@@ -8,7 +8,7 @@ name: Siteyi derle ve yayınla
 on:
   push:
     branches: [main]
-    paths: ['apps/web/**', 'packages/**', '.github/workflows/yayin.yml']
+    paths: ['apps/web/**', 'packages/**', '.github/**']
   repository_dispatch:
     types: [yayin]
   workflow_dispatch:
@@ -47,8 +47,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
-      - run: npm install --workspace apps/web --no-audit --no-fund
-      - run: npm run build --workspace apps/web
+      - run: .github/calistir.sh Kurulum npm install --workspace apps/web --no-audit --no-fund --legacy-peer-deps
+      - run: .github/calistir.sh Derleme npm run build --workspace apps/web
       - uses: actions/upload-pages-artifact@v3
         with: { path: apps/web/dist }
       - id: deploy
@@ -67,11 +67,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
-      - run: npm install --workspace apps/web --no-audit --no-fund
+      - run: .github/calistir.sh Kurulum npm install --workspace apps/web --no-audit --no-fund --legacy-peer-deps
       - name: Derle (CMS adresi zorunlu — örnek veri canlıya çıkmaz)
         run: |
           test -n "$CMS_URL" || { echo "vars.CMS_URL boş"; exit 1; }
-          npm run build --workspace apps/web
+          .github/calistir.sh Derleme npm run build --workspace apps/web
       - name: Natro'ya yükle (FTP, yalnız değişenler)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
