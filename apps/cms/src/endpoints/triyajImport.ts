@@ -63,6 +63,6 @@ export const triyajImport: Endpoint = {
       ? await payload.update({ collection: 'news', id: prev.docs[0].id, data, draft: true })
       : await payload.create({ collection: 'news', data, draft: true })
     const admin = `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/admin/collections/news/${doc.id}`
-    return Response.json({ id: doc.id, admin, preview: `${process.env.WEB_URL}/onizleme/haber/${doc.id}?k=${process.env.PREVIEW_SECRET || ''}`, updated: !!prev.docs[0] })
+    return Response.json({ id: doc.id, admin, preview: `${process.env.WEB_URL}/onizleme?tur=haber&id=${doc.id}&k=${process.env.PREVIEW_SECRET || ''}`, updated: !!prev.docs[0] })
   },
 }

@@ -6,9 +6,11 @@ import Ad from '../../components/Ad.astro'
 import InfiniteFeed from '../../components/InfiniteFeed.astro'
 import * as api from '../../lib/api'
 import { newsMeta } from '../../lib/seo'
-const { kategori, slug } = Astro.params
-const n = await api.getNews(kategori!, slug!)
-if (!n) return new Response(null, { status: 404, statusText: 'Bulunamadı' })
+import type { News } from '../../lib/types'
+export async function getStaticPaths() {
+  return (await api.allNews()).map((n) => ({ params: { kategori: n.category.slug, slug: n.path.split('/').pop() }, props: { n } }))
+}
+const { n } = Astro.props as { n: News }
 const [related, ads, videos, reels, site] = await Promise.all([api.getRelated(n), api.getAds(), api.getVideos(), api.getReels(), api.getSite()])
 ---
 <Base meta={newsMeta(n)}>

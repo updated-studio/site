@@ -1,13 +1,15 @@
 ---
-import { pageOf } from '../../lib/format'
 import Base from '../../layouts/Base.astro'
 import CardStd from '../../components/CardStd.astro'
 import CardList from '../../components/CardList.astro'
 import Ad from '../../components/Ad.astro'
 import * as api from '../../lib/api'
 import { listMeta } from '../../lib/seo'
-const p = pageOf(Astro.params.sayfa)
-if (!p) return new Response(null, { status: 404, statusText: 'Bulunamadı' })
+export async function getStaticPaths() {
+  const n = Math.max(1, Math.ceil((await api.allReviews()).length / 24))
+  return Array.from({ length: n }, (_, i) => ({ params: { sayfa: i ? `sayfa/${i + 1}` : undefined }, props: { p: i + 1 } }))
+}
+const { p } = Astro.props
 const [items, next, ads] = await Promise.all([api.getReviews(p, 24), api.getReviews(p + 1, 1), api.getAds()])
 const top = [...items].sort((a, b) => b.score - a.score).slice(0, 5)
 ---

@@ -1,21 +1,14 @@
 ---
+/** Arama: statik dizin (/ara-dizin.json) tarayıcıda taranır; sunucu gerekmez. */
 import Base from '../layouts/Base.astro'
-import CardStd from '../components/CardStd.astro'
-import KunyeMini from '../components/KunyeMini.astro'
-import * as api from '../lib/api'
-const q = (Astro.url.searchParams.get('q') || '').slice(0, 80)
-const r = await api.search(q)
-Astro.response.headers.set('Cache-Control', 'private, max-age=0')
 ---
-<Base meta={{ title: q ? `"${q}" araması` : 'Ara', description: 'UPDATED içinde haber, inceleme ve ürün ara.', path: '/ara', noindex: true }}>
+<Base meta={{ title: 'Ara', description: 'UPDATED içinde haber, inceleme ve ürün ara.', path: '/ara', noindex: true }}>
   <div class="wrap">
     <div class="art-head" style="max-width:none;padding-bottom:24px">
       <h1 class="h1">Ara</h1>
-      <form action="/ara" method="get" role="search" class="chips"><label class="sr" for="aq">Arama</label><input id="aq" class="sel" style="min-width:min(100%,420px)" name="q" value={q} placeholder="Ürün, haber, kategori…" /><button class="btn btn-p" type="submit">Ara</button></form>
+      <form action="/ara" method="get" role="search" class="chips" data-search-page><label class="sr" for="aq">Arama</label><input id="aq" class="sel" style="min-width:min(100%,420px)" name="q" placeholder="Ürün, haber, kategori…" autocomplete="off" /><button class="btn btn-p" type="submit">Ara</button></form>
     </div>
-    {q.length >= 2 && <p class="meta">{r.news.length} haber · {r.products.length} künye</p>}
-    {r.products.length > 0 && <><div class="sh"><h2>Künyeler</h2></div><div class="kstack" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px">{r.products.map((p) => <KunyeMini p={p} />)}</div></>}
-    {r.news.length > 0 && <><div class="sh" style="margin-top:32px"><h2>Haberler</h2></div><div class="grid4">{r.news.map((n) => <CardStd item={n} />)}</div></>}
-    {q.length >= 2 && !r.news.length && !r.products.length && <p class="lead">Sonuç yok. Ürün adını ya da markayı deneyin.</p>}
+    <p class="meta" data-search-count aria-live="polite"></p>
+    <ul class="res" data-search-results style="list-style:none;padding:0"></ul>
   </div>
 </Base>

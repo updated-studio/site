@@ -1,0 +1,91 @@
+# Siteyi derler ve yayınlar.
+# - hazirlik: GitHub Pages (deneme). CMS_URL boşsa örnek verilerle açılır.
+# - natro:    Natro'ya FTP ile yükler (yalnız değişen dosyalar), ardından IndexNow.
+# Tetikler: main'e push, panelde yayın (repository_dispatch: yayin), elle, her gece 04.00 (TR) güvenlik derlemesi.
+# Ayarlar: Settings › Secrets and variables › Actions (aşağıdaki vars.* ve secrets.*).
+name: Siteyi derle ve yayınla
+
+on:
+  push:
+    branches: [main]
+    paths: ['apps/web/**', 'packages/**', '.github/workflows/yayin.yml']
+  repository_dispatch:
+    types: [yayin]
+  workflow_dispatch:
+    inputs:
+      hedef:
+        description: Nereye?
+        type: choice
+        options: [hepsi, hazirlik, natro]
+        default: hepsi
+  schedule:
+    - cron: '0 1 * * *'
+
+# Peş peşe yayınlar: çalışan derleme biter, bekleyen tek derleme en son hâli alır.
+concurrency:
+  group: yayin
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  hazirlik:
+    if: vars.HAZIRLIK_PAGES == '1' && (github.event_name != 'workflow_dispatch' || inputs.hedef != 'natro')
+    runs-on: ubuntu-latest
+    environment: { name: github-pages, url: '${{ steps.deploy.outputs.page_url }}' }
+    env:
+      SITE_URL: ${{ vars.HAZIRLIK_URL }}
+      BASE_PATH: ${{ vars.HAZIRLIK_BASE }}
+      CMS_URL: ${{ vars.CMS_URL }}
+      STAGING: '1'
+      SHOW_AD_SLOTS: '1'
+      PUBLIC_BULTEN_URL: ${{ vars.PUBLIC_BULTEN_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install --workspace apps/web --no-audit --no-fund
+      - run: npm run build --workspace apps/web
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: apps/web/dist }
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+  natro:
+    if: vars.NATRO == '1' && (github.event_name != 'workflow_dispatch' || inputs.hedef != 'hazirlik')
+    runs-on: ubuntu-latest
+    env:
+      SITE_URL: ${{ vars.SITE_URL }}
+      CMS_URL: ${{ vars.CMS_URL }}
+      STAGING: ${{ vars.NATRO_STAGING }}
+      INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+      PUBLIC_BULTEN_URL: ${{ vars.PUBLIC_BULTEN_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install --workspace apps/web --no-audit --no-fund
+      - name: Derle (CMS adresi zorunlu — örnek veri canlıya çıkmaz)
+        run: |
+          test -n "$CMS_URL" || { echo "vars.CMS_URL boş"; exit 1; }
+          npm run build --workspace apps/web
+      - name: Natro'ya yükle (FTP, yalnız değişenler)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.NATRO_FTP_HOST }}
+          username: ${{ secrets.NATRO_FTP_USER }}
+          password: ${{ secrets.NATRO_FTP_PASSWORD }}
+          protocol: ${{ vars.NATRO_FTP_PROTOCOL || 'ftps' }}
+          local-dir: apps/web/dist/
+          server-dir: ${{ vars.NATRO_DIR || 'public_html/' }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+      - name: IndexNow
+        if: vars.NATRO_STAGING != '1'
+        env:
+          CHANGED_PATHS: ${{ join(github.event.client_payload.paths, ',') }}
+        run: node apps/web/scripts/indexnow.mjs

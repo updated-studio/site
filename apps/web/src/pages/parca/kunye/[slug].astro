@@ -1,11 +1,10 @@
 ---
-/** Künye etiketi üzerine gelince açılan kart (HTML parçası). */
-export const partial = true
+/** Künye etiketi üzerine gelince açılan kart (statik HTML parçası). */
 import Img from '../../../components/Img.astro'
-import { getProduct, statusText } from '../../../lib/api'
+import { allProductSlugs, getProduct, statusText } from '../../../lib/api'
 import { conf, glyph, s20 } from '../../../lib/ui'
+export async function getStaticPaths() { return (await allProductSlugs()).map((slug) => ({ params: { slug } })) }
 const p = await getProduct(Astro.params.slug!)
-Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600')
 const known = (p?.specs || []).filter((s) => s.value).slice(0, 3)
 const n = p ? p.news.length + p.reviews.length : 0
 ---

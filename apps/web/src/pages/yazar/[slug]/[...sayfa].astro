@@ -1,11 +1,15 @@
 ---
-import { pageOf } from '../../../lib/format'
 import ListPage from '../../../components/ListPage.astro'
 import * as api from '../../../lib/api'
-const a = await api.getAuthor(Astro.params.slug!)
-if (!a) return new Response(null, { status: 404, statusText: 'Bulunamadı' })
-const p = pageOf(Astro.params.sayfa)
-if (!p) return new Response(null, { status: 404, statusText: 'Bulunamadı' })
+export async function getStaticPaths() {
+  const out: any[] = []
+  for (const a of await api.allAuthors()) {
+    const n = await api.pageCount('yazar', a.slug)
+    for (let i = 1; i <= n; i++) out.push({ params: { slug: a.slug, sayfa: i > 1 ? `sayfa/${i}` : undefined }, props: { a, p: i } })
+  }
+  return out
+}
+const { a, p } = Astro.props
 const items = await api.getAuthorNews(a.slug, p)
 ---
-<ListPage eyebrow={a.title || 'Yazar'} title={a.name} lead={a.bio || `${a.name} imzalı haberler.`} path={`/yazar/${a.slug}`} source={`yazar:${a.slug}`} items={items} page={p} />
+<ListPage eyebrow={a.title || 'Yazar'} title={a.name} lead={a.bio || `${a.name} imzalı haberler.`} path={`/yazar/${a.slug}`} source={`yazar-${a.slug}`} items={items} page={p} />

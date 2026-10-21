@@ -9,18 +9,16 @@ import { comparisonMeta } from '../../lib/seo'
 import { date } from '../../lib/format'
 import { chip } from '../../lib/ui'
 import { autoDiffs, bars, rows } from '../../lib/compare'
-const slug = Astro.params.slug!
-let c = await api.getComparison(slug)
-if (!c) {
-  // Ters sıra (b-vs-a) → kalıcı yönlendirme; adres hep alfabetik.
-  const m = slug.match(/^(.+)-vs-(.+)$/)
-  if (m) { const alt = await api.getComparison(`${m[2]}-vs-${m[1]}`); if (alt) return Astro.redirect(alt.path, 301) }
-  return new Response(null, { status: 404, statusText: 'Bulunamadı' })
+import type { Comparison } from '../../lib/types'
+export async function getStaticPaths() {
+  return (await api.allComparisons()).map((c) => ({ params: { slug: c.path.split('/').pop() }, props: { c } }))
 }
+// Adres hep alfabetik (a-vs-b); ters sıra .htaccess'te 301 (scripts/postbuild.mjs).
+const { c } = Astro.props as { c: Comparison }
 const [ads, videos, reels, site] = await Promise.all([api.getAds(), api.getVideos(), api.getReels(), api.getSite()])
 const R = rows(c.a, c.b).map((r, i, all) => ({ ...r, head: i === 0 || all[i - 1].group !== r.group })), B = bars(c.a, c.b)
 const diffs = c.keyDiffs.length ? c.keyDiffs : autoDiffs(c.a, c.b)
-const nm = (w?: string) => (w === 'a' ? c!.a.name : w === 'b' ? c!.b.name : '')
+const nm = (w?: string) => (w === 'a' ? c.a.name : w === 'b' ? c.b.name : '')
 ---
 <Base meta={comparisonMeta(c)}>
   <div class="wrap">

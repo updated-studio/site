@@ -11,8 +11,10 @@ import * as api from '../../lib/api'
 import { productMeta } from '../../lib/seo'
 import { SOURCE_TEXT, date, esc } from '../../lib/format'
 import { chip, conf, glyph, LVN, s20 } from '../../lib/ui'
-const p = await api.getProduct(Astro.params.slug!)
-if (!p) return new Response(null, { status: 404, statusText: 'Bulunamadı' })
+export async function getStaticPaths() {
+  return (await api.allProductSlugs()).map((slug) => ({ params: { slug } }))
+}
+const p = (await api.getProduct(Astro.params.slug!))!
 const [ads, shelf] = await Promise.all([api.getAds(), api.getProducts(8)])
 const specs = p.specs || []
 const tier = (s: (typeof specs)[number]) => {
@@ -42,7 +44,7 @@ const kiyas = p.rivals[0] ? `/karsilastirma/${[p.slug, p.rivals[0].slug].sort().
         <span class="ku-conf"><Fragment set:html={conf(p.certainty)} /><span>{LVN[p.certainty]}</span></span>
         {p.score && p.reviews[0] && <a class="ku-score" href={p.reviews[0].path}><b>{s20(p.score)}</b><span>Updated<br />puanı</span></a>}
       </div>
-      <div class="ku-actions"><a class="btn pri" href={`/rss.xml?urun=${p.slug}`}>Takip et (RSS)</a><a class="btn" href={kiyas}>Kıyasla</a></div>
+      <div class="ku-actions"><a class="btn pri" href={`/rss/urun/${p.slug}.xml`}>Takip et (RSS)</a><a class="btn" href={kiyas}>Kıyasla</a></div>
       <div class="ku-stats"><span><b>{feed.length}</b> içerik</span><span><b>{p.news.length}</b> haber</span><span><b>{p.reviews.length}</b> inceleme</span><span><b>{specs.filter((s) => s.value).length}/{specs.length}</b> doğrulanmış özellik</span></div>
     </div>
     <div class="ku-stage">

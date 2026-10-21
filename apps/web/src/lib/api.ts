@@ -1,7 +1,7 @@
 /**
  * Payload REST istemcisi → görünüm modelleri (types.ts).
  * CMS_URL boşsa her fonksiyon örnek verilere düşer; böylece site CMS olmadan da açılır.
- * Okumalar herkese açık uçlardandır (yalnız yayımlanmış içerik döner). Önizleme API anahtarıyla taslak okur.
+ * Statik derlemede çalışır (GitHub Actions); yalnız yayımlanmış içerik okunur. Taslak önizleme panelin /api/onizleme ucundan, tarayıcıda.
  */
 import type { Ad, Author, Cat, Comparison, Home, Img, News, Product, ProductRef, Reel, Review, Spec, Video } from './types'
 import { lexicalToHtml } from './rich'
@@ -10,7 +10,6 @@ import * as S from './sample'
 import { env } from './env'
 
 const CMS = env('CMS_URL').replace(/\/$/, '')
-const PREVIEW_KEY = env('CMS_PREVIEW_KEY')
 export const live = !!CMS
 export const PAGE = 20
 
@@ -24,13 +23,21 @@ function qs(o: Record<string, any>, pre = ''): string {
     return [`${encodeURIComponent(key)}=${encodeURIComponent(v)}`]
   }).filter(Boolean).join('&')
 }
-async function get<T = any>(path: string, params: Record<string, any> = {}, opts: { draft?: boolean } = {}): Promise<T> {
+/** Derleme tek süreçte çalışır: aynı istek bir kez gider (bellek önbelleği), geçici hatada 3 kez denenir. */
+const memo = new Map<string, Promise<any>>()
+function get<T = any>(path: string, params: Record<string, any> = {}): Promise<T> {
   const url = `${CMS}/api/${path}${Object.keys(params).length ? '?' + qs(params) : ''}`
-  const headers: Record<string, string> = { Accept: 'application/json' }
-  if (opts.draft && PREVIEW_KEY) headers.Authorization = `users API-Key ${PREVIEW_KEY}`
-  const r = await fetch(url, { headers })
-  if (!r.ok) throw new Error(`CMS ${r.status} ${path}`)
-  return r.json() as Promise<T>
+  if (!memo.has(url)) memo.set(url, (async () => {
+    for (let i = 0; ; i++) {
+      try {
+        const r = await fetch(url, { headers: { Accept: 'application/json' } })
+        if (r.ok) return r.json()
+        if (r.status < 500 || i >= 2) throw new Error(`CMS ${r.status} ${path}`)
+      } catch (e) { if (i >= 2) throw e }
+      await new Promise((ok) => setTimeout(ok, 800 * (i + 1)))
+    }
+  })())
+  return memo.get(url)!
 }
 const published = { _status: { equals: 'published' } }
 const list = (collection: string, where: any = {}, o: { page?: number; limit?: number; sort?: string; depth?: number } = {}) =>
@@ -77,10 +84,9 @@ const mVideo = (v: any): Video => ({ title: v.title, youtubeId: v.youtubeId, kin
 const mReel = (r: any): Reel => ({ caption: r.caption, url: r.url, cover: mImg(r.cover, 'reel') })
 const mAd = (a: any): Ad => ({ slot: a.slot, name: a.name, advertiser: a.advertiser, url: a.url, image: mImg(a.image, 'hero'), mobileImage: mImg(a.mobileImage, 'card'), videoUrl: a.videoUrl, title: a.title })
 
-/* ---------- güvenli çağrı: CMS yoksa ya da hata verirse örnek veri ---------- */
+/* ---------- CMS yoksa örnek veri. CMS varken hata derlemeyi durdurur: yayına asla örnek veri çıkmaz. ---------- */
 async function safe<T>(liveFn: () => Promise<T>, sample: () => T): Promise<T> {
-  if (!live) return sample()
-  try { return await liveFn() } catch (e) { console.error('[cms]', (e as Error).message); return sample() }
+  return live ? liveFn() : sample()
 }
 const page = <T,>(arr: T[], p: number, n = PAGE) => arr.slice((p - 1) * n, p * n)
 const cyc = <T,>(arr: T[], p: number, n = PAGE) => Array.from({ length: n }, (_, i) => arr[((p - 1) * n + i) % arr.length]) // örnek veride akış bitmesin
@@ -158,15 +164,6 @@ export async function search(q: string) {
 /** Aramada Türkçe katlama: "DJI" ~ "dji", "İnceleme" ~ "inceleme", "ç" ~ "c". */
 const fold = (s: string) => s.toLocaleLowerCase('tr-TR').replace(/ı/g, 'i').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 
-/* ---------- önizleme (taslak) ---------- */
-const PREVIEW_COLL: Record<string, string> = { haber: 'news', inceleme: 'reviews', karsilastirma: 'comparisons' }
-export async function getPreview(tur: string, id: string) {
-  const coll = PREVIEW_COLL[tur]; if (!coll) return null
-  if (!live) return tur === 'haber' ? S.NEWS.find((n) => n.id === id) || S.NEWS[3] : tur === 'inceleme' ? S.REVIEWS[0] : S.COMPARISONS[0]
-  const d = await get(`${coll}/${encodeURIComponent(id)}`, { draft: 'true', depth: 2 }, { draft: true })
-  return { doc: coll === 'news' ? mNews(d) : coll === 'reviews' ? mReview(d) : mComparison(d), workflow: d.workflow, triyaj: d.triyaj }
-}
-
 /* ---------- site haritaları ---------- */
 export async function allPaths(collection: 'news' | 'reviews' | 'comparisons' | 'products', since?: Date) {
   return safe(async () => {
@@ -196,3 +193,28 @@ const STATIC_PAGES: Record<string, { title: string; spot: string; html: string }
 }
 type PageT = { title: string; spot: string; html: string; seo: { title: string; description: string } }
 export const getPage = (slug: string) => safe<PageT | null>(async () => { const r = await list('pages', { slug: { equals: slug } }, { limit: 1, depth: 1, sort: '-updatedAt' }); const d = r.docs[0]; return d ? { title: d.title as string, spot: (d.spot || '') as string, html: lexicalToHtml(d.body, media), seo: seo(d) } : null }, () => (STATIC_PAGES[slug] ? { ...STATIC_PAGES[slug], seo: { title: STATIC_PAGES[slug].title, description: STATIC_PAGES[slug].spot } } : null))
+
+/* ---------- toplu okuma (statik derleme: her içerik türü 100'erli sayfalarla bir kez çekilir) ---------- */
+async function bulk(collection: string, map: (d: any) => any, where: any = {}, depth = 2) {
+  const out: any[] = []
+  for (let p = 1; p < 1000; p++) {
+    const r = await get(collection, { where: collection === 'products' ? where : { and: [published, where] }, limit: 100, page: p, depth, sort: collection === 'products' ? 'slug' : '-publishedAt' })
+    out.push(...r.docs.map(map)); if (!r.hasNextPage) break
+  }
+  return out
+}
+export const allNews = () => safe<News[]>(() => bulk('news', mNews), () => S.NEWS)
+export const allReviews = () => safe<Review[]>(() => bulk('reviews', mReview), () => S.REVIEWS)
+export const allComparisons = () => safe<Comparison[]>(() => bulk('comparisons', mComparison), () => S.COMPARISONS)
+export const allProductSlugs = () => safe<string[]>(async () => (await bulk('products', (d) => d.slug, {}, 0)).filter(Boolean), () => Object.keys(S.PRODUCTS))
+export const allAuthors = () => safe<Author[]>(async () => (await get('authors', { limit: 500, depth: 0 })).docs.map(mAuthor), () => S.AUTHORS)
+export const allPages = () => safe<string[]>(async () => (await get('pages', { where: published, limit: 200, depth: 0 })).docs.map((d: any) => d.slug), () => Object.keys(STATIC_PAGES))
+/** Sayfa sayısı (sonsuz akış ve /sayfa/N için). Çok eski sayfalar arşivde kalır: en fazla 50 sayfa üretilir. */
+export const MAX_PAGES = 50
+export async function pageCount(kind: 'son' | 'kategori' | 'yazar', slug?: string) {
+  return safe(async () => {
+    const where = kind === 'kategori' ? { 'category.slug': { equals: slug } } : kind === 'yazar' ? { 'author.slug': { equals: slug } } : {}
+    const r = await get('news', { where: { and: [published, where] }, limit: 1, depth: 0 })
+    return Math.min(MAX_PAGES, Math.max(1, Math.ceil(r.totalDocs / PAGE)))
+  }, () => 3)
+}

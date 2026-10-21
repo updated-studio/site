@@ -1,35 +1,27 @@
 import type { CollectionAfterChangeHook } from 'payload'
 
-const ALWAYS = ['/', '/haberler', '/news-sitemap.xml', '/sitemap.xml', '/rss.xml']
-
-/** Site önbelleğini yeniler (Vercel ISR: x-prerender-revalidate). */
-export async function purge(paths: string[]) {
-  const web = process.env.WEB_URL, token = process.env.ISR_BYPASS_TOKEN
-  if (!web || !token) return
-  const list = Array.from(new Set([...paths, ...ALWAYS]))
-  await Promise.allSettled(list.map((p) => fetch(web + p, { method: 'HEAD', headers: { 'x-prerender-revalidate': token } })))
-}
-
-/** IndexNow (Bing, Yandex). Google bunu kullanmaz; Google için site haritası + Search Console. */
-export async function indexNow(paths: string[]) {
-  const web = process.env.WEB_URL, key = process.env.INDEXNOW_KEY
-  if (!web || !key || !paths.length) return
-  await fetch('https://api.indexnow.org/indexnow', {
+/**
+ * Site statik (Natro). Yayındaki içerik değişince GitHub Actions'taki "yayin" iş akışı tetiklenir:
+ * site yeniden derlenir, değişen dosyalar FTP ile Natro'ya yüklenir, sonra IndexNow'a bildirilir.
+ * Peş peşe yayınlar tek derlemede toplanır (iş akışında concurrency: bekleyen tek derleme kalır).
+ */
+export async function purge(paths: string[], reason = 'icerik') {
+  const repo = process.env.GITHUB_REPO, token = process.env.GITHUB_DISPATCH_TOKEN
+  if (!repo || !token) return
+  await fetch(`https://api.github.com/repos/${repo}/dispatches`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json; charset=utf-8' },
-    body: JSON.stringify({ host: new URL(web).host, key, keyLocation: `${web}/${key}.txt`, urlList: paths.map((p) => web + p) }),
+    headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${token}`, 'X-GitHub-Api-Version': '2022-11-28' },
+    body: JSON.stringify({ event_type: 'yayin', client_payload: { reason, paths: paths.slice(0, 50) } }),
   }).catch(() => {})
 }
 
-/** Yayındaki içerik değişince ilgili adresleri yeniler; yeni yayında IndexNow'a bildirir. */
+/** Yayındaki içerik değişince (yayına alma, düzeltme, yayından kaldırma) siteyi yeniden derletir. */
 export const revalidate =
   (paths: (doc: any) => string[]): CollectionAfterChangeHook =>
   async ({ doc, previousDoc, context }) => {
-    if (context?.migration) return doc // toplu taşımada tek tek yenileme/ping yok
+    if (context?.migration) return doc // toplu taşımada tek tek derleme yok; taşıma bitince bir kez elle derlenir
     const wasPublic = previousDoc?._status === 'published', isPublic = doc._status === 'published' || doc._status === undefined
     if (!wasPublic && !isPublic) return doc
-    const p = paths(doc)
-    await purge(p)
-    if (isPublic && !wasPublic) await indexNow(p)
+    await purge(paths(doc))
     return doc
   }

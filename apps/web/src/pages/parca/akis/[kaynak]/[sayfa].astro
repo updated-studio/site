@@ -1,0 +1,23 @@
+---
+/**
+ * Sonsuz akış parçası (statik): /parca/akis/{son | kategori-slug | yazar-slug}/{N}.html → bir FeedChunk.
+ * Her kaynak için en fazla api.MAX_PAGES sayfa üretilir; sonrası yoksa akış "sonuna geldiniz" der.
+ */
+import FeedChunk from '../../../../components/FeedChunk.astro'
+import * as api from '../../../../lib/api'
+export async function getStaticPaths() {
+  const src: { kaynak: string; kind: 'son' | 'kategori' | 'yazar'; slug?: string }[] = [{ kaynak: 'son', kind: 'son' }]
+  for (const c of await api.getCategories()) src.push({ kaynak: `kategori-${c.slug}`, kind: 'kategori', slug: c.slug })
+  for (const a of await api.allAuthors()) src.push({ kaynak: `yazar-${a.slug}`, kind: 'yazar', slug: a.slug })
+  const out: any[] = []
+  for (const s of src) {
+    const n = await api.pageCount(s.kind, s.slug)
+    for (let p = 1; p <= n; p++) out.push({ params: { kaynak: s.kaynak, sayfa: String(p) }, props: { ...s, p } })
+  }
+  return out
+}
+const { kind, slug, p } = Astro.props
+const items = kind === 'kategori' ? await api.getCategoryNews(slug, p) : kind === 'yazar' ? await api.getAuthorNews(slug, p) : await api.getLatest(p)
+const [videos, reels, ads, site] = await Promise.all([api.getVideos(12), api.getReels(14), api.getAds(), api.getSite()])
+---
+{items.length > 0 && <FeedChunk items={items} page={p} videos={videos} reels={reels} ads={ads} channel={site.youtube} profile={site.instagram} />}

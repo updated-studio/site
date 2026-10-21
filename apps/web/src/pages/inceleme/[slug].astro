@@ -12,8 +12,11 @@ import { reviewMeta } from '../../lib/seo'
 import { date } from '../../lib/format'
 import { chip, ico, linkProducts } from '../../lib/ui'
 import { insertAfterParagraph } from '../../lib/rich'
-const r = await api.getReview(Astro.params.slug!)
-if (!r) return new Response(null, { status: 404, statusText: 'Bulunamadı' })
+import type { Review } from '../../lib/types'
+export async function getStaticPaths() {
+  return (await api.allReviews()).map((r) => ({ params: { slug: r.path.split('/').pop() }, props: { r } }))
+}
+const { r } = Astro.props as { r: Review }
 const [ads, top, videos, reels, site] = await Promise.all([api.getAds(), api.getReviews(1, 5), api.getVideos(), api.getReels(), api.getSite()])
 const MARK = '<!--AD-IN-->'
 let body = linkProducts(r.html || '', [r.product])

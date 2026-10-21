@@ -1,6 +1,7 @@
 ---
 import Logo from './Logo.astro'
 import type { SiteCfg } from '../lib/api'
+import { env } from '../lib/env'
 interface Props { site: SiteCfg }
 const { site } = Astro.props
 const y = new Date().getFullYear()
@@ -10,7 +11,7 @@ const y = new Date().getFullYear()
     <div>
       <a class="logo" href="/" aria-label="UPDATED ana sayfa"><Logo /></a>
       <p style="color:#B4B7BB;font-size:15px;max-width:36ch;margin:16px 0 0">{site.tagline}</p>
-      <form class="nl" id="bulten" action="/api/bulten" method="post" novalidate>
+      <form class="nl" id="bulten" data-endpoint={env('PUBLIC_BULTEN_URL') || undefined} novalidate>
         <label class="sr" for="nlmail">E-posta</label>
         <input id="nlmail" name="email" type="email" placeholder="E-posta adresiniz" autocomplete="email" required />
         <button class="btn btn-p" type="submit">Bültene kaydol</button>

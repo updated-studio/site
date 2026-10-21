@@ -1,21 +1,27 @@
 ---
-import { pageOf } from '../../lib/format'
-/** /kategori-adi → kategori akışı; kategori değilse kurumsal sayfa (/hakkimizda …). */
+/** /kategori-adi(/sayfa/N) → kategori akışı; kategori olmayan tek parçalı adresler kurumsal sayfa (/hakkimizda …). */
 import ListPage from '../../components/ListPage.astro'
 import Base from '../../layouts/Base.astro'
 import * as api from '../../lib/api'
-const { kategori } = Astro.params
-const cat = await api.getCategory(kategori!)
-const page = cat || Astro.params.sayfa ? null : await api.getPage(kategori!)
-if (!cat && !page) return new Response(null, { status: 404, statusText: 'Bulunamadı' })
-const p = pageOf(Astro.params.sayfa)
-if (!p) return new Response(null, { status: 404, statusText: 'Bulunamadı' })
+export async function getStaticPaths() {
+  const cats = await api.getCategories()
+  const out: any[] = []
+  for (const c of cats) {
+    const n = await api.pageCount('kategori', c.slug)
+    for (let i = 1; i <= n; i++) out.push({ params: { kategori: c.slug, sayfa: i > 1 ? `sayfa/${i}` : undefined }, props: { kind: 'cat', slug: c.slug, p: i } })
+  }
+  for (const slug of await api.allPages()) if (!cats.some((c) => c.slug === slug)) out.push({ params: { kategori: slug, sayfa: undefined }, props: { kind: 'page', slug, p: 1 } })
+  return out
+}
+const { kind, slug, p } = Astro.props
+const cat = kind === 'cat' ? await api.getCategory(slug) : null
+const page = kind === 'page' ? await api.getPage(slug) : null
 const items = cat ? await api.getCategoryNews(cat.slug, p) : []
 ---
 {cat ? (
-  <ListPage title={cat.name} lead={(cat as any).description || `${cat.name} haberleri, en yenisi üstte.`} path={`/${cat.slug}`} source={`kategori:${cat.slug}`} items={items} page={p} />
-) : (
-  <Base meta={{ title: page!.seo.title, description: page!.seo.description, path: `/${kategori}` }}>
-    <div class="wrap"><article class="art"><div class="art-head"><h1>{page!.title}</h1>{page!.spot && <p class="lead" style="margin:0">{page!.spot}</p>}</div><div class="prose" style="margin-top:24px" set:html={page!.html} /></article></div>
+  <ListPage title={cat.name} lead={cat.description || `${cat.name} haberleri, en yenisi üstte.`} path={`/${cat.slug}`} source={`kategori-${cat.slug}`} items={items} page={p} />
+) : page && (
+  <Base meta={{ title: page.seo.title, description: page.seo.description, path: `/${slug}` }}>
+    <div class="wrap"><article class="art"><div class="art-head"><h1>{page.title}</h1>{page.spot && <p class="lead" style="margin:0">{page.spot}</p>}</div><div class="prose" style="margin-top:24px" set:html={page.html} /></article></div>
   </Base>
 )}

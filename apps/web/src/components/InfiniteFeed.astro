@@ -1,7 +1,7 @@
 ---
 /**
  * Sonsuz kaydırma. İlk sayfa sunucuda basılır (arama motorları görür), sonrakiler /parca/akis'tan HTML parçası olarak gelir.
- * JS kapalıysa "Daha fazla" bağlantısı normal sayfalamaya gider (/…/sayfa/N — ISR sorgu dizgesini önbellekte ayırmadığı için yol kullanılır).
+ * JS kapalıysa "Daha fazla" bağlantısı normal sayfalamaya gider (/…/sayfa/N, statik dosya).
  */
 import FeedChunk from './FeedChunk.astro'
 import type { Ad, News, Reel, Video } from '../lib/types'

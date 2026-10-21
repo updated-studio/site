@@ -19,8 +19,12 @@ import { KulupTracks, KulupQuizzes } from './collections/Kulup'
 import { Pages } from './collections/Pages'
 import { Site, Home } from './globals'
 import { triyajImport } from './endpoints/triyajImport'
+import { previewEndpoint } from './endpoints/preview'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
+
+// Site (Natro), hazırlık (GitHub Pages) ve Stüdyo adresleri; EXTRA_ORIGINS virgülle ayrılır.
+const origins = [process.env.WEB_URL, process.env.STUDIO_URL, ...(process.env.EXTRA_ORIGINS || '').split(',')].map((x) => x?.trim()).filter(Boolean) as string[]
 
 export default buildConfig({
   serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
@@ -39,9 +43,11 @@ export default buildConfig({
   // Supabase Postgres: Payload tabloları "payload" şemasında; Stüdyo'nun tablolarıyla karışmaz.
   db: postgresAdapter({ pool: { connectionString: process.env.DATABASE_URI }, schemaName: 'payload' }),
   sharp,
-  cors: [process.env.WEB_URL, process.env.STUDIO_URL].filter(Boolean) as string[],
-  csrf: [process.env.WEB_URL, process.env.STUDIO_URL].filter(Boolean) as string[],
-  endpoints: [triyajImport],
+  cors: origins,
+  csrf: origins,
+  // Zamanlanmış yayın (schedulePublish) için iş kuyruğu dakikada bir çalışır. Panel kalıcı Node sunucusunda çalışmalı.
+  jobs: { autoRun: [{ cron: '* * * * *', queue: 'default', limit: 20 }], tasks: [] },
+  endpoints: [triyajImport, previewEndpoint],
   plugins: [
     s3Storage({
       enabled: !!process.env.S3_BUCKET,

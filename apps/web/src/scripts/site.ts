@@ -12,6 +12,8 @@ const ICO: Record<string, string> = {
   moon: '<path d="M20 15A8 8 0 0 1 9 4a8 8 0 1 0 11 11Z"/>', auto: '<path d="M12 3a9 9 0 1 0 0 18V3Z" fill="currentColor"/><path d="M12 3a9 9 0 1 1 0 18"/>',
 }
 const ico = (k: string) => `<svg class="ico" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">${ICO[k]}</svg>`
+/** Site GitHub Pages proje adresinde (/site) çalışırken yolların önüne eklenir. */
+const BASE = (document.documentElement.dataset.base || '').replace(/\/$/, '')
 const store = { get: (k: string) => { try { return localStorage.getItem(k) } catch { return null } }, set: (k: string, v: string) => { try { localStorage.setItem(k, v) } catch {} } }
 
 /* ---------- görünüm: Sistem / Açık / Koyu ---------- */
@@ -35,9 +37,29 @@ function menu() {
   b.addEventListener('click', () => set(!!s.hidden))
   s.addEventListener('click', (e) => { if ((e.target as HTMLElement).tagName === 'A') set(false) })
 }
+/* ---------- arama: statik dizin (/ara-dizin.json) tarayıcıda taranır ---------- */
+type Row = [string, string, string, string, string]
+let idx: Promise<Row[]> | null = null
+const index = () => (idx ||= fetch(`${BASE}/ara-dizin.json`).then((r) => r.json()).catch(() => []))
+const fold = (x: string) => x.toLocaleLowerCase('tr-TR').replace(/ı/g, 'i').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+const escH = (x: string) => x.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' } as any)[c])
+async function find(q: string, n = 12) {
+  const words = fold(q).split(/\s+/).filter((w) => w.length > 1); if (!words.length) return []
+  return (await index()).filter((r: Row) => { const t = fold(r[1] + ' ' + r[3]); return words.every((w) => t.includes(w)) }).slice(0, n)
+}
+const rowHtml = (r: Row) => `<li><a href="${BASE}${escH(r[2])}"><span class="k">${escH(r[3])}</span><b>${escH(r[1])}</b></a></li>`
+function searchPage() {
+  const form = $<HTMLFormElement>('[data-search-page]'); if (!form) return
+  const inp = $<HTMLInputElement>('input', form)!, out = $('[data-search-results]')!, cnt = $('[data-search-count]')!
+  const run = async () => { const v = inp.value.trim(); const r = await find(v, 100); out.innerHTML = r.map(rowHtml).join(''); cnt.textContent = v.length < 2 ? '' : r.length ? `${r.length} sonuç` : 'Sonuç yok. Ürün adını ya da markayı deneyin.' }
+  inp.value = new URLSearchParams(location.search).get('q') || ''
+  form.addEventListener('submit', (e) => { e.preventDefault(); history.replaceState(null, '', `?q=${encodeURIComponent(inp.value.trim())}`); run() })
+  inp.addEventListener('input', run); run()
+}
 function search() {
   const s = $('#search'), q = $<HTMLInputElement>('#sq'), res = $('#sres'); if (!s || !q || !res) return
-  const open = () => { s.hidden = false; q.value = ''; res.innerHTML = ''; setTimeout(() => q.focus(), 10) }
+  q.addEventListener('input', async () => { const v = q.value.trim(); res.innerHTML = v.length < 2 ? '' : (await find(v)).map(rowHtml).join('') || '<li class="meta" style="padding:12px 0">Sonuç yok. Başka bir model ya da kategori deneyin.</li>' })
+  const open = () => { s.hidden = false; q.value = ''; res.innerHTML = ''; index(); setTimeout(() => q.focus(), 10) }
   const close = () => { s.hidden = true }
   $$('[data-open-search]').forEach((b) => b.addEventListener('click', open))
   $$('[data-close-search]').forEach((b) => b.addEventListener('click', close))
@@ -110,7 +132,7 @@ function newPill() {
   const since = pill.dataset.since || new Date().toISOString()
   const check = async () => {
     try {
-      const r = await fetch('/parca/akis?kaynak=son&sayfa=1'); const html = await r.text()
+      const r = await fetch(`${BASE}/parca/akis/son/1`); const html = await r.text()
       const tmp = document.createElement('div'); tmp.innerHTML = html
       const n = $$('time[datetime]', tmp).filter((t) => (t.getAttribute('datetime') || '') > since).length
       if (n) { pill.textContent = `${n} yeni haber · göster`; pill.hidden = false }
@@ -137,9 +159,9 @@ function feeds() {
       if (busy || end) return; busy = true
       const page = Number(f.dataset.next || '2')
       try {
-        const r = await fetch(`/parca/akis?kaynak=${encodeURIComponent(f.dataset.feed!)}&sayfa=${page}`)
+        const r = await fetch(`${BASE}/parca/akis/${encodeURIComponent(f.dataset.feed!)}/${page}`)
         const html = (await r.text()).trim()
-        if (!r.ok || !html || r.headers.get('X-Feed-End')) { end = true; sentinel.innerHTML = '<p class="meta" style="text-align:center">Akışın sonuna geldiniz.</p>'; return }
+        if (!r.ok || !html || !html.includes('inf-chunk')) { end = true; sentinel.innerHTML = '<p class="meta" style="text-align:center">Akışın sonuna geldiniz.</p>'; return }
         const box = document.createElement('div'); box.innerHTML = html
         const chunk = box.firstElementChild as HTMLElement
         f.insertBefore(chunk, sentinel)
@@ -183,7 +205,7 @@ function kunyeCard() {
   const show = async (a: HTMLElement) => {
     clearTimeout(hideT); const slug = a.dataset.p!; if (cur === slug && card && !card.hidden) return; cur = slug
     if (!card) { card = document.createElement('div'); card.className = 'pcard'; card.setAttribute('role', 'tooltip'); document.body.appendChild(card); card.addEventListener('pointerenter', () => clearTimeout(hideT)); card.addEventListener('pointerleave', hide) }
-    if (!cache.has(slug)) { try { cache.set(slug, await (await fetch(`/parca/kunye/${encodeURIComponent(slug)}`)).text()) } catch { return } }
+    if (!cache.has(slug)) { try { const r = await fetch(`${BASE}/parca/kunye/${encodeURIComponent(slug)}`); cache.set(slug, r.ok ? await r.text() : '') } catch { return } }
     if (cur !== slug) return
     const html = cache.get(slug)!.trim(); if (!html) return
     card.innerHTML = html; card.hidden = false
@@ -236,7 +258,7 @@ function robot() {
       $('[data-h1]', box)!.textContent = A.n; $('[data-h2]', box)!.textContent = B.n
       const keys = [...new Set([...Object.keys(A.sp), ...Object.keys(B.sp)])]
       $('[data-rows]', box)!.innerHTML = keys.filter((k) => !o || A.sp[k] !== B.sp[k]).map((k) => `<tr><th scope="row" style="font-family:var(--f-body);font-weight:600">${esc(k)}</th><td>${esc(A.sp[k] || 'Bilinmiyor')}</td><td>${esc(B.sp[k] || 'Bilinmiyor')}</td></tr>`).join('')
-      go.href = `/karsilastirma/${[A.s, B.s].sort().join('-vs-')}`; go.hidden = A.s === B.s
+      go.href = `${BASE}/karsilastirma/${[A.s, B.s].sort().join('-vs-')}`; go.hidden = A.s === B.s
     }
     a.addEventListener('change', draw); b.addEventListener('change', draw)
     only.addEventListener('click', () => { only.setAttribute('aria-pressed', String(only.getAttribute('aria-pressed') !== 'true')); draw() })
@@ -276,12 +298,14 @@ function newsletter() {
     e.preventDefault()
     const email = ($<HTMLInputElement>('#nlmail')!.value || '').trim()
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = 'Geçerli bir e-posta yazın, ör. ad@alanadi.com'; return }
-    try { const r = await fetch('/api/bulten', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) }); msg.textContent = (await r.json()).msg } catch { msg.textContent = 'Şu an kaydedemedik, birazdan tekrar deneyin.' }
+    const url = f.dataset.endpoint
+    if (!url) { msg.textContent = 'Bülten kaydı henüz açılmadı.'; return }
+    try { const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source: location.hostname }) }); msg.textContent = r.ok ? 'Kaydınız alındı. Onay e-postasını kontrol edin.' : 'Şu an kaydedemedik, birazdan tekrar deneyin.' } catch { msg.textContent = 'Şu an kaydedemedik, birazdan tekrar deneyin.' }
   })
 }
 
 /** Sonradan eklenen parçalara (sonsuz akış) davranış bağla. */
 function hydrate(root: ParentNode) { strips(root); youtube(root); videoAds(root) }
 
-theme(); menu(); search(); breaking(); accordion(); newPill(); clocks(); feeds(); kunyeCard(); sixty(); robot(); onlyDiff(); sokum(); newsletter()
+theme(); menu(); search(); searchPage(); breaking(); accordion(); newPill(); clocks(); feeds(); kunyeCard(); sixty(); robot(); onlyDiff(); sokum(); newsletter()
 hydrate(document)

@@ -15,7 +15,7 @@ const short = (v: unknown) => !v || String(v).trim().split(/\s+/).length <= LIMI
 export const Reviews: CollectionConfig = {
   slug: 'reviews',
   labels: { singular: 'İnceleme', plural: 'İncelemeler' },
-  admin: { useAsTitle: 'title', group: 'İçerik', defaultColumns: ['title', 'product', 'score', 'workflow.state'], preview: (doc) => `${process.env.WEB_URL}/onizleme/inceleme/${doc.id}?k=${process.env.PREVIEW_SECRET || ''}` },
+  admin: { useAsTitle: 'title', group: 'İçerik', defaultColumns: ['title', 'product', 'score', 'workflow.state'], preview: (doc) => `${process.env.WEB_URL}/onizleme?tur=inceleme&id=${doc.id}&k=${process.env.PREVIEW_SECRET || ''}` },
   versions: { drafts: { autosave: { interval: 2000 }, schedulePublish: true }, maxPerDoc: 30 },
   access: { read: publishedOrStaff, create: editorsUp, update: editorsUp, delete: ({ req }) => req.user?.role === 'admin' },
   fields: [

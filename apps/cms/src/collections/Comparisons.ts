@@ -11,7 +11,7 @@ import { trSlug } from '../lib/slug'
 export const Comparisons: CollectionConfig = {
   slug: 'comparisons',
   labels: { singular: 'Karşılaştırma', plural: 'Karşılaştırmalar' },
-  admin: { useAsTitle: 'title', group: 'İçerik', preview: (doc) => `${process.env.WEB_URL}/onizleme/karsilastirma/${doc.id}?k=${process.env.PREVIEW_SECRET || ''}` },
+  admin: { useAsTitle: 'title', group: 'İçerik', preview: (doc) => `${process.env.WEB_URL}/onizleme?tur=karsilastirma&id=${doc.id}&k=${process.env.PREVIEW_SECRET || ''}` },
   versions: { drafts: true, maxPerDoc: 20 },
   access: { read: publishedOrStaff, create: editorsUp, update: editorsUp, delete: editorsUp },
   fields: [

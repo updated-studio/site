@@ -7,8 +7,10 @@ import Footer from '../components/Footer.astro'
 import { getBreaking, getSite } from '../lib/api'
 import { SITE, siteLd, type Meta } from '../lib/seo'
 import { ico } from '../lib/ui'
+import { env } from '../lib/env'
 interface Props { meta: Meta; breaking?: boolean; bodyClass?: string }
 const { meta, breaking = true, bodyClass } = Astro.props
+const staging = env('STAGING') === '1' // hazırlık sitesi arama motorlarına kapalı
 const [site, hot] = await Promise.all([getSite(), breaking ? getBreaking() : Promise.resolve([])])
 const url = SITE + (meta.path === '/' ? '' : meta.path)
 const canonical = meta.canonical || url
@@ -16,14 +18,14 @@ const title = meta.path === '/' ? meta.title : `${meta.title} · UPDATED`
 const ld = { '@context': 'https://schema.org', '@graph': [...siteLd(), ...(meta.jsonld || [])] }
 ---
 <!doctype html>
-<html lang="tr">
+<html lang="tr" data-base={import.meta.env.BASE_URL === '/' ? undefined : import.meta.env.BASE_URL}>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title}</title>
   <meta name="description" content={meta.description} />
   <link rel="canonical" href={canonical} />
-  {meta.noindex ? <meta name="robots" content="noindex, follow" /> : <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />}
+  {meta.noindex || staging ? <meta name="robots" content="noindex, follow" /> : <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />}
   <meta property="og:site_name" content="UPDATED" />
   <meta property="og:locale" content="tr_TR" />
   <meta property="og:type" content={meta.type || 'website'} />
