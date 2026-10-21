@@ -1,0 +1,25 @@
+---
+/**
+ * Reklam alanı (kit 10b): "Reklam" yazar, içerik gibi görünmez; açılır/sesli yok.
+ * Kampanya yoksa: canlıda alan hiç basılmaz (boşluk kalmaz); önizlemede ölçü gösteren yer tutucu çıkar.
+ */
+import type { Ad } from '../lib/types'
+import { showAdSlots } from '../lib/env'
+interface Props { slot: 'lb' | 'mr' | 'in'; ad?: Ad | null; bare?: boolean; placeholder?: boolean }
+const { slot, ad, bare = false, placeholder = showAdSlots() } = Astro.props
+const SIZE = { lb: 'Masaüstü 970 × 250 · mobil 320 × 100', mr: 'Kutu 300 × 250', in: 'Akış içi yerel reklam · 1 / 20 haber' }
+const show = !!ad || placeholder
+---
+{show && (bare ? (
+  <div class={`ad ad-${slot}`} role="complementary" aria-label="Reklam">
+    <span class="k">Reklam</span>
+    {ad ? <a class="slot" href={ad.url} rel="sponsored noopener" target="_blank"><picture>{ad.mobileImage && <source media="(max-width: 767px)" srcset={ad.mobileImage.url} />}<img src={ad.image?.url} alt={`${ad.advertiser} reklamı`} loading="lazy" /></picture></a> : <div class="slot">{SIZE[slot]}</div>}
+  </div>
+) : (
+  <div class="ad-wrap">
+    <div class={`ad ad-${slot}`} role="complementary" aria-label="Reklam">
+      <span class="k">Reklam</span>
+      {ad ? <a class="slot" href={ad.url} rel="sponsored noopener" target="_blank"><picture>{ad.mobileImage && <source media="(max-width: 767px)" srcset={ad.mobileImage.url} />}<img src={ad.image?.url} alt={`${ad.advertiser} reklamı`} loading="lazy" /></picture></a> : <div class="slot">{SIZE[slot]}</div>}
+    </div>
+  </div>
+))}

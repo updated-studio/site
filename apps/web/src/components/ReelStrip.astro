@@ -1,0 +1,18 @@
+---
+import Strip from './Strip.astro'
+import Img from './Img.astro'
+import Logo from './Logo.astro'
+import type { Reel } from '../lib/types'
+interface Props { reels: Reel[]; profile: string }
+const { reels, profile } = Astro.props
+---
+{reels.length > 0 && (
+  <Strip title="Reels" sub="Instagram · @updated.tr" moreHref={profile} moreLabel="Takip et" external>
+    {reels.map((r) => (
+      <a class="reel" href={r.url} target="_blank" rel="noopener">
+        <span class="c-img"><Img img={r.cover} alt="" sizes="200px" /><span class="up"><Logo variant="up" /></span><span class="cap">{r.caption}</span></span>
+        <span class="meta">Reels · @updated.tr</span>
+      </a>
+    ))}
+  </Strip>
+)}

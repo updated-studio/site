@@ -1,0 +1,64 @@
+---
+/**
+ * Taslak önizleme — triyajdan gelen haber ekibe burada "son taslak" olarak sunulur.
+ * Erişim: Payload'daki Önizle düğmesi ?k=PREVIEW_SECRET ile açar. Önbelleğe alınmaz, arama motorlarına kapalı.
+ * Yayınlama Payload'da yapılır (yalnız yayın yönetmeni; kendi haberini onaylayamaz — hooks/workflow).
+ */
+import Base from '../../../layouts/Base.astro'
+import ArticleBody from '../../../components/ArticleBody.astro'
+import KunyeMini from '../../../components/KunyeMini.astro'
+import { getPreview, getAds } from '../../../lib/api'
+import { SITE } from '../../../lib/seo'
+import { env } from '../../../lib/env'
+import { CHECKLIST, LIMIT, STATES } from '@updated/kit'
+const { tur, id } = Astro.params
+const secret = env('PREVIEW_SECRET')
+Astro.response.headers.set('Cache-Control', 'private, no-store')
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+if (secret && Astro.url.searchParams.get('k') !== secret) return new Response('Önizleme bağlantısı geçersiz.', { status: 401 })
+const res: any = await getPreview(tur!, id!).catch(() => null)
+if (!res) return new Response(null, { status: 404, statusText: 'Bulunamadı' })
+const doc = res.doc || res
+const wf = res.workflow || { state: 'incelemede', checklist: {} }
+const tri = res.triyaj
+const ads = await getAds()
+const state = STATES.find((s) => s.value === wf.state) || STATES[1]
+const stCls = { taslak: 'st-tas', incelemede: 'st-inc', planlandi: 'st-pla', yayinda: 'st-yay', arsiv: 'st-tas' }[state.value as string]
+const cms = env('CMS_URL').replace(/\/$/, '')
+const coll = { haber: 'news', inceleme: 'reviews', karsilastirma: 'comparisons' }[tur as string]
+const fields = [
+  ['Başlık (H1)', doc.title, LIMIT.title], ['SEO başlığı', doc.seo?.title, LIMIT.seoTitle], ['Meta açıklama', doc.seo?.description, LIMIT.spot], ['Spot', doc.spot, LIMIT.spot],
+] as const
+const left = CHECKLIST.filter(([k]) => !wf.checklist?.[k]).length
+---
+<Base meta={{ title: `Önizleme · ${doc.title}`, description: doc.spot || '', path: Astro.url.pathname, noindex: true }} breaking={false}>
+  <div slot="top" class="draftbar">
+    <div class="wrap">
+      <span class={`st ${stCls}`}>{state.label}</span>
+      <span class="mono">{tri?.importedAt ? `Triyajdan otomatik taslak · öncelik ${tri.priority ?? '–'}/10${tri.cluster ? ` · küme ${tri.cluster}` : ''}` : 'Taslak'} · {doc.author?.name}</span>
+      <span class="sp">
+        <a class="btn" href="#yayin-oncesi">SEO · GEO ve kontrol {left > 0 ? `(${left} eksik)` : '✓'}</a>
+        {cms && coll && <a class="btn btn-p" href={`${cms}/admin/collections/${coll}/${id}`}>Panelde aç ve yayınla</a>}
+      </span>
+    </div>
+  </div>
+  <div class="wrap with-rail">
+    {doc.kind === 'news' ? <ArticleBody n={doc} related={[]} ads={ads} /> : (
+      <article class="art"><div class="art-head"><h1>{doc.title}</h1><p class="lead">{doc.spot}</p></div><div class="prose" set:html={doc.html || ''} /></article>
+    )}
+    <div class="rail" style="padding-top:48px">
+      {(doc.products || []).length > 0 && <div><h4 class="label" style="color:var(--text-3);margin:0 0 8px">Künye bağlantıları</h4><div class="kstack">{doc.products.map((p: any) => <KunyeMini p={p} />)}</div></div>}
+      <section id="yayin-oncesi" style="display:flex;flex-direction:column;gap:20px">
+        <h2 style="font-size:30px">Yayın öncesi</h2>
+        <p class="meta">Otomatik: başlık, adres, meta, şema, künye bağlantıları. Boş alanlar kayıtta doldurulur.</p>
+        {fields.map(([l, v, max]) => <div class="fld"><label>{l}</label><div class="in">{v || '—'}</div><span class={`cnt ${v && String(v).length <= max ? 'ok' : ''}`}>{String(v || '').length} / {max}</span></div>)}
+        <div class="fld"><label>Adres</label><div class="in mono">{SITE}{doc.path || '(kayıtta üretilir)'}</div></div>
+        <div class="fld"><label>Varlıklar (GEO)</label><div class="in">{(doc.seo?.entities || []).join(' · ') || '—'}</div></div>
+        <div><h3 style="font-size:22px;margin-bottom:8px">Kontrol listesi · web</h3>
+          <ul class="chk">{CHECKLIST.map(([k, l]) => <li class={wf.checklist?.[k] ? 'ok' : ''}><span class="b">{wf.checklist?.[k] ? '✓' : ''}</span><span>{l}</span></li>)}</ul>
+          <p class="meta" style="margin-top:8px">İşaretleme panelde yapılır. Son dakika dışında eksik madde varken yayın düğmesi çalışmaz.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+</Base>

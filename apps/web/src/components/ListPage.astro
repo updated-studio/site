@@ -1,0 +1,26 @@
+---
+/** Liste sayfası iskeleti: başlık, sonsuz akış (ilk sayfa sunucuda), yan sütunda son dakika + kutu reklam. */
+import Base from '../layouts/Base.astro'
+import SonDakika from './SonDakika.astro'
+import Ad from './Ad.astro'
+import InfiniteFeed from './InfiniteFeed.astro'
+import * as api from '../lib/api'
+import { listMeta } from '../lib/seo'
+import type { News } from '../lib/types'
+interface Props { title: string; lead: string; path: string; source: string; items: News[]; page: number; eyebrow?: string }
+const { title, lead, path, source, items, page, eyebrow = 'Kategori' } = Astro.props
+const [latest, videos, reels, ads, site] = await Promise.all([api.getLatest(1, 7), api.getVideos(), api.getReels(), api.getAds(), api.getSite()])
+const meta = { ...listMeta(page > 1 ? `${title} · sayfa ${page}` : title, lead, path + (page > 1 ? `/sayfa/${page}` : ''), items.map((n) => ({ path: n.path, title: n.title }))), noindex: items.length === 0 }
+---
+<Base meta={meta}>
+  {page > 1 && <link slot="head" rel="prev" href={page === 2 ? path : `${path}/sayfa/${page - 1}`} />}
+  <div class="wrap">
+    <div class="art-head" style="max-width:none;padding-bottom:24px"><span class="cat">{eyebrow}</span><h1 class="h1">{title}</h1><p class="lead" style="margin:0">{lead}</p></div>
+    <div class="with-rail">
+      <div>
+        {items.length ? <InfiniteFeed title="Son haberler" source={source} basePath={path} items={items} startPage={page} videos={videos} reels={reels} ads={ads} channel={site.youtube} profile={site.instagram} /> : <p class="lead">Bu bölümde henüz yayımlanmış haber yok.</p>}
+      </div>
+      <div class="rail"><SonDakika items={latest} /><Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare /></div>
+    </div>
+  </div>
+</Base>

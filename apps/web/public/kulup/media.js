@@ -1,0 +1,3 @@
+/* Kulüp görselleri: örnek WebP dosyaları (canlıda Payload Media). */
+window.UP = window.UP || {};
+UP.IMG = {"ai": "/ornek/ai.webp", "cam360": "/ornek/cam360.webp", "car": "/ornek/car.webp", "city": "/ornek/city.webp", "drone": "/ornek/drone.webp", "drone_cut": "/ornek/drone_cut.webp", "flip": "/ornek/flip.webp", "fpv": "/ornek/fpv.webp", "honor": "/ornek/honor.webp", "laptop": "/ornek/laptop.webp", "launcher": "/ornek/launcher.webp", "luna": "/ornek/luna.webp", "mic": "/ornek/mic.webp", "oled": "/ornek/oled.webp", "pad": "/ornek/pad.webp", "pad_cut": "/ornek/pad_cut.webp", "phones": "/ornek/phones.webp", "scope": "/ornek/scope.webp", "trifold": "/ornek/trifold.webp", "ultra": "/ornek/ultra.webp", "walkman": "/ornek/walkman.webp"};

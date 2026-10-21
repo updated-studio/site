@@ -1,0 +1,25 @@
+---
+import { pageOf } from '../../lib/format'
+import Base from '../../layouts/Base.astro'
+import CardStd from '../../components/CardStd.astro'
+import CardList from '../../components/CardList.astro'
+import Ad from '../../components/Ad.astro'
+import * as api from '../../lib/api'
+import { listMeta } from '../../lib/seo'
+const p = pageOf(Astro.params.sayfa)
+if (!p) return new Response(null, { status: 404, statusText: 'Bulunamadı' })
+const [items, next, ads] = await Promise.all([api.getReviews(p, 24), api.getReviews(p + 1, 1), api.getAds()])
+const top = [...items].sort((a, b) => b.score - a.score).slice(0, 5)
+---
+<Base meta={listMeta('İncelemeler', 'Kullanarak test ettiğimiz cihazlar: /20 puan, artılar, eksiler ve kime uygun olduğu.', p > 1 ? `/inceleme/sayfa/${p}` : '/inceleme', items.map((r) => ({ path: r.path, title: r.title })))}>
+  <div class="wrap">
+    <div class="art-head" style="max-width:none;padding-bottom:24px"><span class="lbl l-inc">İnceleme</span><h1 class="h1">İncelemeler</h1><p class="lead" style="margin:0">Her puan /20; kullanım süresi ve cihazın kaynağı puan kutusunda yazar.</p></div>
+    <div class="with-rail">
+      <div>
+        <div class="grid3">{items.map((r, i) => <CardStd item={r} eager={i < 3} />)}</div>
+        <nav class="chips" style="margin-top:32px" aria-label="Sayfalar">{p > 1 && <a class="btn" href={p === 2 ? '/inceleme' : `/inceleme/sayfa/${p - 1}`} rel="prev">Önceki</a>}{next.length > 0 && <a class="btn" href={`/inceleme/sayfa/${p + 1}`} rel="next">Sonraki</a>}</nav>
+      </div>
+      <div class="rail"><div><h4 class="label" style="color:var(--text-3);margin:0 0 8px">Puan tablosu</h4><CardList items={top} score /></div><Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare /></div>
+    </div>
+  </div>
+</Base>

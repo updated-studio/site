@@ -1,0 +1,21 @@
+---
+/** Kıyas Robotu: künye veritabanından iki ürün seç, özellikleri yan yana gör; "Sadece farklar". */
+import type { ProductRef } from '../../lib/types'
+interface Props { products: ProductRef[]; no?: string }
+const { products, no = '04' } = Astro.props
+const pool = products.filter((p) => (p.specs || []).some((s) => s.value))
+const data = pool.map((p) => ({ s: p.slug, n: p.name, sp: Object.fromEntries((p.specs || []).filter((s) => s.value).map((s) => [s.key, s.value])) }))
+---
+{pool.length >= 2 && <>
+  <div class="sh"><h2><span class="no">{no}</span>Kıyas robotu</h2><span class="meta">Ürün veritabanından · her değer kaynaklı</span></div>
+  <div class="robot" data-robot={JSON.stringify(data)}>
+    <div class="chips" style="margin-bottom:12px">
+      <label class="sr" for="rb1">1. ürün</label><select id="rb1" class="sel">{pool.map((p, i) => <option value={p.slug} selected={i === 0}>{p.name}</option>)}</select>
+      <span class="vsx">VS</span>
+      <label class="sr" for="rb2">2. ürün</label><select id="rb2" class="sel">{pool.map((p, i) => <option value={p.slug} selected={i === 1}>{p.name}</option>)}</select>
+      <button class="btn" type="button" data-only aria-pressed="false">Sadece farklar</button>
+      <a class="btn-t btn" href="#" data-go hidden>Karşılaştırmayı aç</a>
+    </div>
+    <div class="tbl"><table><thead><tr><th>Özellik</th><th data-h1></th><th data-h2></th></tr></thead><tbody data-rows></tbody></table></div>
+  </div>
+</>}

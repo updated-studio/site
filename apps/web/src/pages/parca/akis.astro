@@ -1,0 +1,14 @@
+---
+/** Sonsuz akış parçası: ?kaynak=son | kategori:slug | yazar:slug &sayfa=N → bir FeedChunk (HTML). */
+export const partial = true
+import FeedChunk from '../../components/FeedChunk.astro'
+import * as api from '../../lib/api'
+const kaynak = Astro.url.searchParams.get('kaynak') || 'son'
+const page = Math.min(500, Math.max(1, Number(Astro.url.searchParams.get('sayfa')) || 1))
+const [kind, slug] = kaynak.split(':')
+const items = kind === 'kategori' && slug ? await api.getCategoryNews(slug, page) : kind === 'yazar' && slug ? await api.getAuthorNews(slug, page) : await api.getLatest(page)
+const [videos, reels, ads, site] = await Promise.all([api.getVideos(12), api.getReels(14), api.getAds(), api.getSite()])
+Astro.response.headers.set('Cache-Control', 'public, max-age=60, s-maxage=300')
+if (!items.length) Astro.response.headers.set('X-Feed-End', '1')
+---
+{items.length > 0 && <FeedChunk items={items} page={page} videos={videos} reels={reels} ads={ads} channel={site.youtube} profile={site.instagram} />}

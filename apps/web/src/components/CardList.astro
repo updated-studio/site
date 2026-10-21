@@ -1,0 +1,12 @@
+---
+import type { News, Review } from '../lib/types'
+import { short } from '../lib/format'
+import { s20 } from '../lib/ui'
+interface Props { items: (News | Review)[]; start?: number; score?: boolean }
+const { items, start = 1, score = false } = Astro.props
+---
+<ol class="c-list">
+  {items.map((n, i) => (
+    <li><a href={n.path}><span class="n">{score && n.kind === 'review' ? s20(n.score).replace('/20', '') : String(i + start).padStart(2, '0')}</span><b>{n.title}</b><span class="meta">{n.kind === 'news' ? n.category.name : 'İnceleme'} · {short(n.publishedAt)}</span></a></li>
+  ))}
+</ol>

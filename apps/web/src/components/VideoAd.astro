@@ -1,0 +1,20 @@
+---
+/** Küçük video reklam (outstream): ekranda %60 görünür olunca sessiz başlar, 5 sn sonra geçilebilir, sesi kullanıcı açar. */
+import type { Ad } from '../lib/types'
+import { showAdSlots } from '../lib/env'
+interface Props { ad?: Ad | null; placeholder?: boolean }
+const { ad, placeholder = showAdSlots() } = Astro.props
+---
+{(ad?.videoUrl || placeholder) && (
+  <div class="ad-wrap" data-vidad>
+    <div class="ad ad-vid" role="complementary" aria-label="Video reklam" style="width:100%;max-width:640px">
+      <span class="k">Reklam · video · sessiz başlar{ad ? ` · ${ad.advertiser}` : ''}</span>
+      <div class="slot">
+        {ad?.videoUrl ? <video src={ad.videoUrl} muted playsinline preload="none" data-src-ok /> : <span>Video reklam alanı · 15 sn · 16:9</span>}
+        <span class="bar"></span>
+        <span class="ctl"><button type="button" class="vol">Sesi aç</button><button type="button" class="skip" disabled>Geç (5)</button></span>
+      </div>
+      {ad && <a class="sr" href={ad.url} rel="sponsored noopener" target="_blank">{ad.advertiser} sitesine git</a>}
+    </div>
+  </div>
+)}

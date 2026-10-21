@@ -1,0 +1,52 @@
+---
+/**
+ * Haber gövdesi (kit 10b sırası): kategori → H1 → spot → künye satırı → 16:9 kapak + künye → kısa cevap → metin → kaynak → düzeltme → ilgili (≤4).
+ * Reklam: ilk paragraftan önce yok; 2. paragraftan sonra akış içi, sonda bant (en fazla 2).
+ */
+import Img from './Img.astro'
+import CardList from './CardList.astro'
+import Ad from './Ad.astro'
+import type { Ad as AdT, News } from '../lib/types'
+import { date, time } from '../lib/format'
+import { label, linkProducts } from '../lib/ui'
+import { insertAfterParagraph } from '../lib/rich'
+import { pickAd } from '../lib/api'
+interface Props { n: News; related: News[]; ads: AdT[] }
+const { n, related, ads } = Astro.props
+const MARK = '<!--AD-IN-->'
+let body = linkProducts(n.html || '', n.products)
+const paras = (body.match(/<\/p>/g) || []).length
+if (paras >= 3) body = insertAfterParagraph(body, 2, MARK)
+const [before, after] = body.split(MARK)
+const updated = n.updatedAt && +new Date(n.updatedAt) - +new Date(n.publishedAt) > 10 * 60e3
+---
+<article class="art">
+  <div class="art-head">
+    <div class="chips"><a class="cat" href={`/${n.category.slug}`}>{n.category.name}</a><Fragment set:html={label(n.label)} /></div>
+    <h1>{n.title}</h1>
+    <p class="lead" style="margin:0">{n.spot}</p>
+    <div class="kunye-row">
+      <a href={`/yazar/${n.author.slug}`} rel="author">{n.author.name}</a><span>·</span><time datetime={n.publishedAt}>{date(n.publishedAt)}</time><span>·</span><span>{time(n.publishedAt)}</span>
+      {n.readingTime && <><span>·</span><span>{n.readingTime} dk okuma</span></>}
+      {updated && <><span>·</span><span>Güncellendi {time(n.updatedAt!)}</span></>}
+    </div>
+  </div>
+  {n.cover && <figure class="cover"><Img img={n.cover} eager sizes="(max-width: 767px) 100vw, 860px" /><figcaption>{n.cover.credit}</figcaption></figure>}
+  <div class="prose" style="margin-top:24px">
+    {n.shortAnswer && <div class="short"><span class="label">Kısa cevap</span><p set:html={linkProducts(`<p>${n.shortAnswer}</p>`, n.products).replace(/^<p>|<\/p>$/g, '')} /></div>}
+    <Fragment set:html={before} />
+    {after !== undefined && <Ad slot="in" ad={pickAd(ads, 'in')} />}
+    {n.label === 'sizinti' && ((n.knowns?.length || 0) + (n.unknowns?.length || 0) > 0) && (
+      <div class="kv"><div><h3>Bilinenler</h3><ul>{(n.knowns || []).map((x) => <li>+ {x}</li>)}</ul></div><div><h3>Bilinmeyenler</h3><ul>{(n.unknowns || []).map((x) => <li>− {x}</li>)}</ul></div></div>
+    )}
+    {after && <Fragment set:html={after} />}
+    {n.sources && n.sources.length > 0 && (
+      <div class="src"><span class="label" style="color:var(--text-3)">Kaynak</span>
+        <p style="margin:6px 0 0">{n.sources.map((s, i) => <>{i > 0 && ' · '}{s.url ? <a href={s.url} rel="noopener" target="_blank">{s.name}</a> : s.name}{s.primary && n.sources!.length > 1 ? ' (birincil)' : ''}</>)}</p>
+      </div>
+    )}
+    {n.corrections?.map((c) => <div class="fix"><b>Düzeltme · {date(c.at)} {time(c.at)}</b> {c.note}</div>)}
+    <Ad slot="lb" ad={pickAd(ads, 'lb')} />
+  </div>
+  {related.length > 0 && <><div class="sh" style="margin-top:48px"><h2>İlgili haberler</h2></div><CardList items={related.slice(0, 4)} /></>}
+</article>

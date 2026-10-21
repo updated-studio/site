@@ -1,0 +1,21 @@
+---
+/** Çıkış radarı: künyede "radarda" işaretli ürünler, kesinlik çubuğu (▮ söylenti … ▮▮▮▮ resmî). */
+import type { ProductRef } from '../../lib/types'
+import { conf } from '../../lib/ui'
+import { statusText } from '../../lib/api'
+interface Props { items: (ProductRef & { releaseWhen?: string })[]; no?: string }
+const { items, no = '03' } = Astro.props
+---
+{items.length > 0 && <>
+  <div class="sh"><h2><span class="no">{no}</span>Çıkış radarı</h2><span class="meta">Kesinlik: ▮ söylenti · ▮▮ sızıntı · ▮▮▮ test/takvim · ▮▮▮▮ resmî</span></div>
+  <div class="grid3" style="margin-bottom:48px">
+    {items.slice(0, 3).map((r) => (
+      <article class="c-std"><div class="b">
+        <span class="cat">{r.brand}</span>
+        <h3 style="font-size:30px">{r.releaseWhen || 'Açıklanmadı'}</h3>
+        <b style="font-size:16px">{r.name}</b>
+        <div class="ft"><span class="pc-st"><Fragment set:html={conf(r.certainty)} /><span>{statusText(r.status)}</span></span><a class="btn-t btn" href={`/urun/${r.slug}`}>Künye</a></div>
+      </div></article>
+    ))}
+  </div>
+</>}

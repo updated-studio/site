@@ -1,0 +1,11 @@
+---
+/** Sponsorlu kart (kit 10b): gri etiket, reklam verenin adı açık; içerik kartı gibi görünse de "Sponsorlu" yazar. */
+import Img from './Img.astro'
+import type { Ad } from '../lib/types'
+interface Props { ad: Ad }
+const { ad } = Astro.props
+---
+<article class="c-std c-spo">
+  <a class="c-img" href={ad.url} rel="sponsored noopener" target="_blank" tabindex="-1" aria-hidden="true"><Img img={ad.image} alt="" /><span class="lbl l-spo">Sponsorlu</span></a>
+  <div class="b"><span class="cat" style="color:var(--text-3)">Sponsorlu içerik · {ad.advertiser}</span><h3><a href={ad.url} rel="sponsored noopener" target="_blank">{ad.title || ad.name}</a></h3><div class="ft"><span class="meta">Reklam ortağı tarafından hazırlandı</span></div></div>
+</article>

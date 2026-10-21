@@ -1,0 +1,22 @@
+---
+/** Söküm: ürün katmanları düz, marka renklerinde; her katman bir özellik. Bilinmeyen değer "Bilinmiyor" kalır. */
+import type { Product } from '../lib/types'
+interface Props { p: Product }
+const { p } = Astro.props
+const KINDS: Record<string, string[]> = { drone: ['guard', 'shell', 'cam', 'bat', 'board'], phone: ['back', 'cam', 'board', 'bat', 'screen'], cam360: ['lens', 'shell', 'screen', 'bat', 'board'], pad: ['shell', 'btn', 'board', 'bat'], audio: ['shell', 'driver', 'board', 'bat'], camera: ['shell', 'sensor', 'mount', 'screen'] }
+const DEF: Record<string, string[]> = { drone: ['Pervane koruması', 'Üst kabuk', 'Kamera', 'Pil', 'Ana kart'], phone: ['Arka cam', 'Kamera', 'Ana kart', 'Pil', 'Ekran'], cam360: ['Lensler', 'Gövde', 'Ekran', 'Pil', 'Ana kart'], pad: ['Üst kabuk', 'Tuşlar', 'Ana kart', 'Pil'], audio: ['Kabuk', 'Sürücü', 'Ana kart', 'Pil'], camera: ['Gövde', 'Sensör', 'Lens yuvası', 'Ekran'] }
+const DECO: Record<string, string> = { guard: '<i></i><i></i><i></i><i></i>', cam: '<i></i>', lens: '<i></i><i></i>', bat: '<div><span>BAT</span></div>', board: '<i class="soc"></i><i></i><i></i>', screen: '<em><i></i><i></i><i></i><i></i></em>', btn: '<i></i><i></i><i></i><i></i><b></b>', driver: '<i></i>', sensor: '<i></i>', mount: '<i></i>' }
+const type = KINDS[p.type] ? p.type : 'phone'
+const kinds = KINDS[type], names = DEF[type]
+const parts = kinds.map((_, i) => ({ name: p.parts?.[i]?.name || names[i], value: p.parts?.[i]?.value || 'Bilinmiyor' }))
+---
+<div class="sk" data-type={type} data-sokum>
+  <div class="sk-dev">
+    {kinds.map((k, i) => (
+      <div class={`sk-l sk-${k}`} style={`--i:${kinds.length - 1 - i};--n:${kinds.length}`}>
+        <Fragment set:html={DECO[k] || ''} />
+        <span class="sk-lab"><b>{parts[i].name}</b><span class={parts[i].value === 'Bilinmiyor' ? 'unk' : ''}>{parts[i].value}</span></span>
+      </div>
+    ))}
+  </div>
+</div>

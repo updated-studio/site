@@ -1,0 +1,28 @@
+---
+import Logo from './Logo.astro'
+import { ico } from '../lib/ui'
+import type { SiteCfg } from '../lib/api'
+interface Props { site: SiteCfg; current?: string }
+const { site, current = '' } = Astro.props
+const nav = site.nav.slice(0, 7) // kit 10b: en fazla 7
+const on = (h: string) => (h !== '/' && current.startsWith(h) ? 'page' : undefined)
+---
+<header class="hdr" id="hdr">
+  <div class="wrap">
+    <a class="logo" href="/" aria-label="UPDATED ana sayfa"><Logo /></a>
+    <nav class="nav" aria-label="Kategoriler">
+      {nav.map((n) => <a href={n.href} aria-current={on(n.href)}>{n.label}</a>)}
+      <a class="kulup" href={site.kulupUrl}>Kulüp</a>
+    </nav>
+    <div class="hdr-r">
+      <button class="srch" type="button" data-open-search><Fragment set:html={ico('search')} /><span>Ara</span></button>
+      <button class="ibtn" type="button" data-theme-btn aria-label="Görünüm"><Fragment set:html={ico('auto')} /></button>
+      <a class="btn btn-p" href="#bulten">Bülten</a>
+      <button class="ibtn menu-b" type="button" data-menu aria-expanded="false" aria-controls="sheet" aria-label="Menü"><Fragment set:html={ico('menu')} /></button>
+    </div>
+  </div>
+</header>
+<nav class="sheet" id="sheet" aria-label="Mobil menü" hidden>
+  {nav.map((n) => <a href={n.href}>{n.label}</a>)}
+  <a href={site.kulupUrl}>Updated Kulüp</a>
+</nav>

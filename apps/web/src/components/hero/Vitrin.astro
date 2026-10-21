@@ -1,0 +1,22 @@
+---
+import Img from '../Img.astro'
+import CardStd from '../CardStd.astro'
+import type { Comparison, News, Review } from '../../lib/types'
+import { date, time } from '../../lib/format'
+import { chip, label } from '../../lib/ui'
+interface Props { items: (News | Review | Comparison)[] }
+const [m, ...rest] = Astro.props.items
+const prods = m.kind === 'news' ? m.products : m.kind === 'review' ? [m.product] : [m.a, m.b]
+---
+<div class="vt">
+  <article class="c-man" style="grid-template-columns:1fr">
+    <a class="c-img" href={m.path} tabindex="-1" aria-hidden="true"><Img img={m.cover} alt="" eager sizes="(max-width: 900px) 100vw, 820px" /><Fragment set:html={m.kind === 'news' ? label(m.label) : ''} /></a>
+    <div class="b">
+      {m.kind === 'news' ? <a class="cat" href={`/${m.category.slug}`}>{m.category.name}</a> : <span class="cat">{m.kind === 'review' ? 'İnceleme' : 'Karşılaştırma'}</span>}
+      <h2><a href={m.path}>{m.title}</a></h2><p>{m.spot}</p>
+      <span class="meta">{m.author.name} · {date(m.publishedAt)} · {time(m.publishedAt)}</span>
+      {prods.length > 0 && <div class="pks" set:html={prods.map((p) => chip(p)).join('')} />}
+    </div>
+  </article>
+  <div class="vt-side">{rest.slice(0, 2).map((n) => <CardStd item={n} eager />)}</div>
+</div>

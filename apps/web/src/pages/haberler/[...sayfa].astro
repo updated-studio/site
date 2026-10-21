@@ -1,0 +1,9 @@
+---
+import { pageOf } from '../../lib/format'
+import ListPage from '../../components/ListPage.astro'
+import * as api from '../../lib/api'
+const p = pageOf(Astro.params.sayfa)
+if (!p) return new Response(null, { status: 404, statusText: 'Bulunamadı' })
+const items = await api.getLatest(p)
+---
+<ListPage title="Haberler" lead="Triyajdan gelen ve editör onayından geçen tüm haberler, en yenisi üstte." path="/haberler" source="son" items={items} page={p} />

@@ -1,0 +1,14 @@
+---
+/** Puan kutusu (kit 10b): metnin sonunda, /20 tam sayı, ≤3 artı/eksi, kullanım süresi ve cihaz kaynağı. */
+import type { Review } from '../lib/types'
+interface Props { r: Review }
+const { r } = Astro.props
+---
+<div class="score">
+  <div class="top"><h3>{r.product.name}</h3><span class="s">{Math.round(r.score)}/20</span></div>
+  <div class="pm">
+    <div><b>Artılar</b><ul>{r.pros.slice(0, 3).map((x) => <li>+ {x}</li>)}</ul></div>
+    <div><b>Eksiler</b><ul>{r.cons.slice(0, 3).map((x) => <li>− {x}</li>)}</ul></div>
+  </div>
+  <div class="ft">{r.usageDays ? `${r.usageDays} gün kullanıldı` : 'Kullanım süresi belirtilmedi'} · {r.deviceSource || 'Cihaz kaynağı belirtilmedi'}</div>
+</div>

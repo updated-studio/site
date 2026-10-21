@@ -1,0 +1,78 @@
+---
+/**
+ * KÜNYE — ürün sayfası. Bu ürüne bağlı her haber, inceleme ve kıyas burada listelenir.
+ * Teknik değerler kaynağıyla; bilinmeyen değer "Bilinmiyor" kalır, uydurulmaz.
+ */
+import Base from '../../layouts/Base.astro'
+import Img from '../../components/Img.astro'
+import Sokum from '../../components/Sokum.astro'
+import Ad from '../../components/Ad.astro'
+import * as api from '../../lib/api'
+import { productMeta } from '../../lib/seo'
+import { SOURCE_TEXT, date, esc } from '../../lib/format'
+import { chip, conf, glyph, LVN, s20 } from '../../lib/ui'
+const p = await api.getProduct(Astro.params.slug!)
+if (!p) return new Response(null, { status: 404, statusText: 'Bulunamadı' })
+const [ads, shelf] = await Promise.all([api.getAds(), api.getProducts(8)])
+const specs = p.specs || []
+const tier = (s: (typeof specs)[number]) => {
+  if (!s.value) return '<span class="src s0">Doğrulanmadı</span>'
+  const t = SOURCE_TEXT[s.source || ''] || s.source || 'Kaynak'
+  const cls = s.source === 'sizinti' ? 's2' : s.source === 'test' || s.source === 'takvim' ? 's3' : 's4'
+  const when = s.at ? ` · ${date(s.at)}` : ''
+  return s.sourceUrl ? `<a class="src ${cls}" href="${esc(s.sourceUrl)}" rel="noopener" target="_blank">${esc(t)}${when}</a>` : `<span class="src ${cls}">${esc(t)}${when}</span>`
+}
+const feed = [
+  ...p.reviews.map((r) => ({ tag: 'İNCELEME', cls: 'İNCELEME', title: r.title, d: date(r.publishedAt), href: r.path, s: s20(r.score), at: r.publishedAt })),
+  ...p.news.map((n) => ({ tag: n.label === 'sizinti' ? 'SIZINTI' : 'HABER', cls: 'TANITIM', title: n.title, d: date(n.publishedAt), href: n.path, s: '', at: n.publishedAt })),
+].sort((a, b) => +new Date(b.at) - +new Date(a.at))
+const rel = shelf.filter((q) => q.slug !== p.slug).slice(0, 4)
+const status = api.statusText(p.status)
+const kiyas = p.rivals[0] ? `/karsilastirma/${[p.slug, p.rivals[0].slug].sort().join('-vs-')}` : '/karsilastirma'
+---
+<Base meta={productMeta(p)}>
+  <header class="ku-hero"><div class="wrap ku-top">
+    <div class="ku-copy">
+      <nav class="crumbs" aria-label="Konum"><a href="/">Ana sayfa</a><span aria-hidden="true">/</span><a href="/urun">Künye</a><span aria-hidden="true">/</span><span>{p.name}</span></nav>
+      <span class="eyebrow ku-eb">Künye · {p.brand}</span>
+      <h1 class="ku-h1">{p.name}</h1>
+      {p.blurb && <p class="ku-blurb">{p.blurb}</p>}
+      <div class="ku-status">
+        <span class={`ku-st lv${p.certainty}`}>{status}</span>
+        <span class="ku-conf"><Fragment set:html={conf(p.certainty)} /><span>{LVN[p.certainty]}</span></span>
+        {p.score && p.reviews[0] && <a class="ku-score" href={p.reviews[0].path}><b>{s20(p.score)}</b><span>Updated<br />puanı</span></a>}
+      </div>
+      <div class="ku-actions"><a class="btn pri" href={`/rss.xml?urun=${p.slug}`}>Takip et (RSS)</a><a class="btn" href={kiyas}>Kıyasla</a></div>
+      <div class="ku-stats"><span><b>{feed.length}</b> içerik</span><span><b>{p.news.length}</b> haber</span><span><b>{p.reviews.length}</b> inceleme</span><span><b>{specs.filter((s) => s.value).length}/{specs.length}</b> doğrulanmış özellik</span></div>
+    </div>
+    <div class="ku-stage">
+      {p.image && <><div class="ku-tabs" role="group" aria-label="Görünüm"><button type="button" aria-pressed="true" data-m="sok">Söküm</button><button type="button" aria-pressed="false" data-m="foto">Fotoğraf</button></div><div class="ku-photo" hidden><Img img={p.image} alt={p.name} /></div></>}
+      <Sokum p={p} />
+      <button class="btn ku-tog" type="button" aria-pressed="true">Topla</button>
+      <span class="eyebrow ku-cap">Söküm · her katman bir özellik</span>
+    </div>
+  </div></header>
+
+  <section class="wrap ku-grid">
+    <div>
+      <div class="sec-head" style="margin-bottom:12px"><div><span class="eyebrow">Ürün veritabanından · her değer kaynağıyla</span><h2 class="sec-title ku-h2">Teknik künye</h2></div></div>
+      {specs.length ? (
+        <div class="tbl-box"><table class="ku-tbl"><thead><tr><th scope="col">Özellik</th><th scope="col">Değer</th><th scope="col">Kaynak</th></tr></thead><tbody>
+          {specs.map((s) => <tr><th scope="row">{s.key}</th><td class={s.value ? '' : 'unk'}>{s.value || 'Bilinmiyor'}</td><td set:html={tier(s)} /></tr>)}
+        </tbody></table></div>
+      ) : <p class="pc-unk">Teknik veriler henüz girilmedi.</p>}
+      <p class="ku-note">Değerler üretici beyanı, Updated ölçümü ve diğer kaynaklar olarak ayrı saklanır. Çakışan değerler QC onayına düşer; onaylanınca bu künyeye bağlı tüm haber, inceleme ve kıyaslar birlikte güncellenir.</p>
+      <div class="sec-head" style="margin:48px 0 12px"><div><span class="eyebrow">Bu ürünle ilgili her şey</span><h2 class="sec-title ku-h2">Akış</h2></div></div>
+      {feed.length ? <ol class="ku-feed">{feed.map((f) => <li><a href={f.href}><span class={`tag t-${f.cls}`}>{f.tag}</span><b>{f.title}</b><span class="d">{f.d}</span>{f.s && <span class="s">{f.s}</span>}</a></li>)}</ol> : <p class="pc-unk">Bu ürünle ilgili henüz içerik yok.</p>}
+    </div>
+    <aside class="rail" aria-label="Yan sütun">
+      <div class="ku-box"><h4>Kıyasla</h4>{p.rivals.length ? <Fragment set:html={p.rivals.map((r) => chip(r)).join('')} /> : <p class="pc-unk">Henüz kıyas yok.</p>}<a class="btn" href="/karsilastirma" style="margin-top:10px">Kıyas Robotu ile seç</a></div>
+      <div class="ku-box"><h4>Çıkış radarı</h4><div class="pc-st"><Fragment set:html={conf(p.certainty)} /><span>{status} · {LVN[p.certainty]}{p.releaseWhen ? ` · ${p.releaseWhen}` : ''}</span></div></div>
+      <Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare />
+    </aside>
+  </section>
+
+  {rel.length > 0 && <section class="sec ku-rel"><div class="wrap"><div class="sec-head"><div><span class="eyebrow">Künye rafı</span><h2 class="sec-title">Benzer ürünler</h2></div></div>
+    <div class="shelfk">{rel.map((q) => <a class="kcard" href={`/urun/${q.slug}`}><Fragment set:html={glyph(q.type, 46)} /><span class="eyebrow">{q.brand}</span><b>{q.name}</b><span class="pc-st"><Fragment set:html={conf(q.certainty)} /><span>{api.statusText(q.status)}</span></span>{q.score && <span class="kc-sc">{s20(q.score)}</span>}</a>)}</div>
+  </div></section>}
+</Base>

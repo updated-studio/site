@@ -1,0 +1,21 @@
+---
+/** "Bugün 60 saniyede": okur Oynat'a basar (kit: otomatik dönen slayt yok); her haber 10 sn. */
+import type { News } from '../../lib/types'
+import { ico } from '../../lib/ui'
+interface Props { items: News[]; no?: string }
+const { items, no = '05' } = Astro.props
+const data = items.slice(0, 6).map((n) => ({ c: n.category.name, t: n.title, s: n.spot, h: n.path }))
+---
+{data.length > 0 && <>
+  <div class="sh" style="margin-top:48px"><h2><span class="no">{no}</span>Bugün 60 saniyede</h2></div>
+  <div class="s60" data-s60={JSON.stringify(data)}>
+    <div class="segs">{data.map(() => <i><b></b></i>)}</div>
+    <div class="s60-b"><span class="meta" data-m>{data[0].c} · 1/{data.length}</span><h3 data-h>{data[0].t}</h3><p data-p>{data[0].s}</p></div>
+    <div class="chips">
+      <button class="btn" type="button" data-prev aria-label="Önceki"><Fragment set:html={ico('left')} /></button>
+      <button class="btn btn-p" type="button" data-play>Oynat</button>
+      <button class="btn" type="button" data-next aria-label="Sonraki"><Fragment set:html={ico('right')} /></button>
+      <a class="btn-t btn" href={data[0].h} data-open>Haberi aç</a>
+    </div>
+  </div>
+</>}

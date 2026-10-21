@@ -1,0 +1,15 @@
+---
+import Base from '../../layouts/Base.astro'
+import CardStd from '../../components/CardStd.astro'
+import KiyasRobotu from '../../components/modules/KiyasRobotu.astro'
+import * as api from '../../lib/api'
+import { listMeta } from '../../lib/seo'
+const [items, products] = await Promise.all([api.getComparisons(), api.getProducts(40)])
+---
+<Base meta={listMeta('Karşılaştırmalar', 'İki ürünü aynı koşulda karşılaştırıyoruz: can alıcı farklar, sayılar ve kime hangisi.', '/karsilastirma', items.map((c) => ({ path: c.path, title: c.title })))}>
+  <div class="wrap">
+    <div class="art-head" style="max-width:none;padding-bottom:24px"><span class="lbl l-kiy">Karşılaştırma</span><h1 class="h1">Karşılaştırmalar</h1><p class="lead" style="margin:0">Hazır kıyaslar ya da Kıyas Robotu ile kendi seçimin.</p></div>
+    <div class="grid3">{items.map((c, i) => <CardStd item={c} eager={i < 3} />)}</div>
+    <div style="margin-top:48px"><KiyasRobotu products={products} no="" /></div>
+  </div>
+</Base>

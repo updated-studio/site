@@ -1,0 +1,18 @@
+---
+/** Künye etiketi üzerine gelince açılan kart (HTML parçası). */
+export const partial = true
+import Img from '../../../components/Img.astro'
+import { getProduct, statusText } from '../../../lib/api'
+import { conf, glyph, s20 } from '../../../lib/ui'
+const p = await getProduct(Astro.params.slug!)
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600')
+const known = (p?.specs || []).filter((s) => s.value).slice(0, 3)
+const n = p ? p.news.length + p.reviews.length : 0
+---
+{p && <>
+  {p.image && <div class="pc-img"><Img img={p.image} alt={p.name} eager sizes="300px" /></div>}
+  <div class="pc-top"><Fragment set:html={glyph(p.type, 34)} /><span><span class="eyebrow">{p.brand}</span><b>{p.name}</b></span>{p.score && <span class="pc-sc">{s20(p.score)}</span>}</div>
+  <div class="pc-st"><Fragment set:html={conf(p.certainty)} /><span>{statusText(p.status)}</span></div>
+  {known.length ? <dl>{known.map((s) => <div><dt>{s.key}</dt><dd>{s.value}</dd></div>)}</dl> : <p class="pc-unk">Teknik veriler henüz doğrulanmadı.</p>}
+  <a class="btn pri" href={`/urun/${p.slug}`}>Künyeyi aç · {n} içerik →</a>
+</>}
