@@ -26,11 +26,12 @@ const tier = (s: (typeof specs)[number]) => {
 }
 const feed = [
   ...p.reviews.map((r) => ({ tag: 'İNCELEME', cls: 'İNCELEME', title: r.title, d: date(r.publishedAt), href: r.path, s: s20(r.score), at: r.publishedAt })),
+  ...(p.comparisons || []).map((c) => ({ tag: 'KIYAS', cls: 'KIYAS', title: c.title, d: date(c.publishedAt), href: c.path, s: '', at: c.publishedAt })),
   ...p.news.map((n) => ({ tag: n.label === 'sizinti' ? 'SIZINTI' : 'HABER', cls: 'TANITIM', title: n.title, d: date(n.publishedAt), href: n.path, s: '', at: n.publishedAt })),
 ].sort((a, b) => +new Date(b.at) - +new Date(a.at))
 const rel = shelf.filter((q) => q.slug !== p.slug).slice(0, 4)
 const status = api.statusText(p.status)
-const kiyas = p.rivals[0] ? `/karsilastirma/${[p.slug, p.rivals[0].slug].sort().join('-vs-')}` : '/karsilastirma'
+const kiyas = p.comparisons?.[0] ? p.comparisons[0].path : p.rivals[0] ? `/karsilastirma/${[p.slug, p.rivals[0].slug].sort().join('-vs-')}` : '/karsilastirma'
 ---
 <Base meta={productMeta(p)}>
   <header class="ku-hero"><div class="wrap ku-top">

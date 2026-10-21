@@ -12,7 +12,7 @@ export type News = {
 }
 export type Review = Omit<News, 'kind' | 'category' | 'label'> & { kind: 'review'; product: ProductRef; score: number; pros: string[]; cons: string[]; usageDays?: number; deviceSource?: string; who?: { for: string[]; notFor: string[] }; methodHtml?: string; video?: Video }
 export type Comparison = { id: string; kind: 'comparison'; title: string; spot: string; path: string; a: ProductRef; b: ProductRef; shortAnswer?: string; keyDiffs: { big: string; label: string; winner?: 'a' | 'b' }[]; whoFor?: { a?: string; b?: string }; method?: string; cover?: Img; author: Author; publishedAt: string; seo: News['seo'] }
-export type Product = ProductRef & { path: string; releaseWhen?: string; parts?: { name: string; value?: string }[]; rivals: ProductRef[]; news: News[]; reviews: Review[]; seo: News['seo'] }
+export type Product = ProductRef & { path: string; releaseWhen?: string; parts?: { name: string; value?: string }[]; rivals: ProductRef[]; news: News[]; reviews: Review[]; comparisons?: Comparison[]; seo: News['seo'] }
 export type Video = { title: string; youtubeId: string; kind: string; thumb?: Img }
 export type Reel = { caption: string; url: string; cover?: Img }
 export type Ad = { slot: 'lb' | 'mr' | 'in' | 'video' | 'sponsored'; name: string; advertiser: string; url: string; image?: Img; mobileImage?: Img; videoUrl?: string; title?: string }

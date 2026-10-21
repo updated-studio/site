@@ -123,8 +123,9 @@ export async function getProduct(slug: string): Promise<Product | null> {
     const d = r.docs[0]; if (!d) return null
     const ref = mRef(d)!
     const reviews = (d.reviews?.docs || []).filter((x: any) => rel(x) && x._status === 'published').map(mReview)
-    return { ...ref, score: reviews[0]?.score, path: `/urun/${d.slug}`, releaseWhen: d.releaseWhen, parts: d.parts || [], rivals: (d.rivals || []).map(mRef).filter(Boolean), news: (d.news?.docs || []).filter((x: any) => rel(x) && x._status === 'published').map(mNews), reviews, seo: seo({ ...d, title: d.name, spot: d.blurb }) } as Product
-  }, () => S.PRODUCTS[slug] || null)
+    const cmp = (await get('comparisons', { where: { and: [published, { or: [{ a: { equals: d.id } }, { b: { equals: d.id } }] }] }, limit: 20, depth: 1 })).docs.map(mComparison)
+    return { ...ref, score: reviews[0]?.score, comparisons: cmp, path: `/urun/${d.slug}`, releaseWhen: d.releaseWhen, parts: d.parts || [], rivals: (d.rivals || []).map(mRef).filter(Boolean), news: (d.news?.docs || []).filter((x: any) => rel(x) && x._status === 'published').map(mNews), reviews, seo: seo({ ...d, title: d.name, spot: d.blurb }) } as Product
+  }, () => (S.PRODUCTS[slug] ? { ...S.PRODUCTS[slug], comparisons: S.COMPARISONS.filter((c) => c.a.slug === slug || c.b.slug === slug) } : null))
 }
 export const getProducts = (limit = 12) => safe(async () => (await get('products', { sort: '-updatedAt', limit, depth: 1 })).docs.map(mRef).filter(Boolean) as ProductRef[], () => Object.values(S.PRODUCTS).slice(0, limit))
 export const getRadar = () => safe(async () => (await get('products', { where: { onRadar: { equals: true } }, sort: 'certainty', limit: 6, depth: 1 })).docs.map((d: any) => ({ ...mRef(d)!, releaseWhen: d.releaseWhen })), () => S.RADAR.map((p) => ({ ...p })))
