@@ -1,0 +1,12 @@
+node_modules
+.env
+.env.*
+!.env.example
+.next
+dist
+.astro
+.vercel
+apps/cms/src/payload-types.ts.bak
+*.log
+.DS_Store
+apps/cms/scripts/wp-migrate.log.json

@@ -1,0 +1,26 @@
+---
+/** Akordeon manşet: 5 panel, ilk açık; tıkla / Enter / (masaüstünde) üzerine gel. Otomatik dönmez (kit). */
+import Img from '../Img.astro'
+import type { Comparison, News, Review } from '../../lib/types'
+import { short } from '../../lib/format'
+import { label, s20 } from '../../lib/ui'
+interface Props { items: (News | Review | Comparison)[] }
+const items = Astro.props.items.slice(0, 5)
+const catOf = (n: any) => (n.kind === 'news' ? n.category.name : n.kind === 'review' ? 'İnceleme' : 'Karşılaştırma')
+const lblOf = (n: any) => (n.kind === 'review' ? '<span class="lbl l-inc">İnceleme</span>' : n.kind === 'comparison' ? '<span class="lbl l-kiy">Karşılaştırma</span>' : label(n.label))
+---
+<div class="ak" role="list" data-ak>
+  {items.map((n, i) => (
+    <div class="akp" role="listitem" tabindex="0" aria-expanded={i === 0 ? 'true' : 'false'}>
+      <Img img={n.cover} alt="" eager={i < 2} sizes="(max-width: 980px) 100vw, 860px" />
+      <Fragment set:html={lblOf(n)} />
+      <span class="tab"><span class="n">{String(i + 1).padStart(2, '0')}</span><span class="v">{catOf(n)}</span></span>
+      <div class="blk">
+        <span class="cat">{catOf(n)}</span>
+        <h2><a href={n.path}>{n.title}</a></h2>
+        <p>{n.spot}</p>
+        <span class="meta">{n.author.name} · {short(n.publishedAt)}{n.kind === 'review' ? ` · ${s20(n.score)}` : ''}</span>
+      </div>
+    </div>
+  ))}
+</div>

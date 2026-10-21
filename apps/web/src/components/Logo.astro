@@ -1,0 +1,11 @@
+---
+import yatay from '../assets/marka/updated-yatay-black.svg?raw'
+import up from '../assets/marka/updated-up-black.svg?raw'
+import dikey from '../assets/marka/updated-dikey-black.svg?raw'
+interface Props { variant?: 'yatay' | 'up' | 'dikey'; label?: string }
+const { variant = 'yatay', label = 'UPDATED' } = Astro.props
+// Resmî logo yolları; renk CSS'ten (currentColor) gelir. Kit: logoya efekt yok.
+const raw = { yatay, up, dikey }[variant]
+const svg = raw.replace(/<title>.*?<\/title>/, '').replace(/ width="\d+" height="\d+"/, '').replace('<svg ', `<svg role="img" aria-label="${label}" `)
+---
+<Fragment set:html={svg} />

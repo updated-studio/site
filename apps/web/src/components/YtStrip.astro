@@ -1,0 +1,19 @@
+---
+import Strip from './Strip.astro'
+import Img from './Img.astro'
+import type { Video } from '../lib/types'
+import { ico } from '../lib/ui'
+interface Props { videos: Video[]; channel: string }
+const { videos, channel } = Astro.props
+// Tıklayınca yerinde oynar (youtube-nocookie, JS); JS yoksa YouTube'a gider.
+---
+{videos.length > 0 && (
+  <Strip title="Videolar" sub="YouTube · Nerdesin Fatih" moreHref={channel} moreLabel="Kanala git" external>
+    {videos.map((v) => (
+      <a class="yt" href={v.youtubeId ? `https://www.youtube.com/watch?v=${v.youtubeId}` : channel} target="_blank" rel="noopener" data-yt={v.youtubeId || undefined}>
+        <span class="c-img"><Img img={v.thumb} alt="" sizes="320px" /><span class="play" set:html={ico('play', 24)} /></span>
+        <span class="cat">{v.kind} · YouTube</span><b>{v.title}</b>
+      </a>
+    ))}
+  </Strip>
+)}

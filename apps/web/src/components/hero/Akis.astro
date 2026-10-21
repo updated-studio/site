@@ -1,0 +1,26 @@
+---
+/** Akış manşet: zaman çizgisi. Yeni haber gelince "N yeni haber · göster" düğmesi çıkar (kendiliğinden kaymaz). */
+import Img from '../Img.astro'
+import type { News } from '../../lib/types'
+import { time } from '../../lib/format'
+import { chip, label } from '../../lib/ui'
+interface Props { items: News[] }
+const items = Astro.props.items.filter((n) => n.kind === 'news').slice(0, 7)
+const now = Date.now()
+---
+<button class="newpill" type="button" data-newpill data-since={items[0]?.publishedAt} hidden></button>
+<ol class="tl" data-tl>
+  {items.map((n) => (
+    <li class={n.label === 'son-dakika' && now - +new Date(n.publishedAt) < 24 * 3600e3 ? 'hot' : ''}>
+      <time datetime={n.publishedAt}>{time(n.publishedAt)}</time>
+      <div class="row">
+        <div>
+          <div class="chips" style="margin-bottom:6px"><a class="cat" href={`/${n.category.slug}`}>{n.category.name}</a><Fragment set:html={label(n.label)} /></div>
+          <h3><a href={n.path}>{n.title}</a></h3><p>{n.spot}</p>
+          {n.products.length > 0 && <div class="pks" style="margin-top:8px" set:html={n.products.map((p) => chip(p)).join('')} />}
+        </div>
+        <a class="c-img" href={n.path} tabindex="-1" aria-hidden="true"><Img img={n.cover} alt="" sizes="240px" /></a>
+      </div>
+    </li>
+  ))}
+</ol>

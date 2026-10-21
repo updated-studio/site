@@ -1,0 +1,75 @@
+---
+/** Ana sayfa (kit 10b sırası): son dakika → manşet → son haberler → incelemeler → video → çok okunan; ardından modüller ve sonsuz akış. */
+import Base from '../layouts/Base.astro'
+import Akordeon from '../components/hero/Akordeon.astro'
+import Vitrin from '../components/hero/Vitrin.astro'
+import Akis from '../components/hero/Akis.astro'
+import SonDakika from '../components/SonDakika.astro'
+import CardStd from '../components/CardStd.astro'
+import CardList from '../components/CardList.astro'
+import Ad from '../components/Ad.astro'
+import YtStrip from '../components/YtStrip.astro'
+import ReelStrip from '../components/ReelStrip.astro'
+import Radar from '../components/modules/Radar.astro'
+import KiyasRobotu from '../components/modules/KiyasRobotu.astro'
+import Altmis from '../components/modules/Altmis.astro'
+import KunyeRafi from '../components/modules/KunyeRafi.astro'
+import InfiniteFeed from '../components/InfiniteFeed.astro'
+import * as api from '../lib/api'
+import type { News } from '../lib/types'
+
+const [home, latest, reviews, videos, reels, ads, radar, products, site] = await Promise.all([
+  api.getHome(), api.getLatest(1, 24), api.getReviews(1, 4), api.getVideos(), api.getReels(), api.getAds(), api.getRadar(), api.getProducts(12), api.getSite(),
+])
+const m = { radar: true, kiyasRobotu: true, altmisSaniye: true, kunyeRafi: true, videolar: true, reels: true, cokOkunan: true, ...home.modules }
+const heroIds = new Set(home.hero.map((h) => h.id))
+const rest = latest.filter((n) => !heroIds.has(n.id))
+const mostRead: News[] = home.mostRead.length ? home.mostRead : latest.slice(0, 5)
+const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşılaştırmalar', description: site.tagline, path: '/' }
+---
+<Base meta={meta}>
+  <section class="sec" style="padding-top:24px">
+    <div class="wrap with-rail">
+      <div>
+        {home.heroLayout === 'vitrin' ? <Vitrin items={home.hero} /> : home.heroLayout === 'akis' ? <Akis items={latest} /> : <Akordeon items={home.hero} />}
+      </div>
+      <div class="rail"><SonDakika items={latest} /><Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare /></div>
+    </div>
+  </section>
+
+  <section class="sec"><div class="wrap">
+    <div class="sh"><h2><span class="no">01</span>Son haberler</h2><a class="btn-t btn" href="/haberler">Tümü</a></div>
+    <div class="grid4">{rest.slice(0, 8).map((n) => <CardStd item={n} />)}</div>
+  </div></section>
+
+  <Ad slot="lb" ad={api.pickAd(ads, 'lb')} />
+
+  {reviews.length > 0 && <section class="sec"><div class="wrap">
+    <div class="sh"><h2><span class="no">02</span>İncelemeler</h2><a class="btn-t btn" href="/inceleme">Tümü</a></div>
+    <div class="grid4">{reviews.slice(0, 4).map((r) => <CardStd item={r} />)}</div>
+  </div></section>}
+
+  {(m.videolar || m.reels) && <section class="sec"><div class="wrap">
+    {m.videolar && <YtStrip videos={videos} channel={site.youtube} />}
+    {m.videolar && m.reels && <div style="height:48px"></div>}
+    {m.reels && <ReelStrip reels={reels} profile={site.instagram} />}
+  </div></section>}
+
+  <section class="sec"><div class="wrap with-rail">
+    <div>
+      {m.radar && <Radar items={radar} />}
+      {m.kiyasRobotu && <KiyasRobotu products={products} />}
+      {m.altmisSaniye && <Altmis items={latest} />}
+    </div>
+    <div class="rail">
+      {m.cokOkunan && <div><h4 class="label" style="color:var(--text-3);margin:0 0 8px">En çok okunanlar</h4><CardList items={mostRead} /></div>}
+      <Ad slot="mr" ad={api.pickAd(ads, 'mr', 1)} bare />
+    </div>
+  </div></section>
+
+  {m.kunyeRafi && <section class="sec"><div class="wrap"><KunyeRafi products={products} /></div></section>}
+
+  <section class="sec"><div class="wrap">
+    <InfiniteFeed title="Daha fazla haber" source="son" items={[]} startPage={2} videos={videos} reels={reels} ads={ads} channel={site.youtube} profile={site.instagram} renderFirst={false} />
+  </div></section>
+</Base>

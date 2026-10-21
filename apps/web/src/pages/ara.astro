@@ -1,0 +1,14 @@
+---
+/** Arama: statik dizin (/ara-dizin.json) tarayıcıda taranır; sunucu gerekmez. */
+import Base from '../layouts/Base.astro'
+---
+<Base meta={{ title: 'Ara', description: 'UPDATED içinde haber, inceleme ve ürün ara.', path: '/ara', noindex: true }}>
+  <div class="wrap">
+    <div class="art-head" style="max-width:none;padding-bottom:24px">
+      <h1 class="h1">Ara</h1>
+      <form action="/ara" method="get" role="search" class="chips" data-search-page><label class="sr" for="aq">Arama</label><input id="aq" class="sel" style="min-width:min(100%,420px)" name="q" placeholder="Ürün, haber, kategori…" autocomplete="off" /><button class="btn btn-p" type="submit">Ara</button></form>
+    </div>
+    <p class="meta" data-search-count aria-live="polite"></p>
+    <ul class="res" data-search-results style="list-style:none;padding:0"></ul>
+  </div>
+</Base>

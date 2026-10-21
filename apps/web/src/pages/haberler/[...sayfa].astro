@@ -1,0 +1,11 @@
+---
+import ListPage from '../../components/ListPage.astro'
+import * as api from '../../lib/api'
+export async function getStaticPaths() {
+  const n = await api.pageCount('son')
+  return Array.from({ length: n }, (_, i) => ({ params: { sayfa: i ? `sayfa/${i + 1}` : undefined }, props: { p: i + 1 } }))
+}
+const { p } = Astro.props
+const items = await api.getLatest(p)
+---
+<ListPage title="Haberler" lead="Triyajdan gelen ve editör onayından geçen tüm haberler, en yenisi üstte." path="/haberler" source="son" items={items} page={p} />

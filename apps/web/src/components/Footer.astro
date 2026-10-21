@@ -1,0 +1,26 @@
+---
+import Logo from './Logo.astro'
+import type { SiteCfg } from '../lib/api'
+import { env } from '../lib/env'
+interface Props { site: SiteCfg }
+const { site } = Astro.props
+const y = new Date().getFullYear()
+---
+<footer class="ftr" id="ftr">
+  <div class="wrap">
+    <div>
+      <a class="logo" href="/" aria-label="UPDATED ana sayfa"><Logo /></a>
+      <p style="color:#B4B7BB;font-size:15px;max-width:36ch;margin:16px 0 0">{site.tagline}</p>
+      <form class="nl" id="bulten" data-endpoint={env('PUBLIC_BULTEN_URL') || undefined} novalidate>
+        <label class="sr" for="nlmail">E-posta</label>
+        <input id="nlmail" name="email" type="email" placeholder="E-posta adresiniz" autocomplete="email" required />
+        <button class="btn btn-p" type="submit">Bültene kaydol</button>
+      </form>
+      <p class="mono" id="nlmsg" style="font-size:12px;color:#B4B7BB;min-height:18px;margin:8px 0 0" aria-live="polite">{site.newsletterNote}</p>
+    </div>
+    <div><h4>Bölümler</h4><ul><li><a href="/haberler">Haberler</a></li><li><a href="/inceleme">İncelemeler</a></li><li><a href="/karsilastirma">Karşılaştırma</a></li><li><a href="/urun">Künyeler</a></li><li><a href={site.kulupUrl}>Updated Kulüp</a></li></ul></div>
+    <div><h4>Kanallar</h4><ul><li><a href={site.youtube} target="_blank" rel="noopener">YouTube</a></li><li><a href={site.instagram} target="_blank" rel="noopener">Instagram</a></li><li><a href="#bulten">Bülten</a></li><li><a href="/rss.xml">RSS</a></li></ul></div>
+    <div><h4>Kurumsal</h4><ul><li><a href="/hakkimizda">Hakkımızda</a></li><li><a href="/test-yontemimiz">Test yöntemimiz</a></li><li><a href="/duzeltme-politikasi">Düzeltme politikası</a></li><li><a href="/reklam">Reklam ve sponsorluk</a></li></ul></div>
+    <div class="bt"><span>© {y} UPDATED · updated.com.tr</span><span>Görsel künyeleri her görselin altında</span></div>
+  </div>
+</footer>

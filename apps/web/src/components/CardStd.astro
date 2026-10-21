@@ -1,0 +1,23 @@
+---
+import Img from './Img.astro'
+import type { News, Review, Comparison } from '../lib/types'
+import { short } from '../lib/format'
+import { chip, label, s20 } from '../lib/ui'
+interface Props { item: News | Review | Comparison; eager?: boolean }
+const { item: n, eager } = Astro.props
+const isRev = n.kind === 'review', isCmp = n.kind === 'comparison'
+const lbl = isRev ? '<span class="lbl l-inc">İnceleme</span>' : isCmp ? '<span class="lbl l-kiy">Karşılaştırma</span>' : label((n as News).label)
+const cat = n.kind === 'news' ? n.category : null
+const prods = n.kind === 'news' ? n.products : n.kind === 'review' ? [n.product] : [n.a, n.b]
+---
+<article class="c-std">
+  <a class="c-img" href={n.path} tabindex="-1" aria-hidden="true"><Img img={n.cover} alt="" eager={eager} /><Fragment set:html={lbl} /></a>
+  <div class="b">
+    {cat ? <a class="cat" href={`/${cat.slug}`}>{cat.name}</a> : <span class="cat">{isRev ? 'İnceleme' : 'Karşılaştırma'}</span>}
+    <h3><a href={n.path}>{n.title}</a></h3>
+    <div class="ft">
+      <span class="meta">{isRev && <b style="color:var(--text)">{s20((n as Review).score)} · </b>}{n.author.name} · <time datetime={n.publishedAt}>{short(n.publishedAt)}</time></span>
+      {prods.length > 0 && <span class="pks" set:html={prods.filter(Boolean).slice(0, 2).map((p) => chip(p)).join('')} />}
+    </div>
+  </div>
+</article>

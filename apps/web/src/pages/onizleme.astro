@@ -1,0 +1,30 @@
+---
+/**
+ * Taslak önizleme — triyajdan gelen haber ekibe burada "son taslak" olarak sunulur.
+ * Statik sayfa; taslak tarayıcıda panelin /api/onizleme ucundan okunur (parola ?k= ile, panelde doğrulanır).
+ * Yayınlama panelde yapılır (yalnız yayın yönetmeni; kendi haberini onaylayamaz — hooks/workflow).
+ */
+import Base from '../layouts/Base.astro'
+import { env } from '../lib/env'
+import { CHECKLIST, LIMIT, STATES } from '@updated/kit'
+const cms = env('CMS_URL').replace(/\/$/, '')
+---
+<Base meta={{ title: 'Taslak önizleme', description: 'Yayın öncesi son taslak.', path: '/onizleme', noindex: true }} breaking={false}>
+  <div slot="top" class="draftbar"><div class="wrap"><span class="st st-inc" data-pv-state>◐ Yükleniyor</span><span class="mono" data-pv-meta></span><span class="sp"><a class="btn" href="#yayin-oncesi" data-pv-left>SEO · GEO ve kontrol</a><a class="btn btn-p" data-pv-admin hidden>Panelde aç ve yayınla</a></span></div></div>
+  <div class="wrap with-rail" data-preview data-cms={cms} data-checklist={JSON.stringify(CHECKLIST)} data-limits={JSON.stringify(LIMIT)} data-states={JSON.stringify(STATES)}>
+    <article class="art">
+      <div class="art-head"><div class="chips"><span class="cat" data-pv-cat></span><span data-pv-label></span></div><h1 data-pv-title>Taslak yükleniyor…</h1><p class="lead" style="margin:0" data-pv-spot></p><div class="kunye-row" data-pv-row></div></div>
+      <figure class="cover" data-pv-cover hidden><img alt="" /><figcaption></figcaption></figure>
+      <div class="prose" style="margin-top:24px"><div class="short" data-pv-short hidden><span class="label">Kısa cevap</span><p></p></div><div data-pv-body></div><div class="src" data-pv-src hidden><span class="label" style="color:var(--text-3)">Kaynak</span><p style="margin:6px 0 0"></p></div></div>
+    </article>
+    <div class="rail" style="padding-top:48px">
+      <section id="yayin-oncesi" style="display:flex;flex-direction:column;gap:20px">
+        <h2 style="font-size:30px">Yayın öncesi</h2>
+        <p class="meta">Otomatik: başlık, adres, meta, şema, künye bağlantıları. Boş alanlar kayıtta doldurulur.</p>
+        <div data-pv-fields></div>
+        <div><h3 style="font-size:22px;margin-bottom:8px">Kontrol listesi · web</h3><ul class="chk" data-pv-chk></ul><p class="meta" style="margin-top:8px">İşaretleme panelde yapılır. Son dakika dışında eksik madde varken yayın düğmesi çalışmaz.</p></div>
+      </section>
+    </div>
+  </div>
+  <script>import '../scripts/preview.ts'</script>
+</Base>

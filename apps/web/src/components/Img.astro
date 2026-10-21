@@ -1,0 +1,7 @@
+---
+/** Görsel: Payload WebP türevleri srcset ile; ilk ekran görselleri eager, diğerleri lazy. */
+import type { Img } from '../lib/types'
+interface Props { img?: Img; alt?: string; eager?: boolean; sizes?: string; class?: string }
+const { img, alt, eager = false, sizes = '(max-width: 767px) 100vw, 400px', class: cls } = Astro.props
+---
+{img && <img class={cls} src={img.url} srcset={img.srcset} sizes={img.srcset ? sizes : undefined} alt={alt ?? img.alt} width={img.w || 1200} height={img.h || 675} loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : undefined} decoding="async" />}

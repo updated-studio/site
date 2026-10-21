@@ -1,0 +1,33 @@
+---
+/**
+ * Sonsuz akışın bir sayfası: 20 haber → YouTube şeridi → (tek sayfalarda) video reklam → Reels şeridi.
+ * 12. karttan sonra akış içi reklam; 8. sıraya sponsorlu kart (kampanya varsa).
+ */
+import CardStd from './CardStd.astro'
+import CardSponsored from './CardSponsored.astro'
+import Ad from './Ad.astro'
+import VideoAd from './VideoAd.astro'
+import YtStrip from './YtStrip.astro'
+import ReelStrip from './ReelStrip.astro'
+import type { Ad as AdT, News, Reel, Video } from '../lib/types'
+import { pickAd } from '../lib/api'
+interface Props { items: News[]; page: number; videos: Video[]; reels: Reel[]; ads: AdT[]; channel: string; profile: string; first?: boolean }
+const { items, page, videos, reels, ads, channel, profile, first = false } = Astro.props
+const spo = pickAd(ads, 'sponsored', page)
+const a = items.slice(0, spo ? 11 : 12), b = items.slice(spo ? 11 : 12)
+// Şeritler her sayfada farklı başlasın
+const rot = <T,>(x: T[]) => (x.length ? [...x.slice(page % x.length), ...x.slice(0, page % x.length)] : x)
+---
+<div class="inf-chunk" data-page={page} style={first ? 'border-top:0;margin-top:0;padding-top:0' : undefined}>
+  {!first && <div class="inf-h"><span class="label" style="color:var(--text-3)">Sayfa {page} · {items.length} haber</span></div>}
+  <div class="grid4">
+    {a.slice(0, 7).map((n) => <CardStd item={n} />)}
+    {spo && <CardSponsored ad={spo} />}
+    {a.slice(7).map((n) => <CardStd item={n} />)}
+  </div>
+  {b.length > 0 && <Ad slot="in" ad={pickAd(ads, 'in', page)} />}
+  {b.length > 0 && <div class="grid4">{b.map((n) => <CardStd item={n} />)}</div>}
+  <YtStrip videos={rot(videos)} channel={channel} />
+  {page % 2 === 1 && <VideoAd ad={pickAd(ads, 'video', page)} />}
+  <ReelStrip reels={rot(reels)} profile={profile} />
+</div>

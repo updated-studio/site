@@ -1,0 +1,57 @@
+---
+import Base from '../../layouts/Base.astro'
+import Img from '../../components/Img.astro'
+import KunyeMini from '../../components/KunyeMini.astro'
+import Ad from '../../components/Ad.astro'
+import InfiniteFeed from '../../components/InfiniteFeed.astro'
+import * as api from '../../lib/api'
+import { comparisonMeta } from '../../lib/seo'
+import { date } from '../../lib/format'
+import { chip } from '../../lib/ui'
+import { autoDiffs, bars, rows } from '../../lib/compare'
+import type { Comparison } from '../../lib/types'
+export async function getStaticPaths() {
+  return (await api.allComparisons()).map((c) => ({ params: { slug: c.path.split('/').pop() }, props: { c } }))
+}
+// Adres hep alfabetik (a-vs-b); ters sıra .htaccess'te 301 (scripts/postbuild.mjs).
+const { c } = Astro.props as { c: Comparison }
+const [ads, videos, reels, site] = await Promise.all([api.getAds(), api.getVideos(), api.getReels(), api.getSite()])
+const R = rows(c.a, c.b).map((r, i, all) => ({ ...r, head: i === 0 || all[i - 1].group !== r.group })), B = bars(c.a, c.b)
+const diffs = c.keyDiffs.length ? c.keyDiffs : autoDiffs(c.a, c.b)
+const nm = (w?: string) => (w === 'a' ? c.a.name : w === 'b' ? c.b.name : '')
+---
+<Base meta={comparisonMeta(c)}>
+  <div class="wrap">
+    <div class="art-head" style="max-width:none">
+      <div class="chips"><span class="lbl l-kiy">Karşılaştırma</span></div>
+      <div class="vs" style="margin-top:8px">
+        <div class="side"><span class="c-img" style="width:100%"><Img img={c.a.image} alt={c.a.name} eager /></span><h2>{c.a.name}</h2><Fragment set:html={chip(c.a)} /></div>
+        <span class="x" aria-hidden="true">VS</span>
+        <div class="side r"><span class="c-img" style="width:100%"><Img img={c.b.image} alt={c.b.name} eager /></span><h2>{c.b.name}</h2><Fragment set:html={chip(c.b)} /></div>
+      </div>
+      <h1 class="h2" style="margin-top:16px">{c.title}</h1>
+      <div class="kunye-row"><a href={`/yazar/${c.author.slug}`} rel="author">{c.author.name}</a><span>·</span><time datetime={c.publishedAt}>{date(c.publishedAt)}</time>{c.method && <><span>·</span><span>{c.method}</span></>}</div>
+    </div>
+    <div class="with-rail" style="margin-top:24px">
+      <div>
+        {c.shortAnswer && <div class="short" style="margin-top:0"><span class="label">Kısa cevap</span><p>{c.shortAnswer}</p></div>}
+        {diffs.length > 0 && <><div class="sh" style="margin-top:32px"><h2>Can alıcı {diffs.length} fark</h2></div>
+          <div class="kd">{diffs.map((d) => <div><span class="big">{d.big}</span><b>{d.label}</b>{d.winner && <span class="w">Önde: <b>{nm(d.winner)}</b></span>}</div>)}</div></>}
+        {B.length > 0 && <><div class="sh" style="margin-top:32px"><h2>Sayılarla</h2></div>
+          <div class="bars">{B.map((x) => <div class="bar"><span class="lb">{x.label}</span><div class="two"><div class="r me"><i><b style={`width:${(x.a / x.max) * 100}%`}></b></i><span>{c!.a.name} · {x.a}</span></div><div class="r"><i><b style={`width:${(x.b / x.max) * 100}%`}></b></i><span>{c!.b.name} · {x.b}</span></div></div></div>)}</div>
+          <p class="meta" style="margin-top:8px">Kaynak: künyedeki değerler (her biri kaynağıyla künye sayfasında)</p></>}
+        {c.whoFor && (c.whoFor.a || c.whoFor.b) && <><div class="sh" style="margin-top:32px"><h2>Kime hangisi</h2></div><div class="kv"><div><h3>{c.a.name} al, eğer…</h3><p>{c.whoFor.a}</p></div><div><h3>{c.b.name} al, eğer…</h3><p>{c.whoFor.b}</p></div></div></>}
+        <Ad slot="in" ad={api.pickAd(ads, 'in')} />
+        <div class="sh" style="margin-top:32px" id="tablo"><h2>Tüm özellikler</h2><button class="btn" type="button" data-only-diff aria-pressed="false">Sadece farklar</button></div>
+        <div class="tbl"><table data-cmp><thead><tr><th>Özellik</th><th>{c.a.name}</th><th>{c.b.name}</th></tr></thead><tbody>
+          {R.map((r) => <>
+            {r.head && <tr class="grp"><th colspan="3">{r.group}</th></tr>}
+            <tr data-same={r.a === r.b ? '1' : undefined}><th scope="row" style="font-family:var(--f-body);font-weight:600">{r.key}</th><td class={r.win === 'a' ? 'w' : ''}>{r.a}</td><td class={r.win === 'b' ? 'w' : ''}>{r.b}</td></tr>
+          </>)}
+        </tbody></table></div>
+      </div>
+      <div class="rail"><div><h4 class="label" style="color:var(--text-3);margin:0 0 8px">Künyeler</h4><div class="kstack"><KunyeMini p={c.a} /><KunyeMini p={c.b} /></div></div><Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare /></div>
+    </div>
+  </div>
+  <div class="wrap" style="padding-top:48px"><InfiniteFeed title="Okumaya devam et" source="son" items={[]} videos={videos} reels={reels} ads={ads} channel={site.youtube} profile={site.instagram} renderFirst={false} /></div>
+</Base>

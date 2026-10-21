@@ -1,0 +1,16 @@
+---
+/**
+ * Sonsuz kaydırma. İlk sayfa sunucuda basılır (arama motorları görür), sonrakiler /parca/akis'tan HTML parçası olarak gelir.
+ * JS kapalıysa "Daha fazla" bağlantısı normal sayfalamaya gider (/…/sayfa/N, statik dosya).
+ */
+import FeedChunk from './FeedChunk.astro'
+import type { Ad, News, Reel, Video } from '../lib/types'
+interface Props { title: string; source: string; basePath?: string; items: News[]; videos: Video[]; reels: Reel[]; ads: Ad[]; channel: string; profile: string; startPage?: number; renderFirst?: boolean }
+const { title, source, basePath = '/haberler', items, videos, reels, ads, channel, profile, startPage = 1, renderFirst = true } = Astro.props
+const next = startPage + (renderFirst ? 1 : 0)
+---
+<div data-feed={source} data-next={next}>
+  <div class="sh"><h2>{title}</h2><span class="meta">Sayfanın sonuna geldikçe 20 haber, ardından videolar ve reels yüklenir</span></div>
+  {renderFirst && items.length > 0 && <FeedChunk items={items} page={startPage} videos={videos} reels={reels} ads={ads} channel={channel} profile={profile} first />}
+  <div class="loader" data-sentinel><div class="skel" aria-hidden="true"><i></i><i></i><i></i><i></i></div><a class="btn" href={`${basePath === '/' ? '' : basePath}/sayfa/${next}`} rel="next" data-more>Daha fazla haber</a></div>
+</div>

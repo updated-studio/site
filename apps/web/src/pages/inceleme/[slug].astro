@@ -1,0 +1,63 @@
+---
+/** İnceleme: kısa karar en üstte, puan kutusu metnin sonunda (kit), sonra yöntem ve videolu inceleme. */
+import Base from '../../layouts/Base.astro'
+import Img from '../../components/Img.astro'
+import ScoreBox from '../../components/ScoreBox.astro'
+import KunyeMini from '../../components/KunyeMini.astro'
+import CardList from '../../components/CardList.astro'
+import Ad from '../../components/Ad.astro'
+import InfiniteFeed from '../../components/InfiniteFeed.astro'
+import * as api from '../../lib/api'
+import { reviewMeta } from '../../lib/seo'
+import { date } from '../../lib/format'
+import { chip, ico, linkProducts } from '../../lib/ui'
+import { insertAfterParagraph } from '../../lib/rich'
+import type { Review } from '../../lib/types'
+export async function getStaticPaths() {
+  return (await api.allReviews()).map((r) => ({ params: { slug: r.path.split('/').pop() }, props: { r } }))
+}
+const { r } = Astro.props as { r: Review }
+const [ads, top, videos, reels, site] = await Promise.all([api.getAds(), api.getReviews(1, 5), api.getVideos(), api.getReels(), api.getSite()])
+const MARK = '<!--AD-IN-->'
+let body = linkProducts(r.html || '', [r.product])
+if ((body.match(/<\/p>/g) || []).length >= 3) body = insertAfterParagraph(body, 2, MARK)
+const [before, after] = body.split(MARK)
+const cat = r.product.type === 'drone' || r.product.type === 'camera' || r.product.type === 'cam360' ? ['Kamera & Dron', '/kamera-dron'] : r.product.type === 'phone' ? ['Mobil', '/mobil'] : null
+---
+<Base meta={reviewMeta(r)}>
+  <div class="wrap with-rail">
+    <article class="art">
+      <div class="art-head">
+        <div class="chips"><span class="lbl l-inc">İnceleme</span>{cat && <a class="cat" href={cat[1]}>{cat[0]}</a>}</div>
+        <h1>{r.title}</h1>
+        <p class="lead" style="margin:0">{r.spot}</p>
+        <div class="kunye-row"><a href={`/yazar/${r.author.slug}`} rel="author">{r.author.name}</a><span>·</span><time datetime={r.publishedAt}>{date(r.publishedAt)}</time>{r.readingTime && <><span>·</span><span>{r.readingTime} dk okuma</span></>}<span>·</span><Fragment set:html={chip(r.product)} /></div>
+      </div>
+      {r.cover && <figure class="cover"><Img img={r.cover} eager sizes="(max-width: 767px) 100vw, 860px" /><figcaption>{r.cover.credit}</figcaption></figure>}
+      <div class="prose" style="margin-top:24px">
+        {r.shortAnswer && <div class="short"><span class="label">Kısa karar · {Math.round(r.score)}/20</span><p>{r.shortAnswer}</p></div>}
+        <Fragment set:html={before} />
+        {after !== undefined && <Ad slot="in" ad={api.pickAd(ads, 'in')} />}
+        {after && <Fragment set:html={after} />}
+        {r.who && (r.who.for.length > 0 || r.who.notFor.length > 0) && <><h2>Kime göre?</h2><div class="kv"><div><h3>Uygun</h3><ul>{r.who.for.map((x) => <li>{x}</li>)}</ul></div><div><h3>Uygun değil</h3><ul>{r.who.notFor.map((x) => <li>{x}</li>)}</ul></div></div></>}
+        <ScoreBox r={r} />
+        {r.methodHtml && <><h2>Yöntem</h2><Fragment set:html={r.methodHtml} /></>}
+        {r.video && (
+          <a class="c-std" href={r.video.youtubeId ? `https://www.youtube.com/watch?v=${r.video.youtubeId}` : site.youtube} target="_blank" rel="noopener" data-yt={r.video.youtubeId || undefined} style="text-decoration:none;margin:24px 0">
+            <span class="c-img"><Img img={r.video.thumb} alt="" /><span class="play" style="position:absolute;left:0;bottom:0;width:56px;height:56px;background:var(--blue);display:grid;place-items:center;color:#fff" set:html={ico('play', 24)} /></span>
+            <span class="b"><span class="cat">YouTube · videolu inceleme</span><b style="font-size:18px">{r.video.title}</b></span>
+          </a>
+        )}
+        {r.corrections?.map((c) => <div class="fix"><b>Düzeltme · {date(c.at)}</b> {c.note}</div>)}
+      </div>
+    </article>
+    <div class="rail" style="padding-top:48px">
+      <div><h4 class="label" style="color:var(--text-3);margin:0 0 8px">Ürün künyesi</h4><KunyeMini p={{ ...r.product, score: r.score }} /></div>
+      <Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare />
+      <div><h4 class="label" style="color:var(--text-3);margin:0 0 8px">Puan tablosu</h4><CardList items={top.filter((x) => x.id !== r.id).slice(0, 4)} score /></div>
+    </div>
+  </div>
+  <div class="wrap" style="padding-top:48px">
+    <InfiniteFeed title="Okumaya devam et" source="son" items={[]} videos={videos} reels={reels} ads={ads} channel={site.youtube} profile={site.instagram} renderFirst={false} />
+  </div>
+</Base>

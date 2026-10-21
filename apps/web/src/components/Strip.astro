@@ -1,0 +1,19 @@
+---
+/** Yatay şerit: oklar her zaman görünür (mobilde de), altta sayfa noktaları. Kaydırma JS ile senkron. */
+import { ico } from '../lib/ui'
+interface Props { title: string; sub?: string; moreHref?: string; moreLabel?: string; external?: boolean }
+const { title, sub, moreHref, moreLabel, external } = Astro.props
+---
+<section class="strip" data-strip>
+  <div class="strip-h">
+    <div>{sub && <span class="cat">{sub}</span>}<h2>{title}</h2></div>
+    <div class="arrows">
+      <span class="hint">Kaydır</span>
+      <button type="button" class="pv" aria-label={`${title}: geri`}><Fragment set:html={ico('left')} /></button>
+      <button type="button" class="nx" aria-label={`${title}: ileri`}><Fragment set:html={ico('right')} /></button>
+      {moreHref && <a class="btn" href={moreHref} target={external ? '_blank' : undefined} rel={external ? 'noopener' : undefined}>{moreLabel}</a>}
+    </div>
+  </div>
+  <div class="track" tabindex="0" aria-label={`${title} şeridi`}><slot /></div>
+  <div class="dots" aria-hidden="true"></div>
+</section>

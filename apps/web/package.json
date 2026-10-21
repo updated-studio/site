@@ -1,0 +1,19 @@
+{
+  "name": "@updated/web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && node scripts/postbuild.mjs",
+    "preview": "astro preview",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "astro": "^5",
+    "@updated/kit": "*"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9",
+    "typescript": "^5"
+  }
+}

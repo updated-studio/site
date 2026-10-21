@@ -1,0 +1,14 @@
+---
+import type { ProductRef } from '../lib/types'
+import { conf, glyph, s20 } from '../lib/ui'
+import { statusText } from '../lib/api'
+interface Props { p: ProductRef }
+const { p } = Astro.props
+---
+<a class="kcard mini" href={`/urun/${p.slug}`}>
+  <Fragment set:html={glyph(p.type, 40)} />
+  <span class="eyebrow">Künye · {p.brand}</span><b>{p.name}</b>
+  <span class="pc-st"><Fragment set:html={conf(p.certainty)} /><span>{statusText(p.status)}</span></span>
+  {p.score && <span class="kc-sc">{s20(p.score)}</span>}
+  <span class="kc-go">Künyeyi aç →</span>
+</a>

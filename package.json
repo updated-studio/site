@@ -1,0 +1,18 @@
+{
+  "name": "updated-site",
+  "private": true,
+  "description": "updated.com.tr — Astro site + Payload panel + Supabase",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:cms": "npm run dev -w apps/cms",
+    "dev:web": "npm run dev -w apps/web",
+    "build": "npm run build -w apps/cms && npm run build -w apps/web",
+    "wp:migrate": "npm run wp:migrate -w apps/cms"
+  },
+  "engines": {
+    "node": ">=20.9"
+  }
+}
