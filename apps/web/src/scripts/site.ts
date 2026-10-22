@@ -304,8 +304,19 @@ function newsletter() {
   })
 }
 
+/* ---------- en çok okunanlar: dönem sekmeleri ---------- */
+function okunanSekme() {
+  $$('[data-okunan]').forEach((box) => {
+    const tabs = $$<HTMLButtonElement>('[data-donem]', box)
+    tabs.forEach((t) => t.addEventListener('click', () => {
+      tabs.forEach((x) => x.setAttribute('aria-selected', String(x === t)))
+      $$('[data-panel]', box).forEach((p) => (p.hidden = p.dataset.panel !== t.dataset.donem))
+    }))
+  })
+}
+
 /** Sonradan eklenen parçalara (sonsuz akış) davranış bağla. */
 function hydrate(root: ParentNode) { strips(root); youtube(root); videoAds(root) }
 
-theme(); menu(); search(); searchPage(); breaking(); accordion(); newPill(); clocks(); feeds(); kunyeCard(); sixty(); robot(); onlyDiff(); sokum(); newsletter()
+theme(); menu(); search(); searchPage(); breaking(); accordion(); newPill(); clocks(); feeds(); kunyeCard(); sixty(); robot(); onlyDiff(); sokum(); newsletter(); okunanSekme()
 hydrate(document)

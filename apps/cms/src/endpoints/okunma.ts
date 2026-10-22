@@ -3,7 +3,8 @@ import { headersWithCors, type Endpoint, type Payload } from 'payload'
 /**
  * Kendi okunma sayacımız (çerezsiz, kişisel veri tutmaz): yalnız "hangi sayfa, hangi gün, kaç kez".
  * POST /api/okunma   gövde: düz metin sayfa yolu (navigator.sendBeacon) → günlük sayaç +1
- * GET  /api/en-cok-okunan?saat=48&n=10 → son N saatin en çok okunan sayfaları (5 dk önbellek)
+ * GET  /api/en-cok-okunan?donem=48s|7g|30g|tum&n=10 → dönemin en çok okunan sayfaları (5 dk önbellek)
+ *   (eski kullanım ?saat=48 de çalışır). Günlük satırlar silinmez: "tüm zamanlar" hep hesaplanabilir.
  * Tablo: payload.okunma_gunluk (gun, yol, sayi). Site derlenirken "En çok okunanlar" buradan gelir.
  */
 const pool = (p: Payload) => (p.db as any).pool as { query: (q: string, v?: any[]) => Promise<{ rows: any[] }> }
@@ -16,7 +17,7 @@ export const okunmaInit = async (payload: Payload) => {
 
 const BOT = /bot|crawl|spider|slurp|preview|facebookexternalhit|headless|lighthouse/i
 const YOL = /^\/[a-z0-9-]+(\/[a-z0-9-]+)*$/
-let top: { key: string; at: number; body: string } | null = null
+const top: Map<string, { at: number; body: string }> = new Map()
 
 export const okunmaEndpoints: Endpoint[] = [
   {
@@ -37,13 +38,16 @@ export const okunmaEndpoints: Endpoint[] = [
     handler: async (req) => {
       const headers = headersWithCors({ headers: new Headers({ 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=300' }), req })
       const u = new URL(req.url || '', 'http://x')
-      const saat = Math.min(24 * 30, Math.max(6, Number(u.searchParams.get('saat')) || 48)), n = Math.min(50, Math.max(1, Number(u.searchParams.get('n')) || 10))
+      const DONEM: Record<string, number> = { '48s': 48, '7g': 24 * 7, '30g': 24 * 30, tum: 24 * 365 * 50 }
+      const d = u.searchParams.get('donem') || ''
+      const saat = DONEM[d] ?? Math.min(24 * 365 * 50, Math.max(6, Number(u.searchParams.get('saat')) || 48)), n = Math.min(50, Math.max(1, Number(u.searchParams.get('n')) || 10))
       const key = `${saat}:${n}`
-      if (!top || top.key !== key || Date.now() - top.at > 300_000) {
+      const c = top.get(key)
+      if (!c || Date.now() - c.at > 300_000) {
         const r = await pool(req.payload).query(`select yol, sum(sayi)::int as sayi from payload.okunma_gunluk where gun >= ((now() - ($1 || ' hours')::interval) at time zone 'Europe/Istanbul')::date group by yol order by sayi desc limit $2`, [String(saat), n]).catch(() => ({ rows: [] }))
-        top = { key, at: Date.now(), body: JSON.stringify(r.rows) }
+        top.set(key, { at: Date.now(), body: JSON.stringify(r.rows) })
       }
-      return new Response(top.body, { headers })
+      return new Response(top.get(key)!.body, { headers })
     },
   },
 ]

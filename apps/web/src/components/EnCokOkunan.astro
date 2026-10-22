@@ -1,0 +1,15 @@
+---
+/** En çok okunanlar: 48 saat / 7 gün / 30 gün / tüm zamanlar sekmeleri. Dördü de derlemede hazırlanır; sekme JS'siz de okunur (ilk sekme açık). */
+import CardList from './CardList.astro'
+import * as api from '../lib/api'
+interface Props { fallback?: import('../lib/types').News[] }
+const { fallback = [] } = Astro.props
+const lists = await Promise.all(api.DONEMLER.map(async ([d, l]) => ({ d, l, items: await api.getMostRead(5, d) })))
+if (!lists[0].items.length) lists[0].items = fallback.slice(0, 5)
+const shown = lists.filter((x, i) => i === 0 || x.items.length)
+---
+<div data-okunan>
+  <h4 class="label" style="color:var(--text-3);margin:0 0 8px">En çok okunanlar</h4>
+  {shown.length > 1 && <div class="chips" role="tablist" aria-label="Dönem" style="margin:0 0 8px;gap:6px">{shown.map((x, i) => <button class="btn" style="height:32px;padding:0 10px;font-size:13px" type="button" role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-donem={x.d}>{x.l}</button>)}</div>}
+  {shown.map((x, i) => <div role="tabpanel" data-panel={x.d} hidden={i !== 0}><CardList items={x.items} /></div>)}
+</div>

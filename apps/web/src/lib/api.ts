@@ -120,16 +120,18 @@ export const getCategory = (slug: string) => safe<(Cat & { description?: string 
 export const getCategoryNews = (slug: string, p = 1) => safe(async () => (await list('news', { 'category.slug': { equals: slug } }, { page: p })).docs.map(mNews), () => { const a = S.NEWS.filter((n) => n.category.slug === slug); return a.length ? cyc(a, p) : [] })
 export const getNews = (catSlug: string, slug: string) => safe(async () => { const r = await list('news', { slug: { equals: slug }, 'category.slug': { equals: catSlug } }, { limit: 1, depth: 2 }); return r.docs[0] ? mNews(r.docs[0]) : null }, () => S.NEWS.find((n) => n.path === `/${catSlug}/${slug}`) || null)
 export const getRelated = (n: News, k = 4) => safe(async () => (await list('news', { id: { not_equals: n.id }, or: [{ 'category.slug': { equals: n.category.slug } }, ...(n.products.length ? [{ 'products.slug': { in: n.products.map((p) => p.slug) } }] : [])] } as any, { limit: k, depth: 1 })).docs.map(mNews), () => S.NEWS.filter((x) => x.id !== n.id && (x.category.slug === n.category.slug || x.products.some((p) => n.products.some((q) => q.slug === p.slug)))).slice(0, k))
-/** En çok okunanlar: panelde elle seçildiyse o; yoksa kendi okunma sayacımızdan (son 48 saat). */
-export const getMostRead = (n = 5) => safe(async () => {
+/** En çok okunanlar: panelde elle seçildiyse (yalnız 48 saat sekmesi) o; yoksa kendi okunma sayacımızdan. */
+export type Donem = '48s' | '7g' | '30g' | 'tum'
+export const DONEMLER: [Donem, string][] = [['48s', '48 saat'], ['7g', '7 gün'], ['30g', '30 gün'], ['tum', 'Tüm zamanlar']]
+export const getMostRead = (n = 5, donem: Donem = '48s') => safe(async () => {
   const h = await get('globals/home', { depth: 2 })
-  if (h.mostRead?.length) return (h.mostRead as any[]).map(mNews)
-  const top = (await get<{ yol: string }[]>('en-cok-okunan', { saat: 48, n: n * 3 }).catch(() => [])) as { yol: string }[]
+  if (donem === '48s' && h.mostRead?.length) return (h.mostRead as any[]).map(mNews)
+  const top = (await get<{ yol: string }[]>('en-cok-okunan', { donem, n: n * 3 }).catch(() => [])) as { yol: string }[]
   if (!top.length) return [] as News[]
   const r = await list('news', { path: { in: top.map((t) => t.yol) } }, { limit: n * 3, depth: 1 })
   const byPath = new Map(r.docs.map((d: any) => [d.path, mNews(d)]))
   return top.map((t) => byPath.get(t.yol)).filter(Boolean).slice(0, n) as News[]
-}, () => [S.NEWS[3], S.NEWS[9], S.NEWS[1], S.NEWS[12], S.NEWS[2]].slice(0, n))
+}, () => { const o = { '48s': 3, '7g': 0, '30g': 6, tum: 9 }[donem]; return [...S.NEWS.slice(o), ...S.NEWS.slice(0, o)].slice(0, n) })
 
 /* ---------- inceleme, kıyas, künye ---------- */
 export const getReviews = (p = 1, n = PAGE) => safe(async () => (await list('reviews', {}, { page: p, limit: n })).docs.map(mReview), () => page(S.REVIEWS, p, n))

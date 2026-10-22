@@ -379,3 +379,4 @@ pre.code{margin:0;background:var(--surface-2);border:1px solid var(--line);paddi
 .ad-lb .slot,.ad-mr .slot{width:100%}
 main{overflow-x:clip}
 .vs .side .pk{align-self:flex-start}.vs .side.r .pk{align-self:flex-end}.akp .blk{max-width:min(560px,78%)}.akp .blk h2{font-size:44px}
+[data-okunan] [role="tab"][aria-selected="true"]{background:var(--text);color:var(--bg);border-color:var(--text)}

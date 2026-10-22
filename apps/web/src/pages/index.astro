@@ -6,7 +6,7 @@ import Vitrin from '../components/hero/Vitrin.astro'
 import Akis from '../components/hero/Akis.astro'
 import SonDakika from '../components/SonDakika.astro'
 import CardStd from '../components/CardStd.astro'
-import CardList from '../components/CardList.astro'
+import EnCokOkunan from '../components/EnCokOkunan.astro'
 import Ad from '../components/Ad.astro'
 import YtStrip from '../components/YtStrip.astro'
 import ReelStrip from '../components/ReelStrip.astro'
@@ -24,8 +24,6 @@ const [home, latest, reviews, videos, reels, ads, radar, products, site] = await
 const m = { radar: true, kiyasRobotu: true, altmisSaniye: true, kunyeRafi: true, videolar: true, reels: true, cokOkunan: true, ...home.modules }
 const heroIds = new Set(home.hero.map((h) => h.id))
 const rest = latest.filter((n) => !heroIds.has(n.id))
-const okunan = await api.getMostRead(5)
-const mostRead: News[] = okunan.length ? okunan : latest.slice(0, 5)
 const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşılaştırmalar', description: site.tagline, path: '/' }
 ---
 <Base meta={meta}>
@@ -63,7 +61,7 @@ const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşıla�
       {m.altmisSaniye && <Altmis items={latest} />}
     </div>
     <div class="rail">
-      {m.cokOkunan && <div><h4 class="label" style="color:var(--text-3);margin:0 0 8px">En çok okunanlar</h4><CardList items={mostRead} /></div>}
+      {m.cokOkunan && <EnCokOkunan fallback={latest} />}
       <Ad slot="mr" ad={api.pickAd(ads, 'mr', 1)} bare />
     </div>
   </div></section>
