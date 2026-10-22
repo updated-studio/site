@@ -31,6 +31,12 @@ if (BASE) {
 
 /* 2) .htaccess */
 const host = new URL(SITE).host
+// Hazırlıkta (STAGING=1) SSL henüz yoksa site http'den de açılsın diye https zorlaması yok; canlıda var.
+const httpsRule = process.env.STAGING === '1' ? '# hazırlık: https zorlaması kapalı (SSL kurulunca canlıda açılır)\n' : `# https ve www'suz tek adres
+RewriteCond %{HTTPS} !=on [OR]
+RewriteCond %{HTTP_HOST} ^www\\. [NC]
+RewriteRule ^(.*)$ https://${host}/$1 [R=301,L]
+`
 const esc = (p) => p.replace(/^\//, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 const redirects = existsSync('src/redirects.json') ? JSON.parse(readFileSync('src/redirects.json', 'utf8')) : {}
 const kiyas = files.filter((f) => /\/karsilastirma\/[^/]+-vs-[^/]+\.html$/.test(f)).map((f) => relative(DIST, f).replace(/\.html$/, ''))
@@ -48,11 +54,7 @@ AddType text/plain .txt
 <IfModule mod_rewrite.c>
 RewriteEngine On
 
-# https ve www'suz tek adres
-RewriteCond %{HTTPS} !=on [OR]
-RewriteCond %{HTTP_HOST} ^www\\. [NC]
-RewriteRule ^(.*)$ https://${host}/$1 [R=301,L]
-
+${httpsRule}
 # sondaki "/" atılır
 RewriteRule ^(.+)/$ /$1 [R=301,L]
 
