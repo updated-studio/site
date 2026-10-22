@@ -1,0 +1,26 @@
+name: Eski site raporu
+# deploy/rapor/ değişince çalışır; hiçbir şeyi değiştirmez. Çıktılar "raporlar" dalına yazılır.
+on:
+  push: { branches: [main], paths: ['deploy/rapor/**'] }
+  workflow_dispatch:
+permissions: { contents: write }
+jobs:
+  rapor:
+    runs-on: ubuntu-latest
+    env:
+      WP_URL: ${{ vars.WP_URL || 'https://updated.com.tr' }}
+      WP_USER: ${{ secrets.WP_USER }}
+      WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: mkdir -p rapor && python3 deploy/rapor/rapor.py
+        continue-on-error: true
+      - run: |
+          cd deploy/rapor && npm init -y >/dev/null && npm i playwright@1.48.2 >/dev/null && npx playwright install --with-deps chromium >/dev/null
+          cd ../.. && node deploy/rapor/foto.mjs
+        continue-on-error: true
+      - run: |
+          cp -r rapor /tmp/rapor; git fetch origin raporlar 2>/dev/null && git checkout raporlar 2>/dev/null || git checkout --orphan raporlar
+          git rm -rfq . 2>/dev/null || true; rm -rf deploy apps packages; cp -r /tmp/rapor/* .
+          git config user.name "updated-bot"; git config user.email "bot@updated.com.tr"
+          git add -A && git commit -qm "Rapor $(date -u +%F' '%T)" && git push -q origin raporlar
