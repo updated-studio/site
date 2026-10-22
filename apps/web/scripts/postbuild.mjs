@@ -94,12 +94,12 @@ ${rules.map(([from, to]) => `RewriteRule ^${esc(decodeURIComponent(from))}/?$ ${
 # WordPress'in genel adres kalıpları → yeni karşılıkları (301)
 RewriteCond %{QUERY_STRING} (?:^|&)s=([^&]+)
 RewriteRule ^$ /ara?q=%1 [R=301,L,NE]
-RewriteRule ^category/(?:[^/]+/)*genel(?:/page/\d+)?$ /haberler [R=301,L]
-RewriteRule ^category/(?:[^/]+/)*([^/]+)/page/(\d+)$ /$1/sayfa/$2 [R=301,L]
+RewriteRule ^category/(?:[^/]+/)*genel(?:/page/\\d+)?$ /haberler [R=301,L]
+RewriteRule ^category/(?:[^/]+/)*([^/]+)/page/(\\d+)$ /$1/sayfa/$2 [R=301,L]
 RewriteRule ^category/(?:[^/]+/)*([^/]+)$ /$1 [R=301,L]
-RewriteRule ^tag/([^/]+)(?:/page/\d+)?$ /ara?q=$1 [R=301,L,NE]
-RewriteRule ^author/([^/]+)(?:/page/\d+)?$ /yazar/$1 [R=301,L]
-RewriteRule ^page/(\d+)$ /haberler/sayfa/$1 [R=301,L]
+RewriteRule ^tag/([^/]+)(?:/page/\\d+)?$ /ara?q=$1 [R=301,L,NE]
+RewriteRule ^author/([^/]+)(?:/page/\\d+)?$ /yazar/$1 [R=301,L]
+RewriteRule ^page/(\\d+)$ /haberler/sayfa/$1 [R=301,L]
 RewriteRule ^(?:comments/)?feed$ /rss.xml [R=301,L]
 RewriteRule ^(.+)/feed$ /$1 [R=301,L]
 RewriteRule ^(?:incelemeler|reviews)$ /inceleme [R=301,L]
@@ -107,9 +107,9 @@ RewriteRule ^kiyaslamalar$ /karsilastirma [R=301,L]
 RewriteRule ^hakkimizda-2$ /hakkimizda [R=301,L]
 RewriteRule ^(?:blog|categories-list|catalogue|rehber-ve-ipuclari)$ /haberler [R=301,L]
 RewriteRule ^advanced-search$ /ara [R=301,L]
-RewriteRule ^(?:wp-admin|wp-login\.php)(?:/.*)?$ https://panel.updated.com.tr/admin [R=302,L]
+RewriteRule ^(?:wp-admin|wp-login\\.php)(?:/.*)?$ https://panel.updated.com.tr/admin [R=302,L]
 # Temanın örnek sayfaları (mağaza, üyelik, demo ana sayfalar…) → ana sayfa
-RewriteRule ^(?:home-\d+|(?:shop|cart|checkout|my-account)(?:-\d+)?|track-order|membership-[^/]+(?:/.*)?|login(?:-custom)?|sample-page|maintenance|coming-soon|landing|newsletter|resources|authors-list|out-authors|our-team|bookmarks|content-widgets|footer-styles|pluvia-english|editor-panel|test|privacy-policy-\d*|faq)$ / [R=301,L]
+RewriteRule ^(?:home-\\d+|(?:shop|cart|checkout|my-account)(?:-\\d+)?|track-order|membership-[^/]+(?:/.*)?|login(?:-custom)?|sample-page|maintenance|coming-soon|landing|newsletter|resources|authors-list|out-authors|our-team|bookmarks|content-widgets|footer-styles|pluvia-english|editor-panel|test|privacy-policy-\\d*|faq)$ / [R=301,L]
 
 # uzantısız adres → .html dosyası
 RewriteCond %{REQUEST_FILENAME}.html -f
