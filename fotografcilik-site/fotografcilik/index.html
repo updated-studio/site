@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Updated — Fotoğrafçılık</title>
+<meta name="description" content="Updated Fotoğrafçılık — pozlama, kompozisyon, ekipman rehberi, canlı pratik simülatörleri ve deneysel fotoğraf değerlendirme sistemi.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap header-row">
+    <div class="brand" onclick="goPage('home')">
+      <span class="logo">UPDATED</span>
+      <span class="chip">FOTOĞRAFÇILIK</span>
+    </div>
+    <nav class="primary" id="navLinks">
+      <button data-page="home" onclick="goPage('home')" class="active">Ana Sayfa</button>
+      <button data-page="temel" onclick="goPage('temel')">Temel Bilgiler</button>
+      <button data-page="ekipman" onclick="goPage('ekipman')">Ekipman</button>
+      <button data-page="pratik" onclick="goPage('pratik')">Pratik</button>
+      <button data-page="rating" onclick="goPage('rating')">Değerlendir</button>
+      <button data-page="yolculuk" onclick="goPage('yolculuk')">Fotoğraf Yolculuğum</button>
+    </nav>
+    <div class="header-tools">
+      <div class="streak-pill" id="streakPill">🔥 0 gün</div>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Görünümü değiştir" aria-label="Açık/koyu tema">
+        <svg id="themeIconSun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg id="themeIconMoon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="avatar-btn" onclick="goPage('yolculuk')" title="Fotoğraf Yolculuğum">F</button>
+      <button class="navburger" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HOME ============ -->
+<div class="page active" id="page-home">
+  <section class="block" style="padding-top:44px;">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div class="story-card feature" id="heroCard" onclick="goHeroSlide()">
+          <div class="story-photo">
+            <span class="chip story-chip" id="heroChip" style="background:var(--c-temel);">TEMEL BİLGİLER</span>
+            <img id="heroImg" alt="Updated Fotoğrafçılık">
+            <div class="hero-dots" id="heroDots"></div>
+          </div>
+          <h3 id="heroTitle">Işığı okumayı, anı yakalamayı öğren</h3>
+          <p id="heroDesc">Diyaframdan kompozisyona, dronlardan yapay zekâ destekli fotoğraf puanlamasına kadar — fotoğrafçılığın temellerini adım adım öğren, pratik yap, geri bildirim al.</p>
+          <div class="story-meta" id="heroMeta"><span>12 DERS</span><span>10 KRİTERLİ PUANLAMA</span><span>ÜCRETSİZ</span></div>
+        </div>
+        <div class="hero-side">
+          <div class="story-card" onclick="goPage('pratik')">
+            <div class="story-photo"><img id="heroSideImg1" alt="Pozlama simülasyonu için örnek fotoğraf"></div>
+            <div class="story-body">
+              <span class="chip story-chip" style="background:var(--c-pratik);">PRATİK</span>
+              <h3>Pozlama, DOF ve Uzun Pozlama — canlı dene</h3>
+              <div class="story-meta"><span>Gerçek zamanlı canvas motoru</span></div>
+            </div>
+          </div>
+          <div class="story-card" onclick="goPage('rating')">
+            <div class="story-photo"><img id="heroSideImg2" alt="Fotoğraf değerlendirme sistemi için örnek fotoğraf"></div>
+            <div class="story-body">
+              <span class="chip story-chip" style="background:var(--c-rating);">DENEYSEL</span>
+              <h3>Fotoğrafını yükle, 10 kritere göre puan al</h3>
+              <div class="story-meta"><span>10 üzerinden puanlama</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" style="padding-top:0;">
+    <div class="wrap">
+      <div class="section-head">
+        <div><span class="tag">SIRALAMA</span><h2>Güncel Puanlamalar</h2></div>
+        <button class="more" onclick="goPage('yolculuk'); switchYolculukTab('siralama');">Tümünü Gör →</button>
+      </div>
+      <div class="score-list" id="homeScoreList"></div>
+    </div>
+  </section>
+
+  <section class="block" style="padding-top:0;">
+    <div class="wrap">
+      <div class="section-head">
+        <div><span class="tag">DERSLER</span><h2>Öne Çıkan Dersler</h2></div>
+        <button class="more" onclick="goPage('temel')">Tüm Dersler →</button>
+      </div>
+      <div class="review-grid" id="homeLessonGrid"></div>
+    </div>
+  </section>
+
+  <section class="block" style="padding-top:0;">
+    <div class="wrap">
+      <div class="section-head"><div><span class="tag">EKİPMAN REHBERİ</span><h2>Kategoriler</h2></div></div>
+      <div class="cat-rail">
+        <div class="cat-pill" onclick="goPage('ekipman'); switchEqTab('kamera');"><div class="dot" style="background:var(--c-kamera);"></div><span class="label">Kameralar</span><span class="count">5</span></div>
+        <div class="cat-pill" onclick="goPage('ekipman'); switchEqTab('lens');"><div class="dot" style="background:var(--c-lens);"></div><span class="label">Lensler</span><span class="count">6</span></div>
+        <div class="cat-pill" onclick="goPage('ekipman'); switchEqTab('drone');"><div class="dot" style="background:var(--c-dron);"></div><span class="label">Dronlar</span><span class="count">3</span></div>
+        <div class="cat-pill" onclick="goPage('pratik')"><div class="dot" style="background:var(--c-pratik);"></div><span class="label">Pratik Simülatörler</span><span class="count">2</span></div>
+        <div class="cat-pill" onclick="goPage('rating')"><div class="dot" style="background:var(--c-rating);"></div><span class="label">Fotoğraf Değerlendirme</span><span class="count">10 kriter</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" style="padding-top:0;">
+    <div class="wrap">
+      <div class="section-head"><div><span class="tag">NEDEN UPDATED</span><h2>Deneysel ve eğitici bir yaklaşım</h2></div></div>
+      <div class="feat-row">
+        <div class="feat-item"><h4>Temelden başla</h4><p>Ezbersiz, mantığını kavrayarak öğren.</p></div>
+        <div class="feat-item"><h4>Canlı simülatörler</h4><p>Ayarları değiştir, sonucu anında gör.</p></div>
+        <div class="feat-item"><h4>Şeffaf puanlama</h4><p>10 kriterle nesnel geri bildirim al.</p></div>
+        <div class="feat-item"><h4>İlerlemeni takip et</h4><p>Seri, XP ve tamamlanan dersler.</p></div>
+        <div class="feat-item"><h4>Topluluk</h4><p>Sıralamada yerini gör, birlikte gelişin.</p></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ TEMEL BİLGİLER ============ -->
+<div class="page" id="page-temel">
+  <div class="wrap" style="padding-top:44px;">
+    <div class="section-head">
+      <div><span class="tag">TEMEL BİLGİLER</span><h2>Dersler</h2></div>
+      <p style="margin:0; font-size:13px; color:var(--text-soft); max-width:26ch; text-align:right;">Her dersin sonunda kısa bir soru var. Doğru cevap XP kazandırır.</p>
+    </div>
+    <div class="tabs" id="levelTabs">
+      <button class="tab-btn active" data-level="all" onclick="switchLevelTab('all')">Tümü</button>
+      <button class="tab-btn" data-level="Başlangıç" onclick="switchLevelTab('Başlangıç')">Başlangıç</button>
+      <button class="tab-btn" data-level="Orta" onclick="switchLevelTab('Orta')">Orta</button>
+      <button class="tab-btn" data-level="İleri" onclick="switchLevelTab('İleri')">İleri</button>
+    </div>
+    <div class="lesson-list" id="lessonList"></div>
+    <div id="lessonDetailArea"></div>
+    <div style="margin-top:28px; text-align:center;">
+      <button class="btn ghost small" onclick="goPage('yolculuk'); switchYolculukTab('sozluk');">Terimleri bilmiyor musun? Sözlüğe bak →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ EKİPMAN ============ -->
+<div class="page" id="page-ekipman">
+  <div class="wrap" style="padding-top:44px;">
+    <div class="section-head"><div><span class="tag">EKİPMAN REHBERİ</span><h2>Kameralar, lensler ve dronlar</h2></div></div>
+    <div class="tabs" id="eqTabs">
+      <button class="tab-btn active" data-tab="kamera" onclick="switchEqTab('kamera')">Kameralar</button>
+      <button class="tab-btn" data-tab="lens" onclick="switchEqTab('lens')">Lensler</button>
+      <button class="tab-btn" data-tab="drone" onclick="switchEqTab('drone')">Dronlar</button>
+      <button class="tab-btn" data-tab="aksesuar" onclick="switchEqTab('aksesuar')">Aksesuarlar</button>
+    </div>
+    <div class="eq-grid" id="eqGrid"></div>
+
+    <div style="margin-top:48px;">
+      <div class="section-head"><div><span class="tag">KÜÇÜK REHBER</span><h2>Hangi ekipman sana uygun?</h2></div></div>
+      <div class="eq-card" style="--eq-color:var(--c-pratik);">
+        <p style="margin-bottom:16px;">Ne çekmeyi en çok seviyorsun?</p>
+        <div class="quiz-opts" id="wizardOpts">
+          <button class="quiz-opt" onclick="wizardAnswer('seyahat')">Seyahat ve manzara</button>
+          <button class="quiz-opt" onclick="wizardAnswer('portre')">Portre ve insan</button>
+          <button class="quiz-opt" onclick="wizardAnswer('vlog')">Vlog ve sosyal medya içeriği</button>
+          <button class="quiz-opt" onclick="wizardAnswer('havadan')">Havadan görüntü</button>
+        </div>
+        <div id="wizardResult" style="margin-top:16px; font-size:13.5px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PRATİK ============ -->
+<div class="page" id="page-pratik">
+  <div class="wrap" style="padding-top:44px;">
+    <div class="section-head"><div><span class="tag">PRATİK · DENEYSEL</span><h2>Pozlama ve Alan Derinliği Simülatörü</h2></div></div>
+    <div class="sim">
+      <div class="sim-preview" id="simPreview">
+        <canvas id="simCanvas" width="480" height="360"></canvas>
+        <div class="readout" id="simReadout">ISO 400 · f/4 · 1/125s</div>
+      </div>
+      <div>
+        <div class="slider-row">
+          <label>ISO <b id="isoVal">400</b></label>
+          <input type="range" id="isoSlider" min="0" max="6" value="2" oninput="updateSim()">
+          <div class="sim-note">Yüksek ISO daha fazla ışık hassasiyeti sağlar ama tanecik (gürültü) oluşturur.</div>
+        </div>
+        <div class="slider-row">
+          <label>Diyafram <b id="apertureVal">f/4</b></label>
+          <input type="range" id="apertureSlider" min="0" max="7" value="3" oninput="updateSim()">
+          <div class="sim-note">Küçük f-değeri (f/1.4) daha fazla ışık alır ve arka planı gerçek zamanlı bulanıklaştırır (sığ alan derinliği). Önündeki figür her zaman net kalır.</div>
+        </div>
+        <div class="slider-row">
+          <label>Enstantane <b id="shutterVal">1/125s</b></label>
+          <input type="range" id="shutterSlider" min="0" max="7" value="3" oninput="updateSim()">
+          <div class="sim-note">Yavaş enstantane, hareket eden ışığın arkasında gerçek zamanlı bir iz bırakır; hızlı enstantane ışığı bir nokta hâlinde dondurur.</div>
+        </div>
+        <div class="sim-verdict" id="simVerdict">Dengeli bir pozlama elde ettin.</div>
+      </div>
+    </div>
+    <p class="photo-credit">Arka plan fotoğrafı: Fatih Turan / Pexels — bulanıklık, ışık izi ve tanecik gerçek zamanlı canvas motoruyla hesaplanır.</p>
+
+    <div style="padding:44px 0 28px;">
+      <div class="section-head"><div><span class="tag">PRATİK · DENEYSEL</span><h2>Uzun Pozlama Modülü</h2></div></div>
+      <p style="color:var(--text-soft); max-width:64ch; margin-bottom:20px;">Gece fotoğrafçılığı dersinde geçen mantığı burada canlı dene: enstantaneyi saniyelere kadar uzattıkça hareketli ışıklar gerçek zamanlı olarak iz bırakmaya başlar.</p>
+      <div class="sim">
+        <div class="sim-preview" id="longPreview">
+          <canvas id="longCanvas" width="480" height="270"></canvas>
+          <div class="readout" id="longReadout">1/125s</div>
+        </div>
+        <div>
+          <div class="slider-row">
+            <label>Enstantane Süresi <b id="longVal">1/125s</b></label>
+            <input type="range" id="longSlider" min="0" max="11" value="3" oninput="updateLong()">
+            <div class="sim-note">Sürgüyü sağa kaydırdıkça enstantane saniyelere uzar; ışıklar tek bir çizgiye dönüşür ve daha fazla ışık toplandığı için kare parlar.</div>
+          </div>
+          <div class="sim-verdict" id="longVerdict">Kısa enstantane — ışıklar nokta hâlinde donuyor.</div>
+        </div>
+      </div>
+      <p class="photo-credit">Not: Gerçek çekimde bu kadar uzun bir enstantanede aşırı pozlamayı önlemek için diyaframı kısman ve/veya bir ND filtre kullanman gerekir.</p>
+    </div>
+
+    <div style="padding:0 0 28px;">
+      <div class="section-head"><div><span class="tag">PRATİK</span><h2>Beyaz Dengesi Simülatörü</h2></div></div>
+      <div class="sim">
+        <div class="sim-preview" id="wbPreview">
+          <canvas id="wbCanvas" width="480" height="360"></canvas>
+          <div class="readout" id="wbReadout">4700K · Gün Işığı</div>
+        </div>
+        <div>
+          <div class="slider-row">
+            <label>Renk Sıcaklığı (Kelvin) <b id="wbVal">4700K</b></label>
+            <input type="range" id="wbSlider" min="2000" max="9000" step="100" value="4700" oninput="updateWB()">
+            <div class="sim-note">Düşük Kelvin (Tungsten ayarı) görüntüyü mavileştirir; yüksek Kelvin (Gölge ayarı) görüntüyü turunculaştırır — gerçek kamera beyaz dengesi mantığıyla aynı, kara cisim ışıma renk yaklaşıklığıyla hesaplanır.</div>
+          </div>
+          <div class="sim-verdict" id="wbVerdict">Gün ışığına yakın, dengeli bir renk sıcaklığı.</div>
+        </div>
+      </div>
+      <p class="photo-credit">Örnek fotoğraf: Fatih Turan / Pexels</p>
+    </div>
+
+    <div style="padding:0 0 28px;">
+      <div class="section-head"><div><span class="tag">PRATİK</span><h2>Kompozisyonu Tanı</h2></div></div>
+      <div id="compPractice"></div>
+      <p class="photo-credit">Örnek fotoğraflar: Fatih Turan / Pexels</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ RATING ============ -->
+<div class="page" id="page-rating">
+  <div class="wrap" style="padding-top:44px;">
+    <div class="section-head"><div><span class="tag">DENEYSEL · GÖRSEL ANALİZ</span><h2>Fotoğrafını Değerlendir</h2></div></div>
+    <p style="color:var(--text-soft); max-width:64ch;">Bir fotoğraf yükle, sistemimiz kompozisyon ve ışık üzerine 10 farklı kritere göre analiz yapıp sana 10 üzerinden bir puan versin. Puanın sıralamaya eklenir.</p>
+
+    <label class="upload-zone" id="uploadZone">
+      <input type="file" id="fileInput" accept="image/*" onchange="handleFile(event)">
+      <div id="uploadZoneText">
+        <h3 style="margin-bottom:6px; font-family:var(--font-display); font-weight:700; font-size:18px;">Fotoğrafı buraya yükle</h3>
+        <p style="margin:0 auto; color:var(--text-soft); font-size:13px;">veya tıklayıp dosya seç · JPG / PNG</p>
+      </div>
+      <img id="previewImg" style="display:none; max-width:100%; max-height:320px; margin-top:10px; border-radius:var(--radius);">
+    </label>
+    <div class="sample-row" id="sampleRow"></div>
+
+    <div class="criteria-preview" id="criteriaPreview"></div>
+
+    <div class="rating-result" id="ratingResult" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- ============ FOTOĞRAF YOLCULUĞUM ============ -->
+<div class="page" id="page-yolculuk">
+  <div class="wrap" style="padding-top:44px;">
+    <div class="section-head"><div><span class="tag">FOTOĞRAF YOLCULUĞUM</span><h2>İlerlemen, sıralaman ve ödüllerin</h2></div></div>
+    <div class="tabs" id="yolculukTabs">
+      <button class="tab-btn active" data-yt="ilerleme" onclick="switchYolculukTab('ilerleme')">İlerlemem</button>
+      <button class="tab-btn" data-yt="siralama" onclick="switchYolculukTab('siralama')">Sıralama</button>
+      <button class="tab-btn" data-yt="oduller" onclick="switchYolculukTab('oduller')">Ödüller</button>
+      <button class="tab-btn" data-yt="sozluk" onclick="switchYolculukTab('sozluk')">Sözlük &amp; SSS</button>
+    </div>
+
+    <div class="yt-panel active" id="yt-ilerleme">
+      <div class="prog-grid">
+        <div class="prog-card"><div class="big" id="progStreak">0</div><div class="lab">GÜNLÜK SERİ</div></div>
+        <div class="prog-card"><div class="big" id="progXP">0</div><div class="lab">TOPLAM XP</div></div>
+        <div class="prog-card"><div class="big" id="progLessons">0/12</div><div class="lab">TAMAMLANAN DERS</div></div>
+      </div>
+      <h3 style="font-size:16px; margin-bottom:6px;">Kullanıcı adın</h3>
+      <p style="font-size:13px; color:var(--text-soft);">Giriş yapmana gerek yok — ama bir kullanıcı adı seçersen ilerlemen ve sıralamadaki puanların bu isimle saklanır.</p>
+      <div class="name-field" style="max-width:420px;">
+        <input type="text" id="usernameInput" placeholder="ör. isikustasi34" oninput="saveUsername()">
+      </div>
+      <div style="margin-top:32px;">
+        <h3 style="font-size:16px; margin-bottom:10px;">Rozetler</h3>
+        <div class="review-grid" id="badgeGrid"></div>
+      </div>
+      <div style="margin-top:32px;">
+        <h3 style="font-size:16px; margin-bottom:10px;">Tamamlanan Dersler</h3>
+        <div id="progLessonList" style="font-size:13.5px; color:var(--text-soft);"></div>
+      </div>
+    </div>
+
+    <div class="yt-panel" id="yt-siralama">
+      <p style="color:var(--text-soft); max-width:64ch;">Fotoğraf değerlendirme sisteminden en yüksek puanı alan kullanıcılar burada listelenir. İleride en üst sıradakilere özel dersler, fotoğraf gezileri ve ekipman ödülleri verilecek.</p>
+      <table class="board">
+        <thead><tr><th>#</th><th style="text-align:right;">Kullanıcı</th><th style="text-align:right;">En Yüksek Puan</th><th style="text-align:right;">Tarih</th></tr></thead>
+        <tbody id="boardBody"></tbody>
+      </table>
+    </div>
+
+    <div class="yt-panel" id="yt-oduller">
+      <div class="reward-list">
+        <div class="reward-row"><div><h4>Konuya Özel Dersler</h4><p>Portre, manzara, sokak fotoğrafçılığı ve drone çekimi gibi konularda derinlemesine ders serileri.</p></div><span class="soon-badge">YAKINDA</span></div>
+        <div class="reward-row"><div><h4>Birebir Koçluk</h4><p>Deneyimli fotoğrafçılarla birebir görüşüp kendi fotoğraflarını konuşabileceğin seanslar.</p></div><span class="soon-badge">YAKINDA</span></div>
+        <div class="reward-row"><div><h4>Ustalık Programı (Masterclass)</h4><p>Profesyonel fotoğrafçılardan uzun soluklu, sertifikalı eğitim programı.</p></div><span class="soon-badge">YAKINDA</span></div>
+        <div class="reward-row"><div><h4>Liderlik Tablosu Ödülleri</h4><p>Sıralamada üst sıralara çıkanlara özel dersler, fotoğraf gezileri, ekipman ve nakit ödüller.</p></div><span class="soon-badge">YAKINDA</span></div>
+      </div>
+      <p style="margin-top:24px; font-size:13px; color:var(--text-soft);">Üyelik ve fiyatlandırma modeli henüz belirlenmedi — şu an her şey ücretsiz ve deneysel.</p>
+    </div>
+
+    <div class="yt-panel" id="yt-sozluk">
+      <div class="lesson-list" id="glossaryList"></div>
+      <div style="margin-top:36px;">
+        <div class="section-head"><div><span class="tag">SIKÇA SORULANLAR</span><h2>SSS</h2></div></div>
+        <div class="reward-list" id="faqList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <span class="logo">UPDATED</span>
+        <p>Fotoğrafçılık bölümü — deneysel eğitim projesi. Işığı anla, anı yakala.</p>
+      </div>
+      <div class="foot-col">
+        <h5>İçerikler</h5>
+        <ul>
+          <li onclick="goPage('temel')">Temel Bilgiler</li>
+          <li onclick="goPage('ekipman')">Ekipman Rehberi</li>
+          <li onclick="goPage('pratik')">Pratik Simülatörler</li>
+          <li onclick="goPage('rating')">Fotoğraf Değerlendirme</li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h5>Topluluk</h5>
+        <ul>
+          <li onclick="goPage('yolculuk'); switchYolculukTab('siralama');">Sıralama</li>
+          <li onclick="goPage('yolculuk'); switchYolculukTab('ilerleme');">İlerlemem</li>
+          <li onclick="goPage('yolculuk'); switchYolculukTab('sozluk');">Sözlük &amp; SSS</li>
+          <li onclick="goPage('yolculuk'); switchYolculukTab('oduller');">Ödüller</li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h5>Kurumsal</h5>
+        <ul><li>Hakkımızda</li><li>İletişim</li><li>Gizlilik politikası</li></ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 UPDATED · FOTOĞRAFÇILIK</span>
+      <span>Örnek fotoğraflar: Fatih Turan / Pexels</span>
+      <span>updated.com.tr</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
