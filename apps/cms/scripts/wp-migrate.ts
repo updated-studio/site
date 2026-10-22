@@ -143,7 +143,7 @@ async function main() {
       // Aynı adres başka bir yazıda varsa (WordPress'te farklı kategoride aynı kısa ad) sonuna WordPress kimliği eklenir
       let slug = decodeURIComponent(p.slug)
       const esi = DRY ? undefined : (await payload.find({ collection: 'news', where: { and: [{ slug: { equals: slug } }, { wpId: { not_equals: p.id } }] }, limit: 1, depth: 0, draft: true })).docs[0]
-      if (esi) slug = `${slug}-${p.id}`
+      if (esi) slug = `${trSlug(slug, 10)}-${p.id}`
       const common = {
         title: cut(title, 70), spot, cover, author: authorMap.get(p.author), slug,
         body: await body(p.content.rendered, title), publishedAt: p.date_gmt + 'Z', _status: 'published',
@@ -168,7 +168,7 @@ async function main() {
           catch (e: any) {
             // Adres başka bir yazıda kullanılıyorsa sonuna WordPress kimliği eklenip yeniden denenir
             if (!JSON.stringify(e.data?.errors || '').includes('"slug"')) throw e
-            common.slug = `${decodeURIComponent(p.slug)}-${p.id}`
+            common.slug = `${trSlug(decodeURIComponent(p.slug), 10)}-${p.id}` // adres alanı 12 kelimeyle sınırlı; ek kimlik kesilmesin
             return await upsert('news', p.id, { ...c, slug: common.slug })
           }
         }
@@ -210,7 +210,7 @@ async function main() {
         const plain = { root: { type: 'root', format: '', indent: 0, version: 1, direction: 'ltr', children: (paras.length ? paras : [title]).map((t: string) => ({ type: 'paragraph', format: '', indent: 0, version: 1, direction: 'ltr', textFormat: 0, children: [{ type: 'text', text: t, format: 0, style: '', mode: 'normal', detail: 0, version: 1 }] })) } }
         const data = { title, spot: cut(decode(pg.excerpt?.rendered || '').replace(/\s+/g, ' ').trim(), 160) || undefined, slug: yeni, _status: 'published' }
         let ok = false
-        for (const b of [await body(pg.content.rendered, title), plain]) {
+        for (const b of [await body(pg.content.rendered, title), plain] as any[]) {
           try { await payload.create({ collection: 'pages', data: { ...data, body: b }, context: ctx }); ok = true; break }
           catch (e: any) { log.errors.push(`sayfa ${eski}: ${e.message}`) }
         }
