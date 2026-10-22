@@ -17,6 +17,11 @@ def hepsi(path, **q):
         p += 1
     return out
 R = []
+import traceback, sys
+def _hata(t, v, tb):
+    open('rapor/hata.txt', 'w').write(''.join(traceback.format_exception(t, v, tb)) + '\n\nKısmi:\n' + '\n'.join(R))
+    sys.__excepthook__(t, v, tb)
+sys.excepthook = _hata
 # 1) Etiketler
 tags = hepsi('tags', _fields='id,name,slug,count')
 cnt = collections.Counter('0' if t['count'] == 0 else '1' if t['count'] == 1 else '2-4' if t['count'] < 5 else '5-9' if t['count'] < 10 else '10+' for t in tags)
