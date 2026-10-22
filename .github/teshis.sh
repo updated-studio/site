@@ -8,6 +8,9 @@ for p in / /robots.txt /mobil /haberler /marka/og-varsayilan.jpg /index.html; do
     out+="$base$p → $r · $srv · $(head -c 120 /tmp/b | tr -d '\n\r' | sed 's/%/%25/g')%0A"
   done
 done
+h=$(curl -s --max-time 20 "${u/https:/http:}/"); toplam=$(grep -o '/medya/[^"? ]*' <<<"$h" | sort -u | wc -l); ok=0; bad=""
+for m in $(grep -o '/medya/[^"? ]*' <<<"$h" | sort -u | head -15); do c=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "${u/https:/http:}$m"); [ "$c" = 200 ] && ok=$((ok+1)) || bad+="$m=$c "; done
+out+="GÖRSEL: ana sayfada $toplam görsel; ilk 15'ten $ok tanesi 200. Hatalı: ${bad:-yok}%0A"
 opts=(-sS --list-only --max-time 30 --user "$NATRO_FTP_USER:$NATRO_FTP_PASSWORD" -k)
 [ "${NATRO_FTP_PROTOCOL:-ftps}" != "ftp" ] && opts+=(--ssl-reqd)
 d="${NATRO_DIR#./}"; d="${d%/}"
