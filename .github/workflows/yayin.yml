@@ -115,6 +115,9 @@ jobs:
           exclude: |
             **/.git*
             **/.git*/**
+      - name: Teşhis
+        if: always() && steps.ayar.outputs.aktif == '1'
+        run: .github/teshis.sh
       - name: IndexNow
         if: steps.ayar.outputs.aktif == '1' && env.STAGING != '1'
         env:
