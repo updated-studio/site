@@ -35,7 +35,8 @@ export default buildConfig({
   admin: {
     user: Users.slug,
     importMap: { baseDir: path.resolve(dirname) },
-    meta: { titleSuffix: ' · UPDATED Panel' },
+    meta: { titleSuffix: ' · UPDATED Panel', icons: [{ url: '/favicon.svg', type: 'image/svg+xml' }] },
+    components: { graphics: { Logo: '/components/Logo#Logo', Icon: '/components/Logo#Icon' } },
     dateFormat: 'dd.MM.yyyy HH.mm',
   },
   // Panel dili Türkçe (isteyen kullanıcı hesap ayarından İngilizceye geçebilir)
