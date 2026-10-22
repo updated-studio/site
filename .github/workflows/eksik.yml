@@ -1,0 +1,15 @@
+name: Eski site karşılaştırma
+# deploy/kontrol/ değişince çalışır: WordPress'te olup yeni sitede olmayanları listeler. Hiçbir şeyi değiştirmez.
+on:
+  push: { paths: ['deploy/kontrol/**'] }
+  workflow_dispatch:
+jobs:
+  kontrol:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 deploy/kontrol/eksik.py
+        env:
+          WP_URL: ${{ vars.WP_URL || 'https://updated.com.tr' }}
+          WP_USER: ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
