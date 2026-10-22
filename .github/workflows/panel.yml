@@ -35,8 +35,8 @@ jobs:
       - name: Ayar kontrolü
         id: ayar
         run: |
-          # Veritabanı adresi: DATABASE_URI girildiyse o; yoksa proje kimliği + bölge + şifreden (Session pooler) kurulur.
-          if [ -z "$DATABASE_URI" ] && [ -n "$DB_PASS" ]; then
+          # Veritabanı adresi: SUPABASE_DB_PASSWORD varsa proje kimliği + bölge + şifreden (Session pooler) kurulur; yoksa DATABASE_URI.
+          if [ -n "$DB_PASS" ]; then  # şifre girildiyse her zaman bundan kurulur (eski DATABASE_URI'yi geçersiz kılar)
             q=$(python3 -c 'import os,urllib.parse as u;print(u.quote(os.environ["DB_PASS"],safe=""))')
             DATABASE_URI="postgresql://postgres.$REF:$q@aws-0-$REGION.pooler.supabase.com:5432/postgres"
             echo "::add-mask::$q"; echo "::add-mask::$DATABASE_URI"; echo "DATABASE_URI=$DATABASE_URI" >> "$GITHUB_ENV"
