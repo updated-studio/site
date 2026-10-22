@@ -1,1 +1,1 @@
-{ "dry": true, "limit": 50, "deneme": 4, "reviewCategory": "", "scoreMeta": "", "not": "Bu dosya değişince WordPress taşıması panel sunucusunda çalışır. Önce dry=true (yalnız sayar), sonra dry=false." }
+{ "dry": false, "limit": 0, "reviewCategory": "", "scoreMeta": "", "deneme": 5, "not": "Bu dosya değişince WordPress taşıması panel sunucusunda çalışır. dry=true yalnız sayar. WordPress'te puan alanı ve ayrı inceleme kategorisi yok; tüm yazılar haber olarak gelir." }
