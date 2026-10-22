@@ -3,7 +3,7 @@
 # Kullanım: .github/calistir.sh "Başlık" komut argümanlar…
 title="$1"; shift
 set -o pipefail
-log=$(mktemp)
+log=$(mktemp /tmp/calistir-XXXX.log)
 "$@" 2>&1 | tee "$log"
 code=${PIPESTATUS[0]}
 if [ "$code" -ne 0 ]; then

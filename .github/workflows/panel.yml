@@ -93,6 +93,8 @@ jobs:
       - name: Ortam dosyası
         if: steps.ayar.outputs.ok == '1'
         run: |
+          # Adres burada da açıkça şifreden kurulur (iş düzeyindeki eski DATABASE_URI secret'ı karışmasın)
+          if [ -n "$DB_PASS" ]; then q=$(python3 -c 'import os,urllib.parse as u;print(u.quote(os.environ["DB_PASS"],safe=""))'); echo "::add-mask::$q"; DATABASE_URI="postgresql://postgres.$REF:$q@aws-0-$REGION.pooler.supabase.com:5432/postgres"; fi
           {
             echo "DATABASE_URI=$DATABASE_URI"
             echo "PAYLOAD_PUBLIC_SERVER_URL=https://$DOMAIN"
@@ -106,7 +108,7 @@ jobs:
               echo "MEDIA_PUBLIC_URL=https://$REF.supabase.co/storage/v1/object/public/media"
             fi
             echo "GITHUB_REPO=${{ github.repository }}"
-            [ -n "$DISPATCH" ] && echo "GITHUB_DISPATCH_TOKEN=$DISPATCH"
+            if [ -n "$DISPATCH" ]; then echo "GITHUB_DISPATCH_TOKEN=$DISPATCH"; fi
           } > /tmp/panel.env
           scp -q /tmp/panel.env deploy/panel/kur.sh deploy/panel/guncelle.sh panel:/tmp/
           ssh panel 'sudo install -m 640 /tmp/panel.env /etc/updated-panel.env && rm /tmp/panel.env'
@@ -131,3 +133,8 @@ jobs:
           s=$(curl -sk -o /dev/null -w '%{http_code}' --max-time 20 "https://$DOMAIN/admin" || true)
           l=$(ssh panel 'curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3001/admin')
           echo "::notice title=Panel::sunucu içi /admin → $l · https://$DOMAIN/admin → $s (DNS ve sertifika hazırsa 200)"
+      - name: Hata ayrıntısı
+        if: failure()
+        run: |
+          for f in /tmp/calistir-*.log; do [ -f "$f" ] || continue; node -e "const t=require('fs').readFileSync(process.argv[1],'utf8').slice(-6000);console.log('::error title=Son adım çıktısı::'+t.replace(/%/g,'%25').replace(/\r/g,'%0D').replace(/\n/g,'%0A'))" "$f"; done
+          echo "::error title=Hata ayrıntısı::başarısız adım sonrası rapor (yukarıdaki notlara bakın)"
