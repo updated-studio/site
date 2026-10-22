@@ -5,10 +5,10 @@
 set -euo pipefail
 DOMAIN="${PANEL_DOMAIN:-panel.updated.com.tr}"
 APP=/opt/updated
-export DEBIAN_FRONTEND=noninteractive
+export DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a
 
 if ! command -v node >/dev/null || ! node -v | grep -q '^v22'; then
-  apt-get update -qq
+  apt-get update -qq >/dev/null
   apt-get install -y -qq ca-certificates curl gnupg git
   curl -fsSL https://deb.nodesource.com/setup_22.x | bash - >/dev/null
   apt-get install -y -qq nodejs
@@ -22,8 +22,9 @@ if ! command -v caddy >/dev/null; then
   apt-get update -qq && apt-get install -y -qq caddy
 fi
 
-# Oracle Ubuntu imajı 80/443'ü iptables ile kapalı getirir.
-for p in 80 443; do iptables -C INPUT -p tcp --dport $p -j ACCEPT 2>/dev/null || iptables -I INPUT 5 -p tcp --dport $p -j ACCEPT; done
+# Bazı imajlar (Oracle) 80/443'ü iptables ile kapalı getirir; ufw açıksa ona da izin verilir.
+command -v ufw >/dev/null && ufw status | grep -q active && { ufw allow 22/tcp; ufw allow 80/tcp; ufw allow 443/tcp; } >/dev/null || true
+for p in 80 443; do iptables -C INPUT -p tcp --dport $p -j ACCEPT 2>/dev/null || iptables -I INPUT -p tcp --dport $p -j ACCEPT; done
 if command -v netfilter-persistent >/dev/null; then netfilter-persistent save >/dev/null 2>&1 || true; else apt-get install -y -qq iptables-persistent >/dev/null 2>&1 && netfilter-persistent save >/dev/null 2>&1 || true; fi
 
 id panel >/dev/null 2>&1 || useradd --system --create-home --home-dir /home/panel --shell /usr/sbin/nologin panel
