@@ -22,9 +22,7 @@ on:
     - cron: '0 1 * * *'
 
 # Peş peşe yayınlar: çalışan derleme biter, bekleyen tek derleme en son hâli alır.
-concurrency:
-  group: yayin
-  cancel-in-progress: false
+# Her hedefin kendi sırası var: GitHub Pages takılırsa Natro yayını beklemez.
 
 permissions:
   contents: write
@@ -33,6 +31,7 @@ permissions:
 
 jobs:
   hazirlik:
+    concurrency: { group: yayin-pages, cancel-in-progress: true }
     if: vars.HAZIRLIK_PAGES == '1' && (github.event_name != 'workflow_dispatch' || inputs.hedef != 'natro')
     runs-on: ubuntu-latest
     environment: { name: github-pages, url: '${{ steps.deploy.outputs.page_url }}' }
@@ -70,6 +69,7 @@ jobs:
         uses: actions/deploy-pages@v4
 
   natro:
+    concurrency: { group: yayin-natro, cancel-in-progress: false }
     # Ayarlar Variables ya da Secrets olarak girilebilir (ikisi de okunur).
     if: github.event_name != 'workflow_dispatch' || inputs.hedef != 'hazirlik'
     runs-on: ubuntu-latest
