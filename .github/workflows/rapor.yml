@@ -13,19 +13,28 @@ jobs:
       WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
-      - run: mkdir -p rapor && python3 deploy/rapor/rapor.py
+      - if: ${{ hashFiles('deploy/rapor/sadece-kaynak') == '' }}
+        run: mkdir -p rapor && python3 deploy/rapor/rapor.py
         continue-on-error: true
       - if: ${{ hashFiles('deploy/rapor/foto-istek') != '' }}
         run: |
           cd deploy/rapor && npm init -y >/dev/null && npm i playwright@1.48.2 >/dev/null && npx playwright install --with-deps chromium >/dev/null
           cd ../.. && node deploy/rapor/foto.mjs
         continue-on-error: true
+      - name: Fotoğrafçılık kaynak dosyaları
+        if: ${{ hashFiles('deploy/rapor/kaynak-istek') != '' }}
+        continue-on-error: true
+        run: |
+          mkdir -p rapor/fotografcilik-site && cd rapor/fotografcilik-site
+          wget -q -e robots=off -r -l 6 -np -p -nH -H -D updated.com.tr,www.updated.com.tr --restrict-file-names=nocontrol -U "Mozilla/5.0 updated-rapor" "$WP_URL/fotografcilik/" || true
+          for f in $(grep -rhoE '["'"'"'(]((\./)?assets/[^"'"'"')?#]+)' . | sed -E 's/^["'"'"'(](\.\/)?//' | sort -u); do [ -f "fotografcilik/$f" ] || wget -q -e robots=off -x -nH -U "Mozilla/5.0" "$WP_URL/fotografcilik/$f" || true; done
+          find . -type f | sed 's/^/::notice title=kaynak::/' | head -200
       - name: Sonuçları yaz
         if: always()
         run: |
           ls -la rapor | sed 's/^/::notice title=dosyalar::/'
           [ -f rapor/hata.txt ] && echo "::error title=HATA::$(sed 's/%/%25/g' rapor/hata.txt | tail -c 6000 | sed ':a;N;$!ba;s/\n/%0A/g')"
-          [ -f rapor/rapor.txt ] && echo "::notice title=RAPOR::$(sed 's/%/%25/g' rapor/rapor.txt | head -c 30000 | sed ':a;N;$!ba;s/\n/%0A/g')"
+          [ -f deploy/rapor/sadece-kaynak ] || [ -f rapor/rapor.txt ] && echo "::notice title=RAPOR::$(sed 's/%/%25/g' rapor/rapor.txt | head -c 30000 | sed ':a;N;$!ba;s/\n/%0A/g')"
           cp -r rapor /tmp/rapor
           git config user.name "updated-bot"; git config user.email "bot@updated.com.tr"
           git checkout -q --orphan raporlar && git rm -rfq --cached . && git clean -fdxq -e rapor

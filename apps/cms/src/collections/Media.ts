@@ -4,7 +4,8 @@ import { LIMIT } from '../lib/kit'
 
 /**
  * Görseller: asıl dosya saklanır (Supabase Storage), site yalnız WebP türevleri kullanır.
- * Boyutlar 16:9 (kit §5). Her türev ≤200 KB hedefli kalitede üretilir; 1600 px kapak tipik olarak 90–160 KB.
+ * Boyutlar 16:9 (kit §5). Asıl dosya en fazla 2560 px, WebP %88 (arşiv kalitesi); sitede kullanılan türevler WebP %72–78,
+ * gözle fark edilir kayıp olmadan küçük kalır. Her yüklemede kendiliğinden uygulanır.
  * Künye zorunlu (kit §8): "Görsel: Apple" / "Fotoğraf: Ad Soyad / UPDATED" / "Temsili görsel".
  */
 export const Media: CollectionConfig = {
@@ -18,13 +19,13 @@ export const Media: CollectionConfig = {
     crop: true,
     adminThumbnail: 'thumb',
     resizeOptions: { width: 2560, withoutEnlargement: true },
-    formatOptions: { format: 'webp', options: { quality: 82 } },
+    formatOptions: { format: 'webp', options: { quality: 88, effort: 6, smartSubsample: true } },
     imageSizes: [
-      { name: 'thumb', width: 480, height: 270, position: 'centre', formatOptions: { format: 'webp', options: { quality: 70 } } },
-      { name: 'card', width: 800, height: 450, position: 'centre', formatOptions: { format: 'webp', options: { quality: 70 } } },
-      { name: 'hero', width: 1600, height: 900, position: 'centre', formatOptions: { format: 'webp', options: { quality: 68 } } },
-      { name: 'og', width: 1200, height: 630, position: 'centre', formatOptions: { format: 'jpeg', options: { quality: 78 } } },
-      { name: 'reel', width: 540, height: 960, position: 'centre', formatOptions: { format: 'webp', options: { quality: 70 } } },
+      { name: 'thumb', width: 480, height: 270, position: 'centre', formatOptions: { format: 'webp', options: { quality: 72, effort: 6, smartSubsample: true } } },
+      { name: 'card', width: 800, height: 450, position: 'centre', formatOptions: { format: 'webp', options: { quality: 76, effort: 6, smartSubsample: true } } },
+      { name: 'hero', width: 1600, height: 900, position: 'centre', formatOptions: { format: 'webp', options: { quality: 78, effort: 6, smartSubsample: true } } },
+      { name: 'og', width: 1200, height: 630, position: 'centre', formatOptions: { format: 'jpeg', options: { quality: 82, mozjpeg: true } } },
+      { name: 'reel', width: 540, height: 960, position: 'centre', formatOptions: { format: 'webp', options: { quality: 76, effort: 6, smartSubsample: true } } },
     ],
   },
   fields: [
