@@ -18,8 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HOST: ${{ secrets.PANEL_SSH_HOST || vars.PANEL_SSH_HOST }}
-      USR: ${{ secrets.PANEL_SSH_USER || vars.PANEL_SSH_USER || 'ubuntu' }}
+      USR: ${{ secrets.PANEL_SSH_USER || vars.PANEL_SSH_USER || 'root' }}
       KEY: ${{ secrets.PANEL_SSH_KEY }}
+      PASS: ${{ secrets.PANEL_SSH_PASSWORD }}
       DOMAIN: ${{ vars.PANEL_DOMAIN || 'panel.updated.com.tr' }}
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       REF: ${{ vars.SUPABASE_REF || secrets.SUPABASE_REF }}
@@ -31,7 +32,7 @@ jobs:
       - name: Ayar kontrolü
         id: ayar
         run: |
-          eksik=""; for k in HOST KEY DATABASE_URI; do [ -n "${!k}" ] || eksik="$eksik $k"; done
+          eksik=""; for k in HOST DATABASE_URI; do [ -n "${!k}" ] || eksik="$eksik $k"; done; [ -n "$KEY$PASS" ] || eksik="$eksik PANEL_SSH_KEY/PANEL_SSH_PASSWORD"
           if [ -n "$eksik" ]; then echo "::warning title=Panel::Eksik ayar:$eksik — kurulum atlandı."; echo "ok=0" >> "$GITHUB_OUTPUT"; exit 0; fi
           echo "ok=1" >> "$GITHUB_OUTPUT"
       - if: steps.ayar.outputs.ok == '1'
@@ -39,7 +40,14 @@ jobs:
       - name: SSH hazırla
         if: steps.ayar.outputs.ok == '1'
         run: |
-          mkdir -p ~/.ssh && printf '%s\n' "$KEY" > ~/.ssh/id && chmod 600 ~/.ssh/id
+          mkdir -p ~/.ssh
+          if [ -n "$KEY" ]; then printf '%s\n' "$KEY" > ~/.ssh/id; else
+            # İlk kurulum root şifresiyle: kalıcı bir anahtar üretilip sunucuya eklenir, sonraki bağlantılar anahtarla.
+            sudo apt-get install -y -qq sshpass >/dev/null; ssh-keygen -q -t ed25519 -N '' -f ~/.ssh/id
+            ssh-keyscan -T 15 "$HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+            SSHPASS="$PASS" sshpass -e ssh-copy-id -i ~/.ssh/id.pub -o StrictHostKeyChecking=accept-new "$USR@$HOST" >/dev/null 2>&1 || { echo "::error title=SSH::Şifreyle girilemedi (IP, kullanıcı ya da şifre yanlış olabilir)"; exit 1; }
+          fi
+          chmod 600 ~/.ssh/id
           ssh-keyscan -T 15 "$HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
           echo "Host panel
             HostName $HOST
