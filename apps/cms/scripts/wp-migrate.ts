@@ -56,7 +56,7 @@ async function main() {
   /* 1) Kategoriler */
   const catMap = new Map<number, { id: any; slug: string }>()
   for await (const c of all('categories', { hide_empty: 1 })) {
-    if (c.slug === 'uncategorized' || c.slug === 'genel') continue
+    if (c.slug === 'uncategorized') continue
     const doc = await upsert('categories', c.id, { name: decode(c.name), slug: c.slug, description: c.description || undefined })
     catMap.set(c.id, { id: doc.id, slug: c.slug }); log.categories++
   }
@@ -140,8 +140,12 @@ async function main() {
       const fm = p._embedded?.['wp:featuredmedia']?.[0]
       const cover = fm?.source_url ? await media(fm.source_url, fm.alt_text || title, fm.caption?.rendered ? decode(fm.caption.rendered).trim() : undefined) : undefined
       const spot = cut(decode(p.excerpt?.rendered || '').replace(/\s+/g, ' ').trim() || title, 160)
+      // Aynı adres başka bir yazıda varsa (WordPress'te farklı kategoride aynı kısa ad) sonuna WordPress kimliği eklenir
+      let slug = decodeURIComponent(p.slug)
+      const esi = DRY ? undefined : (await payload.find({ collection: 'news', where: { and: [{ slug: { equals: slug } }, { wpId: { not_equals: p.id } }] }, limit: 1, depth: 0, draft: true })).docs[0]
+      if (esi) slug = `${slug}-${p.id}`
       const common = {
-        title: cut(title, 70), spot, cover, author: authorMap.get(p.author), slug: decodeURIComponent(p.slug),
+        title: cut(title, 70), spot, cover, author: authorMap.get(p.author), slug,
         body: await body(p.content.rendered, title), publishedAt: p.date_gmt + 'Z', _status: 'published',
         seo: { title: p.yoast_head_json?.title ? cut(p.yoast_head_json.title.replace(/\s*[-|–]\s*UPDATED.*$/i, ''), 60) : undefined, description: p.yoast_head_json?.description ? cut(p.yoast_head_json.description, 160) : undefined },
         workflow: { state: 'yayinda' },
@@ -180,9 +184,37 @@ async function main() {
     } catch (e) { log.errors.push(`yazı ${p.id}: ${(e as Error).message}`) }
   }
 
+  /* 5) Kurumsal sayfalar (WP_PAGES: "eski-slug:yeni-slug,..."). Panelde aynı adreste sayfa varsa üzerine yazılmaz. */
+  const sayfaListesi = (process.env.WP_PAGES ?? 'hakkimizda,iletisim,kullanim-sartlarimiz').split(',').map((x) => x.trim()).filter(Boolean)
+  log.pages = 0
+  for (const item of sayfaListesi) {
+    const [eski, yeni = eski] = item.split(':')
+    try {
+      const { data } = await wp<any[]>('pages', { slug: eski, status: 'publish' })
+      const pg = data[0]; if (!pg) { log.skipped.push(`sayfa yok: ${eski}`); continue }
+      const title = decode(pg.title.rendered).trim()
+      const var_ = DRY ? undefined : (await payload.find({ collection: 'pages', where: { slug: { equals: yeni } }, limit: 1, depth: 0, draft: true })).docs[0] as any
+      if (var_) { log.skipped.push(`sayfa panelde zaten var: ${yeni}`) }
+      else if (!DRY) {
+        const text = new JSDOM(`<body>${pg.content.rendered}</body>`).window.document.body.textContent || ''
+        const paras = text.split(/\n\s*\n|\n/).map((x: string) => x.trim()).filter(Boolean)
+        const plain = { root: { type: 'root', format: '', indent: 0, version: 1, direction: 'ltr', children: (paras.length ? paras : [title]).map((t: string) => ({ type: 'paragraph', format: '', indent: 0, version: 1, direction: 'ltr', textFormat: 0, children: [{ type: 'text', text: t, format: 0, style: '', mode: 'normal', detail: 0, version: 1 }] })) } }
+        const data = { title, spot: cut(decode(pg.excerpt?.rendered || '').replace(/\s+/g, ' ').trim(), 160) || undefined, slug: yeni, _status: 'published' }
+        let ok = false
+        for (const b of [await body(pg.content.rendered, title), plain]) {
+          try { await payload.create({ collection: 'pages', data: { ...data, body: b }, context: ctx }); ok = true; break }
+          catch (e: any) { log.errors.push(`sayfa ${eski}: ${e.message}`) }
+        }
+        if (ok) log.pages++
+      }
+      const old = new URL(pg.link).pathname.replace(/\/$/, '') || '/'
+      if (old !== `/${yeni}`) redirects[old] = `/${yeni}`
+    } catch (e) { log.errors.push(`sayfa ${eski}: ${(e as Error).message}`) }
+  }
+
   if (!DRY) writeFileSync('../web/src/redirects.json', JSON.stringify(redirects, null, 0))
   writeFileSync('scripts/wp-migrate.log.json', JSON.stringify({ ...log, redirects: Object.keys(redirects).length, at: new Date().toISOString(), dry: DRY }, null, 2))
-  console.log(`Kategori ${log.categories} · yazar ${log.authors} · görsel ${log.media} · haber ${log.news} · inceleme ${log.reviews} · atlanan ${log.skipped.length} · hata ${log.errors.length} · yönlendirme ${Object.keys(redirects).length}`)
+  console.log(`Kategori ${log.categories} · yazar ${log.authors} · görsel ${log.media} · haber ${log.news} · inceleme ${log.reviews} · sayfa ${log.pages} · atlanan ${log.skipped.length} · hata ${log.errors.length} · yönlendirme ${Object.keys(redirects).length}`)
   process.exit(0)
 }
 main().catch((e) => { console.error(e); process.exit(1) })

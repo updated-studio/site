@@ -59,7 +59,7 @@ jobs:
           scp -q /tmp/wp.env deploy/wp/calistir.sh panel:/tmp/ && rm /tmp/wp.env
           ssh panel 'sudo install -m 600 -o panel -g panel /tmp/wp.env /opt/updated/wp.env && rm /tmp/wp.env && sudo install -m 755 /tmp/calistir.sh /opt/updated/wp-calistir.sh && sudo -u panel -H bash /opt/updated/wp-calistir.sh' 2>&1 | tee /tmp/tasi.log
           s=${PIPESTATUS[0]}
-          ozet=$(ssh panel 'cat /opt/updated/site/apps/cms/scripts/wp-migrate.log.json 2>/dev/null' | jq -c '{categories,authors,media,news,reviews,gorselsiz,duzMetin,redirects,dry,atlanan:(.skipped|length),atlananlar:(.skipped[:5]),hata:(.errors|length),ilk_hatalar:(.errors[:6])}' 2>/dev/null)
+          ozet=$(ssh panel 'cat /opt/updated/site/apps/cms/scripts/wp-migrate.log.json 2>/dev/null' | jq -c '{categories,authors,media,news,reviews,pages,gorselsiz,duzMetin,redirects,dry,atlanan:(.skipped|length),atlananlar:(.skipped[:5]),hata:(.errors|length),ilk_hatalar:(.errors[:6])}' 2>/dev/null)
           echo "::notice title=Taşıma özeti::${ozet:-özet yok}"; echo "::notice title=Taşıma kaydı::$(tail -c 3500 /tmp/tasi.log | sed 's/%/%25/g' | tr '\n' '\r' | sed 's/\r/%0A/g')"
           [ $s -eq 0 ] || { echo "::error title=Taşıma::$(tail -c 3000 /tmp/tasi.log | sed 's/%/%25/g' | tr '\n' '\r' | sed 's/\r/%0A/g')"; exit 1; }
       - name: Yönlendirmeleri depoya yaz
