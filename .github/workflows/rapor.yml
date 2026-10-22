@@ -28,6 +28,12 @@ jobs:
           mkdir -p rapor/fotografcilik-site && cd rapor/fotografcilik-site
           wget -q -e robots=off -r -l 6 -np -p -nH -H -D updated.com.tr,www.updated.com.tr --restrict-file-names=nocontrol -U "Mozilla/5.0 updated-rapor" "$WP_URL/fotografcilik/" || true
           for f in $(grep -rhoE '["'"'"'(]((\./)?assets/[^"'"'"')?#]+)' . | sed -E 's/^["'"'"'(](\.\/)?//' | sort -u); do [ -f "fotografcilik/$f" ] || wget -q -e robots=off -x -nH -U "Mozilla/5.0" "$WP_URL/fotografcilik/$f" || true; done
+          for f in assets/css/style.css assets/js/app.js assets/js/data.js; do
+            for b in "$WP_URL/fotografcilik" "https://www.updated.com.tr/fotografcilik"; do
+              c=$(curl -sL -A "Mozilla/5.0" -o /tmp/x -w '%{http_code} %{url_effective} %{size_download}' "$b/$f"); echo "::notice title=deneme::$f $c"
+              if [ "${c%% *}" = 200 ]; then mkdir -p "fotografcilik/$(dirname $f)"; cp /tmp/x "fotografcilik/$f"; break; fi
+            done
+          done
           find . -type f | sed 's/^/::notice title=kaynak::/' | head -200
       - name: Sonuçları yaz
         if: always()
