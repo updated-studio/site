@@ -1,0 +1,1 @@
+{ "dry": true, "limit": 50, "reviewCategory": "", "scoreMeta": "", "not": "Bu dosya değişince WordPress taşıması panel sunucusunda çalışır. Önce dry=true (yalnız sayar), sonra dry=false." }
