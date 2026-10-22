@@ -52,6 +52,8 @@ export const triyajImport: Endpoint = {
       spot: cut(body.spot || '', 160),
       category, label: body.label || 'yok', cover, author, products,
       shortAnswer: body.shortAnswer,
+      // Stüdyo'nun etiketleri: sayfa açılmaz, yalnız marka/ürün varlığı olarak (arama motoru ve yapay zekâ için schema "mentions") en fazla 4
+      ...(Array.isArray(body.tags) && body.tags.length ? { seo: { entities: body.tags.map((t: any) => String(t).trim()).filter(Boolean).slice(0, 4) } } : {}),
       body: convertMarkdownToLexical({ editorConfig, markdown: body.markdown }),
       sources: body.sources || [],
       workflow: { state: 'incelemede', ownerUser: owner },
