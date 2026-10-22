@@ -20,6 +20,8 @@ import { Pages } from './collections/Pages'
 import { Site, Home } from './globals'
 import { triyajImport } from './endpoints/triyajImport'
 import { previewEndpoint } from './endpoints/preview'
+import { canliEndpoint } from './endpoints/canli'
+import { okunmaEndpoints, okunmaInit } from './endpoints/okunma'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -47,11 +49,12 @@ export default buildConfig({
   csrf: origins,
   // Zamanlanmış yayın (schedulePublish) için iş kuyruğu dakikada bir çalışır. Panel kalıcı Node sunucusunda çalışmalı.
   jobs: { autoRun: [{ cron: '* * * * *', queue: 'default', limit: 20 }], tasks: [] },
-  endpoints: [triyajImport, previewEndpoint],
+  endpoints: [triyajImport, previewEndpoint, canliEndpoint, ...okunmaEndpoints],
+  onInit: okunmaInit,
   plugins: [
     s3Storage({
       enabled: !!process.env.S3_BUCKET,
-      collections: { media: { prefix: 'media', generateFileURL: ({ filename, prefix }) => `${process.env.MEDIA_PUBLIC_URL}/${prefix}/${filename}` } },
+      collections: { media: { prefix: 'media', disablePayloadAccessControl: true, generateFileURL: ({ filename, prefix }) => `${process.env.MEDIA_PUBLIC_URL}/${prefix}/${filename}` } },
       bucket: process.env.S3_BUCKET || '',
       config: {
         forcePathStyle: true,

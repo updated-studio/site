@@ -24,7 +24,8 @@ const [home, latest, reviews, videos, reels, ads, radar, products, site] = await
 const m = { radar: true, kiyasRobotu: true, altmisSaniye: true, kunyeRafi: true, videolar: true, reels: true, cokOkunan: true, ...home.modules }
 const heroIds = new Set(home.hero.map((h) => h.id))
 const rest = latest.filter((n) => !heroIds.has(n.id))
-const mostRead: News[] = home.mostRead.length ? home.mostRead : latest.slice(0, 5)
+const okunan = await api.getMostRead(5)
+const mostRead: News[] = okunan.length ? okunan : latest.slice(0, 5)
 const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşılaştırmalar', description: site.tagline, path: '/' }
 ---
 <Base meta={meta}>

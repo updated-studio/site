@@ -29,6 +29,29 @@ if (BASE) {
   console.log(`taban yol eklendi: ${BASE}`)
 }
 
+/* 1b) görseller: sayfalarda geçen /medya/… dosyaları Supabase'den indirilir (önbellekte olanlar tekrar indirilmez) */
+const MEDIA = (process.env.MEDIA_PUBLIC_URL || '').replace(/\/$/, '')
+if (MEDIA) {
+  const { mkdirSync, copyFileSync } = await import('node:fs')
+  const { dirname } = await import('node:path')
+  const CACHE = process.env.MEDYA_CACHE || new URL('../.medya-cache/', import.meta.url).pathname
+  const refs = new Set()
+  for (const f of files.filter((f) => /\.(html|xml|json|txt)$/.test(f))) for (const m of readFileSync(f, 'utf8').matchAll(/\/medya\/([^"'\s)<>?#&]+)/g)) refs.add(decodeURIComponent(m[1]))
+  let indirilen = 0, hata = 0
+  const list = [...refs]
+  const work = async (rel) => {
+    const c = join(CACHE, rel), d = join(DIST, 'medya', rel)
+    if (!existsSync(c)) {
+      const r = await fetch(`${MEDIA}/${rel.split('/').map(encodeURIComponent).join('/')}`).catch(() => null)
+      if (!r || !r.ok) { hata++; console.warn(`görsel alınamadı: ${rel} (${r?.status})`); return }
+      mkdirSync(dirname(c), { recursive: true }); writeFileSync(c, Buffer.from(await r.arrayBuffer())); indirilen++
+    }
+    mkdirSync(dirname(d), { recursive: true }); copyFileSync(c, d)
+  }
+  for (let i = 0; i < list.length; i += 8) await Promise.all(list.slice(i, i + 8).map(work))
+  console.log(`görseller: ${list.length} (yeni indirilen ${indirilen}, hata ${hata})`)
+}
+
 /* 2) .htaccess */
 const host = new URL(SITE).host
 // Hazırlıkta (STAGING=1) SSL henüz yoksa site http'den de açılsın diye https zorlaması yok; canlıda var.

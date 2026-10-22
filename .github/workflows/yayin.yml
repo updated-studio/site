@@ -27,7 +27,7 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -40,6 +40,7 @@ jobs:
       SITE_URL: ${{ vars.HAZIRLIK_URL }}
       BASE_PATH: ${{ vars.HAZIRLIK_BASE }}
       CMS_URL: ${{ vars.CMS_URL }}
+      MEDIA_PUBLIC_URL: ${{ vars.SUPABASE_REF && format('https://{0}.supabase.co/storage/v1/object/public/media', vars.SUPABASE_REF) || '' }}
       STAGING: '1'
       SHOW_AD_SLOTS: '1'
       PUBLIC_BULTEN_URL: ${{ vars.PUBLIC_BULTEN_URL }}
@@ -47,8 +48,22 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with: { node-version: 22 }
-      - run: .github/calistir.sh Kurulum npm install --workspace apps/web --no-audit --no-fund --legacy-peer-deps
+      - name: Önbellek (npm paketleri ve görseller)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            apps/web/.medya-cache
+          key: web-${{ runner.arch }}-${{ hashFiles('apps/web/package.json', 'package.json') }}-${{ github.run_id }}
+          restore-keys: web-${{ runner.arch }}-
+      - run: .github/calistir.sh Kurulum npm install --workspace apps/web --no-audit --no-fund --legacy-peer-deps --prefer-offline
       - run: .github/calistir.sh Derleme npm run build --workspace apps/web
+      - name: Paket sürümlerini sabitle (package-lock.json ilk kez oluştuysa depoya yaz)
+        run: |
+          if [ -f package-lock.json ] && ! git ls-files --error-unmatch package-lock.json >/dev/null 2>&1; then
+            git config user.name "updated-site"; git config user.email "site@updated.com.tr"
+            git add package-lock.json && git commit -m "Paket sürümleri sabitlendi (package-lock.json) [skip ci]" && git push || true
+          fi
       - uses: actions/upload-pages-artifact@v3
         with: { path: apps/web/dist }
       - id: deploy
@@ -63,6 +78,7 @@ jobs:
       # Girilmezse hazırlık adresi: v2.updated.com.tr
       SITE_URL: ${{ vars.SITE_URL || secrets.SITE_URL || 'https://v2.updated.com.tr' }}
       CMS_URL: ${{ vars.CMS_URL || secrets.CMS_URL }}
+      MEDIA_PUBLIC_URL: ${{ vars.SUPABASE_REF && format('https://{0}.supabase.co/storage/v1/object/public/media', vars.SUPABASE_REF) || '' }}
       STAGING: ${{ vars.NATRO_STAGING || secrets.NATRO_STAGING }}
       INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
       PUBLIC_BULTEN_URL: ${{ vars.PUBLIC_BULTEN_URL }}
@@ -91,7 +107,16 @@ jobs:
         uses: actions/setup-node@v5
         with: { node-version: 22 }
       - if: steps.ayar.outputs.aktif == '1'
-        run: .github/calistir.sh Kurulum npm install --workspace apps/web --no-audit --no-fund --legacy-peer-deps
+        name: Önbellek (npm paketleri ve görseller)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            apps/web/.medya-cache
+          key: web-${{ runner.arch }}-${{ hashFiles('apps/web/package.json', 'package.json') }}-${{ github.run_id }}
+          restore-keys: web-${{ runner.arch }}-
+      - if: steps.ayar.outputs.aktif == '1'
+        run: .github/calistir.sh Kurulum npm install --workspace apps/web --no-audit --no-fund --legacy-peer-deps --prefer-offline
       - name: Derle (canlıda CMS adresi zorunlu — örnek veri canlıya çıkmaz)
         if: steps.ayar.outputs.aktif == '1'
         run: |
@@ -100,21 +125,15 @@ jobs:
       - name: Güvenlik kontrolü (ana siteye dokunma)
         if: steps.ayar.outputs.aktif == '1'
         run: .github/natro-kontrol.sh
-      - name: Natro'ya yükle (lftp, kopma olursa yeniden dener; sunucudaki başka dosyalara dokunmaz, silmez)
+      - name: Natro'ya yükle (yalnız değişen dosyalar; kopmada yeniden dener)
         if: steps.ayar.outputs.aktif == '1'
         run: |
           sudo apt-get install -y -qq lftp >/dev/null
-          ssl="set ftp:ssl-allow yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes;"
-          [ "$NATRO_FTP_PROTOCOL" = "ftp" ] && ssl="set ftp:ssl-allow no;"
-          [ "$NATRO_FTP_SECURITY" = "loose" ] && ssl="$ssl set ssl:verify-certificate no;"
-          d="${NATRO_DIR#./}"; d="${d:-.}"
           for deneme in 1 2 3; do
-            if lftp -u "$NATRO_FTP_USER,$NATRO_FTP_PASSWORD" "$NATRO_FTP_HOST" -e "$ssl set net:max-retries 4; set net:reconnect-interval-base 5; set net:timeout 30; set ftp:passive-mode yes; mirror -R --parallel=3 --no-perms --exclude-glob .git* apps/web/dist/ $d; bye" > /tmp/lftp.log 2>&1; then
-              echo "Yükleme tamam ($deneme. deneme)"; tail -3 /tmp/lftp.log; exit 0
-            fi
-            echo "Deneme $deneme başarısız, yeniden…"; tail -5 /tmp/lftp.log; sleep 10
+            node deploy/natro-yukle.mjs apps/web/dist 2>&1 | tee /tmp/yukle.log && [ ${PIPESTATUS[0]} -eq 0 ] && exit 0
+            echo "Deneme $deneme başarısız, yeniden…"; sleep 10
           done
-          node -e "const t=require('fs').readFileSync('/tmp/lftp.log','utf8').slice(-5000);console.log('::error title=FTP yükleme::'+t.replace(/%/g,'%25').replace(/\n/g,'%0A'))"
+          node -e "const t=require('fs').readFileSync('/tmp/yukle.log','utf8').slice(-5000);console.log('::error title=FTP yükleme::'+t.replace(/%/g,'%25').replace(/\n/g,'%0A'))"
           exit 1
       - name: Teşhis
         if: always() && steps.ayar.outputs.aktif == '1'

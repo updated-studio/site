@@ -45,11 +45,21 @@ const list = (collection: string, where: any = {}, o: { page?: number; limit?: n
 
 /* ---------- eşleyiciler ---------- */
 const rel = (v: any) => (v && typeof v === 'object' ? v : null)
+/**
+ * Görseller okura Natro'dan gider: Supabase adresi derlemede /medya/… yoluna çevrilir,
+ * dosyaların kendisi scripts/postbuild.mjs ile indirilip siteyle birlikte yüklenir (Supabase trafik kotası harcanmaz).
+ */
+const MEDIA = env('MEDIA_PUBLIC_URL').replace(/\/$/, '')
+export const localMedia = (u?: string) => {
+  if (!u) return u
+  if (u.startsWith('/api/media/file/')) u = CMS + u
+  return MEDIA && u.startsWith(MEDIA + '/') ? '/medya/' + u.slice(MEDIA.length + 1) : u
+}
 export function mImg(m: any, size: 'card' | 'hero' | 'thumb' | 'reel' | 'og' = 'card'): Img | undefined {
   m = rel(m); if (!m?.url) return undefined
   const s = m.sizes || {}
-  const pick = s[size]?.url || m.url
-  const srcset = ['thumb', 'card', 'hero'].map((k) => s[k]?.url && `${s[k].url} ${s[k].width}w`).filter(Boolean).join(', ')
+  const pick = localMedia(s[size]?.url || m.url)!
+  const srcset = ['thumb', 'card', 'hero'].map((k) => s[k]?.url && `${localMedia(s[k].url)} ${s[k].width}w`).filter(Boolean).join(', ')
   return { url: pick, alt: m.alt || '', credit: m.credit, w: s[size]?.width || m.width, h: s[size]?.height || m.height, srcset: size === 'reel' ? undefined : srcset || undefined }
 }
 const mCat = (c: any): Cat => (rel(c) ? { name: c.name, slug: c.slug } : { name: 'Haber', slug: 'haber' })
@@ -110,7 +120,16 @@ export const getCategory = (slug: string) => safe<(Cat & { description?: string 
 export const getCategoryNews = (slug: string, p = 1) => safe(async () => (await list('news', { 'category.slug': { equals: slug } }, { page: p })).docs.map(mNews), () => { const a = S.NEWS.filter((n) => n.category.slug === slug); return a.length ? cyc(a, p) : [] })
 export const getNews = (catSlug: string, slug: string) => safe(async () => { const r = await list('news', { slug: { equals: slug }, 'category.slug': { equals: catSlug } }, { limit: 1, depth: 2 }); return r.docs[0] ? mNews(r.docs[0]) : null }, () => S.NEWS.find((n) => n.path === `/${catSlug}/${slug}`) || null)
 export const getRelated = (n: News, k = 4) => safe(async () => (await list('news', { id: { not_equals: n.id }, or: [{ 'category.slug': { equals: n.category.slug } }, ...(n.products.length ? [{ 'products.slug': { in: n.products.map((p) => p.slug) } }] : [])] } as any, { limit: k, depth: 1 })).docs.map(mNews), () => S.NEWS.filter((x) => x.id !== n.id && (x.category.slug === n.category.slug || x.products.some((p) => n.products.some((q) => q.slug === p.slug)))).slice(0, k))
-export const getMostRead = () => safe(async () => { const h = await get('globals/home', { depth: 2 }); return (h.mostRead || []).map(mNews) as News[] }, () => [S.NEWS[3], S.NEWS[9], S.NEWS[1], S.NEWS[12], S.NEWS[2]])
+/** En çok okunanlar: panelde elle seçildiyse o; yoksa kendi okunma sayacımızdan (son 48 saat). */
+export const getMostRead = (n = 5) => safe(async () => {
+  const h = await get('globals/home', { depth: 2 })
+  if (h.mostRead?.length) return (h.mostRead as any[]).map(mNews)
+  const top = (await get<{ yol: string }[]>('en-cok-okunan', { saat: 48, n: n * 3 }).catch(() => [])) as { yol: string }[]
+  if (!top.length) return [] as News[]
+  const r = await list('news', { path: { in: top.map((t) => t.yol) } }, { limit: n * 3, depth: 1 })
+  const byPath = new Map(r.docs.map((d: any) => [d.path, mNews(d)]))
+  return top.map((t) => byPath.get(t.yol)).filter(Boolean).slice(0, n) as News[]
+}, () => [S.NEWS[3], S.NEWS[9], S.NEWS[1], S.NEWS[12], S.NEWS[2]].slice(0, n))
 
 /* ---------- inceleme, kıyas, künye ---------- */
 export const getReviews = (p = 1, n = PAGE) => safe(async () => (await list('reviews', {}, { page: p, limit: n })).docs.map(mReview), () => page(S.REVIEWS, p, n))

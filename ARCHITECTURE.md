@@ -36,6 +36,12 @@ GitHub Actions: Astro statik derleme ──► Natro (FTP, değişen dosyalar) �
 | 17 | Arama statik dizinle (`/ara-dizin.json`) tarayıcıda | Sunucu yok; dizin kısa (tür, başlık, adres, kategori). |
 | 18 | Taslak önizleme `/onizleme?tur&id&k` sayfası, veri panelin `/api/onizleme` ucundan | Taslaklar statik derlemeye girmez; parola panelde doğrulanır. |
 | 19 | CMS varken hata derlemeyi durdurur | Örnek veri asla canlıya çıkmaz; yarım derleme FTP'ye yüklenmez. |
+| 21 | Görseller okura Natro'dan (`/medya/…`) | Supabase ücretsiz katmanı ayda 5 GB çıkış verir; haber sitesi bunu hızla aşar. Derlemede kullanılan görseller indirilip siteyle yüklenir (önbellekli). Asıl dosyalar Supabase'de kalır. |
+| 22 | Anlık katman (`/api/canli`, 404 yedeği) | Statik derleme 1–2 dk sürer. Yeni haber son dakika şeridine ve yan listeye hemen düşer; adresi derlenmemişse 404 sayfası haberi panelden okuyup gösterir. |
+| 23 | Kendi okunma sayacı (`/api/okunma`, `/api/en-cok-okunan`) | Çerezsiz, kişisel veri yok; "En çok okunanlar" son 48 saatten. Ek servis yok. |
+| 24 | Natro'ya yalnız değişen dosyalar (`deploy/natro-yukle.mjs`) | Özet (sha1) karşılaştırması; yayından kalkan sayfa silinir; bizim yüklemediğimiz dosyalara dokunulmaz. |
+| 25 | Site veritabanı yedeği `updated-studio/yedek` deposunda | Stüdyo yedeğiyle aynı yöntem, her gece 03.35. |
+| 26 | Panel sunucusu: şimdi Oracle (ücretsiz ARM), sonra Natro VPS | `deploy/panel/*.sh` iki yerde de aynı; https'i Caddy kendi alır. |
 | 20 | Hazırlık GitHub Pages'te (`BASE_PATH=/site`) | Alan adı gerekmeden deneme; postbuild iç bağlantılara önek ekler, her sayfa noindex. |
 
 ## Kit uyumu (kısa)

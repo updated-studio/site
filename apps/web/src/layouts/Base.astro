@@ -18,7 +18,7 @@ const title = meta.path === '/' ? meta.title : `${meta.title} · UPDATED`
 const ld = { '@context': 'https://schema.org', '@graph': [...siteLd(), ...(meta.jsonld || [])] }
 ---
 <!doctype html>
-<html lang="tr" data-base={import.meta.env.BASE_URL === '/' ? undefined : import.meta.env.BASE_URL}>
+<html lang="tr" data-cms={env('CMS_URL').replace(/\/$/, '') || undefined} data-base={import.meta.env.BASE_URL === '/' ? undefined : import.meta.env.BASE_URL}>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -66,6 +66,6 @@ const ld = { '@context': 'https://schema.org', '@graph': [...siteLd(), ...(meta.
       <ul class="res" id="sres"></ul>
     </div>
   </div>
-  <script>import '../scripts/site.ts'</script>
+  <script>import '../scripts/site.ts'; import '../scripts/canli.ts'</script>
 </body>
 </html>

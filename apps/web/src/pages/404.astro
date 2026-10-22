@@ -5,7 +5,8 @@ import { getLatest } from '../lib/api'
 const latest = await getLatest(1, 4)
 ---
 <Base meta={{ title: 'Sayfa bulunamadı', description: 'Aradığınız sayfa taşınmış ya da kaldırılmış olabilir.', path: '/404', noindex: true }}>
-  <div class="wrap">
+  <div class="wrap" data-canli-haber hidden></div>
+  <div class="wrap" data-404>
     <div class="art-head" style="max-width:none"><span class="cat">404</span><h1 class="h1">Sayfa bulunamadı</h1><p class="lead">Adres değişmiş ya da içerik kaldırılmış olabilir. Aramayı deneyin ya da son haberlere bakın.</p>
       <form action="/ara" method="get" role="search" class="chips"><label class="sr" for="q404">Ara</label><input id="q404" class="sel" name="q" placeholder="Ürün, haber…" /><button class="btn btn-p" type="submit">Ara</button></form></div>
     <div class="grid4" style="margin-top:32px">{latest.map((n) => <CardStd item={n} />)}</div>
