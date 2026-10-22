@@ -48,9 +48,13 @@ jobs:
           RC: ${{ steps.a.outputs.rc }}
           SM: ${{ steps.a.outputs.sm }}
         run: |
-          d=""; [ "$DRY" = "true" ] && d="DRY_RUN=1"
-          q() { printf %q "$1"; }
-          ssh panel "sudo -u panel -H bash -c 'set -a; . /etc/updated-panel.env; . /etc/updated-panel.secrets; set +a; cd /opt/updated/site/apps/cms && $d LIMIT=$LIMIT WP_URL=$(q "$WP_URL") WP_USER=$(q "$WP_USER") WP_APP_PASSWORD=$(q "$WP_APP_PASSWORD") WP_REVIEW_CATEGORY=$(q "$RC") WP_SCORE_META=$(q "$SM") timeout 4h npx payload run scripts/wp-migrate.ts'" 2>&1 | tee /tmp/tasi.log
+          {
+            [ "$DRY" = "true" ] && echo "DRY_RUN=1"
+            echo "LIMIT=$LIMIT"
+            printf 'WP_URL=%q\nWP_USER=%q\nWP_APP_PASSWORD=%q\nWP_REVIEW_CATEGORY=%q\nWP_SCORE_META=%q\n' "$WP_URL" "$WP_USER" "$WP_APP_PASSWORD" "$RC" "$SM"
+          } > /tmp/wp.env
+          scp -q /tmp/wp.env deploy/wp/calistir.sh panel:/tmp/ && rm /tmp/wp.env
+          ssh panel 'sudo install -m 600 -o panel -g panel /tmp/wp.env /opt/updated/wp.env && rm /tmp/wp.env && sudo install -m 755 /tmp/calistir.sh /opt/updated/wp-calistir.sh && sudo -u panel -H bash /opt/updated/wp-calistir.sh' 2>&1 | tee /tmp/tasi.log
           s=${PIPESTATUS[0]}
           ozet=$(ssh panel 'cat /opt/updated/site/apps/cms/scripts/wp-migrate.log.json 2>/dev/null' | jq -c '{categories,authors,media,news,reviews,redirects,dry,atlanan:(.skipped|length),hata:(.errors|length),ilk_hatalar:(.errors[:5])}' 2>/dev/null)
           echo "::notice title=Taşıma özeti::${ozet:-özet yok} · son satır: $(grep -v '^\s*$' /tmp/tasi.log | tail -1 | cut -c1-300)"
