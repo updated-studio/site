@@ -72,6 +72,10 @@ jobs:
             IdentityFile ~/.ssh/id
             ServerAliveInterval 30
             StrictHostKeyChecking accept-new" > ~/.ssh/config
+          # root değilse: bir kez şifresiz sudo tanımlanır (kurulum betikleri sudo ile çalışır)
+          if [ "$USR" != "root" ] && [ -n "$PASS" ]; then
+            printf '%s\n' "$PASS" | ssh panel "sudo -S -p '' sh -c 'echo \"$USR ALL=(ALL) NOPASSWD:ALL\" > /etc/sudoers.d/90-updated-panel && chmod 440 /etc/sudoers.d/90-updated-panel'" || { echo "::error title=SSH::$USR için sudo ayarlanamadı"; exit 1; }
+          fi
           ssh panel 'echo "bağlandı: $(uname -m) $(lsb_release -ds 2>/dev/null)"' 2>&1 | tee /tmp/ssh.log || { echo "::error title=SSH::$(tail -c 800 /tmp/ssh.log | tr '\n' ' ')"; exit 1; }
       - name: Ortam dosyası
         if: steps.ayar.outputs.ok == '1'
