@@ -58,6 +58,9 @@ ${httpsRule}
 # sondaki "/" atılır
 RewriteRule ^(.+)/$ /$1 [R=301,L]
 
+# /index ve /index.html → ana sayfa
+RewriteRule ^index(\\.html)?$ / [R=301,L]
+
 # .html uzantılı istek → uzantısız adres
 RewriteCond %{THE_REQUEST} \\s/([^?\\s]+)\\.html[\\s?]
 RewriteRule ^ /%1 [R=301,L]
