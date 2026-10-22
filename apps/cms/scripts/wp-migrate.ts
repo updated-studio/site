@@ -108,7 +108,21 @@ async function main() {
         const cap = el.querySelector?.('figcaption')?.textContent?.trim()
         const id = await media(src.split('?')[0].replace(/-\d+x\d+(\.\w+)$/, '$1'), img.getAttribute('alt') || title, cap)
         if (id && id !== 'dry') children.push({ type: 'upload', relationTo: 'media', value: id, version: 3, fields: {}, format: '', id: randomBytes(12).toString('hex') })
-      } else buf += el.outerHTML ?? el.textContent ?? ''
+      } else {
+        // Metnin içine gömülü <img>'ler: HTML dönüştürücü bunları geçersiz görsel düğümüne çeviriyordu.
+        // Görsel metinden çıkarılır; görselli modda paragrafın hemen arkasına ayrı görsel olarak eklenir.
+        const inner = el.querySelectorAll ? [...el.querySelectorAll('img')] : []
+        inner.forEach((i: any) => (i.closest('a') && i.closest('a').textContent.trim() === '' ? i.closest('a') : i).remove())
+        buf += el.outerHTML ?? el.textContent ?? ''
+        if (inner.length && !gorselsiz) {
+          flush()
+          for (const i of inner as any[]) {
+            const src = i.getAttribute('data-src') || i.getAttribute('src') || ''
+            const id = await media(src.split('?')[0].replace(/-\d+x\d+(\.\w+)$/, '$1'), i.getAttribute('alt') || title)
+            if (id && id !== 'dry') children.push({ type: 'upload', relationTo: 'media', value: id, version: 3, fields: {}, format: '', id: randomBytes(12).toString('hex') })
+          }
+        }
+      }
     }
     flush()
     return { root: { type: 'root', format: '', indent: 0, version: 1, direction: 'ltr', children } }
