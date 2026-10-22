@@ -87,7 +87,7 @@ async function main() {
   }
 
   /** HTML → Lexical. Metindeki görseller Payload'a yüklenip "upload" düğümü olur (WordPress adresine bağlı kalmaz). */
-  async function body(html: string, title: string) {
+  async function body(html: string, title: string, gorselsiz = false) {
     const clean = html.replace(/<!--[\s\S]*?-->/g, '').replace(/\[\/?[a-z_]+[^\]]*\]/g, '') // blok yorumları, kısa kodlar
     const dom = new JSDOM(`<body>${clean}</body>`)
     const doc = dom.window.document
@@ -101,7 +101,8 @@ async function main() {
     const flush = () => { if (buf.trim()) children.push(...convertHTMLToLexical({ editorConfig, html: buf, JSDOM }).root.children); buf = '' }
     for (const el of [...dom.window.document.body.childNodes] as any[]) {
       const img = el.nodeName === 'IMG' ? el : el.querySelector?.('img')
-      if (img && (el.nodeName === 'FIGURE' || el.nodeName === 'IMG' || (el.nodeName === 'P' && el.textContent.trim() === ''))) {
+      if (img && gorselsiz) { const cap = el.querySelector?.('figcaption')?.textContent?.trim(); if (cap) buf += `<p><em>${cap}</em></p>` }
+      else if (img && (el.nodeName === 'FIGURE' || el.nodeName === 'IMG' || (el.nodeName === 'P' && el.textContent.trim() === ''))) {
         flush()
         const src = img.getAttribute('data-src') || img.getAttribute('src') || ''
         const cap = el.querySelector?.('figcaption')?.textContent?.trim()
@@ -148,11 +149,15 @@ async function main() {
         catch (e: any) {
           // Metin editöre sığmadıysa düz paragraflarla yeniden dene (biçim kaybolur, içerik korunur); sebebi kayda yazılır.
           log.errors.push(`yazı ${p.id} ilk deneme: ${e.message} ${JSON.stringify(e.data?.errors || '').slice(0, 300)}`)
+          // 2. deneme: biçim (başlık, bağlantı, kalın) korunur, metin içi görseller çıkarılır
+          try { doc = await upsert('news', p.id, { ...common, body: await body(p.content.rendered, title, true), category: cat.id, label: 'yok' }); log.gorselsiz = (log.gorselsiz || 0) + 1 } catch (e2: any) { log.errors.push(`yazı ${p.id} ikinci deneme: ${e2.message}`) }
+          if (!doc) {
           const text = new JSDOM(`<body>${p.content.rendered}</body>`).window.document.body.textContent || ''
           const paras = text.split(/\n\s*\n|\n/).map((x: string) => x.trim()).filter(Boolean)
           const plain = { root: { type: 'root', format: '', indent: 0, version: 1, direction: 'ltr', children: (paras.length ? paras : [title]).map((t: string) => ({ type: 'paragraph', format: '', indent: 0, version: 1, direction: 'ltr', textFormat: 0, children: [{ type: 'text', text: t, format: 0, style: '', mode: 'normal', detail: 0, version: 1 }] })) } }
           doc = await upsert('news', p.id, { ...common, body: plain, category: cat.id, label: 'yok' })
           log.duzMetin = (log.duzMetin || 0) + 1
+          }
         }
         path = `/${cat.slug}/${(doc as any).slug || common.slug}`; log.news++
       }
