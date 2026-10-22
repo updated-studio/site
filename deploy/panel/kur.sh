@@ -3,6 +3,8 @@
 # Kurulanlar: Node 22, git, Caddy (https sertifikasını kendisi alır/yeniler), güvenlik duvarı (80/443), systemd hizmeti.
 # Kullanım: sudo PANEL_DOMAIN=panel.updated.com.tr bash kur.sh
 set -euo pipefail
+# Sunucu adı çözülemiyor uyarısı (sudo) için: kendi adını hosts dosyasına ekle
+grep -q "$(hostname)" /etc/hosts || echo "127.0.1.1 $(hostname)" >> /etc/hosts
 DOMAIN="${PANEL_DOMAIN:-panel.updated.com.tr}"
 APP=/opt/updated
 export DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a
@@ -63,11 +65,14 @@ UNIT
 cat > /etc/caddy/Caddyfile <<CADDY
 $DOMAIN {
 	encode zstd gzip
-	request_body { max_size 50MB }
+	request_body {
+		max_size 50MB
+	}
 	reverse_proxy 127.0.0.1:3001
 }
 CADDY
 systemctl daemon-reload
 systemctl enable updated-panel >/dev/null 2>&1 || true
-systemctl reload caddy 2>/dev/null || systemctl restart caddy
+caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile >/dev/null
+systemctl reload caddy 2>/dev/null || systemctl restart caddy || { journalctl -u caddy -n 30 --no-pager; exit 1; }
 echo "Sunucu hazır: node $(node -v), caddy $(caddy version | cut -d' ' -f1)"
