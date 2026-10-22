@@ -136,5 +136,5 @@ jobs:
       - name: Hata ayrıntısı
         if: failure()
         run: |
-          for f in /tmp/calistir-*.log; do [ -f "$f" ] || continue; node -e "const t=require('fs').readFileSync(process.argv[1],'utf8').slice(-6000);console.log('::error title=Son adım çıktısı::'+t.replace(/%/g,'%25').replace(/\r/g,'%0D').replace(/\n/g,'%0A'))" "$f"; done
+          for f in /tmp/calistir-*.log; do [ -f "$f" ] || continue; node -e "const t=require('fs').readFileSync(process.argv[1],'utf8').slice(-3500);console.log('::error title=Son adım çıktısı::'+t.replace(/%/g,'%25').replace(/\r/g,'%0D').replace(/\n/g,'%0A'))" "$f"; done
           echo "::error title=Hata ayrıntısı::başarısız adım sonrası rapor (yukarıdaki notlara bakın)"
