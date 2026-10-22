@@ -88,6 +88,8 @@ jobs:
           [ -n "$DB_PASS" ] && { q=$(python3 -c 'import os,urllib.parse as u;print(u.quote(os.environ["DB_PASS"],safe=""))'); echo "::add-mask::$q"
             for h in aws-0-$REGION aws-1-$REGION; do out="$out%0Apooler $h (5432): $(t "postgresql://postgres.$REF:$q@$h.pooler.supabase.com:5432/postgres")"; done; }
           [ -n "$URI_SECRET" ] && out="$out%0ADATABASE_URI secret: $(t "$URI_SECRET")"
+          # Payload tabloları "payload" şemasında; göç dosyası şemayı kendisi açmıyor.
+          [ -n "$DB_PASS" ] && out="$out%0Aşema: $(PGCONNECT_TIMEOUT=15 psql "postgresql://postgres.$REF:$q@aws-0-$REGION.pooler.supabase.com:5432/postgres" -tAc 'create schema if not exists payload; select count(*) from information_schema.tables where table_schema='"'"'payload'"'"'' 2>&1 | tail -1) tablo"
           out="$out%0Akullanılan adres: $(echo "$DATABASE_URI" | sed -E 's#//([^:]+):[^@]*@#//\1:***@#; s/'"$REF"'/REF/g')"
           echo "::notice title=Veritabanı testi::$out"
       - name: Ortam dosyası
