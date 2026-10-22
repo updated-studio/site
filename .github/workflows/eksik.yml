@@ -8,7 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: python3 deploy/kontrol/eksik.py
+      - name: v2 ne döndürüyor
+        run: |
+          for u in http://v2.updated.com.tr/ https://updated.com.tr/ http://v2.updated.com.tr/haberler; do
+            curl -s -A "Mozilla/5.0 (Macintosh)" -D /tmp/h -o /tmp/b "$u"; t=$(grep -o '<title>[^<]*' /tmp/b | head -1)
+            echo "::notice title=$u::$(head -1 /tmp/h | tr -d '\r') · $(grep -i '^server:' /tmp/h | tr -d '\r') · $t · $(sed 's/<[^>]*>/ /g' /tmp/b | tr -s ' \n' ' ' | head -c 400)"
+          done
+      - if: ${{ hashFiles('deploy/kontrol/sadece-bak') == '' }}
+        run: python3 deploy/kontrol/eksik.py
         env:
           WP_URL: ${{ vars.WP_URL || 'https://updated.com.tr' }}
           WP_USER: ${{ secrets.WP_USER }}
