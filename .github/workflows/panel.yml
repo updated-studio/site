@@ -1,6 +1,6 @@
 # Yayın panelini (Payload) sunucuya kurar ve günceller. Sunucu: Oracle (şimdi) / Natro VPS (sonra) — aynı betik.
 # Gerekenler (Secrets): PANEL_SSH_HOST (sunucu IP), PANEL_SSH_KEY (özel anahtar), DATABASE_URI (Supabase),
-#   S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY (Supabase Storage). İsteğe bağlı: PANEL_SSH_USER (varsayılan ubuntu), GITHUB_DISPATCH_TOKEN.
+#   S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY (Supabase Storage). DATABASE_URI yerine yalnız SUPABASE_DB_PASSWORD de yeter. İsteğe bağlı: PANEL_SSH_USER (varsayılan ubuntu), GITHUB_DISPATCH_TOKEN.
 # Değişkenler (Variables, isteğe bağlı): SUPABASE_REF (proje kimliği; S3 adreslerini kurar), PANEL_DOMAIN, WEB_URL.
 name: Paneli kur ve güncelle
 
@@ -23,7 +23,9 @@ jobs:
       PASS: ${{ secrets.PANEL_SSH_PASSWORD }}
       DOMAIN: ${{ vars.PANEL_DOMAIN || 'panel.updated.com.tr' }}
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
-      REF: ${{ vars.SUPABASE_REF || secrets.SUPABASE_REF }}
+      DB_PASS: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      REF: ${{ vars.SUPABASE_REF || secrets.SUPABASE_REF || 'werbsodzhfxliffveexk' }}
+      REGION: ${{ vars.SUPABASE_REGION || 'eu-west-2' }}
       S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
       S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
       WEB_URL: ${{ vars.WEB_URL || 'http://v2.updated.com.tr' }}
@@ -32,6 +34,12 @@ jobs:
       - name: Ayar kontrolü
         id: ayar
         run: |
+          # Veritabanı adresi: DATABASE_URI girildiyse o; yoksa proje kimliği + bölge + şifreden (Session pooler) kurulur.
+          if [ -z "$DATABASE_URI" ] && [ -n "$DB_PASS" ]; then
+            q=$(python3 -c 'import os,urllib.parse as u;print(u.quote(os.environ["DB_PASS"],safe=""))')
+            DATABASE_URI="postgresql://postgres.$REF:$q@aws-0-$REGION.pooler.supabase.com:5432/postgres"
+            echo "::add-mask::$q"; echo "::add-mask::$DATABASE_URI"; echo "DATABASE_URI=$DATABASE_URI" >> "$GITHUB_ENV"
+          fi
           eksik=""; for k in HOST DATABASE_URI; do [ -n "${!k}" ] || eksik="$eksik $k"; done; [ -n "$KEY$PASS" ] || eksik="$eksik PANEL_SSH_KEY/PANEL_SSH_PASSWORD"
           if [ -n "$eksik" ]; then echo "::warning title=Panel::Eksik ayar:$eksik — kurulum atlandı."; echo "ok=0" >> "$GITHUB_OUTPUT"; exit 0; fi
           echo "ok=1" >> "$GITHUB_OUTPUT"
@@ -66,7 +74,7 @@ jobs:
             echo "EXTRA_ORIGINS=https://v2.updated.com.tr,http://v2.updated.com.tr,https://updated-studio.github.io,https://updated.com.tr"
             echo "STUDIO_URL=https://studio.updated.com.tr"
             if [ -n "$REF" ] && [ -n "$S3_ACCESS_KEY_ID" ]; then
-              echo "S3_BUCKET=media"; echo "S3_REGION=eu-central-1"
+              echo "S3_BUCKET=media"; echo "S3_REGION=$REGION"
               echo "S3_ENDPOINT=https://$REF.supabase.co/storage/v1/s3"
               echo "S3_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID"; echo "S3_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY"
               echo "MEDIA_PUBLIC_URL=https://$REF.supabase.co/storage/v1/object/public/media"
