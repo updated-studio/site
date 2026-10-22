@@ -68,10 +68,21 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - run: .github/calistir.sh Kurulum npm install --workspace apps/web --no-audit --no-fund --legacy-peer-deps
-      - name: Derle (CMS adresi zorunlu — örnek veri canlıya çıkmaz)
+      - name: Derle (canlıda CMS adresi zorunlu — örnek veri canlıya çıkmaz)
         run: |
-          test -n "$CMS_URL" || { echo "vars.CMS_URL boş"; exit 1; }
+          if [ "$STAGING" != "1" ] && [ -z "$CMS_URL" ]; then echo "::error title=Derleme::vars.CMS_URL boş"; exit 1; fi
           .github/calistir.sh Derleme npm run build --workspace apps/web
+      - name: Güvenlik kontrolü (ana siteye dokunma)
+        env:
+          NATRO_DIR: ${{ vars.NATRO_DIR }}
+          NATRO_ANA_SITE: ${{ vars.NATRO_ANA_SITE }}
+          NATRO_FTP_KILITLI: ${{ vars.NATRO_FTP_KILITLI }}
+          NATRO_FTP_PROTOCOL: ${{ vars.NATRO_FTP_PROTOCOL }}
+          NATRO_FTP_SECURITY: ${{ vars.NATRO_FTP_SECURITY }}
+          NATRO_FTP_HOST: ${{ secrets.NATRO_FTP_HOST }}
+          NATRO_FTP_USER: ${{ secrets.NATRO_FTP_USER }}
+          NATRO_FTP_PASSWORD: ${{ secrets.NATRO_FTP_PASSWORD }}
+        run: .github/natro-kontrol.sh
       - name: Natro'ya yükle (FTP, yalnız değişenler)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -80,7 +91,9 @@ jobs:
           password: ${{ secrets.NATRO_FTP_PASSWORD }}
           protocol: ${{ vars.NATRO_FTP_PROTOCOL || 'ftps' }}
           local-dir: apps/web/dist/
-          server-dir: ${{ vars.NATRO_DIR || 'public_html/' }}
+          server-dir: ${{ vars.NATRO_DIR }}
+          security: ${{ vars.NATRO_FTP_SECURITY || 'strict' }}
+          dangerous-clean-slate: false
           exclude: |
             **/.git*
             **/.git*/**

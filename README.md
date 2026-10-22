@@ -81,10 +81,14 @@ GitHub › Settings › Secrets and variables › Actions:
 | Secret | `INDEXNOW_KEY` | rastgele 32 karakter |
 | Variable | `NATRO` | `1` |
 | Variable | `SITE_URL` | `https://updated.com.tr` |
-| Variable | `NATRO_DIR` | `public_html/` (hazırlık alt alan adı için onun klasörü) |
-| Variable | `NATRO_STAGING` | hazırlık alt alan adına yüklerken `1` |
+| Variable | `NATRO_DIR` | **zorunlu**, alt alan adının klasörü (ör. `v2.updated.com.tr/`); FTP kullanıcısı o klasöre kilitliyse `./` + `NATRO_FTP_KILITLI=1` |
+| Variable | `NATRO_STAGING` | v2 / hazırlık için `1` (noindex, örnek veriye izin) |
+| Variable | `NATRO_FTP_SECURITY` | sertifika alan adıyla uyuşmazsa `loose` |
+| Variable | `NATRO_ANA_SITE` | yalnız ana siteye geçiş günü `evet` |
 | Variable | `NATRO_FTP_PROTOCOL` | `ftps` (olmazsa `ftp`) |
 | Variable | `PUBLIC_BULTEN_URL` | bülten sağlayıcısının kayıt adresi (varsa) |
+
+**Güvenlik:** yüklemeden önce hedef klasör listelenir; içinde WordPress dosyası (wp-config.php, wp-content…) varsa yükleme durur. Kök klasörler (`public_html`, `httpdocs`) `NATRO_ANA_SITE=evet` olmadan reddedilir. Yükleme yalnız kendi yüklediği dosyaları günceller/siler, klasördeki başka dosyalara dokunmaz.
 
 Derleme `.htaccess` üretir: uzantısız adresler, https, sondaki "/" yönlendirmesi, 404 sayfası, önbellek ve güvenlik başlıkları, WordPress'ten kalan eski adreslerin 301 yönlendirmeleri. Şifreler sohbete, koda ya da e-postaya yazılmaz; yalnız GitHub Secrets'a girilir.
 
