@@ -14,5 +14,7 @@ d="${NATRO_DIR#./}"; d="${d%/}"
 root=$(curl "${opts[@]}" "ftp://$NATRO_FTP_HOST/" 2>&1 | head -40 | tr '\n' ' ')
 tgt=$(curl "${opts[@]}" "ftp://$NATRO_FTP_HOST/${d:+$d/}" 2>&1 | head -40 | tr '\n' ' ')
 pwd=$(curl "${opts[@]}" -Q PWD "ftp://$NATRO_FTP_HOST/" 2>&1 | head -3 | tr '\n' ' ')
+h=$(echo "$u" | sed -E 's#https?://##; s#/.*##'); dns="$h → $(getent ahostsv4 "$h" | awk '{print $1}' | sort -u | tr '\n' ' ') · ana: $(getent ahostsv4 "${h#*.}" | awk '{print $1}' | sort -u | tr '\n' ' ')"
+echo "::notice title=Teşhis · DNS::${dns}"
 echo "::notice title=Teşhis · HTTP::${out}"
 echo "::notice title=Teşhis · FTP::kök: ${root}%0Ahedef (${d:-.}): ${tgt}"
