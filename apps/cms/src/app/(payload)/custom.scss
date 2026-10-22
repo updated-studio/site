@@ -1,8 +1,6 @@
-/* Panel markası (Kit 1.2): köşe 0, mavi ana renk */
+/* Panel markası (Kit 1.2): köşeler 0. Renkler Payload'un açık/koyu temasına bırakılır (sabit renk vermek koyu temada yazıları görünmez yapıyordu). */
 :root {
-  --theme-elevation-0: #ffffff;
   --style-radius-s: 0px;
   --style-radius-m: 0px;
   --style-radius-l: 0px;
-  --theme-success-500: #2563eb;
 }

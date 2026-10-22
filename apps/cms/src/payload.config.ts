@@ -5,6 +5,8 @@ import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { s3Storage } from '@payloadcms/storage-s3'
 import sharp from 'sharp'
+import { tr } from '@payloadcms/translations/languages/tr'
+import { en } from '@payloadcms/translations/languages/en'
 
 import { Users } from './collections/Users'
 import { Authors } from './collections/Authors'
@@ -36,7 +38,8 @@ export default buildConfig({
     meta: { titleSuffix: ' · UPDATED Panel' },
     dateFormat: 'dd.MM.yyyy HH.mm',
   },
-  i18n: { fallbackLanguage: 'en' },
+  // Panel dili Türkçe (isteyen kullanıcı hesap ayarından İngilizceye geçebilir)
+  i18n: { supportedLanguages: { tr, en }, fallbackLanguage: 'tr' },
   collections: [News, Reviews, Comparisons, Products, Categories, Authors, Media, Videos, Reels, Ads, KulupTracks, KulupQuizzes, Pages, Users],
   globals: [Home, Site],
   editor: lexicalEditor(),

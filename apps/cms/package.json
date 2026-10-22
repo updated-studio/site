@@ -25,7 +25,8 @@
     "react": "^19",
     "react-dom": "^19",
     "sharp": "^0.34",
-    "@updated/kit": "*"
+    "@updated/kit": "*",
+    "@payloadcms/translations": "^3"
   },
   "devDependencies": {
     "@types/node": "^22",
