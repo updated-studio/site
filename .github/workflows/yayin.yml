@@ -55,50 +55,67 @@ jobs:
         uses: actions/deploy-pages@v4
 
   natro:
-    if: vars.NATRO == '1' && (github.event_name != 'workflow_dispatch' || inputs.hedef != 'hazirlik')
+    # Ayarlar Variables ya da Secrets olarak girilebilir (ikisi de okunur).
+    if: github.event_name != 'workflow_dispatch' || inputs.hedef != 'hazirlik'
     runs-on: ubuntu-latest
     env:
-      SITE_URL: ${{ vars.SITE_URL }}
-      CMS_URL: ${{ vars.CMS_URL }}
-      STAGING: ${{ vars.NATRO_STAGING }}
+      NATRO_ON: ${{ vars.NATRO || secrets.NATRO }}
+      SITE_URL: ${{ vars.SITE_URL || secrets.SITE_URL }}
+      CMS_URL: ${{ vars.CMS_URL || secrets.CMS_URL }}
+      STAGING: ${{ vars.NATRO_STAGING || secrets.NATRO_STAGING }}
       INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
       PUBLIC_BULTEN_URL: ${{ vars.PUBLIC_BULTEN_URL }}
+      NATRO_DIR: ${{ vars.NATRO_DIR || secrets.NATRO_DIR }}
+      NATRO_ANA_SITE: ${{ vars.NATRO_ANA_SITE }}
+      NATRO_FTP_KILITLI: ${{ vars.NATRO_FTP_KILITLI || secrets.NATRO_FTP_KILITLI }}
+      NATRO_FTP_PROTOCOL: ${{ vars.NATRO_FTP_PROTOCOL || secrets.NATRO_FTP_PROTOCOL || 'ftps' }}
+      NATRO_FTP_SECURITY: ${{ vars.NATRO_FTP_SECURITY || secrets.NATRO_FTP_SECURITY || 'strict' }}
+      NATRO_FTP_HOST: ${{ secrets.NATRO_FTP_HOST || vars.NATRO_FTP_HOST }}
+      NATRO_FTP_USER: ${{ secrets.NATRO_FTP_USER || vars.NATRO_FTP_USER }}
+      NATRO_FTP_PASSWORD: ${{ secrets.NATRO_FTP_PASSWORD }}
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with: { node-version: 22 }
-      - run: .github/calistir.sh Kurulum npm install --workspace apps/web --no-audit --no-fund --legacy-peer-deps
-      - name: Derle (canlıda CMS adresi zorunlu — örnek veri canlıya çıkmaz)
+      - name: Ayarları denetle
+        id: ayar
         run: |
-          if [ "$STAGING" != "1" ] && [ -z "$CMS_URL" ]; then echo "::error title=Derleme::vars.CMS_URL boş"; exit 1; fi
+          eksik=""
+          for k in NATRO_ON SITE_URL NATRO_DIR NATRO_FTP_HOST NATRO_FTP_USER NATRO_FTP_PASSWORD; do [ -n "${!k}" ] || eksik="$eksik $k"; done
+          if [ "$NATRO_ON" != "1" ]; then echo "::notice title=Natro::NATRO=1 girilmemiş; Natro yüklemesi atlandı.${eksik:+ Eksik:$eksik}"; echo "aktif=0" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if [ -n "$eksik" ]; then echo "::error title=Natro ayarları eksik::$eksik"; exit 1; fi
+          echo "Hedef: $SITE_URL · klasör: $NATRO_DIR · protokol: $NATRO_FTP_PROTOCOL · hazırlık: ${STAGING:-0}"
+          d="$NATRO_DIR"; [ "${d%/}" = "$d" ] && d="$d/"; echo "dir=$d" >> "$GITHUB_OUTPUT"
+          echo "aktif=1" >> "$GITHUB_OUTPUT"
+      - if: steps.ayar.outputs.aktif == '1'
+        uses: actions/checkout@v5
+      - if: steps.ayar.outputs.aktif == '1'
+        uses: actions/setup-node@v5
+        with: { node-version: 22 }
+      - if: steps.ayar.outputs.aktif == '1'
+        run: .github/calistir.sh Kurulum npm install --workspace apps/web --no-audit --no-fund --legacy-peer-deps
+      - name: Derle (canlıda CMS adresi zorunlu — örnek veri canlıya çıkmaz)
+        if: steps.ayar.outputs.aktif == '1'
+        run: |
+          if [ "$STAGING" != "1" ] && [ -z "$CMS_URL" ]; then echo "::error title=Derleme::CMS_URL boş"; exit 1; fi
           .github/calistir.sh Derleme npm run build --workspace apps/web
       - name: Güvenlik kontrolü (ana siteye dokunma)
-        env:
-          NATRO_DIR: ${{ vars.NATRO_DIR }}
-          NATRO_ANA_SITE: ${{ vars.NATRO_ANA_SITE }}
-          NATRO_FTP_KILITLI: ${{ vars.NATRO_FTP_KILITLI }}
-          NATRO_FTP_PROTOCOL: ${{ vars.NATRO_FTP_PROTOCOL }}
-          NATRO_FTP_SECURITY: ${{ vars.NATRO_FTP_SECURITY }}
-          NATRO_FTP_HOST: ${{ secrets.NATRO_FTP_HOST }}
-          NATRO_FTP_USER: ${{ secrets.NATRO_FTP_USER }}
-          NATRO_FTP_PASSWORD: ${{ secrets.NATRO_FTP_PASSWORD }}
+        if: steps.ayar.outputs.aktif == '1'
         run: .github/natro-kontrol.sh
       - name: Natro'ya yükle (FTP, yalnız değişenler)
+        if: steps.ayar.outputs.aktif == '1'
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.NATRO_FTP_HOST }}
-          username: ${{ secrets.NATRO_FTP_USER }}
-          password: ${{ secrets.NATRO_FTP_PASSWORD }}
-          protocol: ${{ vars.NATRO_FTP_PROTOCOL || 'ftps' }}
+          server: ${{ env.NATRO_FTP_HOST }}
+          username: ${{ env.NATRO_FTP_USER }}
+          password: ${{ env.NATRO_FTP_PASSWORD }}
+          protocol: ${{ env.NATRO_FTP_PROTOCOL }}
           local-dir: apps/web/dist/
-          server-dir: ${{ vars.NATRO_DIR }}
-          security: ${{ vars.NATRO_FTP_SECURITY || 'strict' }}
+          server-dir: ${{ steps.ayar.outputs.dir }}
+          security: ${{ env.NATRO_FTP_SECURITY }}
           dangerous-clean-slate: false
           exclude: |
             **/.git*
             **/.git*/**
       - name: IndexNow
-        if: vars.NATRO_STAGING != '1'
+        if: steps.ayar.outputs.aktif == '1' && env.STAGING != '1'
         env:
           CHANGED_PATHS: ${{ join(github.event.client_payload.paths, ',') }}
         run: node apps/web/scripts/indexnow.mjs
