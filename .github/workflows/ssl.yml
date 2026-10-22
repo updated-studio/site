@@ -1,0 +1,71 @@
+# v2.updated.com.tr için ücretsiz Let's Encrypt sertifikası: alır, cPanel'e kurar, ayda bir kontrol edip süresi yaklaşınca yeniler.
+# Doğrulama: geçici dosya FTP ile v2 klasörüne (.well-known/acme-challenge) konur, iş bitince silinir. Ana siteye dokunmaz.
+# Gerekenler (Secrets): CPANEL_TOKEN (cPanel › Güvenlik › Manage API Tokens), NATRO_FTP_HOST/USER/PASSWORD (mevcut).
+# İsteğe bağlı (Variables): CPANEL_USER (varsayılan u2844888), CPANEL_HOST (varsayılan updated.com.tr:2083), SSL_DOMAINS.
+name: SSL sertifikası (v2)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 1 * *'
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ssl.yml', '.github/ssl-tetik']
+
+concurrency: { group: ssl, cancel-in-progress: false }
+
+jobs:
+  sertifika:
+    runs-on: ubuntu-latest
+    env:
+      DOMAINS: ${{ vars.SSL_DOMAINS || 'v2.updated.com.tr' }}
+      CPANEL_HOST: ${{ vars.CPANEL_HOST || 'updated.com.tr:2083' }}
+      CPANEL_USER: ${{ vars.CPANEL_USER || secrets.CPANEL_USER || 'u2844888' }}
+      CPANEL_TOKEN: ${{ secrets.CPANEL_TOKEN }}
+      FTP_HOST: ${{ secrets.NATRO_FTP_HOST }}
+      FTP_USER: ${{ secrets.NATRO_FTP_USER }}
+      FTP_PASS: ${{ secrets.NATRO_FTP_PASSWORD }}
+    steps:
+      - name: Ayar kontrolü
+        id: ayar
+        run: |
+          if [ -z "$CPANEL_TOKEN" ]; then echo "::warning title=SSL::CPANEL_TOKEN girilmemiş; sertifika işi atlandı."; echo "ok=0" >> "$GITHUB_OUTPUT"; exit 0; fi
+          echo "ok=1" >> "$GITHUB_OUTPUT"
+      - name: Süre kontrolü (30 günden fazla varsa yenileme yok)
+        if: steps.ayar.outputs.ok == '1'
+        id: sure
+        run: |
+          d="${DOMAINS%%,*}"
+          end=$(echo | timeout 15 openssl s_client -servername "$d" -connect "$d:443" 2>/dev/null | openssl x509 -noout -enddate -checkend 2592000 2>/dev/null && echo gecerli || true)
+          if echo "$end" | grep -q gecerli && echo "$end" | grep -q notAfter && [ "${{ github.event_name }}" = "schedule" ]; then echo "::notice title=SSL::Sertifika geçerli: $end"; echo "gerek=0" >> "$GITHUB_OUTPUT"; else echo "gerek=1" >> "$GITHUB_OUTPUT"; fi
+      - name: Sertifika al (Let's Encrypt, HTTP doğrulaması FTP ile)
+        if: steps.ayar.outputs.ok == '1' && steps.sure.outputs.gerek == '1'
+        run: |
+          sudo apt-get install -y -qq certbot lftp >/dev/null
+          cat > /tmp/auth.sh <<'H'
+          #!/usr/bin/env bash
+          printf '%s' "$CERTBOT_VALIDATION" > "/tmp/$CERTBOT_TOKEN"
+          lftp -u "$FTP_USER,$FTP_PASS" "$FTP_HOST" -e "set ftp:ssl-force yes; set ssl:verify-certificate no; mkdir -p -f .well-known/acme-challenge; put /tmp/$CERTBOT_TOKEN -o .well-known/acme-challenge/$CERTBOT_TOKEN; bye"
+          sleep 5
+          H
+          cat > /tmp/clean.sh <<'H'
+          #!/usr/bin/env bash
+          lftp -u "$FTP_USER,$FTP_PASS" "$FTP_HOST" -e "set ftp:ssl-force yes; set ssl:verify-certificate no; rm -f .well-known/acme-challenge/$CERTBOT_TOKEN; bye" || true
+          H
+          chmod +x /tmp/auth.sh /tmp/clean.sh
+          args=(); IFS=',' read -ra ds <<< "$DOMAINS"; for d in "${ds[@]}"; do args+=(-d "$d"); done
+          sudo -E certbot certonly --manual --preferred-challenges http --manual-auth-hook /tmp/auth.sh --manual-cleanup-hook /tmp/clean.sh \
+            --non-interactive --agree-tos --register-unsafely-without-email --key-type rsa --rsa-key-size 2048 \
+            --config-dir /tmp/le --work-dir /tmp/le-w --logs-dir /tmp/le-l --cert-name v2 "${args[@]}" 2>&1 | tee /tmp/certbot.log \
+            || { node -e "console.log('::error title=SSL alma::'+require('fs').readFileSync('/tmp/certbot.log','utf8').slice(-3000).replace(/%/g,'%25').replace(/\n/g,'%0A'))"; exit 1; }
+          sudo chmod -R a+r /tmp/le
+      - name: cPanel'e kur
+        if: steps.ayar.outputs.ok == '1' && steps.sure.outputs.gerek == '1'
+        run: |
+          IFS=',' read -ra ds <<< "$DOMAINS"
+          for d in "${ds[@]}"; do
+            r=$(curl -sS "https://$CPANEL_HOST/execute/SSL/install_ssl" -H "Authorization: cpanel $CPANEL_USER:$CPANEL_TOKEN" \
+              --data-urlencode "domain=$d" --data-urlencode "cert@/tmp/le/live/v2/cert.pem" \
+              --data-urlencode "key@/tmp/le/live/v2/privkey.pem" --data-urlencode "cabundle@/tmp/le/live/v2/chain.pem")
+            echo "$r" | grep -q '"status":1' && echo "::notice title=SSL::$d için sertifika kuruldu." || { echo "::error title=SSL kurulum::$d: $(echo "$r" | head -c 1500)"; exit 1; }
+          done
