@@ -112,10 +112,10 @@ jobs:
           ssh panel 'sudo install -m 640 /tmp/panel.env /etc/updated-panel.env && rm /tmp/panel.env'
       - name: Sunucuyu hazırla
         if: steps.ayar.outputs.ok == '1'
-        run: ssh panel "sudo PANEL_DOMAIN=$DOMAIN bash /tmp/kur.sh" 2>&1 | tee /tmp/kur.log; test ${PIPESTATUS[0]} -eq 0 || { echo "::error title=Sunucu kurulumu::$(tail -c 3000 /tmp/kur.log | sed 's/%/%25/g' | tr '\n' '\r' | sed 's/\r/%0A/g')"; exit 1; }
+        run: .github/calistir.sh "Sunucu kurulumu" ssh panel "sudo PANEL_DOMAIN=$DOMAIN bash /tmp/kur.sh"
       - name: Paneli güncelle (indir, göç, derle, başlat)
         if: steps.ayar.outputs.ok == '1'
-        run: ssh panel "sudo bash /tmp/guncelle.sh" 2>&1 | tee /tmp/gun.log; test ${PIPESTATUS[0]} -eq 0 || { echo "::error title=Panel güncelleme::$(tail -c 5000 /tmp/gun.log | sed 's/%/%25/g' | tr '\n' '\r' | sed 's/\r/%0A/g')"; exit 1; }
+        run: .github/calistir.sh "Panel güncelleme" ssh panel "sudo bash /tmp/guncelle.sh"
       - name: Yeni göç dosyalarını depoya yaz
         if: steps.ayar.outputs.ok == '1'
         run: |
@@ -123,7 +123,7 @@ jobs:
           scp -q 'panel:/opt/updated/site/apps/cms/src/migrations/*' apps/cms/src/migrations/ 2>/dev/null || true
           if [ -n "$(git status --porcelain apps/cms/src/migrations)" ]; then
             git config user.name "updated-panel"; git config user.email "panel@updated.com.tr"
-            git add apps/cms/src/migrations && git commit -m "Panel: veritabanı göç dosyaları (otomatik)" && git push
+            git add apps/cms/src/migrations && git commit -m "Panel: veritabanı göç dosyaları (otomatik) [skip ci]" && { git pull --rebase -q && git push || echo "::warning title=Göç dosyaları::depoya yazılamadı"; }
           fi
       - name: Durum
         if: steps.ayar.outputs.ok == '1'

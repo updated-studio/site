@@ -2,6 +2,7 @@
 # Komutu çalıştırır; hata olursa çıktının sonunu GitHub "error" notu olarak basar (kayıtlar Actions sayfası açmadan okunabilsin).
 # Kullanım: .github/calistir.sh "Başlık" komut argümanlar…
 title="$1"; shift
+set -o pipefail
 log=$(mktemp)
 "$@" 2>&1 | tee "$log"
 code=${PIPESTATUS[0]}
