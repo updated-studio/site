@@ -77,6 +77,19 @@ jobs:
             printf '%s\n' "$PASS" | ssh panel "sudo -S -p '' sh -c 'echo \"$USR ALL=(ALL) NOPASSWD:ALL\" > /etc/sudoers.d/90-updated-panel && chmod 440 /etc/sudoers.d/90-updated-panel'" || { echo "::error title=SSH::$USR için sudo ayarlanamadı"; exit 1; }
           fi
           ssh panel 'echo "bağlandı: $(uname -m) $(lsb_release -ds 2>/dev/null)"' 2>&1 | tee /tmp/ssh.log || { echo "::error title=SSH::$(tail -c 800 /tmp/ssh.log | tr '\n' ' ')"; exit 1; }
+      - name: Veritabanı bağlantı testi
+        if: steps.ayar.outputs.ok == '1'
+        env:
+          URI_SECRET: ${{ secrets.DATABASE_URI }}
+        run: |
+          sudo apt-get install -y -qq postgresql-client >/dev/null 2>&1 || true
+          t() { PGCONNECT_TIMEOUT=15 psql "$1" -tAc "select 1" 2>&1 | tail -1 | sed "s/$REF/REF/g"; }
+          out="şifre uzunluğu: ${#DB_PASS} · baş/son boşluk: $([[ "$DB_PASS" =~ ^[[:space:]]|[[:space:]]$ ]] && echo VAR || echo yok)"
+          [ -n "$DB_PASS" ] && { q=$(python3 -c 'import os,urllib.parse as u;print(u.quote(os.environ["DB_PASS"],safe=""))'); echo "::add-mask::$q"
+            for h in aws-0-$REGION aws-1-$REGION; do out="$out%0Apooler $h (5432): $(t "postgresql://postgres.$REF:$q@$h.pooler.supabase.com:5432/postgres")"; done; }
+          [ -n "$URI_SECRET" ] && out="$out%0ADATABASE_URI secret: $(t "$URI_SECRET")"
+          out="$out%0Akullanılan adres: $(echo "$DATABASE_URI" | sed -E 's#//([^:]+):[^@]*@#//\1:***@#; s/'"$REF"'/REF/g')"
+          echo "::notice title=Veritabanı testi::$out"
       - name: Ortam dosyası
         if: steps.ayar.outputs.ok == '1'
         run: |
