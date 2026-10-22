@@ -70,7 +70,7 @@ jobs:
       NATRO_ANA_SITE: ${{ vars.NATRO_ANA_SITE }}
       NATRO_FTP_KILITLI: ${{ vars.NATRO_FTP_KILITLI || secrets.NATRO_FTP_KILITLI }}
       NATRO_FTP_PROTOCOL: ${{ vars.NATRO_FTP_PROTOCOL || secrets.NATRO_FTP_PROTOCOL || 'ftps' }}
-      NATRO_FTP_SECURITY: ${{ vars.NATRO_FTP_SECURITY || secrets.NATRO_FTP_SECURITY || 'strict' }}
+      NATRO_FTP_SECURITY: ${{ vars.NATRO_FTP_SECURITY || secrets.NATRO_FTP_SECURITY || 'loose' }}
       NATRO_FTP_HOST: ${{ secrets.NATRO_FTP_HOST || vars.NATRO_FTP_HOST }}
       NATRO_FTP_USER: ${{ secrets.NATRO_FTP_USER || vars.NATRO_FTP_USER }}
       NATRO_FTP_PASSWORD: ${{ secrets.NATRO_FTP_PASSWORD }}
