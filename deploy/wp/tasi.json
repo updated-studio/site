@@ -1,1 +1,1 @@
-{ "dry": false, "limit": 0, "reviewCategory": "", "scoreMeta": "", "deneme": 8, "not": "Bu dosya değişince WordPress taşıması panel sunucusunda çalışır. dry=true yalnız sayar. WordPress'te puan alanı ve ayrı inceleme kategorisi yok; tüm yazılar haber olarak gelir." }
+{ "onar": true, "dry": false, "limit": 0, "reviewCategory": "", "scoreMeta": "", "deneme": 9, "not": "onar=true: dosyası depoda olmayan görselleri kaynağından yeniden yükler. onar=false: WordPress taşıması (dry=true yalnız sayar)." }

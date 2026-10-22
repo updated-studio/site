@@ -34,6 +34,7 @@ jobs:
           echo "limit=$(jq -r '.limit // 0' deploy/wp/tasi.json)" >> "$GITHUB_OUTPUT"
           echo "rc=$(jq -r '.reviewCategory // ""' deploy/wp/tasi.json)" >> "$GITHUB_OUTPUT"
           echo "sm=$(jq -r '.scoreMeta // ""' deploy/wp/tasi.json)" >> "$GITHUB_OUTPUT"
+          echo "onar=$(jq -r 'if .onar then 1 else 0 end' deploy/wp/tasi.json)" >> "$GITHUB_OUTPUT"
       - name: SSH
         run: |
           sudo apt-get install -y -qq sshpass >/dev/null
@@ -47,10 +48,12 @@ jobs:
           LIMIT: ${{ steps.a.outputs.limit }}
           RC: ${{ steps.a.outputs.rc }}
           SM: ${{ steps.a.outputs.sm }}
+          ONAR: ${{ steps.a.outputs.onar }}
         run: |
           {
             [ "$DRY" = "true" ] && echo "DRY_RUN=1"
             echo "LIMIT=$LIMIT"
+            echo "ONAR=$ONAR"
             printf 'WP_URL=%q\nWP_USER=%q\nWP_APP_PASSWORD=%q\nWP_REVIEW_CATEGORY=%q\nWP_SCORE_META=%q\n' "$WP_URL" "$WP_USER" "$WP_APP_PASSWORD" "$RC" "$SM"
           } > /tmp/wp.env
           scp -q /tmp/wp.env deploy/wp/calistir.sh panel:/tmp/ && rm /tmp/wp.env

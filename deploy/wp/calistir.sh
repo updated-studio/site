@@ -8,6 +8,6 @@ cd /opt/updated/site/apps/cms
 echo "Başlıyor: $WP_URL · deneme=${DRY_RUN:-0} · sınır=${LIMIT:-yok}"
 export NODE_ENV=production
 rm -f scripts/wp-migrate.log.json
-timeout 4h npx tsx --tsconfig tsconfig.json scripts/wp-migrate.ts 2>&1; k=$?
+if [ "${ONAR:-0}" = "1" ]; then timeout 2h npx tsx --tsconfig tsconfig.json scripts/medya-onar.ts 2>&1; k=$?; else timeout 4h npx tsx --tsconfig tsconfig.json scripts/wp-migrate.ts 2>&1; k=$?; fi
 echo "çıkış kodu: $k"
 exit $k
