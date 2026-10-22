@@ -208,7 +208,7 @@ async function main() {
         const text = new JSDOM(`<body>${pg.content.rendered}</body>`).window.document.body.textContent || ''
         const paras = text.split(/\n\s*\n|\n/).map((x: string) => x.trim()).filter(Boolean)
         const plain = { root: { type: 'root', format: '', indent: 0, version: 1, direction: 'ltr', children: (paras.length ? paras : [title]).map((t: string) => ({ type: 'paragraph', format: '', indent: 0, version: 1, direction: 'ltr', textFormat: 0, children: [{ type: 'text', text: t, format: 0, style: '', mode: 'normal', detail: 0, version: 1 }] })) } }
-        const data = { title, spot: cut(decode(pg.excerpt?.rendered || '').replace(/\s+/g, ' ').trim(), 160) || undefined, slug: yeni, _status: 'published' }
+        const data: any = { title, spot: cut(decode(pg.excerpt?.rendered || '').replace(/\s+/g, ' ').trim(), 160) || undefined, slug: yeni, _status: 'published' }
         let ok = false
         for (const b of [await body(pg.content.rendered, title), plain] as any[]) {
           try { await payload.create({ collection: 'pages', data: { ...data, body: b }, context: ctx }); ok = true; break }
