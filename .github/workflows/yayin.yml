@@ -60,7 +60,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NATRO_ON: ${{ vars.NATRO || secrets.NATRO }}
-      SITE_URL: ${{ vars.SITE_URL || secrets.SITE_URL }}
+      # Girilmezse hazırlık adresi: v2.updated.com.tr
+      SITE_URL: ${{ vars.SITE_URL || secrets.SITE_URL || 'https://v2.updated.com.tr' }}
       CMS_URL: ${{ vars.CMS_URL || secrets.CMS_URL }}
       STAGING: ${{ vars.NATRO_STAGING || secrets.NATRO_STAGING }}
       INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
