@@ -100,21 +100,22 @@ jobs:
       - name: Güvenlik kontrolü (ana siteye dokunma)
         if: steps.ayar.outputs.aktif == '1'
         run: .github/natro-kontrol.sh
-      - name: Natro'ya yükle (FTP, yalnız değişenler)
+      - name: Natro'ya yükle (lftp, kopma olursa yeniden dener; sunucudaki başka dosyalara dokunmaz, silmez)
         if: steps.ayar.outputs.aktif == '1'
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ env.NATRO_FTP_HOST }}
-          username: ${{ env.NATRO_FTP_USER }}
-          password: ${{ env.NATRO_FTP_PASSWORD }}
-          protocol: ${{ env.NATRO_FTP_PROTOCOL }}
-          local-dir: apps/web/dist/
-          server-dir: ${{ steps.ayar.outputs.dir }}
-          security: ${{ env.NATRO_FTP_SECURITY }}
-          dangerous-clean-slate: false
-          exclude: |
-            **/.git*
-            **/.git*/**
+        run: |
+          sudo apt-get install -y -qq lftp >/dev/null
+          ssl="set ftp:ssl-allow yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes;"
+          [ "$NATRO_FTP_PROTOCOL" = "ftp" ] && ssl="set ftp:ssl-allow no;"
+          [ "$NATRO_FTP_SECURITY" = "loose" ] && ssl="$ssl set ssl:verify-certificate no;"
+          d="${NATRO_DIR#./}"; d="${d:-.}"
+          for deneme in 1 2 3; do
+            if lftp -u "$NATRO_FTP_USER,$NATRO_FTP_PASSWORD" "$NATRO_FTP_HOST" -e "$ssl set net:max-retries 4; set net:reconnect-interval-base 5; set net:timeout 30; set ftp:passive-mode yes; mirror -R --parallel=3 --no-perms --exclude-glob .git* apps/web/dist/ $d; bye" > /tmp/lftp.log 2>&1; then
+              echo "Yükleme tamam ($deneme. deneme)"; tail -3 /tmp/lftp.log; exit 0
+            fi
+            echo "Deneme $deneme başarısız, yeniden…"; tail -5 /tmp/lftp.log; sleep 10
+          done
+          node -e "const t=require('fs').readFileSync('/tmp/lftp.log','utf8').slice(-5000);console.log('::error title=FTP yükleme::'+t.replace(/%/g,'%25').replace(/\n/g,'%0A'))"
+          exit 1
       - name: Teşhis
         if: always() && steps.ayar.outputs.aktif == '1'
         run: .github/teshis.sh
