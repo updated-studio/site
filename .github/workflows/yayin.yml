@@ -44,8 +44,8 @@ jobs:
       SHOW_AD_SLOTS: '1'
       PUBLIC_BULTEN_URL: ${{ vars.PUBLIC_BULTEN_URL }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with: { node-version: 22 }
       - run: .github/calistir.sh Kurulum npm install --workspace apps/web --no-audit --no-fund --legacy-peer-deps
       - run: .github/calistir.sh Derleme npm run build --workspace apps/web
@@ -64,8 +64,8 @@ jobs:
       INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
       PUBLIC_BULTEN_URL: ${{ vars.PUBLIC_BULTEN_URL }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with: { node-version: 22 }
       - run: .github/calistir.sh Kurulum npm install --workspace apps/web --no-audit --no-fund --legacy-peer-deps
       - name: Derle (canlıda CMS adresi zorunlu — örnek veri canlıya çıkmaz)
