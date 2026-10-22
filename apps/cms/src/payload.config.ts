@@ -47,7 +47,8 @@ export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
   // Supabase Postgres: Payload tabloları "payload" şemasında; Stüdyo'nun tablolarıyla karışmaz.
-  db: postgresAdapter({ pool: { connectionString: process.env.DATABASE_URI }, schemaName: 'payload' }),
+  // push: false — şema yalnız göç dosyalarıyla değişir (geliştirmede bile otomatik eşitleme yok; Supabase'deki diğer şemalara dokunulmaz)
+  db: postgresAdapter({ pool: { connectionString: process.env.DATABASE_URI }, schemaName: 'payload', push: false }),
   sharp,
   cors: origins,
   csrf: origins,
