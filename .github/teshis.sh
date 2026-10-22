@@ -16,5 +16,14 @@ tgt=$(curl "${opts[@]}" "ftp://$NATRO_FTP_HOST/${d:+$d/}" 2>&1 | head -40 | tr '
 pwd=$(curl "${opts[@]}" -Q PWD "ftp://$NATRO_FTP_HOST/" 2>&1 | head -3 | tr '\n' ' ')
 h=$(echo "$u" | sed -E 's#https?://##; s#/.*##'); dns="$h → $(getent ahostsv4 "$h" | awk '{print $1}' | sort -u | tr '\n' ' ') · ana: $(getent ahostsv4 "${h#*.}" | awk '{print $1}' | sort -u | tr '\n' ' ')"
 echo "::notice title=Teşhis · DNS::${dns}"
+# FTP klasörü sunucuda nereye düşüyor? Bizim robots.txt'yi ("Disallow: /") ana alan adının altındaki olası yollarda ara.
+ana="${h#*.}"; yer=""
+for p in "" /v2 /v2.updated.com.tr /public_html/v2 /subdomains/v2 /v2/public_html; do
+  for b in "https://$ana" "http://$ana" "http://$h"; do
+    c=$(curl -sk --max-time 15 -o /tmp/r -w '%{http_code}' "$b$p/robots.txt"); grep -q '^Disallow: /$' /tmp/r 2>/dev/null && yer+="BULUNDU: $b$p/robots.txt ($c)%0A"
+  done
+done
+anac=$(curl -sk --max-time 15 -o /dev/null -w '%{http_code}' "https://$ana/")
+echo "::notice title=Teşhis · Konum::ana site https://$ana → $anac%0A${yer:-bizim dosyalar hiçbir denenen adreste görünmüyor}"
 echo "::notice title=Teşhis · HTTP::${out}"
 echo "::notice title=Teşhis · FTP::kök: ${root}%0Ahedef (${d:-.}): ${tgt}"
