@@ -51,6 +51,9 @@ for m in media:
     b = base(m['source_url']); i = m['id']
     hit = lambda r: i in r[0] or b in r[1]
     k = 'yayındaki yazıda' if hit(yayin) else 'yalnız taslakta' if hit(taslak) else 'sayfada' if hit(sayfa) else 'sitenin tasarımında (logo, banner…)' if b in sablon else 'yazıya eklenmiş ama metinde yok' if m.get('post') else 'hiçbir yerde'
+    if k == 'yazıya eklenmiş ama metinde yok':
+        ust = m['post']; st = next((s_ for s_, L in yazilar.items() if any(x['id'] == ust for x in L)), 'sayfa' if any(x['id'] == ust for x in sayfalar) else 'silinmiş')
+        k = f'{k} (bağlı olduğu yazı: {st})'
     kume[k] += 1; boyut[k] += (m.get('media_details') or {}).get('filesize') or 0
     if len(ornek[k]) < 12: ornek[k].append(m['source_url'].split('/wp-content/uploads/')[-1])
 R += ['', 'WORDPRESS GÖRSELLERİ', f'toplam {len(media)}'] + [f'{k}: {v} görsel · {boyut[k] / 1e6:.1f} MB' for k, v in kume.most_common()]
@@ -66,7 +69,7 @@ for d in pm['docs']:
     n += 1; top_wp += w; top_asil += d.get('filesize') or 0
     for s, v in (d.get('sizes') or {}).items():
         if v and v.get('filesize'): tur[s] += v['filesize']; top_tur += v['filesize']
-    if len(satir) < 8: satir.append(f"{d.get('filename')}: WP {w / 1024:.0f} KB → asıl {(d.get('filesize') or 0) / 1024:.0f} KB {d.get('width')}x{d.get('height')} · kart {((d.get('sizes') or {}).get('card') or {}).get('filesize', 0) / 1024:.0f} KB · kapak {((d.get('sizes') or {}).get('hero') or {}).get('filesize', 0) / 1024:.0f} KB")
+    if len(satir) < 8: satir.append(f"{d.get('filename')}: WP {w / 1024:.0f} KB → asıl {(d.get('filesize') or 0) / 1024:.0f} KB {d.get('width')}x{d.get('height')} · kart {(((d.get('sizes') or {}).get('card') or {}).get('filesize') or 0) / 1024:.0f} KB · kapak {(((d.get('sizes') or {}).get('hero') or {}).get('filesize') or 0) / 1024:.0f} KB")
 R += ['', 'SIKIŞTIRMA', f'karşılaştırılan {n} görsel · WordPress asıl: {top_wp / 1e6:.1f} MB · paneldeki asıl (WebP): {top_asil / 1e6:.1f} MB · sitede kullanılan türevler toplamı: {top_tur / 1e6:.1f} MB']
 R += ['türevler: ' + ', '.join(f'{k} {v / 1e6:.1f} MB' for k, v in tur.items())] + satir
 open('rapor/rapor.txt', 'w').write('\n'.join(R)); print('\n'.join(R))
