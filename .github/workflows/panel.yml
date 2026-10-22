@@ -19,6 +19,7 @@ jobs:
     env:
       HOST: ${{ secrets.PANEL_SSH_HOST || vars.PANEL_SSH_HOST }}
       USR: ${{ secrets.PANEL_SSH_USER || vars.PANEL_SSH_USER || 'root' }}
+      PORT: ${{ secrets.PANEL_SSH_PORT || vars.PANEL_SSH_PORT || '22' }}
       KEY: ${{ secrets.PANEL_SSH_KEY }}
       PASS: ${{ secrets.PANEL_SSH_PASSWORD }}
       DOMAIN: ${{ vars.PANEL_DOMAIN || 'panel.updated.com.tr' }}
@@ -52,14 +53,22 @@ jobs:
           if [ -n "$KEY" ]; then printf '%s\n' "$KEY" > ~/.ssh/id; else
             # İlk kurulum root şifresiyle: kalıcı bir anahtar üretilip sunucuya eklenir, sonraki bağlantılar anahtarla.
             sudo apt-get install -y -qq sshpass >/dev/null; ssh-keygen -q -t ed25519 -N '' -f ~/.ssh/id
-            ssh-keyscan -T 15 "$HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
-            SSHPASS="$PASS" sshpass -e ssh-copy-id -i ~/.ssh/id.pub -o StrictHostKeyChecking=accept-new "$USR@$HOST" >/dev/null 2>&1 || { echo "::error title=SSH::Şifreyle girilemedi (IP, kullanıcı ya da şifre yanlış olabilir)"; exit 1; }
+            ssh-keyscan -p "$PORT" -T 15 "$HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+            if ! SSHPASS="$PASS" sshpass -e ssh-copy-id -p "$PORT" -i ~/.ssh/id.pub -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 "$USR@$HOST" > /tmp/copy.log 2>&1; then
+              # Teşhis: port açık mı, sunucu hangi giriş yöntemlerine izin veriyor?
+              p=$(timeout 10 bash -c "</dev/tcp/$HOST/$PORT" 2>&1 && echo açık || echo "kapalı/erişilemiyor")
+              m=$(ssh -p "$PORT" -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=no -o PreferredAuthentications=none "$USR@$HOST" 2>&1 | grep -io 'permission denied ([^)]*)' | head -1)
+              b=$(timeout 10 bash -c "exec 3<>/dev/tcp/$HOST/$PORT; head -c 60 <&3" 2>/dev/null | tr -d '\r\n')
+              echo "::error title=SSH girişi::Port $PORT: $p · sunucu: ${b:-?} · izin verilen yöntemler: ${m:-?} · ayrıntı: $(tail -c 400 /tmp/copy.log | tr '\n' ' ')"
+              exit 1
+            fi
           fi
           chmod 600 ~/.ssh/id
-          ssh-keyscan -T 15 "$HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+          ssh-keyscan -p "$PORT" -T 15 "$HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
           echo "Host panel
             HostName $HOST
             User $USR
+            Port $PORT
             IdentityFile ~/.ssh/id
             ServerAliveInterval 30
             StrictHostKeyChecking accept-new" > ~/.ssh/config
