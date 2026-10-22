@@ -163,17 +163,26 @@ async function main() {
         path = `/inceleme/${(doc as any).slug || common.slug}`; log.reviews++
       } else {
         let doc: any
-        try { doc = await upsert('news', p.id, { ...common, category: cat.id, label: 'yok' }) }
+        const ilk = async (c: any) => {
+          try { return await upsert('news', p.id, c) }
+          catch (e: any) {
+            // Adres başka bir yazıda kullanılıyorsa sonuna WordPress kimliği eklenip yeniden denenir
+            if (!JSON.stringify(e.data?.errors || '').includes('"slug"')) throw e
+            common.slug = `${decodeURIComponent(p.slug)}-${p.id}`
+            return await upsert('news', p.id, { ...c, slug: common.slug })
+          }
+        }
+        try { doc = await ilk({ ...common, category: cat.id, label: 'yok' }) }
         catch (e: any) {
           // Metin editöre sığmadıysa düz paragraflarla yeniden dene (biçim kaybolur, içerik korunur); sebebi kayda yazılır.
           log.errors.push(`yazı ${p.id} ilk deneme: ${e.message} ${JSON.stringify(e.data?.errors || '').slice(0, 300)}`)
           // 2. deneme: biçim (başlık, bağlantı, kalın) korunur, metin içi görseller çıkarılır
-          try { doc = await upsert('news', p.id, { ...common, body: await body(p.content.rendered, title, true), category: cat.id, label: 'yok' }); log.gorselsiz = (log.gorselsiz || 0) + 1 } catch (e2: any) { log.errors.push(`yazı ${p.id} ikinci deneme: ${e2.message}`) }
+          try { doc = await ilk({ ...common, body: await body(p.content.rendered, title, true), category: cat.id, label: 'yok' }); log.gorselsiz = (log.gorselsiz || 0) + 1 } catch (e2: any) { log.errors.push(`yazı ${p.id} ikinci deneme: ${e2.message}`) }
           if (!doc) {
           const text = new JSDOM(`<body>${p.content.rendered}</body>`).window.document.body.textContent || ''
           const paras = text.split(/\n\s*\n|\n/).map((x: string) => x.trim()).filter(Boolean)
           const plain = { root: { type: 'root', format: '', indent: 0, version: 1, direction: 'ltr', children: (paras.length ? paras : [title]).map((t: string) => ({ type: 'paragraph', format: '', indent: 0, version: 1, direction: 'ltr', textFormat: 0, children: [{ type: 'text', text: t, format: 0, style: '', mode: 'normal', detail: 0, version: 1 }] })) } }
-          doc = await upsert('news', p.id, { ...common, body: plain, category: cat.id, label: 'yok' })
+          doc = await ilk({ ...common, body: plain, category: cat.id, label: 'yok' })
           log.duzMetin = (log.duzMetin || 0) + 1
           }
         }
