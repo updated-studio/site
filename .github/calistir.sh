@@ -7,6 +7,6 @@ log=$(mktemp /tmp/calistir-XXXX.log)
 "$@" 2>&1 | tee "$log"
 code=${PIPESTATUS[0]}
 if [ "$code" -ne 0 ]; then
-  node -e "const t=require('fs').readFileSync(process.argv[1],'utf8').slice(-3500);console.log('::error title='+process.argv[2]+'::'+t.replace(/%/g,'%25').replace(/\r/g,'%0D').replace(/\n/g,'%0A'))" "$log" "$title"
+  node -e "const t=require('fs').readFileSync(process.argv[1],'utf8').split('\n').filter(l=>!/^\s+(CREATE|ALTER|INSERT|DROP|COMMENT|at )/.test(l)).join('\n').slice(-2500);console.log('::error title='+process.argv[2]+'::'+t.replace(/%/g,'%25').replace(/\r/g,'%0D').replace(/\n/g,'%0A'))" "$log" "$title"
 fi
 exit "$code"
