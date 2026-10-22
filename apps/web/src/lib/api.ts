@@ -105,10 +105,23 @@ const cyc = <T,>(arr: T[], p: number, n = PAGE) => Array.from({ length: n }, (_,
 export type SiteCfg = { tagline: string; nav: { label: string; href: string }[]; youtube: string; instagram: string; kulupUrl: string; newsletterNote: string }
 const DEF_NAV = [['Haberler', '/haberler'], ['İncelemeler', '/inceleme'], ['Karşılaştırma', '/karsilastirma'], ['Mobil', '/mobil'], ['Kamera & Dron', '/kamera-dron'], ['Oyun', '/oyun']].map(([label, href]) => ({ label, href }))
 const DEF_SITE: SiteCfg = { tagline: 'Teknoloji haberleri, incelemeler ve karşılaştırmalar. Önce bilgi, sonra yorum.', nav: DEF_NAV, youtube: 'https://www.youtube.com/@nerdesinfatih', instagram: 'https://www.instagram.com/updated.tr/', kulupUrl: '/kulup', newsletterNote: 'Haftalık bülten pazartesi 08.30.' }
+/**
+ * Panelde menü girilmemişse: Haberler + İncelemeler + "Üst menüde" işaretli kategoriler;
+ * hiçbiri işaretli değilse en çok haberi olan 4 kategori (kit: menüde en fazla 7 öğe; Kulüp ayrıca eklenir).
+ */
+async function autoNav() {
+  const r = await get('categories', { sort: 'order', limit: 100, depth: 0 })
+  let cats = (r.docs as any[]).filter((c) => c.inNav)
+  if (!cats.length) {
+    const counts = await Promise.all((r.docs as any[]).map(async (c) => ({ c, n: (await get('news', { where: { and: [published, { category: { equals: c.id } }] }, limit: 1, depth: 0 })).totalDocs as number })))
+    cats = counts.sort((a, b) => b.n - a.n).filter((x) => x.n > 0).slice(0, 4).map((x) => x.c)
+  }
+  return [['Haberler', '/haberler'], ['İncelemeler', '/inceleme'], ...cats.slice(0, 5).map((c) => [c.name, `/${c.slug}`])].slice(0, 7).map(([label, href]) => ({ label, href }))
+}
 let siteCache: { at: number; v: SiteCfg } | null = null
 export async function getSite(): Promise<SiteCfg> {
   if (siteCache && Date.now() - siteCache.at < 60e3) return siteCache.v
-  const v = await safe(async () => { const g = await get('globals/site', { depth: 0 }); return { ...DEF_SITE, ...Object.fromEntries(Object.entries(g).filter(([, x]) => x != null && x !== '')), nav: g.nav?.length ? g.nav : DEF_NAV } as SiteCfg }, () => DEF_SITE)
+  const v = await safe(async () => { const g = await get('globals/site', { depth: 0 }); return { ...DEF_SITE, ...Object.fromEntries(Object.entries(g).filter(([, x]) => x != null && x !== '')), nav: g.nav?.length ? g.nav : await autoNav() } as SiteCfg }, () => DEF_SITE)
   siteCache = { at: Date.now(), v }
   return v
 }

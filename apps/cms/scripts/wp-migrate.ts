@@ -14,6 +14,7 @@ import { convertHTMLToLexical, editorConfigFactory } from '@payloadcms/richtext-
 import { JSDOM } from 'jsdom'
 import { writeFileSync, existsSync, readFileSync } from 'node:fs'
 import { trSlug, cut } from '../src/lib/slug'
+import { randomBytes } from 'node:crypto'
 
 const WP = (process.env.WP_URL || '').replace(/\/$/, '')
 const AUTH = process.env.WP_USER && process.env.WP_APP_PASSWORD ? 'Basic ' + Buffer.from(`${process.env.WP_USER}:${process.env.WP_APP_PASSWORD}`).toString('base64') : ''
@@ -24,7 +25,7 @@ const SCORE_META = process.env.WP_SCORE_META || ''
 if (!WP) throw new Error('WP_URL gerekli')
 
 const ctx = { migration: true }
-const log = { categories: 0, authors: 0, media: 0, news: 0, reviews: 0, skipped: [] as string[], errors: [] as string[] }
+const log: any = { categories: 0, authors: 0, media: 0, news: 0, reviews: 0, duzMetin: 0, skipped: [] as string[], errors: [] as string[] }
 const decode = (s: string) => new JSDOM(`<p>${s}</p>`).window.document.querySelector('p')!.textContent || ''
 
 async function wp<T = any>(path: string, params: Record<string, string | number> = {}): Promise<{ data: T; total: number; pages: number }> {
@@ -89,6 +90,12 @@ async function main() {
   async function body(html: string, title: string) {
     const clean = html.replace(/<!--[\s\S]*?-->/g, '').replace(/\[\/?[a-z_]+[^\]]*\]/g, '') // blok yorumları, kısa kodlar
     const dom = new JSDOM(`<body>${clean}</body>`)
+    const doc = dom.window.document
+    // Editörün tanımadığı öğeler: betik/stil kaldırılır; video gömmeleri bağlantıya, tablolar satır satır paragrafa çevrilir.
+    doc.querySelectorAll('script, style, noscript, form, button, svg').forEach((e: any) => e.remove())
+    doc.querySelectorAll('iframe, video, embed, object').forEach((e: any) => { const src = e.getAttribute('src') || e.getAttribute('data-src') || ''; const p = doc.createElement('p'); if (src) { const a = doc.createElement('a'); a.href = src.startsWith('//') ? 'https:' + src : src; a.textContent = /youtu/.test(src) ? 'Videoyu YouTube’da izleyin' : 'Gömülü içerik'; p.appendChild(a) } e.replaceWith(p) })
+    doc.querySelectorAll('table').forEach((t: any) => { const frag = doc.createDocumentFragment(); t.querySelectorAll('tr').forEach((tr: any) => { const txt = [...tr.querySelectorAll('th,td')].map((c: any) => c.textContent.trim()).filter(Boolean).join(' · '); if (txt) { const p = doc.createElement('p'); p.textContent = txt; frag.appendChild(p) } }); t.replaceWith(frag) })
+    doc.querySelectorAll('div, section, span:not([class])').forEach((e: any) => { if (!e.querySelector('img')) e.replaceWith(...e.childNodes) })
     const children: any[] = []
     let buf = ''
     const flush = () => { if (buf.trim()) children.push(...convertHTMLToLexical({ editorConfig, html: buf, JSDOM }).root.children); buf = '' }
@@ -99,7 +106,7 @@ async function main() {
         const src = img.getAttribute('data-src') || img.getAttribute('src') || ''
         const cap = el.querySelector?.('figcaption')?.textContent?.trim()
         const id = await media(src.split('?')[0].replace(/-\d+x\d+(\.\w+)$/, '$1'), img.getAttribute('alt') || title, cap)
-        if (id && id !== 'dry') children.push({ type: 'upload', relationTo: 'media', value: id, version: 3, fields: null, format: '' })
+        if (id && id !== 'dry') children.push({ type: 'upload', relationTo: 'media', value: id, version: 3, fields: {}, format: '', id: randomBytes(12).toString('hex') })
       } else buf += el.outerHTML ?? el.textContent ?? ''
     }
     flush()
@@ -136,7 +143,17 @@ async function main() {
         const doc = await upsert('reviews', p.id, { ...common, product: prod.id, scoreBox: { score, pros: [], cons: [] } })
         path = `/inceleme/${(doc as any).slug || common.slug}`; log.reviews++
       } else {
-        const doc = await upsert('news', p.id, { ...common, category: cat.id, label: 'yok' })
+        let doc: any
+        try { doc = await upsert('news', p.id, { ...common, category: cat.id, label: 'yok' }) }
+        catch (e: any) {
+          // Metin editöre sığmadıysa düz paragraflarla yeniden dene (biçim kaybolur, içerik korunur); sebebi kayda yazılır.
+          log.errors.push(`yazı ${p.id} ilk deneme: ${e.message} ${JSON.stringify(e.data?.errors || '').slice(0, 300)}`)
+          const text = new JSDOM(`<body>${p.content.rendered}</body>`).window.document.body.textContent || ''
+          const paras = text.split(/\n\s*\n|\n/).map((x: string) => x.trim()).filter(Boolean)
+          const plain = { root: { type: 'root', format: '', indent: 0, version: 1, direction: 'ltr', children: (paras.length ? paras : [title]).map((t: string) => ({ type: 'paragraph', format: '', indent: 0, version: 1, direction: 'ltr', textFormat: 0, children: [{ type: 'text', text: t, format: 0, style: '', mode: 'normal', detail: 0, version: 1 }] })) } }
+          doc = await upsert('news', p.id, { ...common, body: plain, category: cat.id, label: 'yok' })
+          log.duzMetin = (log.duzMetin || 0) + 1
+        }
         path = `/${cat.slug}/${(doc as any).slug || common.slug}`; log.news++
       }
       const old = new URL(p.link).pathname.replace(/\/$/, '') || '/'
