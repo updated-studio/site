@@ -119,7 +119,7 @@ echo "== adım 6"
 echo "== adım 7"
 bulut -tA -F $'\t' -c "select id, public, coalesce(file_size_limit::text,''), coalesce(array_to_string(allowed_mime_types, ','),'') from storage.buckets where id <> 'media'" |
 while IFS=$'\t' read -r id acik boyut turler; do
-  sa -c "insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types) values ('$id','$id',$acik,nullif('$boyut','')::bigint,nullif(string_to_array('$turler',','),'{}'))
+  sa -c "insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types) values ('$id','$id','$acik'::boolean,nullif('$boyut','')::bigint,nullif(string_to_array('$turler',','),'{}'))
          on conflict (id) do update set public=excluded.public, file_size_limit=excluded.file_size_limit, allowed_mime_types=excluded.allowed_mime_types"
   echo "kova: $id (herkese açık: $acik)"
 done
