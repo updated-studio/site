@@ -76,7 +76,7 @@ jobs:
           ssh panel "sudo ASAMA=${{ github.event.inputs.asama }} PANEL_DOMAIN=$DOMAIN bash /tmp/altyapi/studyo-tasi.sh" > /tmp/ham.log 2>&1
           s=$?
           # Yalnız özet satırları + hata başlıkları (ilk 140 karakter); veri satırı içerebilecek DETAIL/CONTEXT atılır
-          grep -E '^(== |bulut |buluttaki|döküm|tetikleyici|auth\.|göç|kova|dosyalar|hata:|zamanlanmış|fonksiyon|FARK|public:|kullanıcı|TAMAM)|ERROR' /tmp/ham.log \
+          grep -E '^(== |bulut |buluttaki|döküm|tetikleyici|auth\.|göç|kova|dosyalar|hata:|zamanlanmış|fonksiyon|FARK|public:|kullanıcı|TAMAM|psql:|pg_dump:|docker:|Error)|ERROR' /tmp/ham.log \
             | grep -vE 'DETAIL|CONTEXT|LINE [0-9]' | sed -E 's/(ERROR: +[^(]{0,120}).*/\1/' | cut -c1-200 > /tmp/ozet.log
           echo "çıkış kodu: $s" >> /tmp/ozet.log
           cat /tmp/ozet.log
