@@ -4,7 +4,7 @@
 set -euo pipefail
 APP=/opt/updated
 REPO="${PANEL_REPO:-https://github.com/updated-studio/site.git}"
-run() { sudo -u panel -H bash -c "set -a; . /etc/updated-panel.env; . /etc/updated-panel.secrets; set +a; cd $APP/site && $1"; }
+run() { sudo -u panel -H bash -c "set -a; . /etc/updated-panel.env; . /etc/updated-panel.secrets; [ -f /etc/updated-panel.yerel ] && . /etc/updated-panel.yerel; set +a; cd $APP/site && $1"; }
 chown root:panel /etc/updated-panel.secrets && chmod 640 /etc/updated-panel.secrets
 chgrp panel /etc/updated-panel.env && chmod 640 /etc/updated-panel.env
 

@@ -10,7 +10,7 @@ services:
     depends_on: !reset []
     ports: !override
       - "127.0.0.1:8000:8000/tcp"
-    mem_limit: 128m
+    mem_limit: 192m
 
   db:
     ports:
@@ -40,7 +40,7 @@ services:
     mem_limit: 160m
 
   realtime:
-    mem_limit: 384m
+    mem_limit: 512m
 
   storage:
     depends_on: !override

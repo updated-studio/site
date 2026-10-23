@@ -51,6 +51,8 @@ User=panel
 WorkingDirectory=$APP/site/apps/cms
 EnvironmentFile=/etc/updated-panel.env
 EnvironmentFile=/etc/updated-panel.secrets
+# Natro'daki Supabase'e geçişten sonra (deploy/altyapi/panel-tasi.sh): bulut ayarlarının önüne geçer
+EnvironmentFile=-/etc/updated-panel.yerel
 Environment=NODE_ENV=production
 Environment=PORT=3001
 ExecStart=/usr/bin/npm run start
