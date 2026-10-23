@@ -10,6 +10,6 @@ const shown = lists.filter((x, i) => i === 0 || x.items.length)
 ---
 <div data-okunan>
   <h4 class="label" style="color:var(--text-3);margin:0 0 8px">En çok okunanlar</h4>
-  {shown.length > 1 && <div class="chips" role="tablist" aria-label="Dönem" style="margin:0 0 8px;gap:6px">{shown.map((x, i) => <button class="btn" style="height:32px;padding:0 10px;font-size:13px" type="button" role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-donem={x.d}>{x.l}</button>)}</div>}
+  {shown.length > 1 && <div class="chips" role="tablist" aria-label="Dönem" style="margin:0 0 8px;gap:6px">{shown.map((x, i) => <button class="btn" style="padding:0 12px;font-size:14px" type="button" role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-donem={x.d}>{x.l}</button>)}</div>}
   {shown.map((x, i) => <div role="tabpanel" data-panel={x.d} hidden={i !== 0}><CardList items={x.items} /></div>)}
 </div>
