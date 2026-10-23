@@ -25,5 +25,5 @@ echo "YEDEK_ACIK_ANAHTAR=$(cat $D/anahtar.pub)"
 echo "FTP bilgisi: $( [ -s $D/ftp.env ] && echo var || echo YOK) · zamanlama: her gece 03:15"
 echo "hosting'e bağlantı: $(timeout 15 bash -c "</dev/tcp/$(sed -n 's/^FTP_HOST=//p' $D/ftp.env 2>/dev/null)/21" 2>/dev/null && echo açık || echo KAPALI)"
 if [ "${1:-}" = "calistir" ]; then
-  bash $D/yedekle.sh >/dev/null 2>&1; echo "son: $(tail -1 $D/yedek.log | cut -c1-300)"
+  bash $D/yedekle.sh >/dev/null 2>&1 || true; echo "son: $(tail -1 $D/yedek.log | cut -c1-300)"
 fi
