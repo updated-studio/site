@@ -5,19 +5,18 @@
 set -euo pipefail
 D=/opt/updated/yedek
 HERE="$(cd "$(dirname "$0")" && pwd)"
-for p in rsync lftp; do command -v $p >/dev/null || { apt-get update -qq >/dev/null; apt-get install -y -qq $p >/dev/null; }; done
+# stdin (FTP bilgileri) önce okunur: paket kurulumu stdin'i tüketmesin
+girdi=""; [ -t 0 ] || girdi=$(cat)
+for p in rsync lftp; do command -v $p >/dev/null || { apt-get update -qq >/dev/null; apt-get install -y -qq $p >/dev/null 2>&1 </dev/null; }; done
 mkdir -p $D && chmod 700 $D
 install -m 700 "$HERE/yedekle.sh" $D/yedekle.sh
 [ -f $D/anahtar ] || ssh-keygen -q -t ed25519 -N '' -C "natro-yedek@updated" -f $D/anahtar
 [ -f $D/sifre ] || openssl rand -base64 36 | tr -d '\n' > $D/sifre
 # FTP bilgileri (stdin'den, KEY=deger satırları); klasör adı bir kez rastgele üretilir
-if [ ! -t 0 ]; then
-  girdi=$(cat)
-  if [ -n "$girdi" ]; then
+if [ -n "$girdi" ]; then
     eski_dir=$( [ -f $D/ftp.env ] && sed -n 's/^FTP_DIR=//p' $D/ftp.env || true )
     { echo "$girdi" | grep -E '^FTP_(HOST|USER|PASS)='; echo "FTP_DIR=${eski_dir:-.yedek-$(openssl rand -hex 8)}"; } > $D/ftp.env.yeni
     mv $D/ftp.env.yeni $D/ftp.env
-  fi
 fi
 chmod 600 $D/anahtar $D/sifre $D/ftp.env 2>/dev/null || true
 echo "15 0 * * * root bash $D/yedekle.sh >/dev/null 2>&1" > /etc/cron.d/updated-yedek
