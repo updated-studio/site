@@ -8,7 +8,7 @@ name: Siteyi derle ve yayınla
 on:
   push:
     branches: [main]
-    paths: ['apps/web/**', 'packages/**', '.github/**']
+    paths: ['apps/web/**', 'packages/**', '.github/**', 'deploy/canli.json', 'deploy/natro-yukle.mjs']
   repository_dispatch:
     types: [yayin]
   workflow_dispatch:
