@@ -1,18 +1,20 @@
 import type { CollectionAfterChangeHook } from 'payload'
+import { randomBytes } from 'node:crypto'
+import { writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 
 /**
- * Site statik (Natro). Yayındaki içerik değişince GitHub Actions'taki "yayin" iş akışı tetiklenir:
- * site yeniden derlenir, değişen dosyalar FTP ile Natro'ya yüklenir, sonra IndexNow'a bildirilir.
- * Peş peşe yayınlar tek derlemede toplanır (iş akışında concurrency: bekleyen tek derleme kalır).
+ * Site statik (Natro). Yayındaki içerik değişince aynı sunucudaki yayın sırasına bir istek dosyası bırakılır
+ * (deploy/altyapi/site): site yeniden derlenir, değişen dosyalar FTP ile Natro'ya yüklenir. GitHub'a gidilmez.
+ * Peş peşe yayınlar tek derlemede toplanır (derleme sürerken gelen istekler bir sonraki derlemeye kalır).
  */
+const ISTEK = process.env.SITE_YAYIN_ISTEK || '/var/spool/updated-site'
+
 export async function purge(paths: string[], reason = 'icerik') {
-  const repo = process.env.GITHUB_REPO, token = process.env.GITHUB_DISPATCH_TOKEN
-  if (!repo || !token) return
-  await fetch(`https://api.github.com/repos/${repo}/dispatches`, {
-    method: 'POST',
-    headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${token}`, 'X-GitHub-Api-Version': '2022-11-28' },
-    body: JSON.stringify({ event_type: 'yayin', client_payload: { reason, paths: paths.slice(0, 50) } }),
-  }).catch(() => {})
+  const ad = `${Date.now()}-${randomBytes(4).toString('hex')}.json`
+  await writeFile(join(ISTEK, ad), JSON.stringify({ reason, paths: paths.slice(0, 50) })).catch((e) =>
+    console.error(`site yayın isteği yazılamadı (${ISTEK}): ${e.message}`),
+  )
 }
 
 /** Yayındaki içerik değişince (yayına alma, düzeltme, yayından kaldırma) siteyi yeniden derletir. */

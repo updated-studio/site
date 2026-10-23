@@ -4,6 +4,9 @@
 # Kullanım: sudo bash panel-tasi.sh            (zaten taşındıysa yalnız görselleri eşitler)
 #           sudo YENIDEN=1 bash panel-tasi.sh  (yereldeki payload şemasını silip buluttan yeniden alır)
 set -euo pipefail
+# EMNİYET (23 Ekim 2026): taşıma bitti, panel Natro'dan çalışıyor. Bu betik Natro'daki panel verisini buluttaki BAYAT kopyayla
+# değiştirir; yalnız bilerek, felaket kurtarma için: PANEL_TASI_ONAY=natro-verisini-sil
+[ "${PANEL_TASI_ONAY:-}" = natro-verisini-sil ] || { echo "Durduruldu: panel zaten Natro'da; bu betik Natro'daki güncel veriyi siler. Bkz. DURUM.md."; exit 1; }
 SB=/opt/updated/supabase
 YEREL=/etc/updated-panel.yerel
 HERE="$(cd "$(dirname "$0")" && pwd)"

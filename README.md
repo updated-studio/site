@@ -1,31 +1,36 @@
 # updated.com.tr — yeni site
 
-Astro (statik site) + Payload 3 (yayın paneli) + Supabase (ayrı proje: veritabanı ve görseller). Tasarım: UPDATED Marka Kiti 1.2.
+Astro (statik site) + Payload 3 (yayın paneli) + Supabase (açık kaynak, Natro VPS'te). Tasarım: UPDATED Marka Kiti 1.2.
+**Her şey Natro'da çalışır (23 Ekim 2026'dan beri); GitHub yalnız kodu saklar, hiçbir iş akışı yoktur.**
 
 ```
-apps/web     Astro 5 · statik HTML; GitHub Actions derler → Natro (FTP) · deneme: GitHub Pages
-apps/cms     Payload 3 (Next 15) · panel /admin, REST /api, triyaj /api/triyaj/import, önizleme /api/onizleme
-packages/kit Marka kiti kuralları (sınırlar, etiketler, kontrol listesi) — iki uygulama da kullanır
-supabase/    Kulüp ilerleme tabloları (SQL)
-docs/        Stüdyo entegrasyonu, Kulüp yol haritası
-.github/     yayin.yml — derle ve yayınla
+apps/web       Astro 5 · statik HTML; Natro VPS'te derlenir → Natro hosting (FTP, yalnız değişen dosyalar)
+apps/cms       Payload 3 (Next 15) · panel /admin, REST /api, triyaj /api/triyaj/import, önizleme /api/onizleme
+packages/kit   Marka kiti kuralları — iki uygulama da kullanır
+deploy/        sunucu betikleri: altyapi/ (Supabase, site yayını, Stüdyo yayını, yedek, Claude), panel/ (kurulum, güncelleme)
+docs/          Stüdyo entegrasyonu, Kulüp yol haritası
 ```
-
-> **Durum:** Kod yazıldı, veri katmanı örnek veriyle denendi. `npm install` ve tam derleme ilk kez GitHub Actions'ta çalışacak (yazıldığı ortamda paket sunucusu kapalıydı).
 
 ## Nasıl çalışır
 
 ```
-Stüdyo · Haber Masası ──► Payload panel ──► Supabase (ayrı proje)
-                              │ yayın
+Stüdyo · Haber Masası ──► Payload panel ──► Supabase (Natro VPS)
+                              │ Yayınla: /var/spool/updated-site'a istek
                               ▼
-                   GitHub Actions: derle ──► Natro (FTP, yalnız değişen dosyalar) ──► IndexNow
-                                        └──► GitHub Pages (hazırlık)
+            Natro VPS: updated-site-yayin ──► derle (~1 dk) ──► Natro hosting (FTP) ──► updated.com.tr
 ```
 
-Site sunucu gerektirmez: her sayfa HTML dosyası olarak üretilir. Yayın, düzeltme ya da yayından kaldırma derlemeyi tetikler; yeni hâl birkaç dakikada sitede olur. Peş peşe yayınlar tek derlemede toplanır.
+- **Site:** panelde Yayınla → birkaç dakikada sitede. Kod `main`'de değişince de (2 dk'da bir bakılır) ve her gece 04.00'te derlenir. Betik `deploy/altyapi/site/yayinla.sh` (`sudo updated-site-yayinla --dene` yüklemeden dener).
+- **Panel:** `apps/cms` `main`'de değişince sunucu kendisi günceller (`deploy/panel/otomatik.sh`, 2 dk).
+- **Stüdyo:** `updated-studio/studio` `main`'de değişince sunucu derler ve yayınlar (`deploy/altyapi/studyo`).
+- Gizli ayarlar yalnız sunucuda: `/etc/updated-panel.*`, `/etc/updated-site.env`, `/opt/updated/supabase/.env`, `functions.env`.
+- Kayıtlar: `journalctl -u updated-site-yayin`, `-u updated-panel-guncelle`, `-u updated-studyo`.
 
-## 1. Önce GitHub'da deneme (panel olmadan)
+---
+
+## Tarihsel kurulum notları (GitHub Actions dönemi, 23 Ekim 2026 öncesi; artık geçerli değil)
+
+### 1. Önce GitHub'da deneme (panel olmadan)
 
 1. Bu kodu `updated-studio/site` deposuna gönderin.
 2. Settings › Pages › Source: **GitHub Actions**.
