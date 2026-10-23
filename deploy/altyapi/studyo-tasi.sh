@@ -33,6 +33,10 @@ sa()    { docker exec -i supabase-db psql -X -q -U supabase_admin -d postgres -v
 pg()    { docker exec -i supabase-db psql -X -q -U postgres -h localhost -d postgres -v ON_ERROR_STOP=1 "$@"; }
 I=/tmp/studyo-tasi; rm -rf $I; mkdir -p $I; chmod 700 $I
 
+# KİLİT: geçişten sonra asıl veri Natro'dadır; bu betik Natro'daki Stüdyo verisini silip buluttan aldığı için bir daha çalışmaz.
+if [ -f $SB/.studyo-gecti ] && [ "${KILIDI_AC:-}" != "evet-natrodaki-veriyi-sil" ]; then
+  echo "hata: Stüdyo $(cat $SB/.studyo-gecti) tarihinde Natro'ya geçti; bu betik artık Natro'daki veriyi siler. Durduruldu."; exit 1
+fi
 echo "== aşama: $ASAMA"
 bulut -tAc "select 'bulut bağlantısı tamam · ' || version()" | cut -c1-60
 
@@ -176,4 +180,5 @@ done
 echo "public: $(pg -tAc "select count(*) from pg_tables where schemaname='public'") tablo, $toplam kayıt, farklı tablo: $fark"
 echo "kullanıcı: bulut $(bulut -tAc 'select count(*) from auth.users') · Natro $(sa -tAc 'select count(*) from auth.users')"
 rm -rf $I
+[ "$ASAMA" = "gecis" ] && date "+%d.%m.%Y %H:%M" > $SB/.studyo-gecti
 echo "TAMAM ($ASAMA)"
