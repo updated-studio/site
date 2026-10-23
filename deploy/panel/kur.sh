@@ -68,7 +68,14 @@ $DOMAIN {
 	request_body {
 		max_size 50MB
 	}
-	reverse_proxy 127.0.0.1:3001
+	# Supabase (kendi sunucumuzda, deploy/altyapi): Stüdyo ve panel görselleri bu yollardan
+	@supabase path /rest/v1/* /auth/v1/* /storage/v1/* /realtime/v1/* /functions/v1/* /graphql/v1/*
+	handle @supabase {
+		reverse_proxy 127.0.0.1:8000
+	}
+	handle {
+		reverse_proxy 127.0.0.1:3001
+	}
 }
 CADDY
 systemctl daemon-reload

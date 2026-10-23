@@ -1,0 +1,60 @@
+# Updated: Supabase'in açık kaynak sürümü, Natro VPS'te yalın kurulum (23 Ekim 2026).
+# Resmî docker-compose.yml'in üstüne biner. Yalnız kullanılan servisler çalışır:
+#   db, auth, rest, realtime, storage, functions, api-gw (Envoy).
+# Çalışmayanlar: studio (yönetim ekranı), meta, imgproxy (görsel dönüştürme), supavisor (havuz), kayıt toplama.
+# Bellek sınırları 3,8 GB'lık sunucuya göre; panel (Payload) aynı sunucuda ~200-400 MB.
+# Dış dünyaya hiçbir port açılmaz: yalnız 127.0.0.1. Dışarıya Caddy açar (panel.updated.com.tr/{rest,auth,storage,realtime,functions}/v1).
+
+services:
+  api-gw:
+    depends_on: !reset []
+    ports: !override
+      - "127.0.0.1:8000:8000/tcp"
+    mem_limit: 128m
+
+  db:
+    ports:
+      - "127.0.0.1:5432:5432"
+    command: !override
+      - postgres
+      - -c
+      - config_file=/etc/postgresql/postgresql.conf
+      - -c
+      - log_min_messages=fatal
+      - -c
+      - shared_buffers=192MB
+      - -c
+      - effective_cache_size=768MB
+      - -c
+      - work_mem=4MB
+      - -c
+      - maintenance_work_mem=64MB
+      - -c
+      - max_connections=80
+    mem_limit: 1g
+
+  auth:
+    mem_limit: 128m
+
+  rest:
+    mem_limit: 160m
+
+  realtime:
+    mem_limit: 384m
+
+  storage:
+    depends_on: !override
+      db:
+        condition: service_healthy
+      rest:
+        condition: service_started
+    environment:
+      ENABLE_IMAGE_TRANSFORMATION: "false"
+      IMGPROXY_URL: ""
+    mem_limit: 256m
+
+  functions:
+    depends_on: !override
+      db:
+        condition: service_healthy
+    mem_limit: 512m
