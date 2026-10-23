@@ -2,12 +2,15 @@
 # Claude Code'u Natro sunucusuna kurar (Remote Control: Claude sunucuda çalışır, claude.ai/telefondan yazılır; gelen port açılmaz).
 # Giriş (claude.ai hesabı) Fatih tarafından BİR KEZ elle yapılır: bkz. deploy/altyapi/claude/BENIOKU.md
 # Kullanım: sudo bash kur.sh <kullanıcı>
-set -euo pipefail
+set -uo pipefail
+adim() { echo "· $*"; }
 K="${1:-${SUDO_USER:-updated}}"
 id "$K" >/dev/null 2>&1 || { echo "kullanıcı yok: $K"; exit 1; }
 export DEBIAN_FRONTEND=noninteractive
-command -v tmux >/dev/null || apt-get install -y -qq tmux </dev/null >/dev/null 2>&1
-npm install -g --no-audit --no-fund @anthropic-ai/claude-code >/dev/null 2>&1
+command -v tmux >/dev/null || { apt-get update -qq </dev/null >/dev/null 2>&1; apt-get install -y -qq tmux </dev/null 2>&1 | tail -2; }
+adim "tmux: $(command -v tmux || echo YOK)"
+npm install -g --no-audit --no-fund @anthropic-ai/claude-code 2>&1 | tail -3
+adim "claude: $(command -v claude || echo YOK)"
 # Sunucuyu yönetmesi için: docker grubu (Supabase kapları) ve /opt/updated okuma-yazma
 usermod -aG docker "$K"
 chgrp -R "$K" /opt/updated/site 2>/dev/null || true
