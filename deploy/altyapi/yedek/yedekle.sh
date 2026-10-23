@@ -61,10 +61,14 @@ host_yedek() {
   echo "$OZET" > $paket/BILGI.txt
   local ssl='set ftp:ssl-allow yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate no;'
   lftp -u "$FTP_USER,$FTP_PASS" "$FTP_HOST" -e "$ssl set net:max-retries 3; set net:timeout 60; set ftp:passive-mode yes;
-    mkdir -p $FTP_DIR; cd $FTP_DIR; put $IS/htaccess -o .htaccess; mkdir -p $gun; cd $gun;
-    mput $paket/*; bye" >/dev/null || return 1
+    mkdir -f -p $FTP_DIR; cd $FTP_DIR; put $IS/htaccess -o .htaccess; mkdir -f -p $gun; cd $gun;
+    mput $paket/*; bye" >/dev/null 2>&1 || return 1
+  # Doğrulama: hostingdeki dosyalar ve klasörün web'e kapalı olduğu (klasör adı kayda yazılmaz)
+  local liste; liste=$(lftp -u "$FTP_USER,$FTP_PASS" "$FTP_HOST" -e "$ssl set net:timeout 30; cd $FTP_DIR/$gun; cls -s --block-size=1048576; bye" 2>/dev/null | tr -s ' \n' ' ')
+  local web; web=$(curl -s -o /dev/null -w '%{http_code}' "https://updated.com.tr/$FTP_DIR/$gun/BILGI.txt")
+  echo "hostingde: $liste· web erişimi: $web"
   echo "$ozet" > $D/dosya-ozeti
-  echo "$gun klasörü, $(du -sh $paket | cut -f1)"
+  echo "$gun klasörü"
 }
 if out=$(host_yedek 2>&1); then SONUC="$SONUC · hosting tamam ($out)"; else SONUC="$SONUC · hosting HATA: $(echo "$out" | tail -1 | cut -c1-120)"; fi
 
