@@ -1,0 +1,87 @@
+# Stüdyo'nun Supabase'ini (bulut) Natro'ya taşır: veri, kullanıcı hesapları, dosyalar, zamanlanmış işler, fonksiyonlar.
+# deneme: Natro'da kopya, zamanlanmış işler kapalı (Stüdyo buluttan çalışmaya devam eder). gecis: bulut işleri durur, Natro'dakiler açılır.
+# Depo herkese açık: sunucu çıktısı süzülür, yalnız özet satırları ve kısaltılmış hata başlıkları görünür (veri satırı sızmasın).
+name: Stüdyo taşıma (Natro)
+on:
+  workflow_dispatch:
+    inputs:
+      asama: { description: 'deneme ya da gecis', type: choice, options: [deneme, gecis], default: deneme }
+      studyo_ref: { description: 'Stüdyo deposunun dalı (fonksiyon kodu)', default: 'site-paneli' }
+permissions: { contents: read }
+concurrency: { group: panel, cancel-in-progress: false }
+jobs:
+  tasi:
+    runs-on: ubuntu-latest
+    env:
+      HOST: ${{ secrets.PANEL_SSH_HOST || vars.PANEL_SSH_HOST }}
+      USR: ${{ secrets.PANEL_SSH_USER || vars.PANEL_SSH_USER || 'root' }}
+      PORT: ${{ secrets.PANEL_SSH_PORT || vars.PANEL_SSH_PORT || '22' }}
+      KEY: ${{ secrets.PANEL_SSH_KEY }}
+      PASS: ${{ secrets.PANEL_SSH_PASSWORD }}
+      DOMAIN: ${{ vars.PANEL_DOMAIN || 'panel.updated.com.tr' }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/checkout@v5
+        with: { repository: updated-studio/studio, ref: '${{ github.event.inputs.studyo_ref }}', path: studyo }
+      - name: SSH hazırla
+        run: |
+          mkdir -p ~/.ssh
+          if [ -n "$KEY" ]; then printf '%s\n' "$KEY" > ~/.ssh/id; else
+            # İlk kurulum root şifresiyle: kalıcı bir anahtar üretilip sunucuya eklenir, sonraki bağlantılar anahtarla.
+            sudo apt-get install -y -qq sshpass >/dev/null; ssh-keygen -q -t ed25519 -N '' -f ~/.ssh/id
+            ssh-keyscan -p "$PORT" -T 15 "$HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+            if ! SSHPASS="$PASS" sshpass -e ssh-copy-id -p "$PORT" -i ~/.ssh/id.pub -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 "$USR@$HOST" > /tmp/copy.log 2>&1; then
+              # Teşhis: port açık mı, sunucu hangi giriş yöntemlerine izin veriyor?
+              p=$(timeout 10 bash -c "</dev/tcp/$HOST/$PORT" 2>&1 && echo açık || echo "kapalı/erişilemiyor")
+              m=$(ssh -p "$PORT" -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=no -o PreferredAuthentications=none "$USR@$HOST" 2>&1 | grep -io 'permission denied ([^)]*)' | head -1)
+              b=$(timeout 10 bash -c "exec 3<>/dev/tcp/$HOST/$PORT; head -c 60 <&3" 2>/dev/null | tr -d '\r\n')
+              echo "::error title=SSH girişi::Port $PORT: $p · sunucu: ${b:-?} · izin verilen yöntemler: ${m:-?} · ayrıntı: $(tail -c 400 /tmp/copy.log | tr '\n' ' ')"
+              exit 1
+            fi
+          fi
+          chmod 600 ~/.ssh/id
+          ssh-keyscan -p "$PORT" -T 15 "$HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+          echo "Host panel
+            HostName $HOST
+            User $USR
+            Port $PORT
+            IdentityFile ~/.ssh/id
+            ServerAliveInterval 30
+            StrictHostKeyChecking accept-new" > ~/.ssh/config
+          # root değilse: bir kez şifresiz sudo tanımlanır (kurulum betikleri sudo ile çalışır)
+          if [ "$USR" != "root" ] && [ -n "$PASS" ]; then
+            printf '%s\n' "$PASS" | ssh panel "sudo -S -p '' sh -c 'echo \"$USR ALL=(ALL) NOPASSWD:ALL\" > /etc/sudoers.d/90-updated-panel && chmod 440 /etc/sudoers.d/90-updated-panel'" || { echo "::error title=SSH::$USR için sudo ayarlanamadı"; exit 1; }
+          fi
+          ssh panel 'echo "bağlandı: $(uname -m) $(lsb_release -ds 2>/dev/null)"' 2>&1 | tee /tmp/ssh.log || { echo "::error title=SSH::$(tail -c 800 /tmp/ssh.log | tr '\n' ' ')"; exit 1; }
+
+      - name: Hazırla
+        env:
+          STUDYO_DB_SIFRE: ${{ secrets.STUDYO_DB_SIFRE }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        run: |
+          umask 077; mkdir -p /tmp/st/fonksiyonlar
+          cp deploy/altyapi/* /tmp/st/
+          for f in studyo/supabase/functions/*/; do cp -a "$f" /tmp/st/fonksiyonlar/; done
+          cp studyo/supabase/migrations/0024_site_paneli.sql /tmp/st/ 2>/dev/null || true
+          t() { printf '%s' "$1" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'; }
+          { echo "STUDYO_DB_SIFRE=$(t "$STUDYO_DB_SIFRE")"; echo "GEMINI_API_KEY=$(t "$GEMINI_API_KEY")"; echo "GROQ_API_KEY=$(t "$GROQ_API_KEY")"; echo "SMTP_PASSWORD=$(t "$SMTP_PASSWORD")"; } > /tmp/st/studyo.env
+          ssh panel 'rm -rf /tmp/altyapi && mkdir -p /tmp/altyapi && chmod 700 /tmp/altyapi'
+          scp -q -r /tmp/st/. panel:/tmp/altyapi/
+          rm -f /tmp/st/studyo.env
+      - name: Taşı
+        run: |
+          set +e
+          ssh panel "sudo ASAMA=${{ github.event.inputs.asama }} PANEL_DOMAIN=$DOMAIN bash /tmp/altyapi/studyo-tasi.sh" > /tmp/ham.log 2>&1
+          s=$?
+          # Yalnız özet satırları + hata başlıkları (ilk 140 karakter); veri satırı içerebilecek DETAIL/CONTEXT atılır
+          grep -E '^(== |bulut |buluttaki|döküm|tetikleyici|auth\.|göç|kova|dosyalar|hata:|zamanlanmış|fonksiyon|FARK|public:|kullanıcı|TAMAM)|ERROR' /tmp/ham.log \
+            | grep -vE 'DETAIL|CONTEXT|LINE [0-9]' | sed -E 's/(ERROR: +[^(]{0,120}).*/\1/' | cut -c1-200 > /tmp/ozet.log
+          echo "çıkış kodu: $s" >> /tmp/ozet.log
+          cat /tmp/ozet.log
+          node -e "const t=require('fs').readFileSync('/tmp/ozet.log','utf8').slice(-3000);console.log('::notice title=Stüdyo taşıma::'+t.replace(/%/g,'%25').replace(/\r/g,'').replace(/\n/g,'%0A'))"
+          exit $s
+      - name: Temizlik
+        if: always()
+        run: ssh panel 'sudo rm -rf /tmp/altyapi /tmp/studyo-tasi' || true

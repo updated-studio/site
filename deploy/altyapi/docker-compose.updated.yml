@@ -57,4 +57,8 @@ services:
     depends_on: !override
       db:
         condition: service_healthy
+    # Stüdyo fonksiyonlarının gizli bilgileri (studyo-tasi.sh yazar; 600)
+    env_file:
+      - path: ./functions.env
+        required: false
     mem_limit: 512m

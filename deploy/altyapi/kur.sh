@@ -63,7 +63,7 @@ ayarla SUPABASE_PUBLIC_URL "https://$DOMAIN"
 ayarla API_EXTERNAL_URL "https://$DOMAIN/auth/v1"
 ayarla SITE_URL "$STUDIO_URL"
 ayarla ADDITIONAL_REDIRECT_URLS "$STUDIO_URL/**,https://updated-studio.github.io/**"
-ayarla DISABLE_SIGNUP "true"
+ayarla DISABLE_SIGNUP "false"   # Stüdyo kayıt formu kullanıyor (ekip üyeliği profiller tablosunda denetlenir)
 ayarla ENABLE_PHONE_SIGNUP "false"
 ayarla ENABLE_PHONE_AUTOCONFIRM "false"
 ayarla ENABLE_ANONYMOUS_USERS "false"
