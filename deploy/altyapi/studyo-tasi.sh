@@ -26,7 +26,7 @@ for h in aws-1-eu-central-1 aws-0-eu-central-1; do
 done
 [ -n "$HAVUZ" ] || { echo "hata: Stüdyo bulut veritabanına bağlanılamadı"; exit 1; }
 BULUT="host=$HAVUZ.pooler.supabase.com port=5432 dbname=postgres user=postgres.$REF sslmode=require"
-BULUT_URI="postgresql://postgres.$REF:$(python3 -c 'import sys,urllib.parse;print(urllib.parse.quote(sys.argv[1],safe=""))' "$BULUT_SIFRE")@$HAVUZ.pooler.supabase.com:5432/postgres?sslmode=require"
+BULUT_URI="postgresql://postgres.$REF:$(python3 -c 'import sys,urllib.parse;print(urllib.parse.quote(sys.argv[1],safe=""))' "$BULUT_SIFRE")@$HAVUZ.pooler.supabase.com:5432/postgres"
 
 bulut() { docker exec -i -e PGPASSWORD="$BULUT_SIFRE" supabase-db psql -X -q "$BULUT" -v ON_ERROR_STOP=1 "$@"; }
 sa()    { docker exec -i supabase-db psql -X -q -U supabase_admin -d postgres -v ON_ERROR_STOP=1 "$@"; }
@@ -120,7 +120,7 @@ echo "== adım 7"
 bulut -tA -F $'\t' -c "select id, public, coalesce(file_size_limit::text,''), coalesce(array_to_string(allowed_mime_types, ','),'') from storage.buckets where id <> 'media'" |
 while IFS=$'\t' read -r id acik boyut turler; do
   sa -c "insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types) values ('$id','$id','$acik'::boolean,nullif('$boyut','')::bigint,nullif(string_to_array('$turler',','),'{}'))
-         on conflict (id) do update set public=excluded.public, file_size_limit=excluded.file_size_limit, allowed_mime_types=excluded.allowed_mime_types"
+         on conflict (id) do update set public=excluded.public, file_size_limit=excluded.file_size_limit, allowed_mime_types=excluded.allowed_mime_types" < /dev/null
   echo "kova: $id (herkese açık: $acik)"
 done
 BULUT_DB="$BULUT_URI" BULUT_URL="$BULUT_URL" HEDEF_ENDPOINT="https://$DOMAIN/storage/v1/s3" HEDEF_REGION=$(deger REGION $SB/.env) \
