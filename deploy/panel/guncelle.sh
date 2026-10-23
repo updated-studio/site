@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Paneli GitHub'daki son koda günceller: indir → kur → veritabanı göçleri → derle → yeniden başlat.
-# Kullanım: sudo bash guncelle.sh  (ortam dosyası /etc/updated-panel.env workflow tarafından yazılır)
+# Kullanım: sudo bash guncelle.sh  (ortam dosyaları /etc/updated-panel.* yalnız sunucuda; deploy/panel/otomatik.sh çağırır)
 set -euo pipefail
 APP=/opt/updated
 REPO="${PANEL_REPO:-https://github.com/updated-studio/site.git}"

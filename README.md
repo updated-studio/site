@@ -1,7 +1,7 @@
 # updated.com.tr — yeni site
 
 Astro (statik site) + Payload 3 (yayın paneli) + Supabase (açık kaynak, Natro VPS'te). Tasarım: UPDATED Marka Kiti 1.2.
-**Her şey Natro'da çalışır (23 Ekim 2026'dan beri); GitHub yalnız kodu saklar, hiçbir iş akışı yoktur.**
+**Her şey Natro'da çalışır (23 Ekim 2026'dan beri); GitHub kodu saklar ve sunucuya hiç bağlanmaz** (yalnız PR'larda kod kontrolü: `.github/workflows/kontrol.yml`).
 
 ```
 apps/web       Astro 5 · statik HTML; Natro VPS'te derlenir → Natro hosting (FTP, yalnız değişen dosyalar)
