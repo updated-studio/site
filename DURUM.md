@@ -10,8 +10,20 @@
 - **Natro bot koruması** ("One moment, please…", openresty) 23 Ekim gecesi açıldı; GitHub'dan yapılan dış kontroller (teşhis, `deploy/kontrol`) siteyi göremiyor. Ziyaretçiler etkilenmiyor.
 
 ## Bekleyenler
+
+### Sıradaki işler (Fatih, 23 Ekim 16:05; bu sırayla)
+0. Oturum başında: `cd /opt/updated/site && git pull` (sunucudaki kopya yalnız panel güncellenince çekiliyor) + Stüdyo deposunu `/opt/updated/studio`'ya klonla/çek.
+1. **Stüdyo ekranı GitHub Pages'ten Natro'ya** (Fatih: "Stüdyo tamamen Natro'da, GitHub'la konuşmasın"): derleme sunucuda, yayın Caddy ile `studio.updated.com.tr` (DNS: `studio` CNAME → panel sunucusu, Fatih Natro DNS'te değiştirir), Stüdyo'nun `.github/workflows/yayin.yml` ve `fonksiyonlar.yml` (bulut) kapatılır; fonksiyon yayını sunucuda.
+2. **`YEDEK_SIFRESI`**: Fatih belirler (şifre yöneticisi + basılı zarf). Sunucuda `/opt/updated/yedek/sifre` onunla değiştirilir, yedek yeniden alınır. Bulut oturumu şifreyi göremedi (güvenlik kısıtı); sunucuda Fatih doğrudan girebilir.
+3. **İkinci yedek kopyası (Natro dışı):** haftada bir şifreli yedek Fatih'in Mac'ine kendiliğinden insin (GitHub deploy key kuruluş kuralıyla kapalı; açılmayacak).
+4. **Panel arayüzü:** "Taslaklar" ve "Yayında" ayrı menüler; panel Stüdyo tarzı, marka kitiyle, kullanımı kolay (Payload admin özelleştirme).
+5. **30 Ekim 2026:** WordPress dosyaları (hosting) silinir; WordPress MySQL veritabanını Fatih Natro panelinden siler. Sitenin hiçbir yeri WordPress'e bağlı değil (doğrulandı).
+6. Supabase bulut projeleri (Stüdyo `fulmooonidwrqyybbkvu`, site `werbsodzhfxliffveexk`) ~1-2 hafta sorunsuz çalışınca silinir; yedek deposundaki eski bulut yedek iş akışları kapatılır.
+7. Tek giriş (Stüdyo + panel + site üyeleri, sunucudaki Supabase Auth) — yol haritası Otomasyon-1.
+8. Kod için Forgejo (Natro'da) isteğe bağlı; hız artık Claude'un sunucuda çalışmasıyla çözüldü.
+Notlar: Fatih teknik değil, adım adım + doğrudan bağlantı; erişimler 2 kişide + basılı zarf (Natro, GitHub + kurtarma kodları, yedek şifresi, VPS şifresi, e-posta şifresi). Sunucu kullanıcısı `updated` (ssh şifreyle; Enes'in Mac'i known_hosts'ta).
 - [x] **WordPress kapatıldı (23 Ekim 15:50, Fatih: "tamamen kopar"):** `canli.json` wordpress=false. wp-json, xmlrpc, wp-cron, index.php → 410; wp-admin / wp-login → panel. Site 200. Stüdyo WordPress'e hiçbir şey göndermiyor. Kalan: WordPress dosyaları hosting'de (çalışmıyor) + WordPress MySQL veritabanı (Natro panelinde). Silme: Fatih onayıyla (tam yedek var).
-- [ ] **Claude sunucuda (hız):** Claude Code VPS'e kuruldu (2.1.309, `deploy/altyapi/claude`). Fatih bir kez giriş yapacak (BENIOKU.md adım 1-3), sonra claude.ai/code → "Natro sunucu" oturumu doğrudan sunucuda çalışır; GitHub turları biter.
+- [x] **Claude sunucuda (23 Ekim 16:05):** Claude Code VPS'te, Remote Control oturumu "Natro sunucu" (tmux `claude`, `claude-sunucu durum`). Fatih giriş yaptı. **Sunucu işleri bundan sonra bu oturumda yapılır** (doğrudan, GitHub turu yok); bulut oturumu sunucuya iş göndermez.
 - [ ] `YEDEK_SIFRESI` secret'ı (Fatih belirler) → sunucudaki yedek şifresi onunla değiştirilecek. Yedek artık kod (depoların tam geçmişi) + gizli ayarları da içeriyor (yalnız şifreli hosting kopyası). Kurtarma: `KURTARMA.md`.
 - [ ] GitHub yedek kopyası: kuruluş kuralı deploy key'i kapatıyor; açılmayacak. İkinci kopya Forgejo/başka makine aşamasında.
 - [ ] Ekipten biri Stüdyo → Haber Masası → Ayarlar → "Site paneli bağlantısı" → **Bağlantıyı dene** + bir taslağı panele gönderir → sonra `deploy/canli.json` `"wordpress": false` (WordPress kapanır).
