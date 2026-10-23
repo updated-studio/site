@@ -1,0 +1,28 @@
+# Durum (ortak hafıza: her oturum okur, her iş sonunda günceller)
+
+## Şu an (23 Ekim 2026)
+- **Site:** http://v2.updated.com.tr (Astro, statik). Kod: bu depo `apps/web`. GitHub Actions derler, Natro paylaşımlı hostinge FTP ile yükler (`.github/workflows/yayin.yml`). https yok (Natro'dan v2 için SSL istenecek).
+- **Panel (Payload):** https://panel.updated.com.tr/admin — Natro VPS (Ubuntu 24.04, kullanıcı `updated`), Caddy + systemd `updated-panel`. Kod `apps/cms`; `apps/cms/**` değişince `.github/workflows/panel.yml` sunucuyu günceller.
+- **Veritabanı + görseller:** Supabase projesi `updated-site` (Londra, ref werbsodzhfxliffveexk), şema `payload`, kova `media`. Gece yedeği: `updated-studio/yedek` deposu.
+- **Yayın akışı:** panelde Yayınla → GitHub `repository_dispatch` (secret `YAYIN_TOKEN`, sunucuda `GITHUB_DISPATCH_TOKEN`) → site derlenir, ~3-5 dk. Son dakika şeridi `/api/canli` ile anlık.
+- **WordPress taşıması bitti:** 189 haber, 18 kategori, 10 yazar, 537 görsel, 3 kurumsal sayfa; eski adresler 301 (`apps/web/src/redirects.json` + `postbuild.mjs` kalıpları). Etiketler taşınmadı (bilerek; aramaya yönlenir). WordPress tam yedeği alındı (Fatih kontrol etti).
+- **Görseller:** asıl WebP %88, türevler %72–78 (`apps/cms/src/collections/Media.ts`); WordPress 945 MB → 185 MB.
+- **Natro bot koruması** ("One moment, please…", openresty) 23 Ekim gecesi açıldı; GitHub'dan yapılan dış kontroller (teşhis, `deploy/kontrol`) siteyi göremiyor. Ziyaretçiler etkilenmiyor.
+
+## Bekleyenler
+- [ ] v2 için SSL + bot korumasını Natro destekten iste (Fatih).
+- [ ] Ana alan adına geçiş (aşağıdaki plan) — Fatih onayıyla.
+- [ ] Stüdyo → Payload bağlantısı: Haber Masası taslakları WordPress yerine panele (`/api/triyaj/import`). Geçişten ÖNCE şart.
+- [ ] Fotoğrafçılık bölümü baştan tasarlanacak (eski dosyalar kullanılmayacak; Fatih ile).
+- [ ] Ekip hesapları panelde; Stüdyo ile tek giriş.
+- [ ] Cloudflare (ücretsiz) önerildi: Natro'nun kör bot koruması yerine ayarlanabilir koruma + önbellek.
+
+## Ana alan adına geçiş planı (taslak)
+1. Stüdyo taslakları panele gidecek şekilde bağlanır, ekip bir gün v2'de dener.
+2. WordPress `eski.updated.com.tr` alt alan adına taşınır (silinmez; yedek zaten var).
+3. Site `public_html`'e yüklenir (`NATRO_DIR` değişir, `STAGING` kapanır → https zorlaması ve indeksleme açılır), `SITE_URL=https://updated.com.tr`.
+4. Google Search Console'a yeni site haritası; 301'ler kontrol edilir.
+
+## Günlük (en yeni üstte)
+- **23 Ekim 2026** (Fatih'in Claude'u): Görseller yeni kaliteyle yeniden üretildi (537/537). Stüdyo'da etiket kuralı (en fazla 3, izinli liste) ve otomatik taslak ataması duraklatıldı (Stüdyo deposu; Edge Function yayını için `SUPABASE_ACCESS_TOKEN` secret'ı bekleniyor). Eski site raporu: `deploy/rapor` (çıktı `raporlar` dalında). Bu dosya ve `CLAUDE.md` eklendi.
+- **22 Ekim 2026** (Fatih'in Claude'u): WordPress taşıması, görsel onarımı, kurumsal sayfalar, eski adres yönlendirmeleri, panel Türkçe + logo, yayın anahtarı.
