@@ -39,11 +39,19 @@ jobs:
             k=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $GROQ" https://api.groq.com/openai/v1/models); s "GROQ_API_KEY: $([ "$k" = 200 ] && echo DOĞRU || echo "HATALI ($k)")"; fi
           if [ -z "$SMTP_SIFRE" ]; then s "SMTP_PASSWORD: girilmemiş"; else
             k=$(python3 -c "
-          import smtplib,os,sys
-          try:
-            c=smtplib.SMTP_SSL('mail.kurumsaleposta.com',465,timeout=20); c.login('studio@updated.com.tr',os.environ['SMTP_SIFRE']); c.quit(); print('DOĞRU')
-          except smtplib.SMTPAuthenticationError: print('ŞİFRE YANLIŞ')
-          except Exception as e: print('bağlanamadı: '+type(e).__name__)
+          import smtplib,os,ssl
+          sifre=os.environ['SMTP_SIFRE']; sonuc=[]
+          for h in ['mail.kurumsaleposta.com','mail.updated.com.tr','smtp.kurumsaleposta.com']:
+            for p in (465,587):
+              for u in ('studio@updated.com.tr','studio'):
+                try:
+                  c=smtplib.SMTP_SSL(h,p,timeout=15) if p==465 else smtplib.SMTP(h,p,timeout=15)
+                  if p==587: c.starttls(context=ssl.create_default_context())
+                  c.login(u,sifre); c.quit(); sonuc.append(f'DOĞRU: {h}:{p} kullanıcı {u}'); break
+                except smtplib.SMTPAuthenticationError: sonuc.append(f'{h}:{p} {u}: şifre reddedildi')
+                except Exception as e: sonuc.append(f'{h}:{p} {u}: bağlanamadı ({type(e).__name__})'); break
+          ok=[x for x in sonuc if x.startswith('DOĞRU')]
+          print(ok[0] if ok else 'ŞİFRE YANLIŞ · ' + ' | '.join(sonuc))
           "); s "SMTP_PASSWORD: $k"; fi
           [ -n "$PEXELS" ] && s "PEXELS_API_KEY: $([ "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: $PEXELS" 'https://api.pexels.com/v1/search?query=phone&per_page=1')" = 200 ] && echo DOĞRU || echo HATALI)" || s "PEXELS_API_KEY: girilmemiş (isteğe bağlı)"
           [ -n "$PIXABAY" ] && s "PIXABAY_API_KEY: $([ "$(curl -s -o /dev/null -w '%{http_code}' "https://pixabay.com/api/?key=$PIXABAY&q=phone&per_page=3")" = 200 ] && echo DOĞRU || echo HATALI)" || s "PIXABAY_API_KEY: girilmemiş (isteğe bağlı)"
