@@ -69,10 +69,13 @@ select cron.unschedule(jobid) from cron.job where jobname not like 'payload%';
 drop schema if exists public cascade;
 create schema public authorization postgres;
 grant usage on schema public to anon, authenticated, service_role;
-alter default privileges for role postgres in schema public grant all on tables to anon, authenticated, service_role;
-alter default privileges for role postgres in schema public grant all on functions to anon, authenticated, service_role;
-alter default privileges for role postgres in schema public grant all on sequences to anon, authenticated, service_role;
 truncate auth.users cascade;
+SQL
+# Varsayılan yetkiler postgres adına (yeni tablo/fonksiyon API rollerine açık; bulutla aynı)
+pg <<'SQL'
+alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
+alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
 SQL
 
 # 3) Şema (postgres sahipliğinde, buluttaki gibi) + gerçek zamanlı yayın listesi
