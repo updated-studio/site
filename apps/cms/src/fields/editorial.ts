@@ -34,7 +34,7 @@ export const workflow: Field = {
   name: 'workflow', type: 'group', label: 'Yayın akışı',
   admin: { position: 'sidebar' },
   fields: [
-    { name: 'state', type: 'select', label: 'Durum', options: [...STATES], defaultValue: 'taslak' },
+    { name: 'state', type: 'select', label: 'Durum', options: [...STATES], defaultValue: 'taslak', admin: { components: { Cell: '/components/DurumHucre#DurumHucre' } } },
     { name: 'ownerUser', type: 'relationship', relationTo: 'users', label: 'Hazırlayan' },
     { name: 'secondEditor', type: 'relationship', relationTo: 'users', label: 'İkinci editör' },
     { name: 'approvedBy', type: 'relationship', relationTo: 'users', label: 'Onaylayan', admin: { readOnly: true } },

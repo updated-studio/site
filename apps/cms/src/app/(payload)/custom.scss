@@ -1,6 +1,401 @@
-/* Panel markası (Kit 1.2): köşeler 0. Renkler Payload'un açık/koyu temasına bırakılır (sabit renk vermek koyu temada yazıları görünmez yapıyordu). */
+/*
+ * Panel görünümü: UPDATED Marka Kiti 1.2 — §3 renk, §4 tipografi, §12 panel arayüzü, §12b panel koyu mod, §13 hareket.
+ * Payload'un kendi stilleri bir CSS katmanında (@layer) durur; buradaki katmansız kurallar onların önüne geçer.
+ * Yeni renk eklenmez: yalnız kit paleti ve arayüz nötrleri. Köşe 0, gölge yok, saydamlık ve gradyan yok.
+ */
+@import 'yazi-tipleri';
+
 :root {
+  --font-body: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+  --font-serif: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif; // zengin metin de Metin rolünde (sitedeki gibi)
+  --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  --font-head: 'Big Shoulders Display', Impact, 'Arial Narrow', sans-serif;
   --style-radius-s: 0px;
   --style-radius-m: 0px;
   --style-radius-l: 0px;
+  --kit-mavi: #2563eb;
+  --kit-turuncu: #ff6b1a;
+  --kit-yan: #000000; // kenar çubuk
+  --kit-yan-secili: #171717;
+  --kit-yan-cizgi: transparent;
+  --kit-kolay: cubic-bezier(0.2, 0, 0, 1);
+
+  // §12b açık değerler: zemin #F2F2F2 · yüzey #FFFFFF · yüzey 2 #F2F2F2 · çizgi #E2E2E2 · metin #171717 / #55585C / #6B6F74 · form çerçevesi #9A9EA3
+  --theme-bg: #f2f2f2;
+  --theme-input-bg: #ffffff;
+  --theme-text: #171717;
+  --theme-elevation-0: #ffffff;
+  --theme-elevation-50: #f2f2f2;
+  --theme-elevation-100: #e2e2e2;
+  --theme-elevation-150: #e2e2e2;
+  --theme-elevation-200: #e2e2e2;
+  --theme-elevation-250: #e2e2e2;
+  --theme-elevation-300: #9a9ea3;
+  --theme-elevation-350: #9a9ea3;
+  --theme-elevation-400: #6b6f74;
+  --theme-elevation-450: #6b6f74;
+  --theme-elevation-500: #6b6f74;
+  --theme-elevation-550: #55585c;
+  --theme-elevation-600: #55585c;
+  --theme-elevation-650: #55585c;
+  --theme-elevation-700: #171717;
+  --theme-elevation-750: #171717;
+  --theme-elevation-800: #171717;
+  --theme-elevation-850: #171717;
+  --theme-elevation-900: #000000;
+  --theme-elevation-950: #000000;
+  --theme-elevation-1000: #000000;
+  --theme-border-color: #e2e2e2;
+}
+
+// §12b koyu değerler: zemin #121212 · yüzey #1C1C1C · yüzey 2 #262626 · çizgi #333333 · metin #F2F2F2 / #B4B7BB / #8E9297 · form çerçevesi #8E9297
+html[data-theme='dark'] {
+  --kit-yan-secili: #1c1c1c;
+  --kit-yan-cizgi: #333333;
+  --theme-bg: #121212;
+  --theme-input-bg: #1c1c1c;
+  --theme-text: #f2f2f2;
+  --theme-elevation-0: #1c1c1c;
+  --theme-elevation-50: #262626;
+  --theme-elevation-100: #333333;
+  --theme-elevation-150: #333333;
+  --theme-elevation-200: #333333;
+  --theme-elevation-250: #333333;
+  --theme-elevation-300: #8e9297;
+  --theme-elevation-350: #8e9297;
+  --theme-elevation-400: #8e9297;
+  --theme-elevation-450: #8e9297;
+  --theme-elevation-500: #8e9297;
+  --theme-elevation-550: #b4b7bb;
+  --theme-elevation-600: #b4b7bb;
+  --theme-elevation-650: #b4b7bb;
+  --theme-elevation-700: #f2f2f2;
+  --theme-elevation-750: #f2f2f2;
+  --theme-elevation-800: #f2f2f2;
+  --theme-elevation-850: #f2f2f2;
+  --theme-elevation-900: #ffffff;
+  --theme-elevation-950: #ffffff;
+  --theme-elevation-1000: #ffffff;
+  --theme-border-color: #333333;
+}
+
+// Durum renkleri: kırmızı/yeşil yok (§12). Başarı = mavi, hata ve uyarı = turuncu; açık tonlar yüzey 2.
+:root,
+html[data-theme='dark'] {
+  @each $n in 50, 100, 150, 200, 250, 300 {
+    --theme-success-#{$n}: var(--theme-elevation-50);
+    --theme-error-#{$n}: var(--theme-elevation-50);
+    --theme-warning-#{$n}: var(--theme-elevation-50);
+  }
+  @each $n in 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950 {
+    --theme-success-#{$n}: var(--kit-mavi);
+    --theme-error-#{$n}: var(--kit-turuncu);
+    --theme-warning-#{$n}: var(--kit-turuncu);
+  }
+}
+
+body {
+  font-family: var(--font-body);
+}
+
+// §4 Başlık rolü: sayfa başlığı 32 px, büyük harf, satır 1,2; harf aralığı yok
+.list-header__title,
+.doc-header__title,
+.dashboard__label,
+.collection-edit .render-title,
+.template-minimal h1,
+.dashboard h2 {
+  font-family: var(--font-head);
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+.list-header__title,
+.doc-header__title {
+  font-size: 32px;
+}
+
+// §12 kenar çubuk: siyah, seçili öğe #171717 zemin + 3 px mavi sol çizgi
+.nav {
+  background: var(--kit-yan);
+  border-right: 1px solid var(--kit-yan-cizgi);
+  color: #f2f2f2;
+  --nav-width: 240px;
+}
+.nav__link,
+.nav a,
+.nav__link-label,
+.nav__log-out,
+.nav .nav__controls a,
+.nav .nav__controls button {
+  color: #f2f2f2;
+}
+.nav-group__toggle,
+.nav-group__label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #b4b7bb;
+}
+.nav a.nav__link,
+.nav .nav__link {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  margin-left: -12px;
+  border-left: 3px solid transparent;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background-color 120ms var(--kit-kolay);
+}
+.nav a.nav__link:hover {
+  background: var(--kit-yan-secili);
+}
+.nav .nav__link:has(.nav__link-indicator),
+.nav a.nav__link.active,
+.nav a.nav__link[aria-current='page'] {
+  background: var(--kit-yan-secili);
+  border-left-color: var(--kit-mavi);
+}
+.nav__link-indicator {
+  display: none;
+}
+.nav .hamburger,
+.nav .nav__mobile-close {
+  color: #f2f2f2;
+}
+
+// §12 butonlar: köşe 0, 40 px; ana = mavi zemin beyaz yazı · ikincil = yüzey zemin 1 px çerçeve · üzerine gelince yalnız zemin değişir
+.btn {
+  font-family: var(--font-body);
+  font-weight: 600;
+  transition: background-color 120ms var(--kit-kolay);
+}
+.btn--style-primary {
+  --color: #ffffff;
+  --bg-color: var(--kit-mavi);
+  --hover-bg: #000000;
+  --hover-color: #ffffff;
+}
+html[data-theme='dark'] .btn--style-primary {
+  --hover-bg: #ffffff;
+  --hover-color: #000000;
+}
+.btn--style-primary.btn--disabled {
+  --bg-color: var(--theme-elevation-50);
+  --color: var(--theme-elevation-500);
+  --hover-bg: var(--bg-color);
+  --hover-color: var(--color);
+}
+.btn--style-secondary {
+  --color: var(--theme-text);
+  --bg-color: var(--theme-elevation-0);
+  --btn-border: 1px solid var(--theme-text);
+  --hover-color: var(--theme-text);
+  --hover-bg: var(--theme-elevation-50);
+  --hover-btn-border: 1px solid var(--theme-text);
+}
+.btn--style-pill,
+.pill--style-light {
+  --bg-color: var(--theme-elevation-0);
+  --color: var(--theme-text);
+  --hover-bg: var(--theme-elevation-50);
+  border: 1px solid var(--theme-text);
+}
+.pill--style-light {
+  background: var(--theme-elevation-0);
+}
+
+// §12 form: etiket üstte, alan 1 px çerçeve (#9A9EA3), odakta 2 px mavi
+.field-label:not(.unstyled) {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--theme-text);
+}
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='number'],
+input[type='search'],
+textarea,
+.react-select .rs__control {
+  border-color: var(--theme-elevation-300) !important;
+}
+input:focus,
+textarea:focus,
+.react-select .rs__control--is-focused,
+:focus-visible {
+  outline: 2px solid var(--kit-mavi) !important;
+  outline-offset: 0;
+  box-shadow: none !important;
+}
+.field-description {
+  color: var(--theme-elevation-550);
+  font-size: 13px;
+}
+
+// §12 tablo: başlık satırı gri zemin, mono büyük harf 12 px; satır 48 px
+.table thead th,
+.table thead .sort-column__label {
+  background: var(--theme-elevation-50);
+  color: var(--theme-elevation-600);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.table tbody tr:nth-child(odd) td {
+  background: var(--theme-elevation-0);
+}
+.table tbody tr:nth-child(even) td {
+  background: var(--theme-elevation-0);
+}
+.table tbody tr td {
+  border-bottom: 1px solid var(--theme-border-color);
+  height: 48px;
+}
+.table tbody a {
+  color: var(--theme-text);
+  text-decoration: none;
+}
+.table tbody a:hover {
+  color: var(--kit-mavi);
+  text-decoration: underline;
+}
+html[data-theme='dark'] .table tbody a:hover {
+  color: #f2f2f2; // koyuda mavi yazı yok (§12b)
+}
+
+// Tablo yüzeyi (§12b: tablo = yüzey)
+.table table {
+  background: var(--theme-elevation-0);
+  border: 1px solid var(--theme-border-color);
+}
+
+// Listede ana eylem "Yeni oluştur" = ana buton (mavi), ekranda bir tane (§12)
+.list-create-new-doc__create-new-button.btn--style-pill {
+  --bg-color: var(--kit-mavi);
+  --color: #ffffff;
+  --hover-bg: #000000;
+  --hover-color: #ffffff;
+  border-color: var(--kit-mavi);
+}
+html[data-theme='dark'] .list-create-new-doc__create-new-button.btn--style-pill {
+  --hover-bg: #ffffff;
+  --hover-color: #000000;
+}
+
+// Gösterge kartları: yüzey zemin, 1 px çizgi, gölge yok
+.card {
+  background: var(--theme-elevation-0);
+  border: 1px solid var(--theme-border-color);
+  box-shadow: none;
+  transition: background-color 120ms var(--kit-kolay);
+}
+.card:hover {
+  background: var(--theme-elevation-50);
+  box-shadow: none;
+}
+.card__title {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+// Bağlantılar: açıkta mavi, koyuda #F2F2F2 altı çizili (§12b)
+.render-fields a:not(.btn),
+.field-description a {
+  color: var(--kit-mavi);
+}
+html[data-theme='dark'] .render-fields a:not(.btn),
+html[data-theme='dark'] .field-description a {
+  color: #f2f2f2;
+  text-decoration: underline;
+}
+
+// §12 durum etiketleri (sabit beş): renk + ikon + metin
+.kit-durum {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 8px;
+  font-family: var(--font-body), 'Apple Symbols', 'Segoe UI Symbol', 'Noto Sans Symbols 2', sans-serif; // ○ ◐ ◷ ● ■ simgeleri için yedek
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.kit-durum--taslak {
+  background: #f2f2f2;
+  color: #000000;
+}
+.kit-durum--incelemede {
+  background: var(--kit-turuncu);
+  color: #000000;
+}
+.kit-durum--planlandi {
+  background: #ffffff;
+  color: #000000;
+  border-color: var(--kit-mavi);
+}
+.kit-durum--yayinda {
+  background: var(--kit-mavi);
+  color: #ffffff;
+}
+.kit-durum--arsiv {
+  background: #000000;
+  color: #ffffff;
+}
+html[data-theme='dark'] {
+  .kit-durum--taslak {
+    background: #262626;
+    color: #f2f2f2;
+  }
+  .kit-durum--planlandi {
+    background: transparent;
+    color: #f2f2f2;
+  }
+  .kit-durum--arsiv {
+    background: #f2f2f2;
+    color: #000000;
+  }
+}
+
+// §12 bildirim: başarı siyah zemin, uyarı/hata 2 px turuncu çerçeve; gölge yok
+.payload-toast-container .toast-success,
+.toast-success {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.payload-toast-container .toast-error,
+.payload-toast-container .toast-warning,
+.toast-error,
+.toast-warning {
+  background: var(--theme-elevation-0) !important;
+  color: var(--theme-text) !important;
+  border: 2px solid var(--kit-turuncu) !important;
+  box-shadow: none !important;
+}
+html[data-theme='dark'] .toast-success {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+// Gölge ve yuvarlaklık kalmasın (açılır menüler, pencereler, açılır kutular)
+.popup__content,
+.rs__menu,
+.drawer__content,
+.modal,
+.tooltip,
+.react-datepicker {
+  box-shadow: none !important;
+  border: 1px solid var(--theme-border-color);
+  border-radius: 0 !important;
 }
