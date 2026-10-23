@@ -19,8 +19,14 @@ deger() { sed -n "s/^$1=//p" "$2" | head -1 | sed 's/^"\(.*\)"$/\1/'; }
 GIZLI="$HERE/studyo.env"
 [ -f "$GIZLI" ] || { echo "gizli bilgi dosyası yok"; exit 1; }
 BULUT_SIFRE=$(deger STUDYO_DB_SIFRE "$GIZLI")
-BULUT="host=aws-0-eu-central-1.pooler.supabase.com port=5432 dbname=postgres user=postgres.$REF sslmode=require"
-BULUT_URI="postgresql://postgres.$REF:$(python3 -c 'import sys,urllib.parse;print(urllib.parse.quote(sys.argv[1],safe=""))' "$BULUT_SIFRE")@aws-0-eu-central-1.pooler.supabase.com:5432/postgres?sslmode=require"
+# Havuz adresi: aynı bölgede aws-0 / aws-1 olabilir; çalışan seçilir
+HAVUZ=""
+for h in aws-1-eu-central-1 aws-0-eu-central-1; do
+  if docker exec -e PGPASSWORD="$BULUT_SIFRE" supabase-db psql -X -tAc "select 1" "host=$h.pooler.supabase.com port=5432 dbname=postgres user=postgres.$REF sslmode=require connect_timeout=10" >/dev/null 2>&1; then HAVUZ=$h; break; fi
+done
+[ -n "$HAVUZ" ] || { echo "hata: Stüdyo bulut veritabanına bağlanılamadı"; exit 1; }
+BULUT="host=$HAVUZ.pooler.supabase.com port=5432 dbname=postgres user=postgres.$REF sslmode=require"
+BULUT_URI="postgresql://postgres.$REF:$(python3 -c 'import sys,urllib.parse;print(urllib.parse.quote(sys.argv[1],safe=""))' "$BULUT_SIFRE")@$HAVUZ.pooler.supabase.com:5432/postgres?sslmode=require"
 
 bulut() { docker exec -i -e PGPASSWORD="$BULUT_SIFRE" supabase-db psql -X -q "$BULUT" -v ON_ERROR_STOP=1 "$@"; }
 sa()    { docker exec -i supabase-db psql -X -q -U supabase_admin -d postgres -v ON_ERROR_STOP=1 "$@"; }
