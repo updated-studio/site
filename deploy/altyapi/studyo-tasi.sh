@@ -37,6 +37,7 @@ echo "== aşama: $ASAMA"
 bulut -tAc "select 'bulut bağlantısı tamam · ' || version()" | cut -c1-60
 
 # 0) Zamanlanmış işler: buluttaki liste (geçişte önce buluttakiler durdurulur)
+echo "== adım 0"
 bulut -tA -c "select format('select cron.schedule(%L, %L, %L);', jobname, schedule, replace(command, 'https://$REF.supabase.co/functions/v1/', 'http://functions:9000/')) from cron.job order by jobid" > $I/cron.sql
 bulut -tA -c "select format('update cron.job set active = %L where jobname = %L;', active, jobname) from cron.job order by jobid" > $I/cron-aktif.sql
 echo "buluttaki zamanlanmış işler: $(grep -c . $I/cron.sql)"
@@ -45,6 +46,7 @@ if [ "$ASAMA" = "gecis" ]; then
 fi
 
 # 1) Bulut dökümü (yalnız Stüdyo'nun kendi şeması public; auth ve depolama ayrıca)
+echo "== adım 1"
 docker exec -e PGPASSWORD="$BULUT_SIFRE" supabase-db pg_dump "$BULUT" -s -n public --no-owner -f /tmp/st-sema.sql
 docker exec -e PGPASSWORD="$BULUT_SIFRE" supabase-db pg_dump "$BULUT" -a -n public --no-owner -f /tmp/st-veri.sql
 docker cp supabase-db:/tmp/st-sema.sql $I/sema.sql; docker cp supabase-db:/tmp/st-veri.sql $I/veri.sql
@@ -54,9 +56,12 @@ sed -i "s#https://$REF.supabase.co/functions/v1/#http://functions:9000/#g" $I/se
 sed -i "s#https://$REF.supabase.co/storage/v1/#https://$DOMAIN/storage/v1/#g; s#https://$REF.supabase.co/functions/v1/#http://functions:9000/#g" $I/veri.sql
 grep -E '^ALTER PUBLICATION' $I/sema.sql > $I/yayin.sql || true
 sed -i '/^ALTER PUBLICATION/d; /^COMMENT ON SCHEMA public/d; /^CREATE SCHEMA public;/d' $I/sema.sql
+# Supabase'in kendi rolleri adına varsayılan yetkiler (bulutta platform yazar; burada yalnız postgres'inkiler kalır)
+sed -i '/^ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin/d; /^ALTER DEFAULT PRIVILEGES FOR ROLE supabase_/d' $I/sema.sql
 echo "döküm: şema $(grep -c '^CREATE TABLE' $I/sema.sql) tablo · veri $(du -h $I/veri.sql | cut -f1)"
 
 # 2) Natro'daki eski Stüdyo kopyasını temizle (panelin payload şemasına dokunulmaz)
+echo "== adım 2"
 sa <<'SQL'
 -- Stüdyo'nun bulutta kullandığı eklentiler: zamanlanmış işler (pg_cron) ve sunucudan istek (pg_net)
 create extension if not exists pg_cron with schema pg_catalog;
@@ -79,6 +84,7 @@ alter default privileges in schema public grant all on sequences to anon, authen
 SQL
 
 # 3) Şema (postgres sahipliğinde, buluttaki gibi) + gerçek zamanlı yayın listesi
+echo "== adım 3"
 pg < $I/sema.sql
 [ -s $I/yayin.sql ] && sa < $I/yayin.sql
 # auth.users / storage üzerindeki Stüdyo tetikleyicileri ve depolama erişim kuralları
@@ -91,6 +97,7 @@ sa < $I/tetik.sql; sa < $I/kural.sql
 echo "tetikleyici: $(grep -c . $I/tetik.sql) · depolama kuralı: $(grep -c . $I/kural.sql)"
 
 # 4) Kullanıcı hesapları (şifreleriyle): yalnız iki tarafta da olan, üretilmemiş sütunlar (sürüm farkına karşı)
+echo "== adım 4"
 for t in users identities; do
   ortak=$(comm -12 \
     <(bulut -tAc "select column_name from information_schema.columns where table_schema='auth' and table_name='$t' and is_generated='NEVER' " | sort) \
@@ -101,12 +108,15 @@ for t in users identities; do
 done
 
 # 5) Stüdyo verisi (tetikleyiciler kapalı: kayıtlar olduğu gibi gelsin)
+echo "== adım 5"
 ( echo "set session_replication_role = replica;"; cat $I/veri.sql ) | sa
 
 # 6) Haber Masası → panel kolonları (göç 0024; bulutta hiç çalışmadı)
+echo "== adım 6"
 [ -f "$HERE/0024_site_paneli.sql" ] && pg < "$HERE/0024_site_paneli.sql" && echo "göç 0024 uygulandı"
 
 # 7) Depolama kovaları ve dosyalar
+echo "== adım 7"
 bulut -tA -F $'\t' -c "select id, public, coalesce(file_size_limit::text,''), coalesce(array_to_string(allowed_mime_types, ','),'') from storage.buckets where id <> 'media'" |
 while IFS=$'\t' read -r id acik boyut turler; do
   sa -c "insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types) values ('$id','$id',$acik,nullif('$boyut','')::bigint,nullif(string_to_array('$turler',','),'{}'))
@@ -118,11 +128,13 @@ HEDEF_KEY=$(deger S3_PROTOCOL_ACCESS_KEY_ID $SB/.env) HEDEF_SECRET=$(deger S3_PR
 NODE_PATH=/opt/updated/site/node_modules node "$HERE/studyo-dosya-kopyala.cjs"
 
 # 8) Zamanlanmış işler: aynı adlarla; denemede hepsi kapalı, geçişte buluttaki açık/kapalı durumuyla
+echo "== adım 8"
 pg -tA < $I/cron.sql >/dev/null
 if [ "$ASAMA" = "gecis" ]; then sa < $I/cron-aktif.sql; else sa -c "update cron.job set active = false"; fi
 echo "zamanlanmış iş: $(sa -tAc 'select count(*) from cron.job') (açık: $(sa -tAc 'select count(*) from cron.job where active'))"
 
 # 10) Fonksiyonlar: kod (Stüdyo deposundan) + gizli bilgiler + giriş e-postaları (SMTP)
+echo "== adım 10"
 F=$SB/functions.env; umask 077
 FLUX=$( [ -f $F ] && deger FLUX_TOKEN $F || true ); [ -n "$FLUX" ] || FLUX=$(openssl rand -hex 24)
 {
@@ -155,6 +167,7 @@ for i in $(seq 1 30); do [ "$(curl -s -o /dev/null -w '%{http_code}' -X OPTIONS 
 echo "fonksiyon denemesi (triyaj-taslak OPTIONS): $(curl -s -o /dev/null -w '%{http_code}' -X OPTIONS http://127.0.0.1:8000/functions/v1/triyaj-taslak)"
 
 # 9) Karşılaştırma: tablo tablo kayıt sayısı
+echo "== adım 9"
 fark=0; toplam=0
 for t in $(pg -tAc "select tablename from pg_tables where schemaname='public' order by 1"); do
   b=$(bulut -tAc "select count(*) from public.\"$t\""); y=$(pg -tAc "select count(*) from public.\"$t\"")
