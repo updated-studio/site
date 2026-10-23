@@ -1,11 +1,12 @@
 # Durum (ortak hafıza: her oturum okur, her iş sonunda günceller)
 
 ## Şu an (23 Ekim 2026, 16:45)
-- **Site:** https://updated.com.tr (23 Ekim'den beri canlı; Astro, statik; https açık, http → https). Kod: bu depo `apps/web`. GitHub Actions derler, Natro paylaşımlı hostinge FTP ile yükler (`.github/workflows/yayin.yml`). v2.updated.com.tr artık kullanılmıyor.
-- **Panel (Payload):** https://panel.updated.com.tr/admin — Natro VPS (Ubuntu 24.04, 2 çekirdek, 3,8 GB + 4 GB takas), Caddy + systemd `updated-panel`. Kod `apps/cms`; `apps/cms/**` değişince `.github/workflows/panel.yml` sunucuyu günceller.
+- **Her şey Natro'da (23 Ekim 22:40):** GitHub kodu saklar, sunucuya hiç bağlanmaz (yalnız PR kod kontrolü `kontrol.yml` kaldı). Sunucudaki GitHub giriş anahtarları (106 adet) silindi (yedek `/var/backups/authorized_keys.updated.2026-10-23`).
+- **Site:** https://updated.com.tr (Astro, statik). **Natro VPS'te derlenir** (~1 dk) ve Natro hostinge FTP ile yüklenir (`deploy/altyapi/site`, `updated-site-yayin`): panelde Yayınla → anında; kod `main`'de değişince → 2 dk içinde; her gece 04.00. Hata olursa yayındaki site kalır, 10 dk sonra yeniden dener. Yüklemeden deneme: `sudo updated-site-yayinla --dene`. FTP bilgisi `/etc/updated-site.env`.
+- **Panel (Payload):** https://panel.updated.com.tr/admin — Natro VPS (Ubuntu 24.04, 2 çekirdek, 3,8 GB + 4 GB takas), Caddy + systemd `updated-panel`. Kod `apps/cms`; `main`'de değişince **sunucu kendisi günceller** (`deploy/panel/otomatik.sh`, `updated-panel-guncelle.timer`, 2 dk). Ortam dosyaları `/etc/updated-panel.*` artık yalnız sunucuda (GitHub yazmaz). Site ve panel derlemeleri aynı anda çalışmaz (bellek).
 - **Veritabanı + giriş + görseller + Stüdyo fonksiyonları:** Natro VPS'te Supabase'in açık kaynak sürümü (`/opt/updated/supabase`, Docker; dışarıya `panel.updated.com.tr/{rest,auth,storage,realtime,functions}/v1`). Panel verisi `payload` şeması, görseller `media` kovası. Bulut projeleri (site `werbsodzhfxliffveexk`, Stüdyo `fulmooonidwrqyybbkvu`) yedek olarak duruyor, kullanılmıyor.
 - **Stüdyo ekranı:** https://studio.updated.com.tr artık Natro'dan (`deploy/altyapi/studyo`; DNS `studio` A → 136.144.200.84, sertifika Let's Encrypt, 23 Ekim 18:15). GitHub Pages kopyası ve iş akışları henüz kapatılmadı.
-- **Yayın akışı:** panelde Yayınla → GitHub `repository_dispatch` → site derlenir, ~3-5 dk. Son dakika şeridi `/api/canli` ile anlık.
+- **Yayın akışı:** panelde Yayınla → panel `/var/spool/updated-site`'a istek bırakır → sunucu derler ve yükler, ~1 dk. Son dakika şeridi `/api/canli` ile anlık.
 - **Haber Masası → panel:** Stüdyo'nun otomatik ve elle hazırlanan taslakları doğrudan panele gidiyor (studio PR #24, #25). WordPress'e hiçbir şey gitmiyor.
 - **WordPress kapalı (23 Ekim 15:50):** `deploy/canli.json` wordpress=false; wp-json, xmlrpc, wp-cron, index.php → 410; wp-admin/wp-login → panel. Dosyaları hosting'de, veritabanı Natro'da duruyor (silme 30 Ekim, Fatih onayıyla; tam yedek var). Taşınanlar: 189 haber, 18 kategori, 10 yazar, 537 görsel, 3 kurumsal sayfa; eski adresler 301.
 - **Yedek:** her gece 03:15, şifreli, Natro hosting'de son 7 gün (`deploy/altyapi/yedek`); veritabanı + dosyalar + kodun tam geçmişi + sunucu ayarları. Kurtarma: `KURTARMA.md`.
@@ -29,7 +30,8 @@
 5. **30 Ekim 2026:** WordPress dosyaları (hosting) silinir; WordPress MySQL veritabanını Fatih Natro panelinden siler (Fatih onayıyla; site WordPress'e bağlı değil, doğrulandı).
 6. Supabase bulut projeleri ~1-2 hafta sorunsuz çalışınca silinir; yedek deposundaki eski bulut yedek iş akışları kapatılır.
 7. Tek giriş (Stüdyo + panel + site üyeleri, sunucudaki Supabase Auth) — yol haritası Otomasyon-1.
-8. Kod için Forgejo (Natro'da) isteğe bağlı; GitHub salt okunur ayna olarak kalır (Fatih onayladı).
+8. ✅ **Site ve panel de Natro'da (23 Ekim 22:40)**, yukarıda "Şu an". Kalan: GitHub depo ayarlarındaki eski gizli bilgiler (VPS şifresi, FTP şifreleri, veritabanı şifreleri, `YAYIN_TOKEN`) artık kullanılmıyor; silinmeleri Fatih'in onayıyla (https://github.com/updated-studio/site/settings/secrets/actions). PR kod kontrolünün (`kontrol.yml`, iki depoda) kalıp kalmayacağı Fatih'in kararı.
+9. Kod için Forgejo (Natro'da) isteğe bağlı; GitHub salt okunur ayna olarak kalır (Fatih onayladı).
 
 ## Diğer açık işler
 - [x] **Sunucudan GitHub'a yazma (23 Ekim 21:30):** ince ayarlı erişim anahtarı `natro-sunucu` (yalnız site + studio; Contents + Workflows yazma; 366 gün, **Ekim 2027'de yenilenecek**). Sunucuda `updated` kullanıcısının `~/.git-credentials` dosyasında; yenileme: `github-anahtar-gir`.
@@ -46,6 +48,7 @@
 - **Aşama 4 (sürüyor):** Stüdyo ekranı Natro'ya (Sıradaki işler 1), sonra isteğe bağlı Forgejo.
 
 ## Günlük (en yeni üstte)
+- **23 Ekim 2026 22:40** (Natro sunucusundaki Claude): Kullanıcı: "siteyi de tamamen taşı, hiçbir şey kalmasın." Site derleme+yayın sunucuya alındı (ilk yayın 61 sn; deneme derlemesinde bütün sayfalar canlıyla birebir aynıydı). **Bulunan eski hata:** GitHub'ın görsel önbelleği hiç yenilenmediği için canlı site 167 görselin yeniden üretilmeden önceki hâlini gösteriyordu; sunucudaki ilk yayın güncellerini yükledi. Panel Yayınla → istek dosyası → yayın 29 sn (denendi). Panel kendini güncelliyor (denendi: 7668a7e). Bütün sunucuya bağlanan GitHub iş akışları ve `.github` yardımcıları kaldırıldı; `panel-tasi.sh`'a emniyet eklendi. PR kod kontrolünü (`kontrol.yml`) de kaldırmak istedim, güvenlik denetimi durdurdu (kalite kontrolü, ekibi etkiler) → geri kondu, karar Fatih'in. Paneldeki `GITHUB_DISPATCH_TOKEN` silindi.
 - **23 Ekim 2026 21:55** (Natro sunucusundaki Claude): Kullanıcı: "Stüdyo'nun her şeyi aktarıldı mı? Tamamen bitirmeden diğer işlere geçmiyoruz." Stüdyo denetlendi ve bitirildi (Sıradaki işler 1). Göç otomatik yapılmak istendi; güvenlik denetimi durdurdu, eski düzen (bilerek elle) korundu.
 - **23 Ekim 2026 21:40** (Natro sunucusundaki Claude): Sunucuya GitHub yazma anahtarı verildi (kullanıcı adım adım oluşturdu, anahtar sohbete hiç yazılmadı; `github-anahtar-gir`). Bekleyen kayıtlar gönderildi. Panel güncellemesi Caddy ayarını yeniden üretti, Stüdyo düşmedi (`conf.d` içe alımı çalışıyor). Stüdyo deposuna gönderim sunucuda kendiliğinden derlenip yayına çıktı (ilk gerçek deneme).
 - **23 Ekim 2026 18:15** (Natro sunucusundaki Claude): `studio` DNS kaydı Natro'da değiştirildi (kullanıcı adım adım yaptı). Ders: **Natro DNS panelinde CNAME düzenlemek kaydı silebiliyor**; düzenledikten sonra `dig +short <ad> @ns1.natrohost.com` ile mutlaka kontrol et. Yeni kayıt A → 136.144.200.84; sertifika alındı, 1.1.1.1 ve 8.8.8.8 yeni adresi görüyor. Kayıt ~10 dk yoktu; bazı servis sağlayıcılarında 1 saate kadar "bulunamadı" görünebilir.

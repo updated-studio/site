@@ -5,11 +5,11 @@ Bu dosya, Claude'a ya da bir kişiye erişilemese bile sistemi ayakta tutmak ve 
 ## Neler nerede (23 Ekim 2026)
 | Parça | Yer | Nasıl yönetilir |
 |---|---|---|
-| Site (updated.com.tr) | Natro paylaşımlı hosting, `public_html` | Koddan derlenir (`apps/web`), FTP ile yüklenir |
+| Site (updated.com.tr) | Natro paylaşımlı hosting, `public_html` | Natro VPS'te derlenir, FTP ile yüklenir: `sudo updated-site-yayinla --zorla` (kayıt: `journalctl -u updated-site-yayin`) |
 | Panel (panel.updated.com.tr) | Natro VPS, `/opt/updated/site/apps/cms`, servis `updated-panel` | `systemctl restart updated-panel` |
 | Veritabanı + giriş + dosyalar + Stüdyo fonksiyonları | Natro VPS, `/opt/updated/supabase` (Supabase açık kaynak, Docker) | `cd /opt/updated/supabase && sudo docker compose ps` |
 | Stüdyo ekranı (studio.updated.com.tr) | Natro VPS, `/var/www/studio/aktif` (Caddy `/etc/caddy/conf.d/studyo.caddy`) | Kendiliğinden: `updated-studyo.timer`; elle: `sudo updated-studyo-yayinla --zorla` |
-| Kod | GitHub `updated-studio/site`, `updated-studio/studio` (+ yedekte tam kopya) | |
+| Kod | GitHub `updated-studio/site`, `updated-studio/studio` (+ yedekte tam kopya) | GitHub sunucuya bağlanmaz; sunucu 2 dk'da bir `main`'i çeker (site, panel, Stüdyo) |
 | Yedek | Natro hosting, şifreli, her gece 03:15, son 7 gün | `/opt/updated/yedek/yedekle.sh` |
 
 ## Erişimler (kimde olmalı: Fatih + Enes + 3. kişi)
@@ -23,6 +23,8 @@ Bu dosya, Claude'a ya da bir kişiye erişilemese bile sistemi ayakta tutmak ve 
 - **Panel açılmıyor:** VPS'e bağlan → `sudo systemctl restart updated-panel`; olmazsa `journalctl -u updated-panel -n 50`.
 - **Stüdyo giriş/veri gelmiyor:** `cd /opt/updated/supabase && sudo docker compose up -d` (kapalı servisleri açar).
 - **Stüdyo'nun yeni sürümü bozuk çıktı:** `ls /var/www/studio/surumler` → bir öncekini seç → `sudo ln -sfn /var/www/studio/surumler/<klasör> /var/www/studio/aktif` (anında döner).
+- **Site güncellenmiyor:** `journalctl -u updated-site-yayin -n 40`; elle: `sudo updated-site-yayinla --zorla`. GitHub'a ihtiyaç yok.
+- **Panel kodu güncellenmiyor:** `journalctl -u updated-panel-guncelle -n 40`; elle: `sudo updated-panel-guncelle`.
 - **Sunucu yeniden başladı:** her şey kendiliğinden açılır (Docker ve servisler otomatik). Claude: `claude-sunucu`.
 
 ## Yedekten geri kurma (özet)
