@@ -58,6 +58,13 @@ echo "döküm: şema $(grep -c '^CREATE TABLE' $I/sema.sql) tablo · veri $(du -
 
 # 2) Natro'daki eski Stüdyo kopyasını temizle (panelin payload şemasına dokunulmaz)
 sa <<'SQL'
+-- Stüdyo'nun bulutta kullandığı eklentiler: zamanlanmış işler (pg_cron) ve sunucudan istek (pg_net)
+create extension if not exists pg_cron with schema pg_catalog;
+create extension if not exists pg_net with schema extensions;
+grant usage on schema cron to postgres;
+grant all privileges on all tables in schema cron to postgres;
+grant usage on schema net to postgres, service_role;
+grant execute on all functions in schema net to postgres, service_role;
 select cron.unschedule(jobid) from cron.job where jobname not like 'payload%';
 drop schema if exists public cascade;
 create schema public authorization postgres;
