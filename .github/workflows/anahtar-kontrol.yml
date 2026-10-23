@@ -18,6 +18,10 @@ jobs:
       - name: Dene
         run: |
           s() { echo "$1" >> /tmp/sonuc.txt; }
+          # Kopyalarken giren baş/son boşluk ve satır sonları atılır (sonuç satırında belirtilir)
+          temiz() { printf '%s' "$1" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'; }
+          for v in DB_SIFRE SMTP_SIFRE GEMINI GROQ; do t=$(temiz "${!v}"); [ "$t" != "${!v}" ] && s "not: $v değerinde baş/son boşluk vardı (${#t}/${#v} değil, temizlendi)"; printf -v "$v" '%s' "$t"; export "$v"; done
+          s "uzunluk: DB_SIFRE ${#DB_SIFRE} karakter · SMTP ${#SMTP_SIFRE} karakter"
           # Stüdyo veritabanı: bölge bilinmediği için havuz adresleri sırayla denenir (yanlış bölge "tenant not found" der)
           if [ -z "$DB_SIFRE" ]; then s "STUDYO_DB_SIFRE: girilmemiş"; else
             sonuc="bağlanamadı"
