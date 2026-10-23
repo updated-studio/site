@@ -17,6 +17,12 @@
 - [ ] Ekip hesapları panelde; Stüdyo ile tek giriş.
 - [ ] Cloudflare (ücretsiz) önerildi: Natro'nun kör bot koruması yerine ayarlanabilir koruma + önbellek.
 
+## Tüm altyapıyı Natro'ya taşıma (Fatih, 23 Ekim 05:00: "en önemli öncelik"; kapsam: her şey, GitHub dahil; sebep: hepsi bir arada, daha hızlı, daha güvenli, aracı yok)
+- **Ölçüm (Sunucu ölçümü iş akışı, 23 Ekim 04:56):** Natro VPS = 2 çekirdek, 3,8 GB bellek, takas yok, 38 GB disk (%11 dolu); panel ~200 MB; panel veritabanı 30 MB (189 haber, 537 görsel). Docker yok. **Bu sunucu her şeyi kaldırmaz** (Supabase'in kendi sunucumuzdaki sürümü ≥8 GB ister; site derlemesi GitHub'da 4 çekirdekle 13-14 dk).
+- **Önerilen sunucu:** Natro VDS Pro 6 (6 çekirdek, 16 GB, 400 GB). Fatih'in onayı bekleniyor.
+- **Aşamalar:** (1) panel veritabanı + görseller VPS'e (Postgres + yerel depo) → (2) Stüdyo: Supabase'in açık kaynak sürümü VPS'te (kod neredeyse aynı kalır; giriş, veri, fonksiyonlar taşınır; Enes'e not) + Stüdyo arayüzü Natro'da → (3) GitHub yerine VPS'te Forgejo + iş akışı çalıştırıcısı → (4) gece yedeği başka bir makineye (tek sunucu = tek arıza noktası).
+- **Açık karar:** GitHub tamamen kalkarsa Claude'un bulut oturumları (Fatih'in ve Enes'in) depolara erişemez; bu ortam Natro sunucusuna da ulaşamıyor. Seçenek: GitHub yalnız salt-okunur yedek ayna olarak kalsın mı?
+
 ## Ana alan adına geçiş (23 Ekim gecesi, Fatih: "bu gece aktaracağız")
 Yöntem: **WordPress silinmez, taşınmaz.** Yeni site `public_html`'e WordPress'in yanına yüklenir; `.htaccess` (eskisi `.htaccess.wp-yedek`) ziyaretçiyi yeni siteye, `wp-admin`, `wp-json` (Stüdyo taslakları), `wp-content` (eski görsel adresleri) isteklerini WordPress'e verir. Anahtar: `deploy/canli.json` (`canli`, `prova`); FTP: `CANLI_FTP_USER/PASSWORD` secret'ları (public_html'e bağlı hesap).
 - **Geri dönüş (2 dk):** FTP ile `public_html/.htaccess.wp-yedek` → `.htaccess` adıyla geri koy ve `index.html`'i sil (ya da adını değiştir); WordPress olduğu gibi döner. Sonra `deploy/canli.json` → `"canli": false`.
