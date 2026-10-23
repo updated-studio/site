@@ -1,38 +1,73 @@
 #!/usr/bin/env bash
-# Natro gece yedeği: veritabanı (Stüdyo + panel + kullanıcı hesapları + depolama kayıtları) ve depolama dosyaları
-# → özel GitHub deposu updated-studio/yedek, klasör natro/ (sunucu kendi gönderir; GitHub'da iş çalışmaz).
-# Eski yedekler deponun geçmişinde durur (düz SQL; git yalnız farkı saklar). Dosyalar bir kez yüklenir, sonra yalnız yenileri.
-# Gizli anahtarlar (.env, functions.env, panel secrets) YEDEKLENMEZ: geri yüklemede yeni anahtar üretilir, herkes yeniden giriş yapar.
-# Kurulum: deploy/altyapi/yedek/kur.sh (cron: her gece 03:15 Türkiye). Elle: sudo bash /opt/updated/yedek/yedekle.sh
-set -euo pipefail
+# Natro gece yedeği (Fatih, 23 Ekim 2026: "GitHub artı Natro, garanti olsun"). İki ayrı yere, birbirinden bağımsız:
+#   1) GitHub özel deposu updated-studio/yedek, klasör natro/ — düz SQL + dosyalar; eski yedekler deponun geçmişinde.
+#   2) Natro paylaşımlı hosting (FTP), public_html/.yedek-<rastgele>/ — ŞİFRELİ (AES-256), klasör web'e kapalı (.htaccess),
+#      son 7 gün (gün adıyla döner). Şifre sunucuda /opt/updated/yedek/sifre ve GitHub yedek deposunda natro/HOSTING_SIFRESI.txt.
+# İçerik: veritabanı (Stüdyo public + panel payload + kullanıcı hesapları auth + zamanlanmış işler + depolama kayıtları),
+#   depolama dosyaları (görseller, profil fotoğrafları), Stüdyo fonksiyon kodu. Gizli anahtar dosyaları (.env) yedeklenmez.
+# Biri başarısız olsa diğeri yine çalışır. Kayıt: /opt/updated/yedek/yedek.log
+set -uo pipefail
 D=/opt/updated/yedek
-REPO=$D/depo
 SB=/opt/updated/supabase
-export GIT_SSH_COMMAND="ssh -i $D/anahtar -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+IS=$D/is; REPO=$D/depo
 log() { echo "$(date '+%F %T') $*" | tee -a $D/yedek.log; }
+q() { docker exec supabase-db psql -X -tA -U supabase_admin -d postgres -c "$1"; }
+dump() { docker exec supabase-db pg_dump -U supabase_admin -d postgres --no-owner "$@"; }
 
-if [ ! -d $REPO/.git ]; then git clone -q --depth 1 git@github.com:updated-studio/yedek.git $REPO; fi
-git -C $REPO fetch -q --depth 1 origin main && git -C $REPO reset -q --hard origin/main
-mkdir -p $REPO/natro/dosyalar
+# --- dökümler (bir kez alınır, iki hedefe gider)
+rm -rf $IS; mkdir -p $IS/natro && chmod 700 $IS
+set -e
+dump -s -n public -n payload > $IS/natro/sema.sql
+dump -a -n public -n payload -n auth --exclude-table='auth.schema_migrations' > $IS/natro/veri.sql
+dump -a -t cron.job > $IS/natro/zamanlanmis-isler.sql
+dump -a -t storage.buckets -t storage.objects > $IS/natro/depolama.sql
+tar -C $SB/volumes/functions -czf $IS/natro/fonksiyonlar.tgz --exclude=./main --exclude=./hello .
+set +e
+OZET="$(date '+%d.%m.%Y %H:%M') · Stüdyo $(q 'select count(*) from public.tr_items') haber · panel $(q 'select count(*) from payload.news') haber · $(q 'select count(*) from auth.users') hesap · $(du -sh $SB/volumes/storage | cut -f1) dosya"
+echo "$OZET" > $IS/natro/SON_YEDEK.txt
+SONUC=""
 
-d() { docker exec supabase-db pg_dump -U supabase_admin -d postgres --no-owner "$@"; }
-# Şema: Stüdyo (public) + panel (payload). auth/storage şemaları Supabase'in kendi kurulumundan gelir.
-d -s -n public -n payload > $REPO/natro/sema.sql
-# Veri: Stüdyo, panel, kullanıcı hesapları (auth), zamanlanmış işler
-d -a -n public -n payload -n auth --exclude-table='auth.schema_migrations' > $REPO/natro/veri.sql
-d -a -t cron.job > $REPO/natro/zamanlanmis-isler.sql
-# Depolama kayıtları (kovalar ve dosya listesi); dosyaların kendisi aşağıda
-d -a -t storage.buckets -t storage.objects > $REPO/natro/depolama.sql
-# Dosyalar: Supabase depolama klasörü (değişmeyenler git'te tekrar saklanmaz)
-rsync -a --delete $SB/volumes/storage/ $REPO/natro/dosyalar/
-ls -la $SB/volumes/functions > /dev/null && tar -C $SB/volumes/functions -czf $REPO/natro/fonksiyonlar.tgz --exclude=main --exclude=hello .
+# --- 1) GitHub
+gh_yedek() {
+  export GIT_SSH_COMMAND="ssh -i $D/anahtar -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20"
+  [ -d $REPO/.git ] || git clone -q --depth 1 git@github.com:updated-studio/yedek.git $REPO || return 1
+  git -C $REPO fetch -q --depth 1 origin main && git -C $REPO reset -q --hard origin/main || return 1
+  mkdir -p $REPO/natro/dosyalar
+  cp $IS/natro/*.sql $IS/natro/*.tgz $IS/natro/SON_YEDEK.txt $REPO/natro/
+  rsync -a --delete $SB/volumes/storage/ $REPO/natro/dosyalar/
+  cp $D/sifre $REPO/natro/HOSTING_SIFRESI.txt
+  cd $REPO && git add -A natro
+  git diff --cached --quiet && { echo "değişiklik yok"; return 0; }
+  git -c user.name="natro-yedek" -c user.email="yedek@updated.com.tr" commit -q -m "Natro yedeği $(date '+%d.%m.%Y %H:%M')" && git push -q origin HEAD:main
+}
+if [ -f $D/anahtar ]; then
+  if out=$(gh_yedek 2>&1); then SONUC="GitHub tamam${out:+ ($out)}"; else SONUC="GitHub HATA: $(echo "$out" | tail -1 | cut -c1-120)"; fi
+else SONUC="GitHub: anahtar yok"; fi
 
-boyut=$(du -sh $REPO/natro | cut -f1)
-satir="$(date -u '+%Y-%m-%dT%H:%M:%SZ') · $boyut · Stüdyo $(docker exec supabase-db psql -X -tA -U supabase_admin -d postgres -c 'select count(*) from public.tr_items') haber · panel $(docker exec supabase-db psql -X -tA -U supabase_admin -d postgres -c 'select count(*) from payload.news') haber · $(docker exec supabase-db psql -X -tA -U supabase_admin -d postgres -c 'select count(*) from auth.users') hesap"
-echo "$satir" > $REPO/natro/SON_YEDEK.txt
-cd $REPO
-git add -A natro
-if git diff --cached --quiet; then log "değişiklik yok"; exit 0; fi
-git -c user.name="natro-yedek" -c user.email="yedek@updated.com.tr" commit -q -m "Natro yedeği $(date '+%d.%m.%Y %H:%M')"
-git push -q origin HEAD:main
-log "TAMAM $satir"
+# --- 2) Natro hosting (FTP, şifreli)
+host_yedek() {
+  [ -f $D/ftp.env ] || { echo "FTP bilgisi yok"; return 1; }
+  . $D/ftp.env
+  local gun; gun=$(LC_ALL=C date +%a | tr 'A-Z' 'a-z')
+  local paket=$IS/updated-$gun
+  mkdir -p $paket
+  tar -C $IS -czf - natro | openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt -pass file:$D/sifre -out $paket/veritabani.tar.gz.enc
+  # Dosyalar: yalnız değiştiyse (liste özeti)
+  local ozet; ozet=$(cd $SB/volumes/storage && find . -type f -printf '%P %s %T@\n' | sort | sha1sum | cut -c1-16)
+  if [ "$ozet" != "$(cat $D/dosya-ozeti 2>/dev/null)" ]; then
+    tar -C $SB/volumes -czf - storage | openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt -pass file:$D/sifre -out $paket/dosyalar.tar.gz.enc
+  fi
+  printf 'Require all denied\nDeny from all\n' > $IS/htaccess
+  echo "$OZET" > $paket/BILGI.txt
+  local ssl='set ftp:ssl-allow yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate no;'
+  lftp -u "$FTP_USER,$FTP_PASS" "$FTP_HOST" -e "$ssl set net:max-retries 3; set net:timeout 60; set ftp:passive-mode yes;
+    mkdir -p $FTP_DIR; cd $FTP_DIR; put $IS/htaccess -o .htaccess; mkdir -p $gun; cd $gun;
+    mput $paket/*; bye" >/dev/null || return 1
+  echo "$ozet" > $D/dosya-ozeti
+  echo "$gun klasörü, $(du -sh $paket | cut -f1)"
+}
+if out=$(host_yedek 2>&1); then SONUC="$SONUC · hosting tamam ($out)"; else SONUC="$SONUC · hosting HATA: $(echo "$out" | tail -1 | cut -c1-120)"; fi
+
+rm -rf $IS
+log "$OZET · $SONUC"
+case "$SONUC" in *HATA*|*"anahtar yok"*) exit 1;; esac
