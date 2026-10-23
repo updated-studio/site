@@ -17,7 +17,12 @@
 - [ ] Ekip hesapları panelde; Stüdyo ile tek giriş.
 - [ ] Cloudflare (ücretsiz) önerildi: Natro'nun kör bot koruması yerine ayarlanabilir koruma + önbellek.
 
-## Ana alan adına geçiş planı (taslak)
+## Ana alan adına geçiş (23 Ekim gecesi, Fatih: "bu gece aktaracağız")
+Yöntem: **WordPress silinmez, taşınmaz.** Yeni site `public_html`'e WordPress'in yanına yüklenir; `.htaccess` (eskisi `.htaccess.wp-yedek`) ziyaretçiyi yeni siteye, `wp-admin`, `wp-json` (Stüdyo taslakları), `wp-content` (eski görsel adresleri) isteklerini WordPress'e verir. Anahtar: `deploy/canli.json` (`canli`, `prova`); FTP: `CANLI_FTP_USER/PASSWORD` secret'ları (public_html'e bağlı hesap).
+- **Geri dönüş (2 dk):** FTP ile `public_html/.htaccess.wp-yedek` → `.htaccess` adıyla geri koy ve `index.html`'i sil (ya da adını değiştir); WordPress olduğu gibi döner. Sonra `deploy/canli.json` → `"canli": false`.
+- Kalıcı çözüm sonrası: Stüdyo taslakları panele bağlanınca WordPress `eski.updated.com.tr`'ye alınır.
+
+## Eski plan notu
 1. Stüdyo taslakları panele gidecek şekilde bağlanır, ekip bir gün v2'de dener.
 2. WordPress `eski.updated.com.tr` alt alan adına taşınır (silinmez; yedek zaten var).
 3. Site `public_html`'e yüklenir (`NATRO_DIR` değişir, `STAGING` kapanır → https zorlaması ve indeksleme açılır), `SITE_URL=https://updated.com.tr`.

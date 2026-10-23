@@ -55,6 +55,17 @@ if (MEDIA) {
 /* 2) .htaccess */
 const host = new URL(SITE).host
 // Hazırlıkta (STAGING=1) SSL henüz yoksa site http'den de açılsın diye https zorlaması yok; canlıda var.
+// Ana alan adına geçişte WordPress silinmez, aynı klasörde "arka planda" kalır (Stüdyo taslakları, eski görsel adresleri, wp-admin).
+const yanyana = process.env.WP_YANYANA === '1'
+const wpBlok = yanyana ? `# WordPress yan yana (geçiş dönemi): WordPress dosyaları olduğu gibi çalışır, kalan her şey yeni site
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+RewriteRule ^wp-json/?(.*)$ /index.php?rest_route=/$1 [QSA,L]
+RewriteRule ^wp-admin$ /wp-admin/ [R=301,L]
+RewriteRule ^(?:wp-admin|wp-includes|wp-content|fotografcilik|\\.well-known)(?:/.*)?$ - [L]
+RewriteRule ^(?:wp-login\\.php|wp-cron\\.php|xmlrpc\\.php|index\\.php)$ - [L]
+RewriteRule ^sitemap_index\\.xml$ /sitemap.xml [R=301,L]
+RewriteRule ^(?:post|page|category|post_tag)-sitemap\\d*\\.xml$ /sitemap.xml [R=301,L]
+` : ''
 const httpsRule = process.env.STAGING === '1' ? '# hazırlık: https zorlaması kapalı (SSL kurulunca canlıda açılır)\n' : `# https ve www'suz tek adres
 RewriteCond %{HTTPS} !=on [OR]
 RewriteCond %{HTTP_HOST} ^www\\. [NC]
@@ -68,7 +79,7 @@ const rules = Object.entries({ ...redirects, ...reverse }).filter(([from, to]) =
 const ht = `# Üretildi: scripts/postbuild.mjs — elle düzenlemeyin
 Options -MultiViews -Indexes
 DirectorySlash Off
-DirectoryIndex index.html
+DirectoryIndex index.html${yanyana ? ' index.php' : ''}
 ErrorDocument 404 /404.html
 AddDefaultCharset utf-8
 AddType application/xml .xml
@@ -77,6 +88,7 @@ AddType text/plain .txt
 <IfModule mod_rewrite.c>
 RewriteEngine On
 
+${wpBlok}
 ${httpsRule}
 # sondaki "/" atılır
 RewriteRule ^(.+)/$ /$1 [R=301,L]
@@ -107,7 +119,7 @@ RewriteRule ^kiyaslamalar$ /karsilastirma [R=301,L]
 RewriteRule ^hakkimizda-2$ /hakkimizda [R=301,L]
 RewriteRule ^(?:blog|categories-list|catalogue|rehber-ve-ipuclari)$ /haberler [R=301,L]
 RewriteRule ^advanced-search$ /ara [R=301,L]
-RewriteRule ^(?:wp-admin|wp-login\\.php)(?:/.*)?$ https://panel.updated.com.tr/admin [R=302,L]
+${yanyana ? '' : 'RewriteRule ^(?:wp-admin|wp-login\\.php)(?:/.*)?$ https://panel.updated.com.tr/admin [R=302,L]'}
 # Temanın örnek sayfaları (mağaza, üyelik, demo ana sayfalar…) → ana sayfa
 RewriteRule ^(?:home-\\d+|(?:shop|cart|checkout|my-account)(?:-\\d+)?|track-order|membership-[^/]+(?:/.*)?|login(?:-custom)?|sample-page|maintenance|coming-soon|landing|newsletter|resources|authors-list|out-authors|our-team|bookmarks|content-widgets|footer-styles|pluvia-english|editor-panel|test|privacy-policy-\\d*|faq)$ / [R=301,L]
 

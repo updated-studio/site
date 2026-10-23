@@ -29,6 +29,28 @@ try { lftp(`get -O ${TMP} ${MAN}`); old = JSON.parse(readFileSync(join(TMP, MAN)
 rmSync(join(TMP, MAN), { force: true })
 
 const changed = Object.keys(now).filter((k) => old[k] !== now[k])
+
+// Klasörde bizden önce dosya varsa (ör. ana sitede WordPress) üzerine yazmadan önce yedeği alınır: ad.wp-yedek
+// Yalnız kök klasör kontrol edilir; WordPress'in kendi klasörleri (wp-*) bizim dosyalarımızla çakışmaz.
+const kok = lftp('cls -1aF').split('\n').map((x) => x.trim()).filter(Boolean)
+const kokDosya = new Set(kok.filter((x) => !x.endsWith('/')).map((x) => x.replace(/[*@]$/, '')))
+const kokKlasor = new Set(kok.filter((x) => x.endsWith('/')).map((x) => x.slice(0, -1)))
+const bizimKlasor = new Set(Object.keys(old).filter((k) => k.includes('/')).map((k) => k.split('/')[0]))
+const cakisan = changed.filter((k) => !(k in old) && !k.includes('/') && kokDosya.has(k) && k !== MAN)
+const yabanciKlasor = [...new Set(changed.filter((k) => k.includes('/') && !(k in old)).map((k) => k.split('/')[0]))].filter((d) => kokKlasor.has(d) && !bizimKlasor.has(d))
+if (cakisan.length) console.log(`Klasörde önceden var olan ve üzerine yazılacak dosyalar (yedeği alınır): ${cakisan.join(', ')}`)
+if (yabanciKlasor.length) console.log(`::warning title=Natro::Klasörde önceden var olan klasörlere dosya eklenecek: ${yabanciKlasor.join(', ')}`)
+if (process.env.PROVA === '1') {
+  console.log(`::notice title=Prova (hiçbir şey yüklenmedi)::Kök: ${kok.length} öğe · yüklenecek ${changed.length} dosya · yedeği alınacak: ${cakisan.join(', ') || 'yok'} · önceden var olan klasörler: ${yabanciKlasor.join(', ') || 'yok'}`)
+  process.exit(0)
+}
+// Yedek kopyalanarak alınır (asıl dosya bizimki gelene kadar yerinde kalır; WordPress bir an bile .htaccess'siz kalmaz)
+for (const k of cakisan) {
+  if (kokDosya.has(`${k}.wp-yedek`)) continue
+  const yerel = join(TMP, 'yedek-' + k.replace(/[^\w.-]/g, '_'))
+  lftp(`get "${k}" -o "${yerel}"; put "${yerel}" -o "${k}.wp-yedek"`)
+  console.log(`yedeklendi: ${k} → ${k}.wp-yedek`)
+}
 const removed = Object.keys(old).filter((k) => !(k in now) && k !== MAN)
 console.log(`Toplam ${Object.keys(now).length} dosya · değişen ${changed.length} · silinecek ${removed.length}`)
 

@@ -21,6 +21,10 @@ url="ftp://$NATRO_FTP_HOST/${path:+$path/}"
 list=$(curl "${opts[@]}" "$url" 2>&1) || fail "Klasör listelenemedi ($url): $list"
 echo "Hedef klasör: $url"; echo "$list" | head -20
 if echo "$list" | grep -qiE '^(wp-config\.php|wp-content|wp-admin|wp-includes|wp-login\.php|xmlrpc\.php)$'; then
+  if [ "${NATRO_ANA_SITE:-}" = "evet" ] && [ "${WP_YANYANA:-}" = "1" ]; then
+    echo "::notice title=Natro::Ana site klasörü (WordPress yan yana modu): WordPress dosyalarına dokunulmaz; çakışan dosyalar önce .wp-yedek adıyla saklanır, yalnız bizim yüklediklerimiz silinebilir."
+    exit 0
+  fi
   fail "Hedef klasörde WordPress dosyaları var ($url). Bu ana site olabilir; yükleme durduruldu."
 fi
 echo "Kontrol tamam: klasörde WordPress yok."

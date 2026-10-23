@@ -90,19 +90,33 @@ jobs:
       NATRO_FTP_HOST: ${{ secrets.NATRO_FTP_HOST || vars.NATRO_FTP_HOST }}
       NATRO_FTP_USER: ${{ secrets.NATRO_FTP_USER || vars.NATRO_FTP_USER }}
       NATRO_FTP_PASSWORD: ${{ secrets.NATRO_FTP_PASSWORD }}
+      CANLI_FTP_USER: ${{ secrets.CANLI_FTP_USER }}
+      CANLI_FTP_PASSWORD: ${{ secrets.CANLI_FTP_PASSWORD }}
     steps:
+      - uses: actions/checkout@v5
+      # Ana alan adı geçişi: deploy/canli.json {"canli": true} olunca hedef updated.com.tr (public_html, WordPress yan yana)
+      - name: Canlı mod
+        run: |
+          if [ "$(jq -r '.canli // false' deploy/canli.json 2>/dev/null)" = "true" ]; then
+            [ -n "$CANLI_FTP_USER" ] && [ -n "$CANLI_FTP_PASSWORD" ] || { echo "::error title=Canlı mod::CANLI_FTP_USER / CANLI_FTP_PASSWORD secret'ları yok"; exit 1; }
+            prova=$(jq -r 'if .prova then 1 else 0 end' deploy/canli.json)
+            for kv in "SITE_URL=https://updated.com.tr" "STAGING=0" "NATRO_DIR=./" "NATRO_FTP_KILITLI=1" "NATRO_ANA_SITE=evet" "WP_YANYANA=1" "PROVA=$prova" \
+                      "NATRO_FTP_USER=$CANLI_FTP_USER" "NATRO_FTP_PASSWORD=$CANLI_FTP_PASSWORD"; do
+              echo "$kv" >> "$GITHUB_ENV"; printf '%s=%q\n' "${kv%%=*}" "${kv#*=}" >> /tmp/canli.env
+            done
+            echo "::notice title=Canlı mod::Hedef https://updated.com.tr (prova: $(jq -r '.prova' deploy/canli.json))"
+          fi
       - name: Ayarları denetle
         id: ayar
         run: |
-          eksik=""
+          [ -f /tmp/canli.env ] && { set -a; . /tmp/canli.env; set +a; }
+          eksik="
           for k in NATRO_ON SITE_URL NATRO_DIR NATRO_FTP_HOST NATRO_FTP_USER NATRO_FTP_PASSWORD; do [ -n "${!k}" ] || eksik="$eksik $k"; done
           if [ "$NATRO_ON" != "1" ]; then echo "::notice title=Natro::NATRO=1 girilmemiş; Natro yüklemesi atlandı.${eksik:+ Eksik:$eksik}"; echo "aktif=0" >> "$GITHUB_OUTPUT"; exit 0; fi
           if [ -n "$eksik" ]; then echo "::error title=Natro ayarları eksik::$eksik"; exit 1; fi
           echo "Hedef: $SITE_URL · klasör: $NATRO_DIR · protokol: $NATRO_FTP_PROTOCOL · hazırlık: ${STAGING:-0}"
           d="$NATRO_DIR"; [ "${d%/}" = "$d" ] && d="$d/"; echo "dir=$d" >> "$GITHUB_OUTPUT"
           echo "aktif=1" >> "$GITHUB_OUTPUT"
-      - if: steps.ayar.outputs.aktif == '1'
-        uses: actions/checkout@v5
       - if: steps.ayar.outputs.aktif == '1'
         uses: actions/setup-node@v5
         with: { node-version: 22 }
@@ -120,14 +134,18 @@ jobs:
       - name: Derle (canlıda CMS adresi zorunlu — örnek veri canlıya çıkmaz)
         if: steps.ayar.outputs.aktif == '1'
         run: |
+          [ -f /tmp/canli.env ] && { set -a; . /tmp/canli.env; set +a; }
           if [ "$STAGING" != "1" ] && [ -z "$CMS_URL" ]; then echo "::error title=Derleme::CMS_URL boş"; exit 1; fi
           .github/calistir.sh Derleme npm run build --workspace apps/web
       - name: Güvenlik kontrolü (ana siteye dokunma)
         if: steps.ayar.outputs.aktif == '1'
-        run: .github/natro-kontrol.sh
+        run: |
+          [ -f /tmp/canli.env ] && { set -a; . /tmp/canli.env; set +a; }
+          .github/natro-kontrol.sh
       - name: Natro'ya yükle (yalnız değişen dosyalar; kopmada yeniden dener)
         if: steps.ayar.outputs.aktif == '1'
         run: |
+          [ -f /tmp/canli.env ] && { set -a; . /tmp/canli.env; set +a; }
           sudo apt-get install -y -qq lftp >/dev/null
           for deneme in 1 2 3; do
             node deploy/natro-yukle.mjs apps/web/dist 2>&1 | tee /tmp/yukle.log && [ ${PIPESTATUS[0]} -eq 0 ] && exit 0
@@ -137,9 +155,13 @@ jobs:
           exit 1
       - name: Teşhis
         if: always() && steps.ayar.outputs.aktif == '1'
-        run: .github/teshis.sh
+        run: |
+          [ -f /tmp/canli.env ] && { set -a; . /tmp/canli.env; set +a; }
+          .github/teshis.sh
       - name: IndexNow
-        if: steps.ayar.outputs.aktif == '1' && env.STAGING != '1'
+        if: steps.ayar.outputs.aktif == '1' && env.STAGING != '1' && env.PROVA != '1'
         env:
           CHANGED_PATHS: ${{ join(github.event.client_payload.paths, ',') }}
-        run: node apps/web/scripts/indexnow.mjs
+        run: |
+          [ -f /tmp/canli.env ] && { set -a; . /tmp/canli.env; set +a; }
+          node apps/web/scripts/indexnow.mjs

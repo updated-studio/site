@@ -101,7 +101,7 @@ jobs:
             echo "DATABASE_URI=$DATABASE_URI"
             echo "PAYLOAD_PUBLIC_SERVER_URL=https://$DOMAIN"
             echo "WEB_URL=$WEB_URL"
-            echo "EXTRA_ORIGINS=https://v2.updated.com.tr,http://v2.updated.com.tr,https://updated-studio.github.io,https://updated.com.tr"
+            echo "EXTRA_ORIGINS=https://v2.updated.com.tr,http://v2.updated.com.tr,https://updated-studio.github.io,https://updated.com.tr,https://www.updated.com.tr"
             echo "STUDIO_URL=https://studio.updated.com.tr"
             if [ -n "$REF" ] && [ -n "$S3_ACCESS_KEY_ID" ]; then
               echo "S3_BUCKET=media"; echo "S3_REGION=$REGION"
