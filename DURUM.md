@@ -10,6 +10,9 @@
 - **Natro bot koruması** ("One moment, please…", openresty) 23 Ekim gecesi açıldı; GitHub'dan yapılan dış kontroller (teşhis, `deploy/kontrol`) siteyi göremiyor. Ziyaretçiler etkilenmiyor.
 
 ## Bekleyenler
+- [ ] **Claude sunucuda (hız):** Claude Code VPS'e kuruldu (2.1.309, `deploy/altyapi/claude`). Fatih bir kez giriş yapacak (BENIOKU.md adım 1-3), sonra claude.ai/code → "Natro sunucu" oturumu doğrudan sunucuda çalışır; GitHub turları biter.
+- [ ] `YEDEK_SIFRESI` secret'ı (Fatih belirler) → sunucudaki yedek şifresi onunla değiştirilecek. Yedek artık kod (depoların tam geçmişi) + gizli ayarları da içeriyor (yalnız şifreli hosting kopyası). Kurtarma: `KURTARMA.md`.
+- [ ] GitHub yedek kopyası: kuruluş kuralı deploy key'i kapatıyor; açılmayacak. İkinci kopya Forgejo/başka makine aşamasında.
 - [ ] Ekipten biri Stüdyo → Haber Masası → Ayarlar → "Site paneli bağlantısı" → **Bağlantıyı dene** + bir taslağı panele gönderir → sonra `deploy/canli.json` `"wordpress": false` (WordPress kapanır).
 - [ ] Flux (Fatih'in Mac'i): işçinin adresi `https://panel.updated.com.tr/functions/v1/triyaj-taslak` + yeni FLUX_TOKEN (sunucuda `functions.env`; açık kayda yazılmaz, güvenli yoldan verilecek).
 - [x] Aşama 3 (23 Ekim 14:35): Natro gece yedeği her gece 03:15 (`deploy/altyapi/yedek`, iş akışı "Yedek (Natro)"). Hedef 1: Natro hosting, public_html altında rastgele adlı gizli klasör, AES-256 şifreli, web erişimi 403, son 7 gün (gün adıyla). İlk yedek tamam (veritabanı 11 MB, dosyalar 182 MB). Şifre sunucuda `/opt/updated/yedek/sifre`. Hedef 2: GitHub `yedek` deposu, natro/ klasörü — **Fatih'in deploy key eklemesi bekleniyor** (açık anahtar "Yedek (Natro)" çıktısında). Eski bulut yedek iş akışları (yedek deposu) artık bayat buluttan alıyor; kapatılacak.
