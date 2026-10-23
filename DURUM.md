@@ -10,6 +10,7 @@
 - **Natro bot koruması** ("One moment, please…", openresty) 23 Ekim gecesi açıldı; GitHub'dan yapılan dış kontroller (teşhis, `deploy/kontrol`) siteyi göremiyor. Ziyaretçiler etkilenmiyor.
 
 ## Bekleyenler
+- [x] **WordPress kapatıldı (23 Ekim 15:50, Fatih: "tamamen kopar"):** `canli.json` wordpress=false. wp-json, xmlrpc, wp-cron, index.php → 410; wp-admin / wp-login → panel. Site 200. Stüdyo WordPress'e hiçbir şey göndermiyor. Kalan: WordPress dosyaları hosting'de (çalışmıyor) + WordPress MySQL veritabanı (Natro panelinde). Silme: Fatih onayıyla (tam yedek var).
 - [ ] **Claude sunucuda (hız):** Claude Code VPS'e kuruldu (2.1.309, `deploy/altyapi/claude`). Fatih bir kez giriş yapacak (BENIOKU.md adım 1-3), sonra claude.ai/code → "Natro sunucu" oturumu doğrudan sunucuda çalışır; GitHub turları biter.
 - [ ] `YEDEK_SIFRESI` secret'ı (Fatih belirler) → sunucudaki yedek şifresi onunla değiştirilecek. Yedek artık kod (depoların tam geçmişi) + gizli ayarları da içeriyor (yalnız şifreli hosting kopyası). Kurtarma: `KURTARMA.md`.
 - [ ] GitHub yedek kopyası: kuruluş kuralı deploy key'i kapatıyor; açılmayacak. İkinci kopya Forgejo/başka makine aşamasında.
