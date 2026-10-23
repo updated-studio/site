@@ -14,6 +14,9 @@ SB=/opt/updated/supabase
 HERE="$(cd "$(dirname "$0")" && pwd)"
 DOMAIN="${PANEL_DOMAIN:-panel.updated.com.tr}"
 REF=fulmooonidwrqyybbkvu
+# EMNİYET (23 Ekim 2026): taşıma bitti, Stüdyo Natro'dan çalışıyor. Bu betik Natro'daki veriyi silip buluttaki BAYAT kopyayı
+# yazar; yalnız bilerek, felaket kurtarma için: STUDYO_TASI_ONAY=natro-verisini-sil
+[ "${STUDYO_TASI_ONAY:-}" = natro-verisini-sil ] || { echo "Durduruldu: Stüdyo zaten Natro'da; bu betik Natro'daki güncel veriyi siler. Bkz. DURUM.md."; exit 1; }
 BULUT_URL="https://$REF.supabase.co"
 deger() { sed -n "s/^$1=//p" "$2" | head -1 | sed 's/^"\(.*\)"$/\1/'; }
 GIZLI="$HERE/studyo.env"

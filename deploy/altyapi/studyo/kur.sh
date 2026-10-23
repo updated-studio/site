@@ -8,6 +8,7 @@ EV=/var/lib/updated-studyo
 id studyo >/dev/null 2>&1 || useradd --system --home-dir $EV --create-home --shell /usr/sbin/nologin studyo
 mkdir -p $EV /var/www/studio /etc/caddy/conf.d; chown studyo:studyo $EV
 install -m 755 "$HERE/yayinla.sh" /usr/local/bin/updated-studyo-yayinla
+install -m 755 "$HERE/goc.sh" /usr/local/bin/updated-studyo-goc
 
 # Caddy: ana dosya (deploy/panel/kur.sh üretir) conf.d'yi içe alır; Stüdyo kendi dosyasında
 grep -q 'import /etc/caddy/conf.d/\*' /etc/caddy/Caddyfile || printf '\nimport /etc/caddy/conf.d/*.caddy\n' >> /etc/caddy/Caddyfile

@@ -23,6 +23,11 @@ u git -C "$K" reset -q --hard "$yeni"
 kisa=${yeni:0:7}
 echo "Stüdyo $kisa: $(u git -C "$K" log -1 --format=%s)"
 
+# 0) Veritabanı göçleri kendiliğinden UYGULANMAZ (bilerek; eski "Veritabanı göçü" iş akışı gibi elle): yalnız bekleyen
+# göç varsa kayda yazılır. Uygulamak: sudo updated-studyo-goc <dosya> (goc.sh).
+bekleyen=$(/usr/local/bin/updated-studyo-goc --bekleyen "$K" 2>/dev/null || true)
+[ -n "$bekleyen" ] && echo "BEKLEYEN GÖÇ:$bekleyen — uygulamak için: sudo updated-studyo-goc <dosya>"
+
 # 1) Fonksiyonlar: yalnız depoda olan ve farklı olanlar yüklenir (sunucunun kendi main/hello fonksiyonlarına dokunulmaz)
 degisti=""
 for d in "$K"/supabase/functions/*/; do
