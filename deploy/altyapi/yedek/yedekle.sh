@@ -69,5 +69,5 @@ host_yedek() {
 if out=$(host_yedek 2>&1); then SONUC="$SONUC · hosting tamam ($out)"; else SONUC="$SONUC · hosting HATA: $(echo "$out" | tail -1 | cut -c1-120)"; fi
 
 rm -rf $IS
-log "$OZET · $SONUC"
+log "$OZET · $(echo "$SONUC" | tr "\n" " ")"
 case "$SONUC" in *HATA*|*"anahtar yok"*) exit 1;; esac
