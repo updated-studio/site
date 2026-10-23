@@ -1,0 +1,47 @@
+# Stüdyo taşıması için girilen gizli bilgileri DENER (değerleri yazmaz): Stüdyo bulut veritabanı, Gemini, Groq, e-posta (SMTP).
+name: Anahtar kontrolü
+on:
+  workflow_dispatch:
+permissions: { contents: read }
+jobs:
+  dene:
+    runs-on: ubuntu-latest
+    env:
+      DB_SIFRE: ${{ secrets.STUDYO_DB_SIFRE }}
+      GEMINI: ${{ secrets.GEMINI_API_KEY }}
+      GROQ: ${{ secrets.GROQ_API_KEY }}
+      SMTP_SIFRE: ${{ secrets.SMTP_PASSWORD }}
+      PEXELS: ${{ secrets.PEXELS_API_KEY }}
+      PIXABAY: ${{ secrets.PIXABAY_API_KEY }}
+      REF: fulmooonidwrqyybbkvu
+    steps:
+      - name: Dene
+        run: |
+          s() { echo "$1" >> /tmp/sonuc.txt; }
+          # Stüdyo veritabanı: bölge bilinmediği için havuz adresleri sırayla denenir (yanlış bölge "tenant not found" der)
+          if [ -z "$DB_SIFRE" ]; then s "STUDYO_DB_SIFRE: girilmemiş"; else
+            sonuc="bağlanamadı"
+            for b in eu-central-1 eu-west-1 eu-west-2 eu-west-3 eu-north-1 eu-central-2 us-east-1 us-east-2 us-west-1 ap-southeast-1; do
+              for a in aws-0 aws-1; do
+                out=$(PGPASSWORD="$DB_SIFRE" PGCONNECT_TIMEOUT=8 psql "host=$a-$b.pooler.supabase.com port=5432 dbname=postgres user=postgres.$REF sslmode=require" -tAc "select count(*) from auth.users" 2>&1) && { sonuc="DOĞRU (bölge $b, $out kullanıcı)"; break 2; }
+                echo "$out" | grep -qi "password authentication failed" && { sonuc="ŞİFRE YANLIŞ (bölge $b)"; break 2; }
+              done
+            done
+            s "STUDYO_DB_SIFRE: $sonuc"
+          fi
+          if [ -z "$GEMINI" ]; then s "GEMINI_API_KEY: girilmemiş"; else
+            k=$(curl -s -o /dev/null -w '%{http_code}' "https://generativelanguage.googleapis.com/v1beta/models?key=$GEMINI"); s "GEMINI_API_KEY: $([ "$k" = 200 ] && echo DOĞRU || echo "HATALI ($k)")"; fi
+          if [ -z "$GROQ" ]; then s "GROQ_API_KEY: girilmemiş"; else
+            k=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $GROQ" https://api.groq.com/openai/v1/models); s "GROQ_API_KEY: $([ "$k" = 200 ] && echo DOĞRU || echo "HATALI ($k)")"; fi
+          if [ -z "$SMTP_SIFRE" ]; then s "SMTP_PASSWORD: girilmemiş"; else
+            k=$(python3 -c "
+          import smtplib,os,sys
+          try:
+            c=smtplib.SMTP_SSL('mail.kurumsaleposta.com',465,timeout=20); c.login('studio@updated.com.tr',os.environ['SMTP_SIFRE']); c.quit(); print('DOĞRU')
+          except smtplib.SMTPAuthenticationError: print('ŞİFRE YANLIŞ')
+          except Exception as e: print('bağlanamadı: '+type(e).__name__)
+          "); s "SMTP_PASSWORD: $k"; fi
+          [ -n "$PEXELS" ] && s "PEXELS_API_KEY: $([ "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: $PEXELS" 'https://api.pexels.com/v1/search?query=phone&per_page=1')" = 200 ] && echo DOĞRU || echo HATALI)" || s "PEXELS_API_KEY: girilmemiş (isteğe bağlı)"
+          [ -n "$PIXABAY" ] && s "PIXABAY_API_KEY: $([ "$(curl -s -o /dev/null -w '%{http_code}' "https://pixabay.com/api/?key=$PIXABAY&q=phone&per_page=3")" = 200 ] && echo DOĞRU || echo HATALI)" || s "PIXABAY_API_KEY: girilmemiş (isteğe bağlı)"
+          cat /tmp/sonuc.txt
+          node -e "const t=require('fs').readFileSync('/tmp/sonuc.txt','utf8');console.log('::notice title=Sonuç::'+t.replace(/%/g,'%25').replace(/\n/g,'%0A'))"
