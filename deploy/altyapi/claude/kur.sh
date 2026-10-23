@@ -27,6 +27,19 @@ case "${1:-baslat}" in
 esac
 SH
 chmod 755 /usr/local/bin/claude-sunucu
+# Tek seferlik giriş: claude.ai hesabıyla giriş, sonra Remote Control'ü ekranda başlatır (iki "y" onayı kullanıcıdan).
+cat > /usr/local/bin/claude-giris <<'SH'
+#!/usr/bin/env bash
+echo "1/2 · claude.ai girişi: açılan bağlantıyı tarayıcıda aç, onayla, verilen kodu buraya yapıştır."
+claude auth login || { echo "Giriş tamamlanmadı. Tekrar: claude-giris"; exit 1; }
+tmux kill-session -t claude 2>/dev/null
+echo
+echo "2/2 · Şimdi iki soru gelecek; ikisine de y yazıp Enter'a bas."
+echo "     'Natro sunucu' bağlandı yazınca bu pencereyi kapatabilirsin; Claude arka planda çalışmaya devam eder."
+sleep 3
+tmux new-session -s claude -c /opt/updated "claude remote-control --name 'Natro sunucu' --spawn same-dir"
+SH
+chmod 755 /usr/local/bin/claude-giris
 # Sunucu yeniden başlarsa kendiliğinden açılsın
 ( crontab -u "$K" -l 2>/dev/null | grep -v claude-sunucu; echo "@reboot /usr/local/bin/claude-sunucu" ) | crontab -u "$K" -
 echo "claude sürümü: $(claude --version 2>/dev/null | head -1)"

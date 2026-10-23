@@ -3,10 +3,10 @@
 Claude sunucunun içinde çalışır; sen claude.ai/code'dan ya da Claude uygulamasından yazarsın. Sunucu dışarıya kapı açmaz (yalnız Anthropic'e giden şifreli bağlantı). Kaynak: https://code.claude.com/docs/en/remote-control
 
 ## Bir kerelik giriş (Fatih)
-1. Mac'te Terminal'i aç, sunucuya bağlan: `ssh <kullanıcı>@<sunucu IP>` (Natro panelindeki VPS bilgileri).
-2. `cd /opt/updated && claude` yaz. Açılan ekranda `/login` → claude.ai hesabınla giriş (tarayıcıda açılan bağlantı, gelen kodu Terminal'e yapıştır). Klasöre güven sorusuna "evet".
-3. `/exit` ile çık, sonra `claude-sunucu` yaz. "başladı" demeli.
-4. claude.ai/code → oturum listesinde **Natro sunucu**. Artık oradan yazınca Claude doğrudan sunucuda çalışır.
+1. Mac'te Terminal → `ssh updated@<sunucu IP>` (IP Natro panelinde; şifre VPS şifresi).
+2. `claude-giris` yaz. Bağlantıyı tarayıcıda aç → onayla → kodu Terminal'e yapıştır.
+3. Gelen iki soruya `y` + Enter. "Natro sunucu" görünce pencereyi kapat.
+4. claude.ai/code → oturum listesinde **Natro sunucu**.
 
 ## Bilinmesi gerekenler
 - Team/Enterprise planında önce bir Owner'ın Remote Control'ü açması gerekir: https://claude.ai/admin-settings/claude-code
