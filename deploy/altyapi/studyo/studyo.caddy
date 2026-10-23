@@ -1,0 +1,27 @@
+# Stüdyo ekranı (deploy/altyapi/studyo). Derlenmiş dosyalar /var/www/studio/aktif'te; yayinla.sh günceller.
+(studyo_dosyalar) {
+	root * /var/www/studio/aktif
+	encode zstd gzip
+	# Adı içerik özetli dosyalar hiç değişmez; giriş sayfası ve sürüm/yenilik dosyaları her açılışta taze
+	@kalici path /assets/*
+	header @kalici Cache-Control "public, max-age=31536000, immutable"
+	@taze path / /index.html /surum.json /yenilikler.json /manifest.json
+	header @taze Cache-Control "no-cache"
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+	try_files {path} /index.html
+	file_server
+}
+
+studio.updated.com.tr {
+	import studyo_dosyalar
+}
+
+# Yerel deneme ucu (yalnız sunucunun içinden; dışarıya kapalı): yayinla.sh ve kontroller kullanır
+http://127.0.0.1:8090 {
+	bind 127.0.0.1
+	import studyo_dosyalar
+}

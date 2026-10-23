@@ -44,6 +44,7 @@ GitHub Actions: Astro statik derleme ──► Natro (FTP, değişen dosyalar) �
 | 26 | Panel sunucusu: şimdi Oracle (ücretsiz ARM), sonra Natro VPS | `deploy/panel/*.sh` iki yerde de aynı; https'i Caddy kendi alır. |
 | 20 | Hazırlık GitHub Pages'te (`BASE_PATH=/site`) | Alan adı gerekmeden deneme; postbuild iç bağlantılara önek ekler, her sayfa noindex. |
 | 27 | Stüdyo taslakları panele (`/api/triyaj/import`), WordPress devre dışı (23 Ekim 2026) | Tek yayın sistemi. Uç üzerine yazmaz (yayında/düzenlenmiş → 409), kategori yalnız var olanlardan; anahtar sunucuda üretilir, panel iş akışı Stüdyo'nun Supabase Secrets'ına eşitler. WordPress dosyaları silinmez; `deploy/canli.json` `wordpress:false` ile PHP girişleri kapanır, eski görseller statik kalır. |
+| 28 | Stüdyo ekranı Natro'da (`deploy/altyapi/studyo`, 23 Ekim 2026) | Fatih: "Stüdyo tamamen Natro'da". Sunucu 2 dk'da bir Stüdyo deposunun `main` dalına bakar, değişince derler ve değişen fonksiyonları yükler; ekibin çalışma şekli değişmez (main'e gönder → birkaç dk'da yayında). Derleme hatasında eski sürüm kalır, son 5 sürüm saklanır. Caddy ana dosyası `conf.d/*.caddy`'yi içe alır. |
 
 ## Kit uyumu (kısa)
 

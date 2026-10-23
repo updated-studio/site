@@ -79,7 +79,11 @@ $DOMAIN {
 		reverse_proxy 127.0.0.1:3001
 	}
 }
+
+# Diğer siteler (ör. Stüdyo: deploy/altyapi/studyo) kendi dosyalarında
+import /etc/caddy/conf.d/*.caddy
 CADDY
+mkdir -p /etc/caddy/conf.d
 systemctl daemon-reload
 systemctl enable updated-panel >/dev/null 2>&1 || true
 caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile >/dev/null
