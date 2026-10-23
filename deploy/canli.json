@@ -1,1 +1,1 @@
-{ "canli": true, "prova": false, "not": "canli=true: site updated.com.tr (public_html) klasörüne, WordPress yanında yüklenir. prova=true: hiçbir şey yüklenmez. Geri dönüş: DURUM.md." }
+{ "canli": true, "prova": false, "yedek": false, "not": "canli=true: site updated.com.tr (public_html) klasörüne yüklenir; WordPress görselleri (wp-content) yerinde kalır." }

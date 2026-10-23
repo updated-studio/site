@@ -45,7 +45,7 @@ if (process.env.PROVA === '1') {
   process.exit(0)
 }
 // Yedek kopyalanarak alınır (asıl dosya bizimki gelene kadar yerinde kalır; WordPress bir an bile .htaccess'siz kalmaz)
-for (const k of cakisan) {
+for (const k of process.env.YEDEK === '0' ? [] : cakisan) {
   if (kokDosya.has(`${k}.wp-yedek`)) continue
   const yerel = join(TMP, 'yedek-' + k.replace(/[^\w.-]/g, '_'))
   lftp(`get "${k}" -o "${yerel}"; put "${yerel}" -o "${k}.wp-yedek"`)

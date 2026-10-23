@@ -100,7 +100,7 @@ jobs:
           if [ "$(jq -r '.canli // false' deploy/canli.json 2>/dev/null)" = "true" ]; then
             [ -n "$CANLI_FTP_USER" ] && [ -n "$CANLI_FTP_PASSWORD" ] || { echo "::error title=Canlı mod::CANLI_FTP_USER / CANLI_FTP_PASSWORD secret'ları yok"; exit 1; }
             prova=$(jq -r 'if .prova then 1 else 0 end' deploy/canli.json)
-            for kv in "SITE_URL=https://updated.com.tr" "STAGING=0" "NATRO_DIR=./" "NATRO_FTP_KILITLI=1" "NATRO_ANA_SITE=evet" "WP_YANYANA=1" "PROVA=$prova" \
+            for kv in "SITE_URL=https://updated.com.tr" "STAGING=0" "NATRO_DIR=./" "NATRO_FTP_KILITLI=1" "YEDEK=$(jq -r 'if .yedek == false then 0 else 1 end' deploy/canli.json)" "NATRO_ANA_SITE=evet" "WP_YANYANA=1" "PROVA=$prova" \
                       "NATRO_FTP_USER=$CANLI_FTP_USER" "NATRO_FTP_PASSWORD=$CANLI_FTP_PASSWORD"; do
               echo "$kv" >> "$GITHUB_ENV"; printf '%s=%q\n' "${kv%%=*}" "${kv#*=}" >> /tmp/canli.env
             done
