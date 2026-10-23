@@ -1,7 +1,7 @@
 # Durum (ortak hafıza: her oturum okur, her iş sonunda günceller)
 
 ## Şu an (23 Ekim 2026)
-- **Site:** http://v2.updated.com.tr (Astro, statik). Kod: bu depo `apps/web`. GitHub Actions derler, Natro paylaşımlı hostinge FTP ile yükler (`.github/workflows/yayin.yml`). https yok (Natro'dan v2 için SSL istenecek).
+- **Site:** https://updated.com.tr (23 Ekim'den beri canlı; Astro, statik). Eski hazırlık adresi v2.updated.com.tr. Kod: bu depo `apps/web`. GitHub Actions derler, Natro paylaşımlı hostinge FTP ile yükler (`.github/workflows/yayin.yml`). https yok (Natro'dan v2 için SSL istenecek).
 - **Panel (Payload):** https://panel.updated.com.tr/admin — Natro VPS (Ubuntu 24.04, kullanıcı `updated`), Caddy + systemd `updated-panel`. Kod `apps/cms`; `apps/cms/**` değişince `.github/workflows/panel.yml` sunucuyu günceller.
 - **Veritabanı + görseller:** Supabase projesi `updated-site` (Londra, ref werbsodzhfxliffveexk), şema `payload`, kova `media`. Gece yedeği: `updated-studio/yedek` deposu.
 - **Yayın akışı:** panelde Yayınla → GitHub `repository_dispatch` (secret `YAYIN_TOKEN`, sunucuda `GITHUB_DISPATCH_TOKEN`) → site derlenir, ~3-5 dk. Son dakika şeridi `/api/canli` ile anlık.
@@ -29,5 +29,6 @@ Yöntem: **WordPress silinmez, taşınmaz.** Yeni site `public_html`'e WordPress
 4. Google Search Console'a yeni site haritası; 301'ler kontrol edilir.
 
 ## Günlük (en yeni üstte)
+- **23 Ekim 2026 04:20** (Fatih'in Claude'u): **updated.com.tr yeni sisteme geçti** (Fatih'in isteği, yedeksiz). `deploy/canli.json` canli=true; FTP `canli@updated.com.tr` → public_html. WordPress dosyaları klasörde duruyor (wp-admin, wp-json, wp-content çalışır; Stüdyo taslakları gitmeye devam eder). v2 artık güncellenmiyor. Sıradaki: Stüdyo → Payload bağlantısı, Search Console'a site haritası, v2'yi ana adrese yönlendirme.
 - **23 Ekim 2026** (Fatih'in Claude'u): Görseller yeni kaliteyle yeniden üretildi (537/537). Stüdyo'da etiket kuralı (en fazla 3, izinli liste) ve otomatik taslak ataması duraklatıldı (Stüdyo deposu; Edge Function yayını için `SUPABASE_ACCESS_TOKEN` secret'ı bekleniyor). Eski site raporu: `deploy/rapor` (çıktı `raporlar` dalında). Bu dosya ve `CLAUDE.md` eklendi.
 - **22 Ekim 2026** (Fatih'in Claude'u): WordPress taşıması, görsel onarımı, kurumsal sayfalar, eski adres yönlendirmeleri, panel Türkçe + logo, yayın anahtarı.
