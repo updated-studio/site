@@ -12,7 +12,7 @@
 ## Bekleyenler
 - [ ] v2 için SSL + bot korumasını Natro destekten iste (Fatih).
 - [ ] Ana alan adına geçiş (aşağıdaki plan) — Fatih onayıyla.
-- [ ] **Stüdyo → Payload bağlantısı (kod hazır, 23 Ekim 04:30–):** site PR #1 + studio PR #24. Sıra: (1) Fatih `SUPABASE_ACCESS_TOKEN`'ı **organizasyon secret'ı** olarak girer → (2) site PR birleşir (panel güncellenir, anahtar Supabase'e yazılır) → (3) Stüdyo'da "Veritabanı göçü" 0024 → (4) studio PR birleşir (fonksiyon + ekran) → (5) Stüdyo → Ayarlar → "Bağlantıyı dene" + bir taslak gönderimi → (6) `deploy/canli.json` `"wordpress": false` (WordPress'in PHP girişleri kapanır; dosyalar silinmez, eski görseller açık kalır).
+- [ ] **Stüdyo → Payload bağlantısı (kod hazır, 23 Ekim 04:30–):** site PR #1 + studio PR #24. Site PR #1 **birleşti, panel güncel (05:00)**. Sıra: (1) Fatih `SUPABASE_ACCESS_TOKEN`'ı site ve studio depolarına secret olarak girer → (2) panel iş akışı elle yeniden çalıştırılır (anahtar Supabase'e yazılır) → (3) Stüdyo'da "Veritabanı göçü" 0024 → (4) studio PR birleşir (fonksiyon + ekran) → (5) Stüdyo → Ayarlar → "Bağlantıyı dene" + bir taslak gönderimi → (6) `deploy/canli.json` `"wordpress": false` (WordPress'in PHP girişleri kapanır; dosyalar silinmez, eski görseller açık kalır).
 - [ ] Fotoğrafçılık bölümü baştan tasarlanacak (eski dosyalar kullanılmayacak; Fatih ile).
 - [ ] Ekip hesapları panelde; Stüdyo ile tek giriş.
 - [ ] Cloudflare (ücretsiz) önerildi: Natro'nun kör bot koruması yerine ayarlanabilir koruma + önbellek.
