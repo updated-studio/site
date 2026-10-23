@@ -1,0 +1,70 @@
+# Stüdyo giriş/şifre sıfırlama teşhisi (yalnız okur). Depo herkese açık: e-posta adresleri ve anahtarlar çıktıda gizlenir.
+name: Giriş teşhisi (Natro)
+on:
+  workflow_dispatch:
+permissions: { contents: read }
+jobs:
+  teshis:
+    runs-on: ubuntu-latest
+    env:
+      HOST: ${{ secrets.PANEL_SSH_HOST || vars.PANEL_SSH_HOST }}
+      USR: ${{ secrets.PANEL_SSH_USER || vars.PANEL_SSH_USER || 'root' }}
+      PORT: ${{ secrets.PANEL_SSH_PORT || vars.PANEL_SSH_PORT || '22' }}
+      KEY: ${{ secrets.PANEL_SSH_KEY }}
+      PASS: ${{ secrets.PANEL_SSH_PASSWORD }}
+    steps:
+      - name: SSH hazırla
+        run: |
+          mkdir -p ~/.ssh
+          if [ -n "$KEY" ]; then printf '%s\n' "$KEY" > ~/.ssh/id; else
+            # İlk kurulum root şifresiyle: kalıcı bir anahtar üretilip sunucuya eklenir, sonraki bağlantılar anahtarla.
+            sudo apt-get install -y -qq sshpass >/dev/null; ssh-keygen -q -t ed25519 -N '' -f ~/.ssh/id
+            ssh-keyscan -p "$PORT" -T 15 "$HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+            if ! SSHPASS="$PASS" sshpass -e ssh-copy-id -p "$PORT" -i ~/.ssh/id.pub -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 "$USR@$HOST" > /tmp/copy.log 2>&1; then
+              # Teşhis: port açık mı, sunucu hangi giriş yöntemlerine izin veriyor?
+              p=$(timeout 10 bash -c "</dev/tcp/$HOST/$PORT" 2>&1 && echo açık || echo "kapalı/erişilemiyor")
+              m=$(ssh -p "$PORT" -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=no -o PreferredAuthentications=none "$USR@$HOST" 2>&1 | grep -io 'permission denied ([^)]*)' | head -1)
+              b=$(timeout 10 bash -c "exec 3<>/dev/tcp/$HOST/$PORT; head -c 60 <&3" 2>/dev/null | tr -d '\r\n')
+              echo "::error title=SSH girişi::Port $PORT: $p · sunucu: ${b:-?} · izin verilen yöntemler: ${m:-?} · ayrıntı: $(tail -c 400 /tmp/copy.log | tr '\n' ' ')"
+              exit 1
+            fi
+          fi
+          chmod 600 ~/.ssh/id
+          ssh-keyscan -p "$PORT" -T 15 "$HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+          echo "Host panel
+            HostName $HOST
+            User $USR
+            Port $PORT
+            IdentityFile ~/.ssh/id
+            ServerAliveInterval 30
+            StrictHostKeyChecking accept-new" > ~/.ssh/config
+          # root değilse: bir kez şifresiz sudo tanımlanır (kurulum betikleri sudo ile çalışır)
+          if [ "$USR" != "root" ] && [ -n "$PASS" ]; then
+            printf '%s\n' "$PASS" | ssh panel "sudo -S -p '' sh -c 'echo \"$USR ALL=(ALL) NOPASSWD:ALL\" > /etc/sudoers.d/90-updated-panel && chmod 440 /etc/sudoers.d/90-updated-panel'" || { echo "::error title=SSH::$USR için sudo ayarlanamadı"; exit 1; }
+          fi
+          ssh panel 'echo "bağlandı: $(uname -m) $(lsb_release -ds 2>/dev/null)"' 2>&1 | tee /tmp/ssh.log || { echo "::error title=SSH::$(tail -c 800 /tmp/ssh.log | tr '\n' ' ')"; exit 1; }
+
+      - name: Teşhis
+        run: |
+          ssh panel 'bash -s' > /tmp/t.txt 2>&1 <<'UZAK'
+          q() { sudo docker exec supabase-db psql -X -tA -U supabase_admin -d postgres -c "$1"; }
+          gizle() { sed -E 's/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/<eposta>/g; s/(eyJ[A-Za-z0-9_-]{6})[A-Za-z0-9._-]+/\1…/g; s/("(password|pass|token|secret)[^"]*": *")[^"]*/\1***/Ig'; }
+          echo "--- ayarlar (değerler değil, var/yok)"
+          cd /opt/updated/supabase
+          for k in SITE_URL API_EXTERNAL_URL ADDITIONAL_REDIRECT_URLS SMTP_HOST SMTP_PORT SMTP_USER SMTP_SENDER_NAME SMTP_ADMIN_EMAIL ENABLE_EMAIL_AUTOCONFIRM DISABLE_SIGNUP MAILER_URLPATHS_RECOVERY; do
+            v=$(sudo sed -n "s/^$k=//p" .env | head -1); case $k in SMTP_HOST|SMTP_PORT|SITE_URL|API_EXTERNAL_URL|ADDITIONAL_REDIRECT_URLS|SMTP_SENDER_NAME|ENABLE_EMAIL_AUTOCONFIRM|DISABLE_SIGNUP|MAILER_URLPATHS_RECOVERY) echo "$k=$v";; *) echo "$k=$( [ -n "$v" ] && echo dolu || echo BOŞ)";; esac
+          done
+          echo "SMTP_PASS=$(sudo sed -n 's/^SMTP_PASS=//p' .env | grep -q . && echo dolu || echo BOŞ)"
+          echo "auth kabındaki SMTP ana bilgisayarı: $(sudo docker exec supabase-auth printenv GOTRUE_SMTP_HOST 2>&1)"
+          echo "--- hesaplar"
+          q "select 'toplam '||count(*)||' · şifresiz '||count(*) filter (where encrypted_password is null or encrypted_password='')||' · onaysız '||count(*) filter (where email_confirmed_at is null)||' · silinmiş '||count(*) filter (where deleted_at is not null)||' · yasaklı '||count(*) filter (where banned_until > now())||' · instance '||string_agg(distinct instance_id::text, ',')||' · aud '||string_agg(distinct aud, ',') from auth.users"
+          q "select 'kimlik: '||count(*)||' · sağlayıcı '||string_agg(distinct provider, ',') from auth.identities"
+          q "select 'son giriş: '||coalesce(to_char(max(last_sign_in_at) at time zone 'Europe/Istanbul','DD.MM HH24:MI'),'-') from auth.users"
+          q "select 'sıfırlama isteği olan hesap: '||count(*)||' · son: '||coalesce(to_char(max(recovery_sent_at) at time zone 'Europe/Istanbul','DD.MM HH24:MI'),'-') from auth.users where recovery_sent_at > now() - interval '1 day'"
+          echo "--- giriş servisi kayıtları (son 12 saat; giriş, sıfırlama, e-posta)"
+          sudo docker logs --since 12h supabase-auth 2>&1 | grep -iE 'recover|token|mail|smtp|invalid|error|grant' | gizle | sed -E 's/"(time|request_id|remote_addr|referer|header)":"[^"]*",?//g' | cut -c1-260 | tail -25
+          echo "--- posta sunucusuna ulaşım (auth kabından)"
+          sudo docker exec supabase-auth sh -c 'nc -z -w 5 mail.kurumsaleposta.com 465 && echo "465 açık" || echo "465 KAPALI"' 2>&1
+          UZAK
+          cat /tmp/t.txt
+          node -e "const t=require('fs').readFileSync('/tmp/t.txt','utf8').slice(0,6000);console.log('::notice title=Giriş teşhisi::'+t.replace(/%/g,'%25').replace(/\r/g,'').replace(/\n/g,'%0A'))"
