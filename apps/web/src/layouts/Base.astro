@@ -42,9 +42,9 @@ const ld = { '@context': 'https://schema.org', '@graph': [...siteLd(), ...(meta.
   <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)" />
   <link rel="icon" href="/marka/updated-up-black.svg" type="image/svg+xml" />
   <link rel="alternate" type="application/rss+xml" title="UPDATED" href="/rss.xml" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&family=Newsreader:ital,wght@1,400&display=swap" />
+  <!-- Yazı tipleri kendi sitemizde (Google'a bağlanılmaz): public/yazi-tipleri, üretici deploy/yazi-tipi-indir.mjs -->
+  <link rel="preload" href="/yazi-tipleri/ibm-plex-sans-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/yazi-tipleri/yazi-tipleri.css?v=20261023" />
   <script is:inline>try{var t=localStorage.getItem('up-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
   <script type="application/ld+json" set:html={JSON.stringify(ld)} />
   <slot name="head" />

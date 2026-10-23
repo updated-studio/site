@@ -162,7 +162,11 @@ ExpiresByType image/webp "access plus 30 days"
 ExpiresByType image/avif "access plus 30 days"
 ExpiresByType image/svg+xml "access plus 30 days"
 ExpiresByType image/jpeg "access plus 30 days"
+ExpiresByType font/woff2 "access plus 1 year"
 </IfModule>
+
+# Kendi barındırdığımız yazı tipleri (public/yazi-tipleri)
+AddType font/woff2 .woff2
 
 <IfModule mod_deflate.c>
 AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/xml application/json application/javascript text/javascript application/rss+xml image/svg+xml
