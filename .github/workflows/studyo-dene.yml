@@ -60,6 +60,7 @@ jobs:
           echo "kaynak kontrolü (son 10 dk): $(q "select count(*) from public.tr_sources where last_check > now() - interval '10 minutes'") kaynak"
           echo "fonksiyon hataları (son 5 dk): $(sudo docker logs --since 5m supabase-edge-functions 2>&1 | grep -ciE 'error|uncaught')"
           sudo docker logs --since 5m supabase-edge-functions 2>&1 | grep -iE 'error|uncaught' | grep -viE 'key|token|password|secret' | cut -c1-160 | tail -5
+          for y in / /haberler /wp-json/ "/?rest_route=/wp/v2/posts" /wp-admin/ /wp-login.php /xmlrpc.php /wp-cron.php /index.php; do echo "web $y → $(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "https://updated.com.tr$y")"; done
           echo "taşıma kilidi: $(sudo cat /opt/updated/supabase/.studyo-gecti 2>/dev/null || echo YOK)"
           echo "--- son taslaklar (no · otomatik · kontrol · panel no · panel hatası)"
           q "select id||' · '||auto||' · '||coalesce(qc_state,'')||' · '||coalesce(site_id::text,'-')||' · '||left(coalesce(site_hata,''),160)||' · '||to_char(created_at at time zone 'Europe/Istanbul','HH24:MI') from public.tr_drafts order by id desc limit 6"
