@@ -23,7 +23,7 @@
 ## Sıradaki işler (Fatih, 23 Ekim 16:05; bu sırayla)
 0. Oturum başında: `cd /opt/updated/calisma/site && git pull` ve `cd /opt/updated/studio && git pull`.
 1. **Stüdyo ekranı GitHub Pages'ten Natro'ya** (Fatih: "Stüdyo tamamen Natro'da, GitHub'la konuşmasın"). **Sunucu tarafı bitti (23 Ekim 16:35):** sunucu 2 dakikada bir Stüdyo deposunun `main` dalına bakar; değişiklik varsa ekranı derler (~40 sn) ve değişen fonksiyonları Natro'daki Supabase'e yükler (`updated-studyo.timer`, `/usr/local/bin/updated-studyo-yayinla`). Derleme hata verirse eski sürüm yayında kalır; son 5 sürüm saklanır. Caddy: `/etc/caddy/conf.d/studyo.caddy`. **DNS değişti (18:15):** `studio` artık A kaydı → 136.144.200.84 (CNAME'i düzenlemek Natro panelinde kaydı sildi; A kaydı yeniden eklendi). Sertifika alındı, giriş servisi yeni adrese izin veriyor (CORS denendi). Kalan: **(b)** ekipten biri tarayıcıda giriş + bir sayfa dener → **(c)** Stüdyo deposunda `.github/workflows/yayin.yml` ve `fonksiyonlar.yml` kapatılır, GitHub Pages ayarı kapatılır (Fatih onayıyla).
-1b. **Sıradaki adım (23 Ekim 18:20):** GitHub yazma anahtarı (kullanıcı onayladı, adım adım yapılacak) → sonra Stüdyo'nun GitHub Pages yayını kapatılır (onayla).
+1b. **Sıradaki adım:** Stüdyo'nun GitHub Pages yayını ve bulut fonksiyon iş akışı kapatılır (onay bekleniyor).
 2. **`YEDEK_SIFRESI`:** Fatih belirler (şifre yöneticisi + zarf). Sunucuda `/opt/updated/yedek/sifre` onunla değiştirilir, yedek yeniden alınır.
 3. **İkinci yedek kopyası (Natro dışı):** haftada bir şifreli yedek Fatih'in Mac'ine kendiliğinden insin (GitHub deploy key kuruluş kuralıyla kapalı; açılmayacak).
 4. **Panel arayüzü:** "Taslaklar" ve "Yayında" ayrı menüler; panel Stüdyo tarzı, marka kitiyle, kullanımı kolay.
@@ -33,7 +33,7 @@
 8. Kod için Forgejo (Natro'da) isteğe bağlı; GitHub salt okunur ayna olarak kalır (Fatih onayladı).
 
 ## Diğer açık işler
-- [ ] **Sunucudan GitHub'a yazma yetkisi yok:** sunucudaki Claude değişiklikleri yerel olarak kaydedebiliyor ama depoya gönderemiyor (23 Ekim 16:40 itibarıyla `/opt/updated/calisma/site` ve `/opt/updated/studio`'da gönderilmemiş kayıtlar var). Çözüm Fatih'in kararı bekliyor.
+- [x] **Sunucudan GitHub'a yazma (23 Ekim 21:30):** ince ayarlı erişim anahtarı `natro-sunucu` (yalnız site + studio; Contents + Workflows yazma; 366 gün, **Ekim 2027'de yenilenecek**). Sunucuda `updated` kullanıcısının `~/.git-credentials` dosyasında; yenileme: `github-anahtar-gir`.
 - [ ] Flux (Fatih'in Mac'i): işçinin adresi `https://panel.updated.com.tr/functions/v1/triyaj-taslak` + yeni FLUX_TOKEN (sunucuda `functions.env`; güvenli yoldan verilecek).
 - [ ] Google Search Console'a yeni site haritası; 301'ler kontrol edilir.
 - [ ] Fotoğrafçılık bölümü baştan tasarlanacak (eski dosyalar kullanılmayacak; Fatih ile).
@@ -47,6 +47,7 @@
 - **Aşama 4 (sürüyor):** Stüdyo ekranı Natro'ya (Sıradaki işler 1), sonra isteğe bağlı Forgejo.
 
 ## Günlük (en yeni üstte)
+- **23 Ekim 2026 21:40** (Natro sunucusundaki Claude): Sunucuya GitHub yazma anahtarı verildi (kullanıcı adım adım oluşturdu, anahtar sohbete hiç yazılmadı; `github-anahtar-gir`). Bekleyen kayıtlar gönderildi. Panel güncellemesi Caddy ayarını yeniden üretti, Stüdyo düşmedi (`conf.d` içe alımı çalışıyor). Stüdyo deposuna gönderim sunucuda kendiliğinden derlenip yayına çıktı (ilk gerçek deneme).
 - **23 Ekim 2026 18:15** (Natro sunucusundaki Claude): `studio` DNS kaydı Natro'da değiştirildi (kullanıcı adım adım yaptı). Ders: **Natro DNS panelinde CNAME düzenlemek kaydı silebiliyor**; düzenledikten sonra `dig +short <ad> @ns1.natrohost.com` ile mutlaka kontrol et. Yeni kayıt A → 136.144.200.84; sertifika alındı, 1.1.1.1 ve 8.8.8.8 yeni adresi görüyor. Kayıt ~10 dk yoktu; bazı servis sağlayıcılarında 1 saate kadar "bulunamadı" görünebilir.
 - **23 Ekim 2026 16:45** (Natro sunucusundaki Claude, Fatih'in hesabı): Fatih: "Stüdyo'yu Natro'ya taşı, eskimiş maddeleri temizle." Yapılan: Stüdyo ekranı sunucuda derlenip yayınlanıyor (`deploy/altyapi/studyo`: `studyo` kullanıcısı, 2 dakikalık zamanlayıcı, Caddy `conf.d/studyo.caddy`, yerel deneme ucu 127.0.0.1:8090; ilk derleme 38 sn, dosyalar GitHub Pages'tekiyle aynı). Sunucudaki fonksiyonlar depodakiyle birebir aynıydı. `deploy/panel/kur.sh` artık `conf.d`'yi içe alıyor (Caddyfile yeniden üretilince Stüdyo düşmesin). Stüdyo kalıcı olarak `/opt/updated/studio`'da, site çalışma kopyası `/opt/updated/calisma/site`. `enes` kullanıcısının `@reboot` satırı eklendi. `CLAUDE.md`: kural 8 (kim neye karar verir) + 9 (sunucudaki kopyalar); bu dosyada eskimiş maddeler temizlendi, "Çalışma biçimi ve erişim" bölümü eklendi. Bekleyen: Fatih'in DNS değişikliği; sunucudan GitHub'a yazma yetkisi.
 - **23 Ekim 2026 07:50** (Fatih'in Claude'u): Fatih: "her şey Natro'da, aracı olmasın". Aşama 1 (panel verisi + görseller) ve aşama 2 (Stüdyo'nun Supabase'i) Natro'ya taşındı; ayrıntı "Tüm altyapıyı Natro'ya taşıma" bölümünde. Fatih yol haritasını verdi (aşağıda "Yol haritası"); önce altyapı temelleri bitecek.
