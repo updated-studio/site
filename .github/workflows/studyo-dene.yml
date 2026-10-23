@@ -51,14 +51,14 @@ jobs:
           ssh panel 'bash -s' > /tmp/d.txt 2>&1 <<'UZAK'
           q() { sudo docker exec supabase-db psql -X -tA -U supabase_admin -d postgres -c "$1"; }
           echo "önce: haber $(q 'select count(*) from public.tr_items') · son kayıt $(q "select to_char(max(created_at) at time zone 'Europe/Istanbul','DD.MM HH24:MI') from public.tr_items")"
-          r=$(curl -s -m 170 -o /tmp/r.txt -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{}' http://127.0.0.1:8000/functions/v1/triyaj-topla)
+          r=$(curl -s -m 170 -o /tmp/r.txt -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"zorla":true}' http://127.0.0.1:8000/functions/v1/triyaj-topla)
           echo "haber toplama: $r · $(head -c 300 /tmp/r.txt | tr '\n' ' ')"
-          sleep 20
+          sleep 60
           echo "sonra: haber $(q 'select count(*) from public.tr_items') · son kayıt $(q "select to_char(max(created_at) at time zone 'Europe/Istanbul','DD.MM HH24:MI') from public.tr_items")"
           echo "kaynak kontrolü (son 10 dk): $(q "select count(*) from public.tr_sources where last_check > now() - interval '10 minutes'") kaynak"
           echo "fonksiyon hataları (son 5 dk): $(sudo docker logs --since 5m supabase-edge-functions 2>&1 | grep -ciE 'error|uncaught')"
           sudo docker logs --since 5m supabase-edge-functions 2>&1 | grep -iE 'error|uncaught' | grep -viE 'key|token|password|secret' | cut -c1-160 | tail -5
-          echo "STUDYO_ACIK_ANAHTAR=$(sudo sed -n 's/^ANON_KEY=//p' /opt/updated/supabase/.env)"
+          echo "STUDYO_ACIK_ANAHTAR_B64=$(sudo sed -n 's/^ANON_KEY=//p' /opt/updated/supabase/.env | base64 -w0)"
           free -h | sed -n 2p
           UZAK
           cat /tmp/d.txt
