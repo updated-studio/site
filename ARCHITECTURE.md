@@ -43,6 +43,7 @@ GitHub Actions: Astro statik derleme ──► Natro (FTP, değişen dosyalar) �
 | 25 | Site veritabanı yedeği `updated-studio/yedek` deposunda | Stüdyo yedeğiyle aynı yöntem, her gece 03.35. |
 | 26 | Panel sunucusu: şimdi Oracle (ücretsiz ARM), sonra Natro VPS | `deploy/panel/*.sh` iki yerde de aynı; https'i Caddy kendi alır. |
 | 20 | Hazırlık GitHub Pages'te (`BASE_PATH=/site`) | Alan adı gerekmeden deneme; postbuild iç bağlantılara önek ekler, her sayfa noindex. |
+| 27 | Stüdyo taslakları panele (`/api/triyaj/import`), WordPress devre dışı (23 Ekim 2026) | Tek yayın sistemi. Uç üzerine yazmaz (yayında/düzenlenmiş → 409), kategori yalnız var olanlardan; anahtar sunucuda üretilir, panel iş akışı Stüdyo'nun Supabase Secrets'ına eşitler. WordPress dosyaları silinmez; `deploy/canli.json` `wordpress:false` ile PHP girişleri kapanır, eski görseller statik kalır. |
 
 ## Kit uyumu (kısa)
 

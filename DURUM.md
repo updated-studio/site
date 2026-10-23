@@ -12,7 +12,7 @@
 ## Bekleyenler
 - [ ] v2 için SSL + bot korumasını Natro destekten iste (Fatih).
 - [ ] Ana alan adına geçiş (aşağıdaki plan) — Fatih onayıyla.
-- [ ] Stüdyo → Payload bağlantısı: Haber Masası taslakları WordPress yerine panele (`/api/triyaj/import`). Geçişten ÖNCE şart.
+- [ ] **Stüdyo → Payload bağlantısı (kod hazır, 23 Ekim 04:30–):** site PR #1 + studio PR #24. Sıra: (1) Fatih `SUPABASE_ACCESS_TOKEN`'ı **organizasyon secret'ı** olarak girer → (2) site PR birleşir (panel güncellenir, anahtar Supabase'e yazılır) → (3) Stüdyo'da "Veritabanı göçü" 0024 → (4) studio PR birleşir (fonksiyon + ekran) → (5) Stüdyo → Ayarlar → "Bağlantıyı dene" + bir taslak gönderimi → (6) `deploy/canli.json` `"wordpress": false` (WordPress'in PHP girişleri kapanır; dosyalar silinmez, eski görseller açık kalır).
 - [ ] Fotoğrafçılık bölümü baştan tasarlanacak (eski dosyalar kullanılmayacak; Fatih ile).
 - [ ] Ekip hesapları panelde; Stüdyo ile tek giriş.
 - [ ] Cloudflare (ücretsiz) önerildi: Natro'nun kör bot koruması yerine ayarlanabilir koruma + önbellek.
@@ -29,6 +29,7 @@ Yöntem: **WordPress silinmez, taşınmaz.** Yeni site `public_html`'e WordPress
 4. Google Search Console'a yeni site haritası; 301'ler kontrol edilir.
 
 ## Günlük (en yeni üstte)
+- **23 Ekim 2026 04:35** (Fatih'in Claude'u): Fatih: "Stüdyo taslaklarını doğrudan Payload'a gönderelim, bitince WordPress tamamen devreden çıksın." Yapılan (PR #1): `/api/triyaj/import` sağlamlaştırıldı (yayındaki/panelde düzenlenmiş taslağın üzerine yazmaz → 409 `yayinda`/`duzenlendi`, `force` ile yazılır; kategori yalnız var olanlardan → 422; görsel aynı adresse yeniden yüklenmez; SEO başlık/açıklama; etiketler `seo.geo.entities` (eski kod yanlış yere yazıyordu); güncellemede iş akışı durumu sıfırlanmaz), yeni uçlar `/api/triyaj/durum` ve `/api/triyaj/kapak`; panel iş akışına "Stüdyo anahtarını eşitle" (sunucudaki `STUDIO_IMPORT_KEY` → Stüdyo Supabase Secrets, `SUPABASE_ACCESS_TOKEN` gerekir); `deploy/canli.json` `wordpress` anahtarı (false → `.htaccess` wp-json/xmlrpc/PHP kapalı, wp-admin panele); PR'larda panel tip denetimi (`kontrol.yml`). Bu çalışma ortamından panel ve npm'e erişilemedi; doğrulama GitHub'da. Stüdyo tarafı: studio PR #24.
 - **23 Ekim 2026 04:20** (Fatih'in Claude'u): **updated.com.tr yeni sisteme geçti** (Fatih'in isteği, yedeksiz). `deploy/canli.json` canli=true; FTP `canli@updated.com.tr` → public_html. WordPress dosyaları klasörde duruyor (wp-admin, wp-json, wp-content çalışır; Stüdyo taslakları gitmeye devam eder). v2 artık güncellenmiyor. Sıradaki: Stüdyo → Payload bağlantısı, Search Console'a site haritası, v2'yi ana adrese yönlendirme.
 - **23 Ekim 2026** (Fatih'in Claude'u): Görseller yeni kaliteyle yeniden üretildi (537/537). Stüdyo'da etiket kuralı (en fazla 3, izinli liste) ve otomatik taslak ataması duraklatıldı (Stüdyo deposu; Edge Function yayını için `SUPABASE_ACCESS_TOKEN` secret'ı bekleniyor). Eski site raporu: `deploy/rapor` (çıktı `raporlar` dalında). Bu dosya ve `CLAUDE.md` eklendi.
 - **22 Ekim 2026** (Fatih'in Claude'u): WordPress taşıması, görsel onarımı, kurumsal sayfalar, eski adres yönlendirmeleri, panel Türkçe + logo, yayın anahtarı.

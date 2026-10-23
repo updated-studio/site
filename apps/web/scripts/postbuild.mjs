@@ -66,6 +66,18 @@ RewriteRule ^(?:wp-login\\.php|wp-cron\\.php|xmlrpc\\.php|index\\.php)$ - [L]
 RewriteRule ^sitemap_index\\.xml$ /sitemap.xml [R=301,L]
 RewriteRule ^(?:post|page|category|post_tag)-sitemap\\d*\\.xml$ /sitemap.xml [R=301,L]
 ` : ''
+// WordPress kapalı (deploy/canli.json "wordpress": false; Stüdyo taslakları panele gidince, 23 Ekim 2026): dosyalar klasörde durur ama
+// hiçbir PHP girişi çalışmaz. Eski görsel adresleri (wp-content/uploads) statik dosya olarak açık kalır; wp-admin panele yönlenir.
+const wpKapali = yanyana ? '' : `# WordPress devre dışı: REST, XML-RPC, cron ve PHP dosyaları kapalı (dosyalar silinmedi)
+RewriteRule ^wp-json(?:/.*)?$ - [G,L]
+RewriteCond %{QUERY_STRING} (?:^|&)rest_route= [NC]
+RewriteRule ^ - [G,L]
+RewriteRule ^(?:xmlrpc|wp-cron|wp-trackback|wp-comments-post|wp-signup|wp-activate|wp-mail|wp-links-opml|index)\\.php$ - [G,L]
+RewriteRule ^wp-(?:includes|content)/.*\\.(?:php\\d?|phtml|phar)$ - [F,L]
+RewriteRule ^(?:wp-admin|wp-login\\.php)(?:/.*)?$ https://panel.updated.com.tr/admin [R=302,L]
+RewriteRule ^sitemap_index\\.xml$ /sitemap.xml [R=301,L]
+RewriteRule ^(?:post|page|category|post_tag)-sitemap\\d*\\.xml$ /sitemap.xml [R=301,L]
+`
 const httpsRule = process.env.STAGING === '1' ? '# hazırlık: https zorlaması kapalı (SSL kurulunca canlıda açılır)\n' : `# https ve www'suz tek adres
 RewriteCond %{HTTPS} !=on [OR]
 RewriteCond %{HTTP_HOST} ^www\\. [NC]
@@ -88,7 +100,7 @@ AddType text/plain .txt
 <IfModule mod_rewrite.c>
 RewriteEngine On
 
-${wpBlok}
+${wpBlok}${wpKapali}
 ${httpsRule}
 # sondaki "/" atılır
 RewriteRule ^(.+)/$ /$1 [R=301,L]
@@ -119,7 +131,6 @@ RewriteRule ^kiyaslamalar$ /karsilastirma [R=301,L]
 RewriteRule ^hakkimizda-2$ /hakkimizda [R=301,L]
 RewriteRule ^(?:blog|categories-list|catalogue|rehber-ve-ipuclari)$ /haberler [R=301,L]
 RewriteRule ^advanced-search$ /ara [R=301,L]
-${yanyana ? '' : 'RewriteRule ^(?:wp-admin|wp-login\\.php)(?:/.*)?$ https://panel.updated.com.tr/admin [R=302,L]'}
 # Temanın örnek sayfaları (mağaza, üyelik, demo ana sayfalar…) → ana sayfa
 RewriteRule ^(?:home-\\d+|(?:shop|cart|checkout|my-account)(?:-\\d+)?|track-order|membership-[^/]+(?:/.*)?|login(?:-custom)?|sample-page|maintenance|coming-soon|landing|newsletter|resources|authors-list|out-authors|our-team|bookmarks|content-widgets|footer-styles|pluvia-english|editor-panel|test|privacy-policy-\\d*|faq)$ / [R=301,L]
 

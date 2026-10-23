@@ -20,7 +20,7 @@ import { Videos, Reels, Ads } from './collections/Social'
 import { KulupTracks, KulupQuizzes } from './collections/Kulup'
 import { Pages } from './collections/Pages'
 import { Site, Home } from './globals'
-import { triyajImport } from './endpoints/triyajImport'
+import { triyajDurum, triyajImport, triyajKapak } from './endpoints/triyajImport'
 import { previewEndpoint } from './endpoints/preview'
 import { canliEndpoint } from './endpoints/canli'
 import { okunmaEndpoints, okunmaInit } from './endpoints/okunma'
@@ -54,7 +54,7 @@ export default buildConfig({
   csrf: origins,
   // Zamanlanmış yayın (schedulePublish) için iş kuyruğu dakikada bir çalışır. Panel kalıcı Node sunucusunda çalışmalı.
   jobs: { autoRun: [{ cron: '* * * * *', queue: 'default', limit: 20 }], tasks: [] },
-  endpoints: [triyajImport, previewEndpoint, canliEndpoint, ...okunmaEndpoints],
+  endpoints: [triyajImport, triyajDurum, triyajKapak, previewEndpoint, canliEndpoint, ...okunmaEndpoints],
   onInit: okunmaInit,
   plugins: [
     s3Storage({
