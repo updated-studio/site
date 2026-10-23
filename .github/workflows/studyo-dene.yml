@@ -49,7 +49,7 @@ jobs:
       - name: Dene
         run: |
           ssh panel 'bash -s' > /tmp/d.txt 2>&1 <<'UZAK'
-          q() { sudo docker exec -i supabase-db psql -X -tA -U supabase_admin -d postgres -c "$1"; }
+          q() { sudo docker exec supabase-db psql -X -tA -U supabase_admin -d postgres -c "$1"; }
           echo "önce: haber $(q 'select count(*) from public.tr_items') · son kayıt $(q "select to_char(max(created_at) at time zone 'Europe/Istanbul','DD.MM HH24:MI') from public.tr_items")"
           r=$(curl -s -m 170 -o /tmp/r.txt -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{}' http://127.0.0.1:8000/functions/v1/triyaj-topla)
           echo "haber toplama: $r · $(head -c 300 /tmp/r.txt | tr '\n' ' ')"
