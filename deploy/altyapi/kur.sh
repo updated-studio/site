@@ -71,6 +71,12 @@ ayarla FUNCTIONS_VERIFY_JWT "false"
 ayarla STORAGE_TENANT_ID "updated"
 ayarla REGION "local"
 
+# Stüdyo geçiş kilidi: Natro'da Stüdyo'nun zamanlanmış işleri açıksa geçiş yapılmıştır (studyo-tasi.sh bir daha çalışmasın)
+if [ ! -f .studyo-gecti ] && docker ps --format '{{.Names}}' | grep -q '^supabase-db$'; then
+  n=$(docker exec supabase-db psql -X -tA -U supabase_admin -d postgres -c "select count(*) from cron.job where active" 2>/dev/null || echo 0)
+  [ "${n:-0}" -gt 0 ] && { date "+%d.%m.%Y %H:%M" > .studyo-gecti; echo "Stüdyo geçiş kilidi kondu"; }
+fi
+
 # 5) Yalnız kullanılan servisleri başlat
 docker compose up -d --remove-orphans db auth rest realtime storage functions api-gw
 for i in $(seq 1 60); do
