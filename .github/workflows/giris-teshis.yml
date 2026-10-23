@@ -49,6 +49,12 @@ jobs:
           ssh panel 'bash -s' > /tmp/t.txt 2>&1 <<'UZAK'
           q() { sudo docker exec supabase-db psql -X -tA -U supabase_admin -d postgres -c "$1"; }
           gizle() { sed -E 's/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/<eposta>/g; s/(eyJ[A-Za-z0-9_-]{6})[A-Za-z0-9._-]+/\1…/g; s/("(password|pass|token|secret)[^"]*": *")[^"]*/\1***/Ig'; }
+          echo "--- posta sunucusuna ulaşım"
+          echo "ad çözümü: $(getent hosts mail.kurumsaleposta.com | head -1)"
+          for p in 465 587 25; do echo "sunucudan $p: $(timeout 8 bash -c "</dev/tcp/mail.kurumsaleposta.com/$p" 2>/dev/null && echo açık || echo KAPALI/zaman aşımı)"; done
+          echo "TLS 465: $(echo | timeout 10 openssl s_client -connect mail.kurumsaleposta.com:465 -servername mail.kurumsaleposta.com 2>/dev/null | grep -m1 -oE 'Verify return code: [0-9]+ \([^)]*\)' || echo 'el sıkışma yok')"
+          echo "auth kabından 465: $(sudo docker exec supabase-auth sh -c 'timeout 8 nc -z mail.kurumsaleposta.com 465 >/dev/null 2>&1 && echo açık || echo KAPALI/zaman aşımı' 2>&1)"
+          echo "güvenlik duvarı (çıkış kuralları): $(sudo iptables -S OUTPUT 2>/dev/null | grep -cE 'DROP|REJECT') engelleyici kural"
           echo "--- ayarlar (değerler değil, var/yok)"
           cd /opt/updated/supabase
           for k in SITE_URL API_EXTERNAL_URL ADDITIONAL_REDIRECT_URLS SMTP_HOST SMTP_PORT SMTP_USER SMTP_SENDER_NAME SMTP_ADMIN_EMAIL ENABLE_EMAIL_AUTOCONFIRM DISABLE_SIGNUP MAILER_URLPATHS_RECOVERY; do
@@ -63,8 +69,6 @@ jobs:
           q "select 'sıfırlama isteği olan hesap: '||count(*)||' · son: '||coalesce(to_char(max(recovery_sent_at) at time zone 'Europe/Istanbul','DD.MM HH24:MI'),'-') from auth.users where recovery_sent_at > now() - interval '1 day'"
           echo "--- giriş servisi kayıtları (son 12 saat; giriş, sıfırlama, e-posta)"
           sudo docker logs --since 12h supabase-auth 2>&1 | grep -iE 'recover|token|mail|smtp|invalid|error|grant' | gizle | sed -E 's/"(time|request_id|remote_addr|referer|header)":"[^"]*",?//g' | cut -c1-260 | tail -25
-          echo "--- posta sunucusuna ulaşım (auth kabından)"
-          sudo docker exec supabase-auth sh -c 'nc -z -w 5 mail.kurumsaleposta.com 465 && echo "465 açık" || echo "465 KAPALI"' 2>&1
           UZAK
           cat /tmp/t.txt
           node -e "const t=require('fs').readFileSync('/tmp/t.txt','utf8').slice(0,6000);console.log('::notice title=Giriş teşhisi::'+t.replace(/%/g,'%25').replace(/\r/g,'').replace(/\n/g,'%0A'))"
