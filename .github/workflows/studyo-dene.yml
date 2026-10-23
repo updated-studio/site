@@ -60,6 +60,15 @@ jobs:
           echo "kaynak kontrolü (son 10 dk): $(q "select count(*) from public.tr_sources where last_check > now() - interval '10 minutes'") kaynak"
           echo "fonksiyon hataları (son 5 dk): $(sudo docker logs --since 5m supabase-edge-functions 2>&1 | grep -ciE 'error|uncaught')"
           sudo docker logs --since 5m supabase-edge-functions 2>&1 | grep -iE 'error|uncaught' | grep -viE 'key|token|password|secret' | cut -c1-160 | tail -5
+          echo "--- son taslaklar (no · otomatik · kontrol · panel no · panel hatası)"
+          q "select id||' · '||auto||' · '||coalesce(qc_state,'')||' · '||coalesce(site_id::text,'-')||' · '||left(coalesce(site_hata,''),160)||' · '||to_char(created_at at time zone 'Europe/Istanbul','HH24:MI') from public.tr_drafts order by id desc limit 6"
+          echo "oto ayarı: $(q "select left(value::text,200) from public.tr_settings where key='oto_taslak'")"
+          echo "son oto: $(q "select left(value::text,250) from public.tr_settings where key='oto_son'")"
+          echo "kategori önbelleği: $(q "select coalesce(jsonb_array_length(value->'liste'),0) from public.tr_settings where key='site_kategoriler'")"
+          echo "--- triyaj-taslak kayıtları (son 30 dk, hata)"
+          sudo docker logs --since 30m supabase-edge-functions 2>&1 | grep -iE 'error|hata|fail|refused|ENOTFOUND|401|422' | grep -viE 'key=|token|password|secret' | cut -c1-200 | tail -8
+          echo "panel ucu sunucudan: $(curl -s -o /dev/null -w '%{http_code}' https://panel.updated.com.tr/api/triyaj/durum)"
+          echo "panel ucu fonksiyon kabından: $(sudo docker exec supabase-edge-functions sh -c 'wget -q -S -O /dev/null https://panel.updated.com.tr/api/triyaj/durum 2>&1 | grep -m1 HTTP' 2>&1 | tr -d '\n' | cut -c1-80)"
           echo "STUDYO_ACIK_ANAHTAR_B64=$(sudo sed -n 's/^ANON_KEY=//p' /opt/updated/supabase/.env | base64 -w0)"
           free -h | sed -n 2p
           UZAK
