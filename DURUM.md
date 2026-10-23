@@ -16,7 +16,7 @@
 - [ ] Ekipten biri Stüdyo → Haber Masası → Ayarlar → "Site paneli bağlantısı" → **Bağlantıyı dene** + bir taslağı panele gönderir → sonra `deploy/canli.json` `"wordpress": false` (WordPress kapanır).
 - [ ] Flux (Fatih'in Mac'i): işçinin adresi `https://panel.updated.com.tr/functions/v1/triyaj-taslak` + yeni FLUX_TOKEN (sunucuda `functions.env`; açık kayda yazılmaz, güvenli yoldan verilecek).
 - [x] Aşama 3 (23 Ekim 14:35): Natro gece yedeği her gece 03:15 (`deploy/altyapi/yedek`, iş akışı "Yedek (Natro)"). Hedef 1: Natro hosting, public_html altında rastgele adlı gizli klasör, AES-256 şifreli, web erişimi 403, son 7 gün (gün adıyla). İlk yedek tamam (veritabanı 11 MB, dosyalar 182 MB). Şifre sunucuda `/opt/updated/yedek/sifre`. Hedef 2: GitHub `yedek` deposu, natro/ klasörü — **Fatih'in deploy key eklemesi bekleniyor** (açık anahtar "Yedek (Natro)" çıktısında). Eski bulut yedek iş akışları (yedek deposu) artık bayat buluttan alıyor; kapatılacak.
-- [ ] **Natro VPS giden e-postayı engelliyor** (465/587/25 kapalı, 23 Ekim teşhis): şifre sıfırlama ve Stüdyo bildirim e-postaları gitmiyor. Natro destekten "VPS'ten giden SMTP 465/587 açılsın" istenecek (Fatih).
+- [x] Natro giden e-posta portlarını açtı (23 Ekim 15:27; 465/587/25 açık, TLS doğrulandı). Şifre sıfırlama ve Stüdyo bildirimleri artık gidebilir.
 - [ ] Aşama 4: GitHub → Forgejo (Natro) + GitHub salt okunur ayna (Fatih onayladı); Stüdyo arayüzü GitHub Pages → Natro (`studio` DNS kaydı değişecek).
 - [ ] 1-2 hafta sorunsuz çalışınca iki Supabase bulut projesi kapatılır.
 - [ ] v2 için SSL + bot korumasını Natro destekten iste (Fatih).
