@@ -3,7 +3,7 @@
 #   1) GitHub özel deposu updated-studio/yedek, klasör natro/ — düz SQL + dosyalar; eski yedekler deponun geçmişinde.
 #   2) Natro paylaşımlı hosting (FTP), public_html/.yedek-<rastgele>/ — ŞİFRELİ (AES-256), klasör web'e kapalı (.htaccess),
 #      son 7 gün (gün adıyla döner). Şifre sunucuda /opt/updated/yedek/sifre ve GitHub yedek deposunda natro/HOSTING_SIFRESI.txt.
-# İçerik: veritabanı (Stüdyo public + panel payload + kullanıcı hesapları auth + zamanlanmış işler + depolama kayıtları),
+# İçerik (hosting): + kod (depoların tam geçmişi) + gizli ayarlar. İçerik: veritabanı (Stüdyo public + panel payload + kullanıcı hesapları auth + zamanlanmış işler + depolama kayıtları),
 #   depolama dosyaları (görseller, profil fotoğrafları), Stüdyo fonksiyon kodu. Gizli anahtar dosyaları (.env) yedeklenmez.
 # Biri başarısız olsa diğeri yine çalışır. Kayıt: /opt/updated/yedek/yedek.log
 set -uo pipefail
@@ -23,6 +23,18 @@ dump -a -t cron.job > $IS/natro/zamanlanmis-isler.sql
 dump -a -t storage.buckets -t storage.objects > $IS/natro/depolama.sql
 tar -C $SB/volumes/functions -czf $IS/natro/fonksiyonlar.tgz --exclude=./main --exclude=./hello .
 set +e
+# Kod: depoların tam geçmişi (git bundle; tek dosyadan geri açılır). Herkese açık depolar adres üzerinden alınır.
+mkdir -p $IS/kod
+for r in site studio; do
+  rm -rf $IS/kod/$r.git
+  git clone -q --mirror "https://github.com/updated-studio/$r.git" $IS/kod/$r.git 2>/dev/null \
+    && git -C $IS/kod/$r.git bundle create -q $IS/kod/$r.bundle --all 2>/dev/null; rm -rf $IS/kod/$r.git
+done
+# Gizli ayarlar: YALNIZ şifreli hosting yedeğine girer (GitHub'a gitmez). Geri yüklemede anahtarlar aynı kalır, kimse yeniden giriş yapmaz.
+mkdir -p $IS/gizli
+cp $SB/.env $IS/gizli/supabase.env 2>/dev/null; cp $SB/functions.env $IS/gizli/ 2>/dev/null
+cp /etc/updated-panel.env /etc/updated-panel.secrets /etc/updated-panel.yerel $IS/gizli/ 2>/dev/null
+cp /etc/caddy/Caddyfile $IS/gizli/ 2>/dev/null
 OZET="$(date '+%d.%m.%Y %H:%M') · Stüdyo $(q 'select count(*) from public.tr_items') haber · panel $(q 'select count(*) from payload.news') haber · $(q 'select count(*) from auth.users') hesap · $(du -sh $SB/volumes/storage | cut -f1) dosya"
 echo "$OZET" > $IS/natro/SON_YEDEK.txt
 SONUC=""
@@ -51,7 +63,7 @@ host_yedek() {
   local gun; gun=$(LC_ALL=C date +%a | tr 'A-Z' 'a-z')
   local paket=$IS/updated-$gun
   mkdir -p $paket
-  tar -C $IS -czf - natro | openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt -pass file:$D/sifre -out $paket/veritabani.tar.gz.enc
+  tar -C $IS -czf - natro kod gizli | openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt -pass file:$D/sifre -out $paket/veritabani.tar.gz.enc
   # Dosyalar: yalnız değiştiyse (liste özeti)
   local ozet; ozet=$(cd $SB/volumes/storage && find . -type f -printf '%P %s %T@\n' | sort | sha1sum | cut -c1-16)
   if [ "$ozet" != "$(cat $D/dosya-ozeti 2>/dev/null)" ]; then

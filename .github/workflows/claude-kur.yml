@@ -1,0 +1,54 @@
+# Claude Code'u Natro sunucusuna kurar (deploy/altyapi/claude). Giriş Fatih tarafından bir kez elle yapılır (BENIOKU.md).
+name: Claude kurulumu (Natro)
+on:
+  workflow_dispatch:
+permissions: { contents: read }
+concurrency: { group: panel, cancel-in-progress: false }
+jobs:
+  kur:
+    runs-on: ubuntu-latest
+    env:
+      HOST: ${{ secrets.PANEL_SSH_HOST || vars.PANEL_SSH_HOST }}
+      USR: ${{ secrets.PANEL_SSH_USER || vars.PANEL_SSH_USER || 'root' }}
+      PORT: ${{ secrets.PANEL_SSH_PORT || vars.PANEL_SSH_PORT || '22' }}
+      KEY: ${{ secrets.PANEL_SSH_KEY }}
+      PASS: ${{ secrets.PANEL_SSH_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: SSH hazırla
+        run: |
+          mkdir -p ~/.ssh
+          if [ -n "$KEY" ]; then printf '%s\n' "$KEY" > ~/.ssh/id; else
+            # İlk kurulum root şifresiyle: kalıcı bir anahtar üretilip sunucuya eklenir, sonraki bağlantılar anahtarla.
+            sudo apt-get install -y -qq sshpass >/dev/null; ssh-keygen -q -t ed25519 -N '' -f ~/.ssh/id
+            ssh-keyscan -p "$PORT" -T 15 "$HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+            if ! SSHPASS="$PASS" sshpass -e ssh-copy-id -p "$PORT" -i ~/.ssh/id.pub -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 "$USR@$HOST" > /tmp/copy.log 2>&1; then
+              # Teşhis: port açık mı, sunucu hangi giriş yöntemlerine izin veriyor?
+              p=$(timeout 10 bash -c "</dev/tcp/$HOST/$PORT" 2>&1 && echo açık || echo "kapalı/erişilemiyor")
+              m=$(ssh -p "$PORT" -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=no -o PreferredAuthentications=none "$USR@$HOST" 2>&1 | grep -io 'permission denied ([^)]*)' | head -1)
+              b=$(timeout 10 bash -c "exec 3<>/dev/tcp/$HOST/$PORT; head -c 60 <&3" 2>/dev/null | tr -d '\r\n')
+              echo "::error title=SSH girişi::Port $PORT: $p · sunucu: ${b:-?} · izin verilen yöntemler: ${m:-?} · ayrıntı: $(tail -c 400 /tmp/copy.log | tr '\n' ' ')"
+              exit 1
+            fi
+          fi
+          chmod 600 ~/.ssh/id
+          ssh-keyscan -p "$PORT" -T 15 "$HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+          echo "Host panel
+            HostName $HOST
+            User $USR
+            Port $PORT
+            IdentityFile ~/.ssh/id
+            ServerAliveInterval 30
+            StrictHostKeyChecking accept-new" > ~/.ssh/config
+          # root değilse: bir kez şifresiz sudo tanımlanır (kurulum betikleri sudo ile çalışır)
+          if [ "$USR" != "root" ] && [ -n "$PASS" ]; then
+            printf '%s\n' "$PASS" | ssh panel "sudo -S -p '' sh -c 'echo \"$USR ALL=(ALL) NOPASSWD:ALL\" > /etc/sudoers.d/90-updated-panel && chmod 440 /etc/sudoers.d/90-updated-panel'" || { echo "::error title=SSH::$USR için sudo ayarlanamadı"; exit 1; }
+          fi
+          ssh panel 'echo "bağlandı: $(uname -m) $(lsb_release -ds 2>/dev/null)"' 2>&1 | tee /tmp/ssh.log || { echo "::error title=SSH::$(tail -c 800 /tmp/ssh.log | tr '\n' ' ')"; exit 1; }
+
+      - name: Kur
+        run: |
+          scp -q deploy/altyapi/claude/kur.sh panel:/tmp/claude-kur.sh
+          ssh panel 'sudo bash /tmp/claude-kur.sh "$(whoami)"; rm -f /tmp/claude-kur.sh; echo "bağlanılan kullanıcı: $(whoami)"' > /tmp/c.txt 2>&1 || true
+          cat /tmp/c.txt
+          node -e "const t=require('fs').readFileSync('/tmp/c.txt','utf8').slice(-1500);console.log('::notice title=Claude kurulumu::'+t.replace(/%/g,'%25').replace(/\r/g,'').replace(/\n/g,'%0A'))"
