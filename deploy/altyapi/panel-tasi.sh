@@ -28,6 +28,8 @@ psql_yerel -c "grant connect, create on database postgres to payload" >/dev/null
 
 # 2) Veritabanı: ilk taşımada (ya da YENIDEN=1) buluttan alınır
 VAR=$(psql_yerel -tAc "select 1 from information_schema.schemata where schema_name='payload'")
+# Geçişten sonra yerel veri asıldır: buluttan yeniden almak onu ezer, bu yüzden geçişten sonra YENIDEN reddedilir
+if [ "${YENIDEN:-0}" = "1" ] && [ -f "$YEREL" ]; then echo "Panel zaten Natro'da çalışıyor; YENIDEN reddedildi (yerel veriyi ezerdi)"; exit 1; fi
 if [ "$VAR" != "1" ] || [ "${YENIDEN:-0}" = "1" ]; then
   [ "$VAR" = "1" ] && psql_yerel -c "drop schema payload cascade" >/dev/null
   docker exec supabase-db pg_dump "$CLOUD_DB" -n payload --no-owner --no-privileges -Fc -f /tmp/payload.dump
@@ -48,7 +50,7 @@ curl -s -o /dev/null -X POST http://127.0.0.1:8000/storage/v1/bucket -H "apikey:
   -H "Content-Type: application/json" -d '{"id":"media","name":"media","public":true}' || true
 KAYNAK_ENDPOINT=$(deger S3_ENDPOINT /etc/updated-panel.env) KAYNAK_REGION=$(deger S3_REGION /etc/updated-panel.env) \
 KAYNAK_KEY=$(deger S3_ACCESS_KEY_ID /etc/updated-panel.env) KAYNAK_SECRET=$(deger S3_SECRET_ACCESS_KEY /etc/updated-panel.env) \
-HEDEF_ENDPOINT=http://127.0.0.1:8000/storage/v1/s3 HEDEF_REGION=$(deger REGION $SB/.env) \
+HEDEF_ENDPOINT=http://127.0.0.1:5000/s3 HEDEF_REGION=$(deger REGION $SB/.env) \
 HEDEF_KEY=$(deger S3_PROTOCOL_ACCESS_KEY_ID $SB/.env) HEDEF_SECRET=$(deger S3_PROTOCOL_ACCESS_KEY_SECRET $SB/.env) \
 NODE_PATH=/opt/updated/site/node_modules node "$HERE/medya-kopyala.cjs"
 
@@ -59,7 +61,7 @@ cat > "$YEREL" <<EOF
 PAYLOAD_DB_SIFRE=$PW
 DATABASE_URI=postgresql://payload:$PW@127.0.0.1:5432/postgres
 S3_BUCKET=media
-S3_ENDPOINT=http://127.0.0.1:8000/storage/v1/s3
+S3_ENDPOINT=http://127.0.0.1:5000/s3
 S3_REGION=$(deger REGION $SB/.env)
 S3_ACCESS_KEY_ID=$(deger S3_PROTOCOL_ACCESS_KEY_ID $SB/.env)
 S3_SECRET_ACCESS_KEY=$(deger S3_PROTOCOL_ACCESS_KEY_SECRET $SB/.env)
