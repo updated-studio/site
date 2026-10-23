@@ -2,6 +2,8 @@
 name: Claude kurulumu (Natro)
 on:
   workflow_dispatch:
+    inputs:
+      kullanicilar: { description: 'Ek Claude kullanıcıları (boşlukla)', default: 'enes' }
 permissions: { contents: read }
 concurrency: { group: panel, cancel-in-progress: false }
 jobs:
@@ -48,7 +50,7 @@ jobs:
 
       - name: Kur
         run: |
-          scp -q deploy/altyapi/claude/kur.sh panel:/tmp/claude-kur.sh
-          ssh panel 'sudo bash /tmp/claude-kur.sh "$(whoami)"; rm -f /tmp/claude-kur.sh; echo "bağlanılan kullanıcı: $(whoami)"' > /tmp/c.txt 2>&1 || true
+          scp -q deploy/altyapi/claude/kur.sh deploy/altyapi/claude/kullanici-ekle.sh panel:/tmp/
+          ssh panel 'sudo bash /tmp/kur.sh "$(whoami)"; for k in ${{ github.event.inputs.kullanicilar || 'enes' }}; do sudo bash /tmp/kullanici-ekle.sh "$k"; done; rm -f /tmp/kur.sh /tmp/kullanici-ekle.sh; echo "çalışan Claude oturumları: $(pgrep -fc "claude remote-control")"' > /tmp/c.txt 2>&1 || true
           cat /tmp/c.txt
           node -e "const t=require('fs').readFileSync('/tmp/c.txt','utf8').slice(-1500);console.log('::notice title=Claude kurulumu::'+t.replace(/%/g,'%25').replace(/\r/g,'').replace(/\n/g,'%0A'))"
