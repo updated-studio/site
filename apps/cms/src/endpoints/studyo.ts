@@ -44,7 +44,7 @@ export const studyoAlanlar: Endpoint = {
   handler: async (req) => {
     const headers = headersWithCors({ headers: new Headers({ 'Cache-Control': 'no-store' }), req })
     if (!req.user) return Response.json({ error: 'Giriş gerekli' }, { status: 401, headers })
-    return Response.json(semaYap(req.payload.config), { headers })
+    return Response.json(semaYap(req.payload.config, req), { headers })
   },
 }
 

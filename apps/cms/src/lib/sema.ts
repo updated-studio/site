@@ -1,4 +1,4 @@
-import type { SanitizedConfig } from 'payload'
+import type { PayloadRequest, SanitizedConfig } from 'payload'
 
 /**
  * Panelin alan yapısını Stüdyo'ya bildirilebilir (JSON) hâle getirir: Stüdyo Site modülü formlarını buradan kurar,
@@ -9,9 +9,17 @@ type Alan = Record<string, unknown>
 const metin = (x: unknown): string | undefined =>
   typeof x === 'string' ? x : x && typeof x === 'object' ? ((x as Record<string, string>).tr ?? (x as Record<string, string>).en) : undefined
 
+/** Kişinin okuma yetkisi olmayan alan Stüdyo'ya hiç gitmez (ör. Uper e-postası yalnız yöneticiye) */
+let istek: PayloadRequest | null = null
+const okuyabilir = (erisim: any) => {
+  if (!istek || typeof erisim?.read !== 'function') return true
+  try { return erisim.read({ req: istek }) !== false } catch { return false }
+}
+
 function alanYap(f: any): Alan | null {
   // _status gibi iç alanlar gönderilmez: yayın durumu Stüdyo'da yalnız Yayınla / Yayından kaldır ile değişir
   if (!f || f.type === 'ui' || f.admin?.hidden || f.hidden || String(f.name ?? '').startsWith('_')) return null
+  if (!okuyabilir(f.access)) return null
   const a: Alan = { type: f.type }
   if (f.name) a.name = f.name
   const etiket = metin(f.label)
@@ -62,9 +70,11 @@ function surumBilgisi(v: any) {
   }
 }
 
-export function semaYap(config: SanitizedConfig) {
+/** req verilirse kişinin göremeyeceği bölümler ve alanlar listeden çıkar (Stüdyo'da herkes yalnız yetkisi olanı görür) */
+export function semaYap(config: SanitizedConfig, req?: PayloadRequest) {
+  istek = req ?? null
   const koleksiyonlar = config.collections
-    .filter((c) => !c.slug.startsWith('payload-') && !c.admin?.hidden)
+    .filter((c) => !c.slug.startsWith('payload-') && !c.admin?.hidden && okuyabilir(c.access))
     .map((c) => ({
       slug: c.slug,
       tekil: metin(c.labels?.singular) ?? c.slug,
@@ -79,7 +89,7 @@ export function semaYap(config: SanitizedConfig) {
       kilit: c.lockDocuments !== false,
       fields: c.auth ? girisAlanlari(c) : c.fields.map(alanYap).filter(Boolean),
     }))
-  const genel = config.globals.map((g) => ({
+  const genel = config.globals.filter((g) => okuyabilir(g.access)).map((g) => ({
     slug: g.slug,
     ad: metin(g.label) ?? g.slug,
     grup: metin(g.admin?.group as unknown) ?? 'Ayarlar',
@@ -87,5 +97,6 @@ export function semaYap(config: SanitizedConfig) {
     kilit: g.lockDocuments !== false,
     fields: g.fields.map(alanYap).filter(Boolean),
   }))
+  istek = null
   return { koleksiyonlar, genel }
 }

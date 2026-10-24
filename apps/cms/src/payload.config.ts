@@ -19,7 +19,7 @@ import { Products } from './collections/Products'
 import { Videos, Reels, Ads } from './collections/Social'
 import { KulupTracks, KulupQuizzes } from './collections/Kulup'
 import { Pages } from './collections/Pages'
-import { Uyeler, Yorumlar } from './collections/Topluluk'
+import { Uyeler, Yorumlar, UyeGiris } from './collections/Topluluk'
 import { Site, Home } from './globals'
 import { triyajDurum, triyajImport, triyajKapak, triyajTemizle } from './endpoints/triyajImport'
 import { previewEndpoint } from './endpoints/preview'
@@ -47,7 +47,7 @@ export default buildConfig({
   // Panel dili Türkçe (isteyen kullanıcı hesap ayarından İngilizceye geçebilir)
   i18n: { supportedLanguages: { tr, en }, fallbackLanguage: 'tr' },
   collections: [News, Reviews, Comparisons, Products, Categories, Authors, Media, Videos, Reels, Ads, KulupTracks, KulupQuizzes, Pages, Uyeler, Yorumlar, Users].map(zamanlamaTemizligi).map(toplulukTemizligi),
-  globals: [Home, Site],
+  globals: [Home, Site, UyeGiris],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },

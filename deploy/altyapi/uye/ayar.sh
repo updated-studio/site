@@ -4,6 +4,8 @@
 # Kullanım: sudo updated-uye-ayar google      (Google istemci kimliği + gizli anahtar)
 #           sudo updated-uye-ayar cloudflare  (Turnstile site anahtarı + gizli anahtar)
 #           sudo updated-uye-ayar durum
+#           updated-uye-ayar uygula       (kendiliğinden: Stüdyo → Site → Topluluk → Üyelik girişi ayarları formu
+#                                          /var/spool/updated-uye/*.json bırakır, updated-uye-ayar.path bunu çalıştırır)
 set -euo pipefail
 [ "$(id -u)" = 0 ] || { echo "sudo ile çalıştır: sudo updated-uye-ayar $*"; exit 1; }
 DIS=/opt/updated/supabase/uye-dis.env
@@ -21,6 +23,16 @@ case "${1:-durum}" in
     read -r -s -p "Turnstile gizli anahtarı (Secret Key, görünmez): " b; echo
     [ -n "$a" ] && [ -n "$b" ] || { echo "İkisi de gerekli; değişiklik yapılmadı."; exit 1; }
     yaz TURNSTILE_SITE "$a"; yaz TURNSTILE_SECRET "$b" ;;
+  uygula)
+    shopt -s nullglob; n=0
+    for f in /var/spool/updated-uye/*.json; do
+      al() { jq -r --arg k "$1" '.[$k] // empty' "$f" 2>/dev/null; }
+      gi=$(al GOOGLE_ID); gs=$(al GOOGLE_SECRET); ts=$(al TURNSTILE_SITE); tg=$(al TURNSTILE_SECRET)
+      if [[ "$gi" =~ ^[0-9]{6,}-[a-z0-9]{10,}\.apps\.googleusercontent\.com$ && "$gs" =~ ^[A-Za-z0-9_-]{10,200}$ ]]; then yaz GOOGLE_ID "$gi"; yaz GOOGLE_SECRET "$gs"; n=$((n+1)); fi
+      if [[ "$ts" =~ ^0x[A-Za-z0-9_-]{10,200}$ && "$tg" =~ ^0x[A-Za-z0-9_-]{10,200}$ ]]; then yaz TURNSTILE_SITE "$ts"; yaz TURNSTILE_SECRET "$tg"; n=$((n+1)); fi
+      rm -f "$f"
+    done
+    [ "$n" -gt 0 ] || { echo "işlenecek geçerli anahtar yok"; exit 0; } ;;
   durum)
     echo "Google: $(var GOOGLE_SECRET) · Cloudflare: $(var TURNSTILE_SECRET)"; exit 0 ;;
   *) echo "Kullanım: sudo updated-uye-ayar google | cloudflare | durum"; exit 1 ;;

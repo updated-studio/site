@@ -13,6 +13,24 @@ SITE=https://updated.com.tr
 DIS_ADRES=https://panel.updated.com.tr/uye/v1
 umask 077
 install -m 755 "$HERE/ayar.sh" /usr/local/bin/updated-uye-ayar
+# Stüdyo formundan gelen anahtarlar: panel (panel kullanıcısı) istek bırakır, root bu birimle işler
+install -d -o panel -g panel -m 700 /var/spool/updated-uye
+cat > /etc/systemd/system/updated-uye-ayar.service <<UNIT
+[Unit]
+Description=Okur girişi anahtarlarını uygula (Stüdyo formundan)
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/updated-uye-ayar uygula
+UNIT
+cat > /etc/systemd/system/updated-uye-ayar.path <<UNIT
+[Unit]
+Description=Okur girişi anahtar isteği bekle
+[Path]
+PathExistsGlob=/var/spool/updated-uye/*.json
+[Install]
+WantedBy=multi-user.target
+UNIT
+systemctl daemon-reload; systemctl enable --now updated-uye-ayar.path >/dev/null 2>&1
 
 # 1) Veritabanı: aynı Postgres sunucusunda ayrı veritabanı (Stüdyo ve panel verisiyle karışmaz)
 q() { docker exec -i supabase-db psql -X -q -v ON_ERROR_STOP=1 -U supabase_admin "$@"; }
