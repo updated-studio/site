@@ -10,7 +10,7 @@ export const GET: APIRoute = async ({ params }) => {
   let urls: { loc: string; lastmod?: string; image?: string }[] = []
   if (tur === 'sayfalar') {
     const cats = await getCategories()
-    urls = ['/', '/haberler', '/inceleme', '/karsilastirma', '/urun', '/kulup', ...cats.map((c) => `/${c.slug}`), ...(await allPages()).map((s) => `/${s}`)].map((p) => ({ loc: SITE + (p === '/' ? '' : p) }))
+    urls = ['/', '/haberler', '/inceleme', '/karsilastirma', '/urun', '/kulup', ...cats.map((c) => `/${c.slug}`), ...(await allPages()).map((s) => `/${s}`), '/topluluk-kurallari', '/uyelik-sozlesmesi', '/uyelik-aydinlatma-metni'].map((p) => ({ loc: SITE + (p === '/' ? '' : p) }))
   } else if (tur in MAP) {
     urls = (await allPaths(MAP[tur as keyof typeof MAP])).map((d) => ({ loc: SITE + d.path, lastmod: d.updatedAt, image: d.image }))
   } else return new Response(null, { status: 404 })

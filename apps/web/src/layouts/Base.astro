@@ -5,18 +5,18 @@ import '../styles/uye.css'
 import Header from '../components/Header.astro'
 import BreakingStrip from '../components/BreakingStrip.astro'
 import Footer from '../components/Footer.astro'
-import { getBreaking, getSite } from '../lib/api'
+import { allPages, getBreaking, getSite } from '../lib/api'
 import { SITE, siteLd, type Meta } from '../lib/seo'
 import { ico } from '../lib/ui'
 import { env } from '../lib/env'
 interface Props { meta: Meta; breaking?: boolean; bodyClass?: string }
 const { meta, breaking = true, bodyClass } = Astro.props
 const staging = env('STAGING') === '1' // hazırlık sitesi arama motorlarına kapalı
-const [site, hot] = await Promise.all([getSite(), breaking ? getBreaking() : Promise.resolve([])])
+const [site, hot, sayfalar] = await Promise.all([getSite(), breaking ? getBreaking() : Promise.resolve([]), allPages()])
 const url = SITE + (meta.path === '/' ? '' : meta.path)
 const canonical = meta.canonical || url
 const title = meta.path === '/' ? meta.title : `${meta.title} · UPDATED`
-const ld = { '@context': 'https://schema.org', '@graph': [...siteLd(), ...(meta.jsonld || [])] }
+const ld = { '@context': 'https://schema.org', '@graph': [...siteLd(sayfalar), ...(meta.jsonld || [])] }
 ---
 <!doctype html>
 <html lang="tr" data-cms={env('CMS_URL').replace(/\/$/, '') || undefined} data-base={import.meta.env.BASE_URL === '/' ? undefined : import.meta.env.BASE_URL}>
@@ -56,7 +56,7 @@ const ld = { '@context': 'https://schema.org', '@graph': [...siteLd(), ...(meta.
   <BreakingStrip items={hot} />
   <slot name="top" />
   <main id="main"><slot /></main>
-  <Footer site={site} />
+  <Footer site={site} sayfalar={sayfalar} />
   <div class="search" id="search" role="dialog" aria-modal="true" aria-label="Arama" hidden>
     <div class="wrap">
       <form action="/ara" method="get" style="display:flex;gap:12px;align-items:center" role="search">

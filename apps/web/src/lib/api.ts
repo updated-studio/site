@@ -243,7 +243,9 @@ export const allReviews = () => safe<Review[]>(() => bulk('reviews', mReview), (
 export const allComparisons = () => safe<Comparison[]>(() => bulk('comparisons', mComparison), () => S.COMPARISONS)
 export const allProductSlugs = () => safe<string[]>(async () => (await bulk('products', (d) => d.slug, {}, 0)).filter(Boolean), () => Object.keys(S.PRODUCTS))
 export const allAuthors = () => safe<Author[]>(async () => (await get('authors', { limit: 500, depth: 0 })).docs.map(mAuthor), () => S.AUTHORS)
-export const allPages = () => safe<string[]>(async () => (await get('pages', { where: published, limit: 200, depth: 0 })).docs.map((d: any) => d.slug), () => Object.keys(STATIC_PAGES))
+let SAYFALAR: Promise<string[]> | null = null
+/** Yayındaki kurumsal sayfaların adresleri (derleme boyunca bir kez çekilir; her sayfanın alt bilgisi kullanır) */
+export const allPages = () => (SAYFALAR ??= safe<string[]>(async () => (await get('pages', { where: published, limit: 200, depth: 0 })).docs.map((d: any) => d.slug), () => Object.keys(STATIC_PAGES)))
 /** Sayfa sayısı (sonsuz akış ve /sayfa/N için). Çok eski sayfalar arşivde kalır: en fazla 50 sayfa üretilir. */
 export const MAX_PAGES = 50
 export async function pageCount(kind: 'son' | 'kategori' | 'yazar', slug?: string) {
