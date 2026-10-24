@@ -9,7 +9,9 @@ export const coverField: Field = { name: 'cover', type: 'upload', relationTo: 'm
 export const shortAnswer: Field = { name: 'shortAnswer', type: 'textarea', label: 'Kısa cevap (AEO)', admin: { description: '2–3 cümle; arama ve yapay zekâ yanıtları için sayfanın en üstünde.' } }
 export const productsField: Field = { name: 'products', type: 'relationship', relationTo: 'products', hasMany: true, label: 'Künye: bu içerikteki ürünler', admin: { description: 'Seçilen ürünler metinde ve yan sütunda künye etiketi olur; ürün sayfasında bu içerik listelenir.' } }
 export const authorField: Field = { name: 'author', type: 'relationship', relationTo: 'authors', label: 'Yazar', required: true, admin: { position: 'sidebar' } }
-export const publishedAt: Field = { name: 'publishedAt', type: 'date', label: 'Yayın zamanı', admin: { position: 'sidebar', date: { pickerAppearance: 'dayAndTime' } } }
+// Kopyalanan kayıt (Stüdyo/panel "Kopyala") taslak olarak, tarihsiz ve Haber Masası bağı olmadan başlar
+const kopyadaBos = { beforeDuplicate: [() => null] }
+export const publishedAt: Field = { name: 'publishedAt', type: 'date', label: 'Yayın zamanı', admin: { position: 'sidebar', date: { pickerAppearance: 'dayAndTime' } }, hooks: kopyadaBos }
 export const pathField: Field = { name: 'path', type: 'text', label: 'Tam adres', index: true, admin: { position: 'sidebar', readOnly: true } }
 export const readingTime: Field = { name: 'readingTime', type: 'number', label: 'Okuma süresi (dk)', admin: { position: 'sidebar', readOnly: true } }
 
@@ -34,10 +36,10 @@ export const workflow: Field = {
   name: 'workflow', type: 'group', label: 'Yayın akışı',
   admin: { position: 'sidebar' },
   fields: [
-    { name: 'state', type: 'select', label: 'Durum', options: [...STATES], defaultValue: 'taslak', admin: { components: { Cell: '/components/DurumHucre#DurumHucre' } } },
+    { name: 'state', type: 'select', label: 'Durum', options: [...STATES], defaultValue: 'taslak', admin: { components: { Cell: '/components/DurumHucre#DurumHucre' } }, hooks: { beforeDuplicate: [() => 'taslak'] } },
     { name: 'ownerUser', type: 'relationship', relationTo: 'users', label: 'Hazırlayan' },
     { name: 'secondEditor', type: 'relationship', relationTo: 'users', label: 'İkinci editör' },
-    { name: 'approvedBy', type: 'relationship', relationTo: 'users', label: 'Onaylayan', admin: { readOnly: true } },
+    { name: 'approvedBy', type: 'relationship', relationTo: 'users', label: 'Onaylayan', admin: { readOnly: true }, hooks: kopyadaBos },
     { name: 'checklist', type: 'group', label: 'Yayın öncesi kontrol', fields: CHECKLIST.map(([k, l]) => ({ name: k, type: 'checkbox' as const, label: l, defaultValue: false })) },
   ],
 }
@@ -48,7 +50,7 @@ export const triyaj: Field = {
   fields: [
     { name: 'priority', type: 'number', label: 'Öncelik (10 üzerinden)', admin: { readOnly: true } },
     { name: 'cluster', type: 'text', label: 'Olay kümesi', admin: { readOnly: true } },
-    { name: 'studioId', type: 'text', label: 'Stüdyo kaydı', index: true, admin: { readOnly: true } },
-    { name: 'importedAt', type: 'date', label: 'Aktarım', admin: { readOnly: true } },
+    { name: 'studioId', type: 'text', label: 'Stüdyo kaydı', index: true, admin: { readOnly: true }, hooks: kopyadaBos },
+    { name: 'importedAt', type: 'date', label: 'Aktarım', admin: { readOnly: true }, hooks: kopyadaBos },
   ],
 }

@@ -1,6 +1,7 @@
 import { getFieldsToSign, headersWithCors, jwtSign, type Endpoint } from 'payload'
 import { addSessionToUser, generatePayloadCookie } from 'payload/shared'
 import { studyoEposta, studyoUyesi } from '../auth/studyo'
+import { canPublish } from '../access/roles'
 import { CHECKLIST, LABELS, LIMIT, STATES, BANNED_WORDS } from '../lib/kit'
 import { semaYap } from '../lib/sema'
 
@@ -64,5 +65,75 @@ export const studyoGiris: Endpoint = {
     const fieldsToSign = getFieldsToSign({ collectionConfig: coll, email: eposta!, user: { ...ham, collection: 'users' } as any, ...(sid ? { sid } : {}) })
     const { token } = await jwtSign({ fieldsToSign, secret: req.payload.secret, tokenExpiration: coll.auth.tokenExpiration })
     return don('/admin', generatePayloadCookie({ collectionAuthConfig: coll.auth, cookiePrefix: req.payload.config.cookiePrefix, token }))
+  },
+}
+
+/**
+ * Zamanlanmış yayın (panelin kendi "schedulePublish" işi; iş kuyruğu dakikada bir çalışır, yayını zamanlayan kişinin yetkisiyle yapar —
+ * yayın kuralları o an yeniden denetlenir). Yalnız yayın yönetmeni/yönetici.
+ * GET  /api/studyo/zamanla?koleksiyon=news&id=12  (ya da ?genel=site-settings) — bekleyen ve son 7 günde başarısız olan zamanlamalar
+ * POST /api/studyo/zamanla  { koleksiyon, id | genel, tur: 'publish'|'unpublish', zaman: ISO }
+ * DELETE /api/studyo/zamanla?is=<iş no>
+ */
+const ZAMANLAMA_HEDEF = (s: URLSearchParams | Record<string, unknown>) => {
+  const al = (k: string) => (s instanceof URLSearchParams ? s.get(k) : (s[k] as string | number | undefined)) ?? null
+  const koleksiyon = al('koleksiyon'), genel = al('genel'), id = al('id')
+  return { koleksiyon: koleksiyon ? String(koleksiyon) : null, genel: genel ? String(genel) : null, id: id !== null ? String(id) : null }
+}
+export const studyoZamanla: Endpoint = {
+  path: '/studyo/zamanla',
+  method: 'get',
+  handler: async (req) => {
+    const headers = headersWithCors({ headers: new Headers({ 'Cache-Control': 'no-store' }), req })
+    if (!canPublish(req.user)) return Response.json({ error: 'Zamanlama yalnız yayın yönetmeni ve yöneticide.' }, { status: 403, headers })
+    const h = ZAMANLAMA_HEDEF(new URL(req.url!).searchParams)
+    if (!(h.koleksiyon && h.id) && !h.genel) return Response.json({ error: 'Geçersiz' }, { status: 400, headers })
+    const hedef = h.genel ? [{ 'input.global': { equals: h.genel } }] : [{ 'input.doc.value': { equals: h.id } }, { 'input.doc.relationTo': { equals: h.koleksiyon } }]
+    const r = await req.payload.find({
+      collection: 'payload-jobs', limit: 50, sort: 'waitUntil', depth: 0, overrideAccess: true,
+      where: { and: [{ taskSlug: { equals: 'schedulePublish' } }, ...hedef, { or: [{ completedAt: { exists: false } }, { and: [{ hasError: { equals: true } }, { updatedAt: { greater_than: new Date(Date.now() - 7 * 864e5).toISOString() } }] }] }] } as any,
+    })
+    const isler = r.docs.map((j: any) => ({ id: j.id, tur: j.input?.type === 'unpublish' ? 'unpublish' : 'publish', zaman: j.waitUntil, hata: j.hasError ? String(j.error?.message ?? j.log?.at?.(-1)?.error?.message ?? 'Yayınlanamadı') : null }))
+    return Response.json({ isler }, { headers })
+  },
+}
+export const studyoZamanlaEkle: Endpoint = {
+  path: '/studyo/zamanla',
+  method: 'post',
+  handler: async (req) => {
+    const headers = headersWithCors({ headers: new Headers({ 'Cache-Control': 'no-store' }), req })
+    if (!canPublish(req.user)) return Response.json({ error: 'Zamanlama yalnız yayın yönetmeni ve yöneticide.' }, { status: 403, headers })
+    const g = ((await req.json?.()) ?? {}) as Record<string, unknown>
+    const h = ZAMANLAMA_HEDEF(g)
+    const zaman = new Date(String(g.zaman ?? ''))
+    const tur = g.tur === 'unpublish' ? 'unpublish' : 'publish'
+    const uygun = h.genel ? req.payload.config.globals.some((x) => x.slug === h.genel) : !!(h.koleksiyon && req.payload.collections[h.koleksiyon as never] && h.id)
+    if (!uygun || isNaN(zaman.getTime()) || zaman.getTime() < Date.now() + 30_000) return Response.json({ error: 'Geçerli ve ileri bir zaman seçin.' }, { status: 400, headers })
+    const is: { id: number | string } = await (req.payload.jobs.queue as any)({
+      task: 'schedulePublish',
+      waitUntil: zaman,
+      input: { type: tur, ...(h.genel ? { global: h.genel } : { doc: { relationTo: h.koleksiyon, value: h.id } }), user: { relationTo: 'users', value: req.user!.id } },
+    })
+    return Response.json({ id: is.id }, { headers })
+  },
+}
+export const studyoZamanlaSil: Endpoint = {
+  path: '/studyo/zamanla',
+  method: 'delete',
+  handler: async (req) => {
+    const headers = headersWithCors({ headers: new Headers({ 'Cache-Control': 'no-store' }), req })
+    if (!canPublish(req.user)) return Response.json({ error: 'Zamanlama yalnız yayın yönetmeni ve yöneticide.' }, { status: 403, headers })
+    const is = new URL(req.url!).searchParams.get('is')
+    if (!is) return Response.json({ error: 'Geçersiz' }, { status: 400, headers })
+    const { docs } = await req.payload.delete({ collection: 'payload-jobs', overrideAccess: true, where: { and: [{ id: { equals: is } }, { taskSlug: { equals: 'schedulePublish' } }, { completedAt: { exists: false } }] } as any })
+    // Bekleyen başka yayın zamanlaması kalmadıysa "Planlandı" durumu "İncelemede"ye döner (iş akışı olan koleksiyonlarda)
+    const girdi = (docs[0] as any)?.input
+    const hedef = girdi?.doc
+    if (girdi?.type === 'publish' && hedef?.relationTo && hedef.value) {
+      const kalan = await req.payload.count({ collection: 'payload-jobs', overrideAccess: true, where: { and: [{ taskSlug: { equals: 'schedulePublish' } }, { completedAt: { exists: false } }, { 'input.doc.value': { equals: String(hedef.value) } }, { 'input.doc.relationTo': { equals: hedef.relationTo } }] } as any })
+      const d: any = kalan.totalDocs ? null : await req.payload.findByID({ collection: hedef.relationTo, id: hedef.value, draft: true, depth: 0, req }).catch(() => null)
+      if (d?.workflow?.state === 'planlandi') await req.payload.update({ collection: hedef.relationTo, id: hedef.value, draft: true, data: { workflow: { ...d.workflow, state: 'incelemede' } } as any, req })
+    }
+    return Response.json({ ok: true }, { headers })
   },
 }

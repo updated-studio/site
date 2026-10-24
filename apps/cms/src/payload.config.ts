@@ -22,9 +22,10 @@ import { Pages } from './collections/Pages'
 import { Site, Home } from './globals'
 import { triyajDurum, triyajImport, triyajKapak } from './endpoints/triyajImport'
 import { previewEndpoint } from './endpoints/preview'
-import { studyoAlanlar, studyoGiris, studyoOnizleme, studyoSema } from './endpoints/studyo'
+import { studyoAlanlar, studyoGiris, studyoOnizleme, studyoSema, studyoZamanla, studyoZamanlaEkle, studyoZamanlaSil } from './endpoints/studyo'
 import { canliEndpoint } from './endpoints/canli'
 import { okunmaEndpoints, okunmaInit } from './endpoints/okunma'
+import { zamanlamaTemizligi } from './hooks/zamanlamaTemizle'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -42,7 +43,7 @@ export default buildConfig({
   },
   // Panel dili Türkçe (isteyen kullanıcı hesap ayarından İngilizceye geçebilir)
   i18n: { supportedLanguages: { tr, en }, fallbackLanguage: 'tr' },
-  collections: [News, Reviews, Comparisons, Products, Categories, Authors, Media, Videos, Reels, Ads, KulupTracks, KulupQuizzes, Pages, Users],
+  collections: [News, Reviews, Comparisons, Products, Categories, Authors, Media, Videos, Reels, Ads, KulupTracks, KulupQuizzes, Pages, Users].map(zamanlamaTemizligi),
   globals: [Home, Site],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
@@ -55,7 +56,7 @@ export default buildConfig({
   csrf: origins,
   // Zamanlanmış yayın (schedulePublish) için iş kuyruğu dakikada bir çalışır. Panel kalıcı Node sunucusunda çalışmalı.
   jobs: { autoRun: [{ cron: '* * * * *', queue: 'default', limit: 20 }], tasks: [] },
-  endpoints: [triyajImport, triyajDurum, triyajKapak, previewEndpoint, canliEndpoint, studyoSema, studyoOnizleme, studyoAlanlar, studyoGiris, ...okunmaEndpoints],
+  endpoints: [triyajImport, triyajDurum, triyajKapak, previewEndpoint, canliEndpoint, studyoSema, studyoOnizleme, studyoAlanlar, studyoGiris, studyoZamanla, studyoZamanlaEkle, studyoZamanlaSil, ...okunmaEndpoints],
   onInit: okunmaInit,
   plugins: [
     s3Storage({
