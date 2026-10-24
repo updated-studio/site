@@ -1,0 +1,14 @@
+---
+/** Üyelik metinleri için ortak düzen (sözleşme, aydınlatma metni, topluluk kuralları). */
+import Base from '../layouts/Base.astro'
+interface Props { baslik: string; aciklama: string; yol: string; guncel: string }
+const { baslik, aciklama, yol, guncel } = Astro.props
+---
+<Base meta={{ title: baslik, description: aciklama, path: yol }} breaking={false}>
+  <div class="wrap">
+    <article class="art hk">
+      <div class="art-head"><h1 class="h1">{baslik}</h1><p class="meta">Son güncelleme: {guncel}</p></div>
+      <div class="prose" style="margin-top:24px"><slot /></div>
+    </article>
+  </div>
+</Base>

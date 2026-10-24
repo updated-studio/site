@@ -78,7 +78,9 @@ if [ ! -f .studyo-gecti ] && docker ps --format '{{.Names}}' | grep -q '^supabas
 fi
 
 # 5) Yalnız kullanılan servisleri başlat
-docker compose up -d --remove-orphans db auth rest realtime storage functions api-gw
+# Okur hesapları (uye-auth) yalnız kurulduysa (deploy/altyapi/uye/kur.sh ayar dosyasını yazar)
+UYE=""; [ -f uye-auth.env ] && UYE=uye-auth
+docker compose up -d --remove-orphans db auth rest realtime storage functions api-gw $UYE
 for i in $(seq 1 60); do
   saglam=$(docker compose ps --format '{{.Service}} {{.Health}}' | awk '$2=="healthy"' | wc -l)
   [ "$saglam" -ge 6 ] && break; sleep 5

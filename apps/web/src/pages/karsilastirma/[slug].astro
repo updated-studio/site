@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro'
 import Img from '../../components/Img.astro'
+import Topluluk from '../../components/Topluluk.astro'
 import KunyeMini from '../../components/KunyeMini.astro'
 import Ad from '../../components/Ad.astro'
 import InfiniteFeed from '../../components/InfiniteFeed.astro'
@@ -30,7 +31,7 @@ const nm = (w?: string) => (w === 'a' ? c.a.name : w === 'b' ? c.b.name : '')
         <div class="side r"><span class="c-img" style="width:100%"><Img img={c.b.image} alt={c.b.name} eager /></span><h2>{c.b.name}</h2><Fragment set:html={chip(c.b)} /></div>
       </div>
       <h1 class="h2" style="margin-top:16px">{c.title}</h1>
-      <div class="kunye-row"><a href={`/yazar/${c.author.slug}`} rel="author">{c.author.name}</a><span>·</span><time datetime={c.publishedAt}>{date(c.publishedAt)}</time>{c.method && <><span>·</span><span>{c.method}</span></>}</div>
+      <div class="kunye-row"><a href={`/yazar/${c.author.slug}`} rel="author">{c.author.name}</a><span>·</span><time datetime={c.publishedAt}>{date(c.publishedAt)}</time>{c.method && <><span>·</span><span>{c.method}</span></>}<a href="#topluluk" data-yorum-say hidden></a></div>
     </div>
     <div class="with-rail" style="margin-top:24px">
       <div>
@@ -49,6 +50,7 @@ const nm = (w?: string) => (w === 'a' ? c.a.name : w === 'b' ? c.b.name : '')
             <tr data-same={r.a === r.b ? '1' : undefined}><th scope="row" style="font-family:var(--f-body);font-weight:600">{r.key}</th><td class={r.win === 'a' ? 'w' : ''}>{r.a}</td><td class={r.win === 'b' ? 'w' : ''}>{r.b}</td></tr>
           </>)}
         </tbody></table></div>
+        <Topluluk hedef={`comparisons:${c.id}`} />
       </div>
       <div class="rail"><div><h4 class="label" style="color:var(--text-3);margin:0 0 8px">Künyeler</h4><div class="kstack"><KunyeMini p={c.a} /><KunyeMini p={c.b} /></div></div><Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare /></div>
     </div>

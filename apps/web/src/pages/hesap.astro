@@ -1,0 +1,9 @@
+---
+/** Uper hesabı: giriş, kayıt, profil, bildirimler, kaydettiklerim, puan, ayarlar. İçerik tarayıcıda çizilir (scripts/hesap.ts). */
+import Base from '../layouts/Base.astro'
+---
+<Base meta={{ title: 'Hesabım', description: "UPDATED'a Uper olarak katıl: yorum yap, tepki ver, yazıları kaydet, puan topla.", path: '/hesap', noindex: true }} breaking={false}>
+  <div class="wrap hs" id="hesap" aria-live="polite"><p class="meta" style="padding:48px 0">Yükleniyor…</p></div>
+  <noscript><div class="wrap"><p>Hesap sayfası için JavaScript gerekir.</p></div></noscript>
+  <script>import '../scripts/hesap.ts'</script>
+</Base>

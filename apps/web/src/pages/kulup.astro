@@ -7,11 +7,12 @@
 import '../styles/brand.css'
 import '../styles/kulup.css'
 import { SITE } from '../lib/seo'
+import { env } from '../lib/env'
 const meta = { title: 'UPDATED Kulüp · Fotoğraf, video ve dron dersleri', description: 'Fotoğraf, video ve dron için dersler, simülatörler, alıştırmalar ve haftalık görevler.' }
 const ld = { '@context': 'https://schema.org', '@type': 'Course', name: 'UPDATED Kulüp', description: meta.description, provider: { '@type': 'Organization', name: 'UPDATED', sameAs: SITE }, inLanguage: 'tr-TR' }
 ---
 <!doctype html>
-<html lang="tr">
+<html lang="tr" data-cms={env('CMS_URL').replace(/\/$/, '') || undefined}>
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{meta.title}</title><meta name="description" content={meta.description} />
@@ -28,12 +29,13 @@ const ld = { '@context': 'https://schema.org', '@type': 'Course', name: 'UPDATED
   <header class="hdr kh" id="hdr"></header>
   <nav class="ktabs wrap" id="ktabs" aria-label="Kulüp bölümleri"></nav>
   <main id="kmain"><noscript><div class="wrap" style="padding:48px 0"><h1>UPDATED Kulüp</h1><p>Dersler ve simülatörler için JavaScript gerekir.</p></div></noscript></main>
-  <footer class="ftr"><div class="wrap" style="grid-template-columns:minmax(0,1fr) auto"><div><span class="label" style="color:#B4B7BB">UPDATED Kulüp</span><p style="color:#B4B7BB;font-size:15px;margin:8px 0 0;max-width:52ch">Fotoğraf, video ve dron için dersler, simülatörler ve haftalık görevler. Sitenin parçası, ayrı bir alan.</p></div><a class="btn btn-p" href="/" style="align-self:center">updated.com.tr</a><div class="bt"><span>© {new Date().getFullYear()} UPDATED</span><span>İlerleme şimdilik bu tarayıcıda saklanır</span></div></div></footer>
+  <footer class="ftr"><div class="wrap" style="grid-template-columns:minmax(0,1fr) auto"><div><span class="label" style="color:#B4B7BB">UPDATED Kulüp</span><p style="color:#B4B7BB;font-size:15px;margin:8px 0 0;max-width:52ch">Fotoğraf, video ve dron için dersler, simülatörler ve haftalık görevler. Sitenin parçası, ayrı bir alan.</p></div><a class="btn btn-p" href="/" style="align-self:center">updated.com.tr</a><div class="bt"><span>© {new Date().getFullYear()} UPDATED</span><span>İlerleme bu tarayıcıda saklanır · <a href="/hesap#kayit" style="color:inherit">Uper ol</a>, her cihazda kalsın</span></div></div></footer>
   <script is:inline src="/kulup/media.js"></script>
   <script is:inline src="/kulup/logo.js"></script>
   <script is:inline src="/kulup/core.js"></script>
   <script is:inline>UP.SITE_URL = '/';</script>
   <script is:inline src="/kulup/kulup.js"></script>
   <script is:inline>UP.kulup();</script>
+  <script>import '../scripts/kulup-uye.ts'</script>
 </body>
 </html>

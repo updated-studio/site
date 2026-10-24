@@ -1,0 +1,8 @@
+---
+/** Herkese açık Uper profili: /uper?ad=kullaniciadi (scripts/uper.ts). Arama motorlarına kapalı. */
+import Base from '../layouts/Base.astro'
+---
+<Base meta={{ title: 'Uper profili', description: 'UPDATED topluluğundan bir Uper.', path: '/uper', noindex: true }} breaking={false}>
+  <div class="wrap hs" id="uper"><p class="meta" style="padding:48px 0">Yükleniyor…</p></div>
+  <script>import '../scripts/uper.ts'</script>
+</Base>

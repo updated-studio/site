@@ -23,6 +23,10 @@ dump -a -t cron.job > $IS/natro/zamanlanmis-isler.sql
 dump -a -t storage.buckets -t storage.objects > $IS/natro/depolama.sql
 tar -C $SB/volumes/functions -czf $IS/natro/fonksiyonlar.tgz --exclude=./main --exclude=./hello .
 set +e
+# Okur hesapları (Uper'ler, ayrı veritabanı "uyeler"; deploy/altyapi/uye). Profilleri ve yorumları zaten payload şemasında.
+if [ "$(q "select 1 from pg_database where datname='uyeler'")" = 1 ]; then
+  docker exec supabase-db pg_dump -U supabase_admin -d uyeler --no-owner -a -n auth --exclude-table='auth.schema_migrations' > $IS/natro/uye-hesaplari.sql
+fi
 # Kod: depoların tam geçmişi (git bundle; tek dosyadan geri açılır). Herkese açık depolar adres üzerinden alınır.
 mkdir -p $IS/kod
 for r in site studio; do
@@ -33,10 +37,11 @@ done
 # Gizli ayarlar: YALNIZ şifreli hosting yedeğine girer (GitHub'a gitmez). Geri yüklemede anahtarlar aynı kalır, kimse yeniden giriş yapmaz.
 mkdir -p $IS/gizli
 cp $SB/.env $IS/gizli/supabase.env 2>/dev/null; cp $SB/functions.env $IS/gizli/ 2>/dev/null
+cp $SB/uye-gizli.env $SB/uye-dis.env $SB/uye-auth.env $IS/gizli/ 2>/dev/null
 cp /etc/updated-panel.env /etc/updated-panel.secrets /etc/updated-panel.yerel $IS/gizli/ 2>/dev/null
 cp /etc/caddy/Caddyfile $IS/gizli/ 2>/dev/null
 cp -r /etc/caddy/conf.d $IS/gizli/caddy-conf.d 2>/dev/null; cp /etc/updated-site.env $IS/gizli/ 2>/dev/null
-OZET="$(date '+%d.%m.%Y %H:%M') · Stüdyo $(q 'select count(*) from public.tr_items') haber · panel $(q 'select count(*) from payload.news') haber · $(q 'select count(*) from auth.users') hesap · $(du -sh $SB/volumes/storage | cut -f1) dosya"
+OZET="$(date '+%d.%m.%Y %H:%M') · Stüdyo $(q 'select count(*) from public.tr_items') haber · panel $(q 'select count(*) from payload.news') haber · $(q 'select count(*) from auth.users') hesap · $(q 'select count(*) from payload.uyeler' 2>/dev/null || echo 0) Uper · $(du -sh $SB/volumes/storage | cut -f1) dosya"
 echo "$OZET" > $IS/natro/SON_YEDEK.txt
 SONUC=""
 

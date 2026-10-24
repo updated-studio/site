@@ -53,6 +53,27 @@ services:
       IMGPROXY_URL: ""
     mem_limit: 256m
 
+  # Sitenin okur hesapları (Uper'ler, 24 Ekim 2026): Stüdyo'nun giriş servisinden ayrı, kendi veritabanı (uyeler) ve kendi anahtarı.
+  # Ayarların hepsi uye-auth.env'de (deploy/altyapi/uye/kur.sh üretir; 600). Dışarıya Caddy açar: panel.updated.com.tr/uye/v1
+  uye-auth:
+    container_name: supabase-uye-auth
+    image: supabase/gotrue:v2.197.0
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9999/health"]
+      timeout: 5s
+      interval: 10s
+      retries: 3
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - path: ./uye-auth.env
+        required: false   # yoksa servis zaten başlatılmaz (uye/kur.sh önce dosyayı yazar)
+    ports:
+      - "127.0.0.1:9998:9999/tcp"
+    mem_limit: 96m
+
   functions:
     depends_on: !override
       db:

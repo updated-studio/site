@@ -74,6 +74,8 @@ h3{font-weight:700}
 .menu-b{display:none}
 .sheet{position:fixed;left:0;right:0;top:calc(67px + env(safe-area-inset-top,0px));bottom:0;z-index:49;background:var(--bg);overflow:auto;padding:16px max(16px,env(safe-area-inset-left,0px)) 32px}
 .sheet a{display:block;font-family:var(--f-head);font-weight:900;font-size:34px;text-transform:uppercase;line-height:1.2;text-decoration:none;padding:8px 0;border-bottom:1px solid var(--line)}
+/* Uper hesap düğmesi için yer: geniş olmayan masaüstünde "Ara" yazısı gizlenir (büyüteç kalır), menü aralığı daralır */
+@media (max-width:1439px){.srch span{display:none}.nav a{padding:8px 7px}}
 @media (max-width:1100px){.nav{display:none}.menu-b{display:grid}.hdr-r{margin-left:auto}.srch span{display:none}}
 @media (max-width:420px){.hdr .btn-p{display:none}}
 /* breaking strip */

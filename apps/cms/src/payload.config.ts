@@ -19,12 +19,15 @@ import { Products } from './collections/Products'
 import { Videos, Reels, Ads } from './collections/Social'
 import { KulupTracks, KulupQuizzes } from './collections/Kulup'
 import { Pages } from './collections/Pages'
+import { Uyeler, Yorumlar } from './collections/Topluluk'
 import { Site, Home } from './globals'
 import { triyajDurum, triyajImport, triyajKapak, triyajTemizle } from './endpoints/triyajImport'
 import { previewEndpoint } from './endpoints/preview'
 import { studyoAlanlar, studyoGiris, studyoOnizleme, studyoSema, studyoZamanla, studyoZamanlaEkle, studyoZamanlaSil } from './endpoints/studyo'
 import { canliEndpoint } from './endpoints/canli'
 import { okunmaEndpoints, okunmaInit } from './endpoints/okunma'
+import { uyeEndpoints } from './endpoints/uye'
+import { toplulukTemizligi } from './lib/uye'
 import { zamanlamaTemizligi } from './hooks/zamanlamaTemizle'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -43,7 +46,7 @@ export default buildConfig({
   },
   // Panel dili Türkçe (isteyen kullanıcı hesap ayarından İngilizceye geçebilir)
   i18n: { supportedLanguages: { tr, en }, fallbackLanguage: 'tr' },
-  collections: [News, Reviews, Comparisons, Products, Categories, Authors, Media, Videos, Reels, Ads, KulupTracks, KulupQuizzes, Pages, Users].map(zamanlamaTemizligi),
+  collections: [News, Reviews, Comparisons, Products, Categories, Authors, Media, Videos, Reels, Ads, KulupTracks, KulupQuizzes, Pages, Uyeler, Yorumlar, Users].map(zamanlamaTemizligi).map(toplulukTemizligi),
   globals: [Home, Site],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
@@ -56,7 +59,7 @@ export default buildConfig({
   csrf: origins,
   // Zamanlanmış yayın (schedulePublish) için iş kuyruğu dakikada bir çalışır. Panel kalıcı Node sunucusunda çalışmalı.
   jobs: { autoRun: [{ cron: '* * * * *', queue: 'default', limit: 20 }], tasks: [] },
-  endpoints: [triyajImport, triyajDurum, triyajKapak, triyajTemizle, previewEndpoint, canliEndpoint, studyoSema, studyoOnizleme, studyoAlanlar, studyoGiris, studyoZamanla, studyoZamanlaEkle, studyoZamanlaSil, ...okunmaEndpoints],
+  endpoints: [triyajImport, triyajDurum, triyajKapak, triyajTemizle, previewEndpoint, canliEndpoint, studyoSema, studyoOnizleme, studyoAlanlar, studyoGiris, studyoZamanla, studyoZamanlaEkle, studyoZamanlaSil, ...okunmaEndpoints, ...uyeEndpoints],
   onInit: okunmaInit,
   plugins: [
     s3Storage({

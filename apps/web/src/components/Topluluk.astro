@@ -1,0 +1,13 @@
+---
+/**
+ * Yazının topluluk bölümü (Uper'ler, 24 Ekim 2026): tepkiler, kaydet, paylaş, yorumlar.
+ * Sayfa statik; bölümü scripts/uye.ts panelin /api/uye/sayfa ucundan doldurur. JS kapalıysa yalnız bağlantı görünür.
+ */
+interface Props { hedef: string }
+const { hedef } = Astro.props
+---
+<section class="tp" id="topluluk" data-hedef={hedef} aria-labelledby="tp-baslik">
+  <div class="sh tp-sh"><h2 id="tp-baslik">Yorumlar</h2></div>
+  <div class="tp-ic" data-tp-ic><p class="meta">Yorumlar yükleniyor…</p></div>
+  <noscript><p>Yorumları görmek ve yorum yapmak için JavaScript gerekir. <a href="/hesap">Uper ol</a>.</p></noscript>
+</section>

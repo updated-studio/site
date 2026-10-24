@@ -18,6 +18,7 @@ const on = (h: string) => (h !== '/' && current.startsWith(h) ? 'page' : undefin
       <button class="srch" type="button" data-open-search><Fragment set:html={ico('search')} /><span>Ara</span></button>
       <button class="ibtn" type="button" data-theme-btn aria-label="Görünüm"><Fragment set:html={ico('auto')} /></button>
       <a class="btn btn-p" href="#bulten">Bülten</a>
+      <a class="ibtn uye-b" href="/hesap" data-uye-btn aria-label="Uper ol / giriş yap" title="Uper ol / giriş yap"><Fragment set:html={ico('user')} /></a>
       <button class="ibtn menu-b" type="button" data-menu aria-expanded="false" aria-controls="sheet" aria-label="Menü"><Fragment set:html={ico('menu')} /></button>
     </div>
   </div>
@@ -25,4 +26,5 @@ const on = (h: string) => (h !== '/' && current.startsWith(h) ? 'page' : undefin
 <nav class="sheet" id="sheet" aria-label="Mobil menü" hidden>
   {nav.map((n) => <a href={n.href}>{n.label}</a>)}
   <a href={site.kulupUrl}>Updated Kulüp</a>
+  <a href="/hesap">Hesabım</a>
 </nav>

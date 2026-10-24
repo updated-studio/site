@@ -6,6 +6,7 @@
 import Img from './Img.astro'
 import CardList from './CardList.astro'
 import Ad from './Ad.astro'
+import Topluluk from './Topluluk.astro'
 import type { Ad as AdT, News } from '../lib/types'
 import { date, time } from '../lib/format'
 import { label, linkProducts } from '../lib/ui'
@@ -29,6 +30,7 @@ const updated = n.updatedAt && +new Date(n.updatedAt) - +new Date(n.publishedAt)
       <a href={`/yazar/${n.author.slug}`} rel="author">{n.author.name}</a><span>·</span><time datetime={n.publishedAt}>{date(n.publishedAt)}</time><span>·</span><span>{time(n.publishedAt)}</span>
       {n.readingTime && <><span>·</span><span>{n.readingTime} dk okuma</span></>}
       {updated && <><span>·</span><span>Güncellendi {time(n.updatedAt!)}</span></>}
+      <a href="#topluluk" data-yorum-say hidden></a>
     </div>
   </div>
   {n.cover && <figure class="cover"><Img img={n.cover} eager sizes="(max-width: 767px) 100vw, 860px" /><figcaption>{n.cover.credit}</figcaption></figure>}
@@ -48,5 +50,6 @@ const updated = n.updatedAt && +new Date(n.updatedAt) - +new Date(n.publishedAt)
     {n.corrections?.map((c) => <div class="fix"><b>Düzeltme · {date(c.at)} {time(c.at)}</b> {c.note}</div>)}
     <Ad slot="lb" ad={pickAd(ads, 'lb')} />
   </div>
+  <Topluluk hedef={`news:${n.id}`} />
   {related.length > 0 && <><div class="sh" style="margin-top:48px"><h2>İlgili haberler</h2></div><CardList items={related.slice(0, 4)} /></>}
 </article>

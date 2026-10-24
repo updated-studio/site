@@ -75,6 +75,14 @@ $DOMAIN {
 	handle @supabase {
 		reverse_proxy 127.0.0.1:8000
 	}
+	# Okur hesapları (Uper'ler): ayrı giriş servisi (deploy/altyapi/uye) ve onun Türkçe e-posta şablonları
+	handle_path /uye/v1/* {
+		reverse_proxy 127.0.0.1:9998
+	}
+	handle_path /uye-eposta/* {
+		root * /opt/updated/uye/eposta
+		file_server
+	}
 	handle {
 		reverse_proxy 127.0.0.1:3001
 	}
