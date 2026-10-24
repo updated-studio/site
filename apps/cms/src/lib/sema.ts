@@ -10,7 +10,8 @@ const metin = (x: unknown): string | undefined =>
   typeof x === 'string' ? x : x && typeof x === 'object' ? ((x as Record<string, string>).tr ?? (x as Record<string, string>).en) : undefined
 
 function alanYap(f: any): Alan | null {
-  if (!f || f.type === 'ui' || f.type === 'join' || f.admin?.hidden || f.hidden) return null
+  // _status gibi iç alanlar gönderilmez: yayın durumu Stüdyo'da yalnız Yayınla / Yayından kaldır ile değişir
+  if (!f || f.type === 'ui' || f.type === 'join' || f.admin?.hidden || f.hidden || String(f.name ?? '').startsWith('_')) return null
   const a: Alan = { type: f.type }
   if (f.name) a.name = f.name
   const etiket = metin(f.label)
