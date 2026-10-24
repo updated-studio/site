@@ -12,7 +12,7 @@ type Uye = {
   id: number; authId: string; email: string; kullaniciAdi: string; ad: string; bio?: string | null; renk?: string | null; durum: string
   guvenilir?: boolean | null; ekip?: boolean | null; puan?: number | null; bildirimEposta?: boolean | null; giris?: string | null
   ekipman?: { tur?: string | null; ad: string; urun?: number | { id: number; title?: string; slug?: string } | null }[] | null
-  createdAt: string; sonGiris?: string | null; onaylar?: { sozlesme?: string | null; kvkk?: string | null } | null
+  unvan?: string | null; createdAt: string; sonGiris?: string | null; onaylar?: { sozlesme?: string | null; kvkk?: string | null } | null
 }
 type Ctx = { req: PayloadRequest; p: Payload; kimlik: Kimlik | null; uye: Uye | null }
 
@@ -73,7 +73,7 @@ async function ekipRol(p: Payload, u: Pick<Uye, 'email' | 'ekip'>): Promise<Ekip
   ROL_ON.set(u.email, { r, t: Date.now() })
   return r
 }
-const herkeseAcik = (u: Pick<Uye, 'kullaniciAdi' | 'ad' | 'renk' | 'puan'>, rol: EkipRol) => ({ kullaniciAdi: u.kullaniciAdi, ad: u.ad, renk: u.renk || 'turuncu', seviye: seviye(Number(u.puan) || 0), ekip: rol })
+const herkeseAcik = (u: Pick<Uye, 'kullaniciAdi' | 'ad' | 'renk' | 'puan' | 'unvan'>, rol: EkipRol) => ({ kullaniciAdi: u.kullaniciAdi, ad: u.ad, renk: u.renk || 'turuncu', seviye: seviye(Number(u.puan) || 0), ekip: rol, unvan: u.unvan || null })
 
 async function adOner(p: Payload, email: string) {
   let kok = email.split('@')[0].toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ı/g, 'i').replace(/[^a-z0-9_.]/g, '').slice(0, 16)
@@ -95,6 +95,7 @@ async function adUygunMu(p: Payload, ad: string, haric?: number) {
 
 function rozetler(u: Uye, s: { yorum: number; begeni: number; kulup: number }) {
   const r: { kod: string; ad: string }[] = []
+  if (u.unvan) r.push({ kod: 'kurucu', ad: u.unvan === 'kurucu' ? 'Kurucu' : 'Kurucu ortak' })
   if (u.ekip) r.push({ kod: 'ekip', ad: 'Updated ekibi' })
   if (+new Date(u.createdAt) < +new Date('2027-01-01')) r.push({ kod: 'ilk', ad: "İlk Uper'lerden" })
   if (s.yorum >= 1) r.push({ kod: 'ilk-yorum', ad: 'İlk yorum' })
@@ -117,7 +118,7 @@ const benimProfil = async (p: Payload, u: Uye) => {
   return {
     kayitli: true, id: u.id, kullaniciAdi: u.kullaniciAdi, ad: u.ad, bio: u.bio || '', renk: u.renk || 'turuncu', email: u.email, giris: u.giris,
     ekipman: (u.ekipman || []).map((e) => ({ tur: e.tur, ad: e.ad, urun: typeof e.urun === 'object' ? e.urun?.id : e.urun })),
-    bildirimEposta: u.bildirimEposta !== false, durum: u.durum, ekip: rol, seviye: seviye(Number(u.puan) || 0), istatistik: s, rozetler: rozetler(u, s), uyelik: u.createdAt,
+    bildirimEposta: u.bildirimEposta !== false, durum: u.durum, ekip: rol, unvan: u.unvan || null, seviye: seviye(Number(u.puan) || 0), istatistik: s, rozetler: rozetler(u, s), uyelik: u.createdAt,
   }
 }
 const yorumSahibi = (y: any) => (typeof y.uye === 'object' ? y.uye?.id : y.uye) as number | undefined

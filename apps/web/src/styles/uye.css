@@ -60,6 +60,7 @@
 .yr-bas a:hover b{text-decoration:underline}
 .sv{display:inline-block;padding:1px 6px;background:var(--surface-2);font-family:var(--f-mono);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text-2)}
 .onay{display:inline-block;vertical-align:-3px;margin-left:4px;flex:none}
+h1 .tac{width:.8em}
 h1 .onay{width:.7em;height:.7em;vertical-align:.02em;margin-left:8px}
 .yr-not{margin:6px 0 0;padding:6px 10px;background:var(--surface-2);font-size:14px;color:var(--text-2);border-left:3px solid var(--orange)}
 .yr-m{margin-top:6px;font-size:16px;line-height:1.6;overflow-wrap:anywhere}
@@ -124,6 +125,7 @@ h1 .onay{width:.7em;height:.7em;vertical-align:.02em;margin-left:8px}
 .rz{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
 .rz li{padding:6px 10px;border:1px solid var(--text);font-size:14px;font-weight:600}
 .rz li.rz-ekip{background:var(--blue);border-color:var(--blue);color:var(--white)}
+.rz li.rz-kurucu{background:#C9A227;border-color:#C9A227;color:var(--black)}
 .rz li.rz-ilk{background:var(--orange);border-color:var(--orange);color:var(--black)}
 .hs-ek{display:grid;grid-template-columns:140px minmax(0,1fr) 44px;gap:8px;margin-bottom:8px}
 @media (max-width:480px){.hs-ek{grid-template-columns:110px minmax(0,1fr) 44px}}

@@ -1,5 +1,5 @@
 /** Herkese açık Uper profili: /uper?ad=kullaniciadi (seviye, rozetler, ekipman, son yorumlar). */
-import { api, avatar, esc, onay, zamanOnce } from './uye'
+import { api, avatar, esc, isaretler, zamanOnce } from './uye'
 
 const kok = document.getElementById('uper')!
 const ad = new URLSearchParams(location.search).get('ad') || ''
@@ -9,7 +9,7 @@ const ad = new URLSearchParams(location.search).get('ad') || ''
   const u = y.j, sv = a.j?.seviyeler || []
   document.title = `${u.ad} (@${u.kullaniciAdi}) · UPDATED`
   kok.innerHTML = `
-    <div class="hs-bas">${avatar(u, 88)}<div><h1 class="h2">${esc(u.ad)}${onay(u.ekip)}</h1><p class="kad">@${esc(u.kullaniciAdi)} · Üyelik ${new Date(u.uyelik).toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' })}</p>${u.bio ? `<p>${esc(u.bio)}</p>` : ''}</div></div>
+    <div class="hs-bas">${avatar(u, 88)}<div><h1 class="h2">${esc(u.ad)}${isaretler(u)}</h1><p class="kad">@${esc(u.kullaniciAdi)} · Üyelik ${new Date(u.uyelik).toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' })}</p>${u.bio ? `<p>${esc(u.bio)}</p>` : ''}</div></div>
     <div class="hs-iki">
       <div>
         <h2 class="label">Seviye</h2>

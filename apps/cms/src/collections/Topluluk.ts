@@ -37,6 +37,7 @@ export const Uyeler: CollectionConfig = {
         { name: 'guvenilir', type: 'checkbox', label: 'Güvenilir (yorumları onaysız yayında)', defaultValue: false },
       ],
     },
+    { name: 'unvan', type: 'select', label: 'Ünvan (adın yanında taçla görünür)', options: [{ label: 'Kurucu', value: 'kurucu' }, { label: 'Kurucu ortak', value: 'kurucu-ortak' }], admin: { description: 'Yalnız yöneticiler verir.' } },
     {
       name: 'ekipman', type: 'array', label: 'Ekipmanı', maxRows: 12,
       fields: [{
