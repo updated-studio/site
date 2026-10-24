@@ -38,6 +38,17 @@ function alanYap(f: any): Alan | null {
   return a
 }
 
+/** Giriş koleksiyonunun iç alanları Stüdyo formuna girmez: API anahtarı Stüdyo'da ayrı bölümde (üret / kapat), oturumlar panelde */
+const GIRIS_IC = new Set(['enableAPIKey', 'apiKey', 'apiKeyIndex', 'hasAPIKey', 'sessions', 'salt', 'hash', 'resetPasswordToken', 'resetPasswordExpiration', 'loginAttempts', 'lockUntil'])
+function girisAlanlari(c: any): Alan[] {
+  return c.fields.filter((f: any) => !GIRIS_IC.has(f.name)).map((f: any) => {
+    const a = alanYap(f)
+    // E-posta Stüdyo hesabıyla eşleşmenin anahtarıdır (auth/studyo.ts); değişirse kişi panele bağlanamaz
+    if (a && f.name === 'email') a.admin = { ...(a.admin as Alan), readOnly: true, description: "Stüdyo hesabının e-postası; Stüdyo'dan gelir." }
+    return a
+  }).filter(Boolean)
+}
+
 /** Sürüm özellikleri: taslak, sürüm geçmişi, otomatik kayıt (ms), zamanlanmış yayın */
 function surumBilgisi(v: any) {
   const d = v && typeof v === 'object' ? v.drafts : null
@@ -62,8 +73,9 @@ export function semaYap(config: SanitizedConfig) {
       gorsel: !!c.upload,
       ...surumBilgisi(c.versions),
       giris: !!c.auth,
+      apiAnahtari: !!(c.auth as any)?.useAPIKey,
       kilit: c.lockDocuments !== false,
-      fields: c.fields.map(alanYap).filter(Boolean),
+      fields: c.auth ? girisAlanlari(c) : c.fields.map(alanYap).filter(Boolean),
     }))
   const genel = config.globals.map((g) => ({
     slug: g.slug,

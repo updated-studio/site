@@ -48,7 +48,7 @@ B=$(docker exec supabase-db psql -X "$CLOUD_DB" -tAc "$(say)")
 Y=$(psql_yerel -tAc "$(say)")
 echo "kayıt (haber/görsel/kategori): bulut $B · Natro $Y"
 # Tek giriş (Stüdyo göçleri 0025/0026): Stüdyo'da site rolü değişince ya da üye çıkarılınca paneldeki hesap tetikleyiciyle güncellenir
-psql_yerel -c "grant usage on schema payload to postgres; grant select, update (role, name, enable_a_p_i_key) on payload.users to postgres; grant select, delete on payload.users_sessions to postgres" >/dev/null
+psql_yerel -c "grant usage on schema payload to postgres; grant select, update (role, name, enable_a_p_i_key, api_key, api_key_index) on payload.users to postgres; grant select, delete on payload.users_sessions to postgres" >/dev/null
 
 # 3) Görseller: yerelde "media" kovası (herkese açık) + buluttan kopya
 curl -s -o /dev/null -X POST http://127.0.0.1:8000/storage/v1/bucket -H "apikey: $SERVICE" -H "Authorization: Bearer $SERVICE" \
