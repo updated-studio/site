@@ -34,6 +34,8 @@
 8. ✅ **Site ve panel de Natro'da (23 Ekim 22:40)**, yukarıda "Şu an". Kalan: GitHub depo ayarlarındaki eski gizli bilgiler (VPS şifresi, FTP şifreleri, veritabanı şifreleri, `YAYIN_TOKEN`) artık kullanılmıyor; Fatih (24 Ekim): şimdilik dursun (silmek isterse https://github.com/updated-studio/site/settings/secrets/actions ve studio için aynısı). PR kod kontrolü (`kontrol.yml`, iki depoda) kalıyor (Fatih, 24 Ekim).
 9. Kod için Forgejo (Natro'da) isteğe bağlı; GitHub salt okunur ayna olarak kalır (Fatih onayladı).
 
+10. **Fatih, 24 Ekim 14:30 (yeni öncelik sırası):** (a) **Site üyeliği:** okur hesabı, yorum, etkileşim; okuma süresi zaten var ("X dk okuma", `autoSeo.ts`). Kapsam Fatih'le netleştiriliyor. (b) Sonra **Otomasyon 3+4 birlikte** + İçerik'in iki editörü tek editörde (ayrıntı Stüdyo ORTAK_CALISMA 24 Ekim notu). Alanlar birleşti: Fatih/Enes ayrımı yok.
+
 ## Diğer açık işler
 - [x] **Sunucudan GitHub'a yazma (23 Ekim 21:30):** ince ayarlı erişim anahtarı `natro-sunucu` (yalnız site + studio; Contents + Workflows yazma; 366 gün, **Ekim 2027'de yenilenecek**). Sunucuda `updated` kullanıcısının `~/.git-credentials` dosyasında; yenileme: `github-anahtar-gir`.
 - [ ] Flux (Fatih'in Mac'i): işçinin adresi `https://panel.updated.com.tr/functions/v1/triyaj-taslak` + yeni FLUX_TOKEN (sunucuda `functions.env`; güvenli yoldan verilecek).
