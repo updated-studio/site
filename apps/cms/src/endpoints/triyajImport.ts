@@ -4,6 +4,7 @@ import { LIMIT } from '../lib/kit'
 import { cut, trSlug } from '../lib/slug'
 import { baslikUydur, makineDenetimi } from '../lib/triyajKural'
 import sharp from 'sharp'
+import { sql } from '@payloadcms/db-postgres'
 
 /**
  * Stüdyo · Haber Masası → panel (WordPress'e gönderimin yerini aldı, 23 Ekim 2026). Anahtar: x-studio-key = STUDIO_IMPORT_KEY.
@@ -19,6 +20,9 @@ import sharp from 'sharp'
  *   Yayın kurallarına uydurulur (lib/triyajKural.ts): başlık düzeltilir, kontrol listesinin ölçülebilir maddeleri işaretlenir;
  *   yanıtta eksikler (editörün tamamlayacakları) ve duzeltmeler döner.
  * POST /api/triyaj/kapak   → { studioId, image } — sonradan gelen görseli (Flux) kapağı olmayan taslağa ekler.
+ * POST /api/triyaj/temizle → { gun, taslaklar: [{ studioId, lastSeen }] } — panelde `gun` gündür kimsenin dokunmadığı
+ *   otomatik taslakları (son sürüm Stüdyo'nun son gördüğüyle aynı, yayında/planlı değil) ve yalnız onların kullandığı kapakları siler
+ *   (Fatih, 24 Ekim 2026: taslak birikmesi). Yanıt: { silinen: studioId[] }.
  */
 
 const yetkili = (req: PayloadRequest) => !!process.env.STUDIO_IMPORT_KEY && req.headers.get('x-studio-key') === process.env.STUDIO_IMPORT_KEY
@@ -200,5 +204,44 @@ export const triyajKapak: Endpoint = {
     const workflow = { ...(prev.workflow || {}), checklist: { ...(prev.workflow?.checklist || {}), kapak: denetim.checklist.kapak, alt: denetim.checklist.alt, kunye: denetim.checklist.kunye } }
     const doc = await req.payload.update({ collection: 'news', id: prev.id, data: { cover: y.id, workflow, _status: 'draft' } as any, draft: true })
     return Response.json({ ok: true, ...linkler(doc), eksikler: denetim.eksikler })
+  },
+}
+
+/** Görsel hiçbir kayıtta (sürümler dahil) kullanılmıyorsa siler */
+async function sahipsizseSil(req: PayloadRequest, id: number) {
+  const n = Number(id)
+  if (!Number.isInteger(n)) return
+  const r: any = await (req.payload.db as any).drizzle.execute(sql.raw(
+    ['news', 'reviews', 'comparisons'].map((t) => `select 1 from payload.${t} where cover_id=${n} or seo_image_id=${n} union all select 1 from payload._${t}_v where version_cover_id=${n} or version_seo_image_id=${n}`)
+      .concat([`select 1 from payload.reels where cover_id=${n}`, `select 1 from payload.products where image_id=${n} or seo_image_id=${n}`, `select 1 from payload.pages where seo_image_id=${n}`,
+        `select 1 from payload.ads where image_id=${n} or mobile_image_id=${n}`, `select 1 from payload.authors where avatar_id=${n}`, `select 1 from payload.videos where thumb_id=${n}`, `select 1 from payload.kulup_tracks where image_id=${n}`])
+      .join(' union all ') + ' limit 1'))
+  if ((r.rows ?? r).length) return
+  await req.payload.delete({ collection: 'media', id: n, overrideAccess: true })
+}
+
+export const triyajTemizle: Endpoint = {
+  path: '/triyaj/temizle',
+  method: 'post',
+  handler: async (req) => {
+    if (!yetkili(req)) return yetkisiz()
+    const body = await req.json?.()
+    const gun = Number(body?.gun)
+    const liste = (Array.isArray(body?.taslaklar) ? body.taslaklar : []).slice(0, 50)
+    if (!(gun >= 1) || !liste.length) return Response.json({ error: 'gun ve taslaklar gerekli', code: 'eksik' }, { status: 400 })
+    const sinir = Date.now() - gun * 86_400_000
+    const silinen: string[] = []
+    for (const t of liste) {
+      const studioId = String(t?.studioId || '')
+      const d = await bulStudyo(req, studioId)
+      if (!d) { silinen.push(studioId); continue } // panelde zaten yok: Stüdyo bağı temizlesin
+      const el = d.updatedAt !== t.lastSeen // Stüdyo'nun son gönderiminden sonra biri dokunmuş (otomatik kayıt dahil)
+      const yeni = !d.triyaj?.importedAt || Date.parse(d.triyaj.importedAt) > sinir
+      if (el || yeni || d._status === 'published' || ['yayinda', 'planlandi'].includes(d.workflow?.state)) continue
+      await req.payload.delete({ collection: 'news', id: d.id, overrideAccess: true })
+      for (const m of new Set([d.cover, d.seo?.image].filter(Boolean))) await sahipsizseSil(req, m).catch(() => {})
+      silinen.push(studioId)
+    }
+    return Response.json({ silinen })
   },
 }
