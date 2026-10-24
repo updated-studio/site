@@ -11,7 +11,7 @@ const metin = (x: unknown): string | undefined =>
 
 function alanYap(f: any): Alan | null {
   // _status gibi iç alanlar gönderilmez: yayın durumu Stüdyo'da yalnız Yayınla / Yayından kaldır ile değişir
-  if (!f || f.type === 'ui' || f.type === 'join' || f.admin?.hidden || f.hidden || String(f.name ?? '').startsWith('_')) return null
+  if (!f || f.type === 'ui' || f.admin?.hidden || f.hidden || String(f.name ?? '').startsWith('_')) return null
   const a: Alan = { type: f.type }
   if (f.name) a.name = f.name
   const etiket = metin(f.label)
@@ -20,13 +20,15 @@ function alanYap(f: any): Alan | null {
   if (f.hasMany) a.hasMany = true
   if (f.unique) a.unique = true
   if (f.relationTo) a.relationTo = f.relationTo
+  // Ters ilişki (join): kaydedilmez, Stüdyo'da salt okunur liste ("Bu ürünle ilgili haberler")
+  if (f.type === 'join') { a.collection = f.collection; a.on = f.on }
   if (f.options) a.options = f.options.map((o: any) => (typeof o === 'string' ? { label: o, value: o } : { label: metin(o.label) ?? o.value, value: o.value }))
   for (const k of ['min', 'max', 'minRows', 'maxRows', 'maxLength'] as const) if (typeof f[k] === 'number') a[k] = f[k]
   if (['string', 'number', 'boolean'].includes(typeof f.defaultValue)) a.defaultValue = f.defaultValue
   const ad = f.admin ?? {}
   const yon: Alan = {}
   if (metin(ad.description)) yon.description = metin(ad.description)
-  if (ad.readOnly) yon.readOnly = true
+  if (ad.readOnly || f.type === 'join') yon.readOnly = true
   if (ad.position === 'sidebar') yon.position = 'sidebar'
   if (typeof ad.condition === 'function') yon.kosullu = true
   if (ad.date?.pickerAppearance) yon.tarih = ad.date.pickerAppearance
