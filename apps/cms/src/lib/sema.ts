@@ -38,6 +38,17 @@ function alanYap(f: any): Alan | null {
   return a
 }
 
+/** Sürüm özellikleri: taslak, sürüm geçmişi, otomatik kayıt (ms), zamanlanmış yayın */
+function surumBilgisi(v: any) {
+  const d = v && typeof v === 'object' ? v.drafts : null
+  return {
+    taslak: !!d,
+    surumler: !!v,
+    otoKayit: d && typeof d === 'object' && d.autosave ? (typeof d.autosave === 'object' && d.autosave.interval) || 2000 : 0,
+    zamanlama: !!(d && typeof d === 'object' && d.schedulePublish),
+  }
+}
+
 export function semaYap(config: SanitizedConfig) {
   const koleksiyonlar = config.collections
     .filter((c) => !c.slug.startsWith('payload-') && !c.admin?.hidden)
@@ -49,15 +60,17 @@ export function semaYap(config: SanitizedConfig) {
       baslikAlani: c.admin?.useAsTitle ?? 'id',
       sutunlar: c.admin?.defaultColumns ?? [],
       gorsel: !!c.upload,
-      taslak: !!(c.versions && typeof c.versions === 'object' && c.versions.drafts),
+      ...surumBilgisi(c.versions),
       giris: !!c.auth,
+      kilit: c.lockDocuments !== false,
       fields: c.fields.map(alanYap).filter(Boolean),
     }))
   const genel = config.globals.map((g) => ({
     slug: g.slug,
     ad: metin(g.label) ?? g.slug,
     grup: metin(g.admin?.group as unknown) ?? 'Ayarlar',
-    taslak: !!(g.versions && typeof g.versions === 'object' && g.versions.drafts),
+    ...surumBilgisi(g.versions),
+    kilit: g.lockDocuments !== false,
     fields: g.fields.map(alanYap).filter(Boolean),
   }))
   return { koleksiyonlar, genel }
