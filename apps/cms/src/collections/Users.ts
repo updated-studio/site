@@ -1,10 +1,12 @@
 import type { CollectionConfig } from 'payload'
 import { ROLES, isAdmin, adminField } from '../access/roles'
+import { studyoStrategy } from '../auth/studyo'
 
 export const Users: CollectionConfig = {
   slug: 'users',
   labels: { singular: 'Kullanıcı', plural: 'Kullanıcılar' },
-  auth: { useAPIKey: true, tokenExpiration: 60 * 60 * 24 * 7 },
+  // Stüdyo girişi de tanınır (auth/studyo.ts): Stüdyo'daki kişi paneldeki kendi hesabı ve yetkileriyle işlem yapar
+  auth: { useAPIKey: true, tokenExpiration: 60 * 60 * 24 * 7, strategies: [studyoStrategy] },
   admin: { useAsTitle: 'name', group: 'Ekip', defaultColumns: ['name', 'email', 'role'] },
   access: { create: isAdmin, delete: isAdmin, read: ({ req }) => !!req.user, update: ({ req, id }) => req.user?.role === 'admin' || req.user?.id === id },
   fields: [
