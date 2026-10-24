@@ -11,6 +11,7 @@ import { join, relative } from 'node:path'
 const DIST = new URL('../dist/', import.meta.url).pathname
 const BASE = (process.env.BASE_PATH || '').replace(/\/$/, '')
 const SITE = (process.env.SITE_URL || 'https://updated.com.tr').replace(/\/$/, '')
+const STUDYO = (process.env.STUDIO_URL || 'https://studio.updated.com.tr').replace(/\/$/, '')
 const walk = (d) => readdirSync(d).flatMap((f) => { const p = join(d, f); return statSync(p).isDirectory() ? walk(p) : [p] })
 const files = walk(DIST)
 
@@ -144,6 +145,11 @@ Header always set X-Content-Type-Options "nosniff"
 Header always set Referrer-Policy "strict-origin-when-cross-origin"
 Header always set X-Frame-Options "SAMEORIGIN"
 Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+# Taslak önizleme Stüdyo'nun canlı önizleme panelinde açılır (yalnız Stüdyo'nun içinde)
+<FilesMatch "^onizleme\\.html$">
+Header always unset X-Frame-Options
+Header always set Content-Security-Policy "frame-ancestors 'self' ${STUDYO}"
+</FilesMatch>
 <FilesMatch "\\.(html|xml|json|txt)$">
 Header set Cache-Control "public, max-age=120, must-revalidate"
 </FilesMatch>
