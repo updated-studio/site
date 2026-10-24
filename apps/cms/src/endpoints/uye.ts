@@ -325,7 +325,7 @@ export const uyeEndpoints: Endpoint[] = [
     sayfaTemizle(h.anahtar)
     if (neden) await ekibeHaberVer(p, `${uye!.ad}: ${metin}`)
     else { await puanEkle(p, uye!.id, 'yorum', `yorum:${y.id}`); await yanitBildir(p, y, uye!.id) }
-    return yanit(req, { id: y.id, onayda: !!neden, mesaj: neden ? (neden === "Uper'in ilk yorumu" ? 'Teşekkürler! İlk yorumun ekibin onayından sonra yayında olacak; sonrakiler hemen görünür.' : 'Yorumun ekibin onayından sonra yayında olacak.') : null }, 201)
+    return yanit(req, { id: y.id, onayda: !!neden, mesaj: neden ? 'Yorumun ekibin onayından sonra yayında olacak.' : null }, 201)
   }),
 
   // Kendi yorumunu düzenle (yazdıktan sonra 15 dakika içinde)

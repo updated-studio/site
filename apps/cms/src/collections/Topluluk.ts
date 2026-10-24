@@ -71,7 +71,7 @@ export const Yorumlar: CollectionConfig = {
     useAsTitle: 'metin', group: 'Topluluk',
     defaultColumns: ['metin', 'uye', 'durum', 'neden', 'sikayet', 'createdAt'],
     listSearchableFields: ['metin'],
-    description: 'Onay bekleyenler: bağlantı ya da uygunsuz kelime içeren yorumlar, yeni Uper\'in ilk yorumu ve 3 şikâyet alan yorumlar.',
+    description: 'Onay bekleyenler: bağlantı, uygunsuz kelime ya da anlamsız tekrar içeren yorumlar ve 3 şikâyet alan yorumlar.',
   },
   defaultSort: '-createdAt',
   access: { read: editorsUp, create: () => false, update: editorsUp, delete: editorsUp },

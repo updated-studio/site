@@ -129,11 +129,11 @@ const KUFUR = /(^|[^a-zçğıöşü])(am[ıi]n[ae]|amc[ıi]k|orospu|o\.ç|sik(er
 const BAGLANTI = /(https?:\/\/|www\.|\b[a-z0-9-]+\.(com|net|org|io|me|xyz|ru|tk|link|shop|site)\b|t\.me\/|wa\.me\/)/i
 const TEKRAR = /(.)\1{9,}/
 
-export function onayNedeni(metin: string, guvenilir: boolean): string | null {
+// Temiz yorum her Uper için hemen yayında (25 Ekim 2026: ilk yorum onayı kaldırıldı)
+export function onayNedeni(metin: string, _guvenilir?: boolean): string | null {
   if (KUFUR.test(metin)) return 'Uygunsuz kelime'
   if (BAGLANTI.test(metin)) return 'Bağlantı içeriyor'
   if (TEKRAR.test(metin)) return 'Anlamsız tekrar'
-  if (!guvenilir) return "Uper'in ilk yorumu"
   return null
 }
 
