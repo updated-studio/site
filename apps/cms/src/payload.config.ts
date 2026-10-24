@@ -22,6 +22,7 @@ import { Pages } from './collections/Pages'
 import { Site, Home } from './globals'
 import { triyajDurum, triyajImport, triyajKapak } from './endpoints/triyajImport'
 import { previewEndpoint } from './endpoints/preview'
+import { studyoOnizleme, studyoSema } from './endpoints/studyo'
 import { canliEndpoint } from './endpoints/canli'
 import { okunmaEndpoints, okunmaInit } from './endpoints/okunma'
 
@@ -54,7 +55,7 @@ export default buildConfig({
   csrf: origins,
   // Zamanlanmış yayın (schedulePublish) için iş kuyruğu dakikada bir çalışır. Panel kalıcı Node sunucusunda çalışmalı.
   jobs: { autoRun: [{ cron: '* * * * *', queue: 'default', limit: 20 }], tasks: [] },
-  endpoints: [triyajImport, triyajDurum, triyajKapak, previewEndpoint, canliEndpoint, ...okunmaEndpoints],
+  endpoints: [triyajImport, triyajDurum, triyajKapak, previewEndpoint, canliEndpoint, studyoSema, studyoOnizleme, ...okunmaEndpoints],
   onInit: okunmaInit,
   plugins: [
     s3Storage({
