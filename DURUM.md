@@ -75,5 +75,5 @@
 
 ## Yol haritası (Fatih, 23 Ekim 2026; altyapı temelleri bittikten sonra sırayla)
 Görsel: (1) Payload panel görünümü · (2) Stüdyo İçerik tasarım aracı: ana şablon kararı + yeni örnekler · (3) site arayüzü eksikleri, (3b) sonra geliştirme · (4) kategori/haber sayfalarında boş sağ sütun: reklam, önerilenler, günün önerisi, reels · (5) temaya göre ters logo · (6) marka kitinin sitenin tamamına uygulanması.
-Otomasyon: (1) Stüdyo ↔ Payload tam bağlantı, tek kullanıcı girişi · (2) taslak Payload'a tam hazır gelir (SEO, GEO, adres, metadata, zorunlu düzenlemeler) · (3) tasarım aracına düşen haberin türü Story/Post'u belirler · (4) siteye eklenen haber Stüdyo tasarım aracına düşer (hangi editör girdiyse onda).
+Otomasyon: (1) ✅ Stüdyo ↔ Payload tam bağlantı, tek kullanıcı girişi (24 Ekim) · (2) ✅ taslak Payload'a tam hazır gelir (SEO, GEO, adres, metadata, zorunlu düzenlemeler) (24 Ekim; taslak birikmesi: günde 30 + 2 gün süre dolumu) · (3) tasarım aracına düşen haberin türü Story/Post'u belirler · (4) siteye eklenen haber Stüdyo tasarım aracına düşer (hangi editör girdiyse onda).
 Panel/altyapı: (1) hızlı yorum + üyelik, puan kazanma · (2) panelde sitenin ayrıntılı ayarları · (3) kullanıcı sistemi (bot koruması, güvenlik) · (4) profillere ekipman ilerlemesi (kamera → lens → gimbal) · (5) "offocus"tan özellik listesi çekme.
