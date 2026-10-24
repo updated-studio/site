@@ -11,8 +11,9 @@ export const Users: CollectionConfig = {
   // Payload'un kendi paneli (yedek kapı) yalnız yöneticilere açık; ekip Stüdyo'yu kullanır. Stüdyo'nun API erişimi bundan etkilenmez.
   access: { admin: ({ req }) => req.user?.role === 'admin', create: isAdmin, delete: isAdmin, read: ({ req }) => !!req.user, update: ({ req, id }) => req.user?.role === 'admin' || req.user?.id === id },
   fields: [
-    { name: 'name', type: 'text', label: 'Ad soyad', required: true },
-    { name: 'role', type: 'select', label: 'Rol', options: [...ROLES], defaultValue: 'editor', required: true, access: { update: adminField } },
+    // Ad ve rol Stüdyo'dan gelir (Ekip → Yönetim); burada değiştirilirse kişinin bir sonraki Stüdyo isteğinde Stüdyo'daki hâline döner
+    { name: 'name', type: 'text', label: 'Ad soyad', required: true, admin: { description: "Stüdyo'dan yönetilir (Ekip → Yönetim)." } },
+    { name: 'role', type: 'select', label: 'Rol', options: [...ROLES], defaultValue: 'editor', required: true, access: { update: adminField }, admin: { description: "Stüdyo'dan yönetilir (Ekip → Yönetim)." } },
     { name: 'author', type: 'relationship', relationTo: 'authors', label: 'Yazar profili' },
   ],
 }

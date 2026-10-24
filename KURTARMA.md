@@ -25,6 +25,8 @@ Bu dosya, Claude'a ya da bir kişiye erişilemese bile sistemi ayakta tutmak ve 
 - **Stüdyo'nun yeni sürümü bozuk çıktı:** `ls /var/www/studio/surumler` → bir öncekini seç → `sudo ln -sfn /var/www/studio/surumler/<klasör> /var/www/studio/aktif` (anında döner).
 - **Site güncellenmiyor:** `journalctl -u updated-site-yayin -n 40`; elle: `sudo updated-site-yayinla --zorla`. GitHub'a ihtiyaç yok.
 - **Panel kodu güncellenmiyor:** `journalctl -u updated-panel-guncelle -n 40`; elle: `sudo updated-panel-guncelle`.
+- **Ekipten biri Stüdyo'nun Site modülüne giremiyor:** Stüdyo → Ekip → Yönetim'de site rolüne bak ("Sitede yetkisi yok" ise rol ver). Panel hesabı ilk girişte kendiliğinden açılır (`apps/cms/src/auth/studyo.ts`).
+- **Stüdyo'da rol değişti ama panele yansımadı / veritabanı yeniden kurulduysa:** tetikleyicinin izni (bir kez): `sudo docker exec -i supabase-db psql -U supabase_admin -d postgres -c "grant usage on schema payload to postgres; grant select, update (role, name, enable_a_p_i_key) on payload.users to postgres; grant select, delete on payload.users_sessions to postgres"`.
 - **Sunucu yeniden başladı:** her şey kendiliğinden açılır (Docker ve servisler otomatik). Claude: `claude-sunucu`.
 
 ## Yedekten geri kurma (özet)

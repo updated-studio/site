@@ -22,7 +22,7 @@ import { Pages } from './collections/Pages'
 import { Site, Home } from './globals'
 import { triyajDurum, triyajImport, triyajKapak } from './endpoints/triyajImport'
 import { previewEndpoint } from './endpoints/preview'
-import { studyoAlanlar, studyoOnizleme, studyoSema } from './endpoints/studyo'
+import { studyoAlanlar, studyoGiris, studyoOnizleme, studyoSema } from './endpoints/studyo'
 import { canliEndpoint } from './endpoints/canli'
 import { okunmaEndpoints, okunmaInit } from './endpoints/okunma'
 
@@ -37,7 +37,7 @@ export default buildConfig({
     user: Users.slug,
     importMap: { baseDir: path.resolve(dirname) },
     meta: { titleSuffix: ' · UPDATED Panel', icons: [{ url: '/favicon.svg', type: 'image/svg+xml' }] },
-    components: { graphics: { Logo: '/components/Logo#Logo', Icon: '/components/Logo#Icon' } },
+    components: { graphics: { Logo: '/components/Logo#Logo', Icon: '/components/Logo#Icon' }, afterLogin: ['/components/StudyoGiris#StudyoGiris'] },
     dateFormat: 'dd.MM.yyyy HH.mm',
   },
   // Panel dili Türkçe (isteyen kullanıcı hesap ayarından İngilizceye geçebilir)
@@ -55,7 +55,7 @@ export default buildConfig({
   csrf: origins,
   // Zamanlanmış yayın (schedulePublish) için iş kuyruğu dakikada bir çalışır. Panel kalıcı Node sunucusunda çalışmalı.
   jobs: { autoRun: [{ cron: '* * * * *', queue: 'default', limit: 20 }], tasks: [] },
-  endpoints: [triyajImport, triyajDurum, triyajKapak, previewEndpoint, canliEndpoint, studyoSema, studyoOnizleme, studyoAlanlar, ...okunmaEndpoints],
+  endpoints: [triyajImport, triyajDurum, triyajKapak, previewEndpoint, canliEndpoint, studyoSema, studyoOnizleme, studyoAlanlar, studyoGiris, ...okunmaEndpoints],
   onInit: okunmaInit,
   plugins: [
     s3Storage({
