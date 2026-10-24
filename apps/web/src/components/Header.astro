@@ -27,4 +27,5 @@ const on = (h: string) => (h !== '/' && current.startsWith(h) ? 'page' : undefin
   {nav.map((n) => <a href={n.href}>{n.label}</a>)}
   <a href={site.kulupUrl}>Updated Kulüp</a>
   <a href="/hesap">Hesabım</a>
+  <div class="sheet-tema"><span>Görünüm</span><button class="ibtn" type="button" data-theme-btn aria-label="Görünüm"><Fragment set:html={ico('auto')} /></button></div>
 </nav>

@@ -94,6 +94,9 @@ export function zamanOnce(iso: string) {
   return new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 export const basHarf = (ad: string) => (ad || '?').trim().split(/\s+/).slice(0, 2).map((x) => x[0]).join('').toLocaleUpperCase('tr-TR')
+const ONAY = `<svg class="onay" width="16" height="16" viewBox="0 0 24 24" role="img" aria-label="Updated ekibi"><title>Updated ekibi</title><path fill="#2563EB" d="M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82L8.6 22.5l3.4-1.47 3.4 1.46 1.89-3.19 3.61-.82-.34-3.69L23 12z"/><path fill="#FFFFFF" d="M10 17l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>`
+/** Ekip üyesinin adının yanında mavi onay işareti (Instagram'daki gibi) */
+export const onay = (ekip?: boolean) => (ekip ? ONAY : '')
 export const avatar = (u: { ad: string; renk?: string }, boy = 40) => `<span class="av av-${esc(u.renk || 'turuncu')}" style="width:${boy}px;height:${boy}px;font-size:${Math.round(boy * 0.42)}px" aria-hidden="true">${esc(basHarf(u.ad))}</span>`
 export function bildir(metin: string, tur: 'ok' | 'hata' = 'ok') {
   document.querySelectorAll('.toast.uye-t').forEach((t) => t.remove())
@@ -129,7 +132,7 @@ async function ustCubuk() {
       menu = document.createElement('div')
       menu.className = 'uye-m'; menu.setAttribute('role', 'menu')
       const liste = (bl.j?.liste || []).slice(0, 6)
-      menu.innerHTML = `<div class="uye-m-bas">${avatar(u, 40)}<div><b>${esc(u.ad)}</b><span class="kad">@${esc(u.kullaniciAdi)} · ${esc(u.seviye.ad)} · ${u.seviye.puan} puan</span></div></div>
+      menu.innerHTML = `<div class="uye-m-bas">${avatar(u, 40)}<div><b>${esc(u.ad)}${onay(u.ekip)}</b><span class="kad">@${esc(u.kullaniciAdi)} · ${esc(u.seviye.ad)} · ${u.seviye.puan} puan</span></div></div>
         <div class="label uye-m-l">Bildirimler</div>
         ${liste.length ? `<ul class="uye-bl">${liste.map((x: any) => `<li class="${x.okundu ? '' : 'yeni'}"><a href="${esc(x.yol || '/hesap#bildirimler')}">${esc(x.metin)}<span class="meta">${esc(zamanOnce(x.at))}</span></a></li>`).join('')}</ul>` : '<p class="meta" style="padding:0 16px">Henüz bildirim yok.</p>'}
         <nav><a role="menuitem" href="/hesap#profil">Profilim</a><a role="menuitem" href="/hesap#kaydedilenler">Kaydettiklerim</a><a role="menuitem" href="/hesap#bildirimler">Tüm bildirimler</a><button role="menuitem" type="button" data-cikis>Çıkış yap</button></nav>`
@@ -168,7 +171,7 @@ function topluluk(kok: HTMLElement) {
     <li class="yr${y.onayda ? ' onayda' : ''}${y.silindi ? ' silik' : ''}" id="yorum-${y.id}" data-id="${y.id}">
       ${y.uye ? `<a class="yr-av" href="/uper?ad=${esc(y.uye.kullaniciAdi)}" tabindex="-1">${avatar(y.uye, yanit ? 32 : 40)}</a>` : `<span class="yr-av"><span class="av av-gri" style="width:${yanit ? 32 : 40}px;height:${yanit ? 32 : 40}px" aria-hidden="true"></span></span>`}
       <div class="yr-g">
-        <div class="yr-bas">${y.uye ? `<a href="/uper?ad=${esc(y.uye.kullaniciAdi)}"><b>${esc(y.uye.ad)}</b></a> <span class="kad">@${esc(y.uye.kullaniciAdi)}</span> <span class="sv" title="Seviye">${esc(y.uye.seviye.ad)}</span>${y.uye.ekip ? ' <span class="sv ekip">Updated ekibi</span>' : ''}` : '<span class="meta">Silinmiş yorum</span>'}
+        <div class="yr-bas">${y.uye ? `<a href="/uper?ad=${esc(y.uye.kullaniciAdi)}"><b>${esc(y.uye.ad)}</b>${onay(y.uye.ekip)}</a> <span class="kad">@${esc(y.uye.kullaniciAdi)}</span> <span class="sv" title="Seviye">${esc(y.uye.seviye.ad)}</span>` : '<span class="meta">Silinmiş yorum</span>'}
           <span class="meta">· <time datetime="${esc(y.at)}">${esc(zamanOnce(y.at))}</time>${y.duzenlendi ? ' · düzenlendi' : ''}</span></div>
         ${y.onayda ? '<p class="yr-not">Ekibin onayını bekliyor; şimdilik yalnız sen görüyorsun.</p>' : ''}
         ${y.yanitlananAd ? `<span class="meta">↳ ${esc(y.yanitlananAd)} kişisine yanıt</span>` : ''}

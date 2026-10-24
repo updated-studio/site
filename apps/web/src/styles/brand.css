@@ -76,8 +76,11 @@ h3{font-weight:700}
 .sheet a{display:block;font-family:var(--f-head);font-weight:900;font-size:34px;text-transform:uppercase;line-height:1.2;text-decoration:none;padding:8px 0;border-bottom:1px solid var(--line)}
 /* Uper hesap düğmesi için yer: geniş olmayan masaüstünde "Ara" yazısı gizlenir (büyüteç kalır), menü aralığı daralır */
 @media (max-width:1439px){.srch span{display:none}.nav a{padding:8px 7px}}
-@media (max-width:1100px){.nav{display:none}.menu-b{display:grid}.hdr-r{margin-left:auto}.srch span{display:none}}
+@media (max-width:1100px){.nav{display:none}.menu-b{display:grid}.hdr-r,.nav + .hdr-r{margin-left:auto}.srch span{display:none}}
 @media (max-width:420px){.hdr .btn-p{display:none}}
+/* Dar telefonda görünüm düğmesi üst çubuktan menüye geçer (hesap düğmesine yer) */
+@media (max-width:480px){.hdr [data-theme-btn]{display:none}.hdr .wrap{gap:12px}}
+.sheet-tema{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0;border-bottom:1px solid var(--line);font-weight:600}
 /* breaking strip */
 .sd{background:var(--black);color:var(--white);height:40px}
 .sd .wrap{height:40px;display:flex;align-items:center;gap:12px}

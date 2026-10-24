@@ -3,7 +3,7 @@
  * yorumlarım, puan ve seviye, ayarlar (bildirim, şifre, e-posta, verilerimi indir, hesabımı sil).
  * Giriş servisinden dönüşte adres çubuğundaki #access_token=… burada okunur ve hemen silinir.
  */
-import { AUTH, api, avatar, ben, bildir, cikis, esc, giris, girisli, oturumYaz, zamanOnce } from './uye'
+import { AUTH, api, avatar, ben, bildir, cikis, esc, giris, girisli, onay, oturumYaz, zamanOnce } from './uye'
 
 const kok = document.getElementById('hesap')!
 const SITE = location.origin
@@ -237,7 +237,7 @@ function ilerleme(sv: any) {
 
 async function hesabim(u: any, sekme: Sekme) {
   kok.innerHTML = `
-    <div class="hs-bas">${avatar(u, 72)}<div><h1 class="h2">${esc(u.ad)}</h1><p class="kad">@${esc(u.kullaniciAdi)} · ${esc(u.seviye.ad)} · <span class="num">${u.seviye.puan}</span> puan${u.ekip ? ' · Updated ekibi' : ''}</p></div>
+    <div class="hs-bas">${avatar(u, 72)}<div><h1 class="h2">${esc(u.ad)}${onay(u.ekip)}</h1><p class="kad">@${esc(u.kullaniciAdi)} · ${esc(u.seviye.ad)} · <span class="num">${u.seviye.puan}</span> puan</p></div>
       <a class="btn" href="/uper?ad=${esc(u.kullaniciAdi)}">Profilimi gör</a></div>
     ${mesaj()}
     <nav class="hs-sek hs-sek-g" aria-label="Hesap bölümleri">${SEKMELER.map(([k, ad]) => `<a href="#${k}" aria-current="${k === sekme ? 'page' : 'false'}" class="${k === sekme ? 'on' : ''}">${ad}</a>`).join('')}</nav>
