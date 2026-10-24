@@ -94,9 +94,9 @@ export function zamanOnce(iso: string) {
   return new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 export const basHarf = (ad: string) => (ad || '?').trim().split(/\s+/).slice(0, 2).map((x) => x[0]).join('').toLocaleUpperCase('tr-TR')
-const ONAY = `<svg class="onay" width="16" height="16" viewBox="0 0 24 24" role="img" aria-label="Updated ekibi"><title>Updated ekibi</title><path fill="#2563EB" d="M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82L8.6 22.5l3.4-1.47 3.4 1.46 1.89-3.19 3.61-.82-.34-3.69L23 12z"/><path fill="#FFFFFF" d="M10 17l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>`
-/** Ekip üyesinin adının yanında mavi onay işareti (Instagram'daki gibi) */
-export const onay = (ekip?: boolean) => (ekip ? ONAY : '')
+/** Ekip üyesinin adının yanında onay işareti (Instagram'daki gibi): yönetici altın, diğer ekip mavi */
+const onaySvg = (renk: string, ad: string) => `<svg class="onay" width="16" height="16" viewBox="0 0 24 24" role="img" aria-label="${ad}"><title>${ad}</title><path fill="${renk}" d="M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82L8.6 22.5l3.4-1.47 3.4 1.46 1.89-3.19 3.61-.82-.34-3.69L23 12z"/><path fill="#FFFFFF" d="M10 17l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>`
+export const onay = (ekip?: string | boolean) => (ekip === 'yonetici' ? onaySvg('#C9A227', 'Updated yöneticisi') : ekip ? onaySvg('#2563EB', 'Updated ekibi') : '')
 export const avatar = (u: { ad: string; renk?: string }, boy = 40) => `<span class="av av-${esc(u.renk || 'turuncu')}" style="width:${boy}px;height:${boy}px;font-size:${Math.round(boy * 0.42)}px" aria-hidden="true">${esc(basHarf(u.ad))}</span>`
 export function bildir(metin: string, tur: 'ok' | 'hata' = 'ok') {
   document.querySelectorAll('.toast.uye-t').forEach((t) => t.remove())

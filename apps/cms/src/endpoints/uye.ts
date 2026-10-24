@@ -60,7 +60,20 @@ const uc = (path: string, method: Endpoint['method'], gerek: 'yok' | 'kimlik' | 
 const ADI = /^[a-z0-9_.]{3,20}$/
 const AYRILMIS = new Set(['admin', 'yonetici', 'updated', 'editor', 'editör', 'ekip', 'moderator', 'mod', 'destek', 'uper', 'upers', 'root', 'sistem', 'kulup', 'hesap', 'yardim'])
 const temizMetin = (s: unknown, n: number) => String(s ?? '').replace(/\r\n?/g, '\n').replace(/[\u0000-\u0008\u000B-\u001F\u007F​-‏‪-‮⁦-⁩]/g, '').replace(/\n{3,}/g, '\n\n').trim().slice(0, n)
-const herkeseAcik = (u: Pick<Uye, 'kullaniciAdi' | 'ad' | 'renk' | 'puan' | 'ekip'>) => ({ kullaniciAdi: u.kullaniciAdi, ad: u.ad, renk: u.renk || 'turuncu', seviye: seviye(Number(u.puan) || 0), ekip: !!u.ekip })
+/** Ekip üyesinin güncel rolü Stüdyo'dan (onay işareti: yönetici altın, diğer ekip mavi); 10 dk bellekte */
+type EkipRol = 'yonetici' | 'ekip' | false
+const ROL_ON = new Map<string, { r: EkipRol; t: number }>()
+async function ekipRol(p: Payload, u: Pick<Uye, 'email' | 'ekip'>): Promise<EkipRol> {
+  if (!u.email) return false
+  const o = ROL_ON.get(u.email)
+  if (o && Date.now() - o.t < 600_000) return o.r
+  const q = await havuz(p).query('select site_rol from public.site_uyesi($1)', [u.email]).catch(() => null)
+  const r: EkipRol = !q ? (u.ekip ? 'ekip' : false) : !q.rows.length ? false : q.rows[0].site_rol === 'admin' ? 'yonetici' : 'ekip'
+  if (ROL_ON.size > 2000) ROL_ON.clear()
+  ROL_ON.set(u.email, { r, t: Date.now() })
+  return r
+}
+const herkeseAcik = (u: Pick<Uye, 'kullaniciAdi' | 'ad' | 'renk' | 'puan'>, rol: EkipRol) => ({ kullaniciAdi: u.kullaniciAdi, ad: u.ad, renk: u.renk || 'turuncu', seviye: seviye(Number(u.puan) || 0), ekip: rol })
 
 async function adOner(p: Payload, email: string) {
   let kok = email.split('@')[0].toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ı/g, 'i').replace(/[^a-z0-9_.]/g, '').slice(0, 16)
@@ -100,11 +113,11 @@ async function istatistik(p: Payload, uyeId: number) {
   return { yorum: y.totalDocs, begeni: b.rows[0].t, kulup: k.rows[0].t }
 }
 const benimProfil = async (p: Payload, u: Uye) => {
-  const s = await istatistik(p, u.id)
+  const s = await istatistik(p, u.id), rol = await ekipRol(p, u)
   return {
     kayitli: true, id: u.id, kullaniciAdi: u.kullaniciAdi, ad: u.ad, bio: u.bio || '', renk: u.renk || 'turuncu', email: u.email, giris: u.giris,
     ekipman: (u.ekipman || []).map((e) => ({ tur: e.tur, ad: e.ad, urun: typeof e.urun === 'object' ? e.urun?.id : e.urun })),
-    bildirimEposta: u.bildirimEposta !== false, durum: u.durum, ekip: !!u.ekip, seviye: seviye(Number(u.puan) || 0), istatistik: s, rozetler: rozetler(u, s), uyelik: u.createdAt,
+    bildirimEposta: u.bildirimEposta !== false, durum: u.durum, ekip: rol, seviye: seviye(Number(u.puan) || 0), istatistik: s, rozetler: rozetler(u, s), uyelik: u.createdAt,
   }
 }
 const yorumSahibi = (y: any) => (typeof y.uye === 'object' ? y.uye?.id : y.uye) as number | undefined
@@ -227,7 +240,7 @@ export const uyeEndpoints: Endpoint[] = [
     const son = await p.find({ collection: 'yorumlar', where: { and: [{ uye: { equals: u.id } }, { durum: { equals: 'yayinda' } }] }, sort: '-createdAt', limit: 10, depth: 0, overrideAccess: true })
     const basliklar = await Promise.all(son.docs.map((y: any) => hedefBul(p, `${y.hedef?.relationTo}:${hedefDegeri(y)}`)))
     return yanit(req, {
-      ...herkeseAcik(u), bio: u.bio || '', uyelik: u.createdAt, istatistik: s, rozetler: rozetler(u, s),
+      ...herkeseAcik(u, await ekipRol(p, u)), bio: u.bio || '', uyelik: u.createdAt, istatistik: s, rozetler: rozetler(u, s),
       ekipman: (u.ekipman || []).map((e) => ({ tur: e.tur, ad: e.ad, urun: typeof e.urun === 'object' && e.urun ? { ad: e.urun.title, yol: e.urun.slug ? `/urun/${e.urun.slug}` : null } : null })),
       yorumlar: son.docs.map((y: any, i) => ({ id: y.id, metin: y.metin.slice(0, 280), at: y.createdAt, yol: y.yol, baslik: basliklar[i]?.baslik || '' })),
     })
@@ -249,6 +262,7 @@ export const uyeEndpoints: Endpoint[] = [
     const uyeIdler = [...new Set(tum.map(yorumSahibi).filter(Boolean))] as number[]
     const uyeler = uyeIdler.length ? (await p.find({ collection: 'uyeler', where: { id: { in: uyeIdler } }, limit: uyeIdler.length, depth: 0, overrideAccess: true })).docs as unknown as Uye[] : []
     const uyeMap = new Map(uyeler.map((u) => [u.id, u]))
+    const rolMap = new Map(await Promise.all(uyeler.map(async (u) => [u.id, await ekipRol(p, u)] as const)))
     let begendiklerim = new Set<number>(), benim: { tepki: string | null; kayitli: boolean } = { tepki: null, kayitli: false }
     if (uye) {
       const [b, t, k] = await Promise.all([
@@ -265,7 +279,7 @@ export const uyeEndpoints: Endpoint[] = [
       return {
         id: y.id, metin: silindi ? 'Bu yorum silindi.' : y.metin, at: y.createdAt, duzenlendi: y.duzenlendi || null, begeni: y.begeni || 0,
         begendim: begendiklerim.has(y.id), benim: !!(uye && u && u.id === uye.id), onayda: y.durum === 'onay-bekliyor', silindi,
-        uye: silindi ? null : herkeseAcik(u!), yanitlanan: typeof y.yanitlanan === 'object' ? y.yanitlanan?.id : y.yanitlanan ?? null,
+        uye: silindi ? null : herkeseAcik(u!, rolMap.get(u!.id) ?? false), yanitlanan: typeof y.yanitlanan === 'object' ? y.yanitlanan?.id : y.yanitlanan ?? null,
       }
     }
     const ustId = (y: any) => (typeof y.ust === 'object' ? y.ust?.id : y.ust) as number | null
