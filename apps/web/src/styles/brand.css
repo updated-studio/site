@@ -1,4 +1,5 @@
-/* UPDATED web · Marka Kiti 1.2 (21.10.2026) — tokens.json değerleri. Köşe 0, gölge yok, gradyan yok, saydamlık yok. */
+/* UPDATED web · Marka Kiti 1.2 (21.10.2026) — tokens.json değerleri. Köşe 0, gölge yok, gradyan yok, saydamlık yok.
+   Koyu tema zemini 24 Ekim 2026'dan beri göz yormayan koyu gri (#1E2023; kitte #121212), Enes'in isteği. */
 :root{
   --black:#000000; --white:#FFFFFF; --blue:#2563EB; --orange:#FF6B1A; --gray:#F2F2F2;
   --bg:#FFFFFF; --surface:#FFFFFF; --surface-2:#F2F2F2; --text:#171717; --text-2:#55585C; --text-3:#6B6F74; --line:#E2E2E2; --rule:#000000;
@@ -11,8 +12,8 @@
   --edge:80px; --gut:24px; --max:1280px;
   color-scheme:light;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#121212;--surface:#1C1C1C;--surface-2:#262626;--text:#F2F2F2;--text-2:#B4B7BB;--text-3:#8E9297;--line:#333333;--rule:#F2F2F2;--link:#F2F2F2;--cat:#B4B7BB;--input:#8E9297;--img:#262626;--logo:#FFFFFF;color-scheme:dark}}
-:root[data-theme="dark"]{--logo:#FFFFFF;--bg:#121212;--surface:#1C1C1C;--surface-2:#262626;--text:#F2F2F2;--text-2:#B4B7BB;--text-3:#8E9297;--line:#333333;--rule:#F2F2F2;--link:#F2F2F2;--cat:#B4B7BB;--input:#8E9297;--img:#262626;color-scheme:dark}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1E2023;--surface:#25282C;--surface-2:#2E3236;--text:#F2F2F2;--text-2:#B4B7BB;--text-3:#8E9297;--line:#3A3E44;--rule:#F2F2F2;--link:#F2F2F2;--cat:#B4B7BB;--input:#8E9297;--img:#2E3236;--logo:#FFFFFF;color-scheme:dark}}
+:root[data-theme="dark"]{--logo:#FFFFFF;--bg:#1E2023;--surface:#25282C;--surface-2:#2E3236;--text:#F2F2F2;--text-2:#B4B7BB;--text-3:#8E9297;--line:#3A3E44;--rule:#F2F2F2;--link:#F2F2F2;--cat:#B4B7BB;--input:#8E9297;--img:#2E3236;color-scheme:dark}
 @media (max-width:1199px){:root{--edge:32px;--gut:16px}}
 @media (max-width:767px){:root{--edge:16px;--gut:16px}}
 *{box-sizing:border-box}
