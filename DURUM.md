@@ -12,7 +12,7 @@
 - **WordPress kapalı (23 Ekim 15:50):** `deploy/canli.json` wordpress=false; wp-json, xmlrpc, wp-cron, index.php → 410; wp-admin/wp-login → panel. Dosyaları hosting'de, veritabanı Natro'da duruyor (silme 30 Ekim, Fatih onayıyla; tam yedek var). Taşınanlar: 189 haber, 18 kategori, 10 yazar, 537 görsel, 3 kurumsal sayfa; eski adresler 301.
 - **Yedek:** her gece 03:15, şifreli, Natro hosting'de son 7 gün (`deploy/altyapi/yedek`); veritabanı + dosyalar + kodun tam geçmişi + sunucu ayarları. Kurtarma: `KURTARMA.md`.
 - **E-posta:** Natro giden posta portları açık (465/587/25); şifre sıfırlama ve Stüdyo bildirimleri gidiyor.
-- **Uper (okur üyeliği), 24 Ekim:** updated.com.tr/hesap — e-posta+şifre, e-postaya bağlantı (şifresiz), Google (24 Ekim 23:44'ten beri açık, Google uygulaması "In production"; proje gen-lang-client-0860138999); yorum + yanıt + beğeni + şikâyet, yazıya tepki (Beğendim/İlginç/Şaşırttı/Katılmıyorum), kaydet, bildirim (sitede zil + yanıt e-postası), puan ve seviye (Kamera→Stüdyo), rozet, ekipman, herkese açık profil (/uper?ad=), Kulüp ilerlemesi hesapta, verilerimi indir, hesabımı sil. Moderasyon Stüdyo → Site → Topluluk. Ayrıntı ARCHITECTURE karar 31, KURTARMA.
+- **Uper (okur üyeliği), 24 Ekim:** updated.com.tr/hesap — e-posta+şifre, e-postaya bağlantı (şifresiz), Google (24 Ekim 23:44'ten beri açık, Google uygulaması "In production"; proje gen-lang-client-0860138999); yorum + yanıt + beğeni + şikâyet, yazıya tepki (Beğendim/İlginç/Şaşırttı/Katılmıyorum), kaydet, bildirim (sitede zil + yanıt e-postası), puan ve seviye (Beta→Updated, 25 Ekim), rozet, ekipman, herkese açık profil (/uper?ad=), Kulüp ilerlemesi hesapta, verilerimi indir, hesabımı sil. Moderasyon Stüdyo → Site → Topluluk. Ayrıntı ARCHITECTURE karar 31, KURTARMA.
 - **Natro bot koruması** ("One moment, please…") GitHub'dan yapılan dış kontrollerin siteyi görmesini engelleyebiliyor; ziyaretçiler etkilenmiyor.
 
 ## Çalışma biçimi ve erişim
@@ -40,7 +40,7 @@
 ## Diğer açık işler
 - [x] **Sunucudan GitHub'a yazma (23 Ekim 21:30):** ince ayarlı erişim anahtarı `natro-sunucu` (yalnız site + studio; Contents + Workflows yazma; 366 gün, **Ekim 2027'de yenilenecek**). Sunucuda `updated` kullanıcısının `~/.git-credentials` dosyasında; yenileme: `github-anahtar-gir`.
 - [ ] Flux (Fatih'in Mac'i): işçinin adresi `https://panel.updated.com.tr/functions/v1/triyaj-taslak` + yeni FLUX_TOKEN (sunucuda `functions.env`; güvenli yoldan verilecek).
-- [ ] Google Search Console'a yeni site haritası; 301'ler kontrol edilir.
+- [x] Google Search Console (25 Ekim): mülk doğrulandı (HTML etiketi), sitemap.xml + news-sitemap.xml başarılı.
 - [ ] Fotoğrafçılık bölümü baştan tasarlanacak (eski dosyalar kullanılmayacak; Fatih ile).
 - [ ] Cloudflare (ücretsiz) önerildi: Natro'nun kör bot koruması yerine ayarlanabilir koruma + önbellek.
 
