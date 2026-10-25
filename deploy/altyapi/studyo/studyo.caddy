@@ -24,7 +24,10 @@ studio.updated.com.tr {
 		header Cache-Control "no-cache"
 		file_server
 	}
-	import studyo_dosyalar
+	# try_files indirme isteklerini index.html'e çevirmesin diye Stüdyo dosyaları ayrı handle içinde
+	handle {
+		import studyo_dosyalar
+	}
 }
 
 # Yerel deneme ucu (yalnız sunucunun içinden; dışarıya kapalı): yayinla.sh ve kontroller kullanır

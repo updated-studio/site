@@ -41,6 +41,8 @@ cp $SB/uye-gizli.env $SB/uye-dis.env $SB/uye-auth.env $IS/gizli/ 2>/dev/null
 cp /etc/updated-panel.env /etc/updated-panel.secrets /etc/updated-panel.yerel $IS/gizli/ 2>/dev/null
 cp /etc/caddy/Caddyfile $IS/gizli/ 2>/dev/null
 cp -r /etc/caddy/conf.d $IS/gizli/caddy-conf.d 2>/dev/null; cp /etc/updated-site.env $IS/gizli/ 2>/dev/null
+# UPDATED Monitör imza anahtarı: kaybolursa uygulama güncellenemez (yeni anahtar = kaldırıp yeniden kurmak gerekir)
+cp -r /opt/updated/monitor-imza $IS/gizli/ 2>/dev/null
 OZET="$(date '+%d.%m.%Y %H:%M') · Stüdyo $(q 'select count(*) from public.tr_items') haber · panel $(q 'select count(*) from payload.news') haber · $(q 'select count(*) from auth.users') hesap · $(q 'select count(*) from payload.uyeler' 2>/dev/null || echo 0) Uper · $(du -sh $SB/volumes/storage | cut -f1) dosya"
 echo "$OZET" > $IS/natro/SON_YEDEK.txt
 SONUC=""
