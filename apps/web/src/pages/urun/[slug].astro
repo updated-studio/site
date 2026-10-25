@@ -33,7 +33,7 @@ const rel = shelf.filter((q) => q.slug !== p.slug).slice(0, 4)
 const status = api.statusText(p.status)
 const kiyas = p.comparisons?.[0] ? p.comparisons[0].path : p.rivals[0] ? `/karsilastirma/${[p.slug, p.rivals[0].slug].sort().join('-vs-')}` : '/karsilastirma'
 ---
-<Base meta={productMeta(p)}>
+<Base meta={{ ...productMeta(p), noindex: (p.specs || []).filter((s) => s.value).length < 5 && !p.news.length && !p.reviews.length }}>
   <header class="ku-hero"><div class="wrap ku-top">
     <div class="ku-copy">
       <nav class="crumbs" aria-label="Konum"><a href="/">Ana sayfa</a><span aria-hidden="true">/</span><a href="/urun">Künye</a><span aria-hidden="true">/</span><span>{p.name}</span></nav>
