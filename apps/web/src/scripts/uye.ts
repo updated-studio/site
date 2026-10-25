@@ -100,7 +100,9 @@ export const onay = (ekip?: string | boolean) => (ekip === 'yonetici' ? onaySvg(
 /** Kurucu ünvanı: onay işaretinin yanında altın taç (ünvanı yalnız yönetici verir) */
 export const tac = (unvan?: string | null) => !unvan ? '' : `<svg class="onay tac" width="18" height="16" viewBox="0 0 24 20" role="img" aria-label="${unvan === 'kurucu' ? 'Kurucu' : 'Kurucu ortak'}"><title>${unvan === 'kurucu' ? 'Kurucu' : 'Kurucu ortak'}</title><path fill="#C9A227" d="M2 6l5.5 4.5L12 2l4.5 8.5L22 6l-2 11H4L2 6z"/><rect x="4" y="18" width="16" height="2" fill="#C9A227"/></svg>`
 export const isaretler = (u: { ekip?: string | boolean; unvan?: string | null }) => onay(u.ekip) + tac(u.unvan)
-export const avatar = (u: { ad: string; renk?: string }, boy = 40) => `<span class="av av-${esc(u.renk || 'turuncu')}" style="width:${boy}px;height:${boy}px;font-size:${Math.round(boy * 0.42)}px" aria-hidden="true">${esc(basHarf(u.ad))}</span>`
+/** Profil resmi: seçilen fotoğraf (Google/Gravatar; yüklenemezse baş harf görünür), emoji ya da baş harf (25 Ekim 2026) */
+export const avatar = (u: { ad: string; renk?: string; foto?: string | null; emoji?: string | null }, boy = 40) =>
+  `<span class="av av-${esc(u.renk || 'turuncu')}${u.emoji ? ' av-emoji' : ''}" style="width:${boy}px;height:${boy}px;font-size:${Math.round(boy * (u.emoji ? 0.56 : 0.42))}px" aria-hidden="true">${u.emoji ? esc(u.emoji) : esc(basHarf(u.ad))}${u.foto ? `<img src="${esc(u.foto)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}</span>`
 export function bildir(metin: string, tur: 'ok' | 'hata' = 'ok') {
   document.querySelectorAll('.toast.uye-t').forEach((t) => t.remove())
   const t = document.createElement('div')

@@ -48,6 +48,13 @@ export const Uyeler: CollectionConfig = {
         ],
       }],
     },
+    {
+      type: 'row', fields: [
+        { name: 'fotoTur', type: 'select', label: 'Profil resmi', defaultValue: 'harf', options: [{ label: 'Baş harfler', value: 'harf' }, { label: 'Google fotoğrafı', value: 'google' }, { label: 'Gravatar', value: 'gravatar' }, { label: 'Emoji', value: 'emoji' }] },
+        { name: 'foto', type: 'text', label: 'Profil resmi adresi', admin: { readOnly: true, description: 'Uper kendisi seçer (Google ya da Gravatar).' } },
+        { name: 'emoji', type: 'text', label: 'Emoji', maxLength: 16 },
+      ],
+    },
     { name: 'renk', type: 'select', label: 'Profil rengi', defaultValue: 'turuncu', options: ['turuncu', 'mavi', 'siyah', 'gri'].map((v) => ({ label: v, value: v })) },
     { name: 'bildirimEposta', type: 'checkbox', label: 'Yorumuna yanıt gelince e-posta', defaultValue: true },
     { name: 'puan', type: 'number', label: 'Puan', defaultValue: 0, admin: { position: 'sidebar', readOnly: true } },

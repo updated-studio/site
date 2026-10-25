@@ -258,6 +258,14 @@ async function hesabim(u: any, sekme: Sekme) {
           <label>Görünen ad<input name="ad" maxlength="40" value="${esc(u.ad)}" required></label>
           <label>Kullanıcı adı<span class="hs-on"><span>@</span><input name="kullaniciAdi" maxlength="20" value="${esc(u.kullaniciAdi)}" autocapitalize="none" spellcheck="false"></span></label>
           <label>Hakkında (160 karakter)<textarea name="bio" maxlength="160" rows="3">${esc(u.bio)}</textarea></label>
+          <fieldset><legend>Profil resmi</legend><div class="hs-foto">
+            <label><input type="radio" name="fotoTur" value="harf"${u.fotoTur === 'harf' || !u.fotoTur ? ' checked' : ''}>${avatar({ ad: u.ad, renk: u.renk }, 44)}<span>Baş harfler</span></label>
+            ${u.googleFoto ? `<label><input type="radio" name="fotoTur" value="google"${u.fotoTur === 'google' ? ' checked' : ''}>${avatar({ ad: u.ad, renk: u.renk, foto: u.googleFoto }, 44)}<span>Google fotoğrafım</span></label>` : ''}
+            <label data-gravatar><input type="radio" name="fotoTur" value="gravatar"${u.fotoTur === 'gravatar' ? ' checked' : ''}>${avatar({ ad: u.ad, renk: u.renk, foto: u.gravatar }, 44)}<span>Gravatar <a href="https://gravatar.com" target="_blank" rel="noopener" class="meta">nedir?</a></span></label>
+            <label><input type="radio" name="fotoTur" value="emoji"${u.fotoTur === 'emoji' ? ' checked' : ''}>${avatar({ ad: u.ad, renk: u.renk, emoji: u.emoji || u.emojiler[0] }, 44)}<span>Emoji</span></label>
+          </div>
+          <div class="hs-emoji" data-emoji-l${u.fotoTur === 'emoji' ? '' : ' hidden'}>${u.emojiler.map((e: string) => `<label><input type="radio" name="emoji" value="${e}"${(u.emoji || u.emojiler[0]) === e ? ' checked' : ''}><span>${e}</span></label>`).join('')}</div>
+          <p class="meta">Zorunlu değil. Gravatar, e-postana bağlı fotoğraf servisidir (WordPress de kullanır); hesabın yoksa baş harflerin görünür.</p></fieldset>
           <fieldset><legend>Profil rengi</legend><div class="hs-renk">${['turuncu', 'mavi', 'siyah', 'gri'].map((r) => `<label><input type="radio" name="renk" value="${r}"${u.renk === r ? ' checked' : ''}><span class="av av-${r}" style="width:36px;height:36px">${esc(u.ad[0] || '?')}</span><span class="sr">${r}</span></label>`).join('')}</div></fieldset>
           <fieldset><legend>Ekipmanım</legend><p class="meta">Kullandığın kamera, lens, gimbal… Profilinde görünür.</p><div data-ekler>${(u.ekipman.length ? u.ekipman : [{}]).map(ek).join('')}</div><button type="button" class="btn" data-ek-ekle>+ Ekipman ekle</button><datalist id="urun-liste"></datalist><p class="meta">Listeden seçtiğin model künyedeki ürünle eşleşir; ürün sayfasında "Kullananlar"da görünürsün.</p></fieldset>
           <button class="btn btn-p" type="submit">Kaydet</button>
@@ -268,13 +276,14 @@ async function hesabim(u: any, sekme: Sekme) {
       const dl = ic.querySelector('#urun-liste'); if (s !== 200 || !dl) return
       dl.innerHTML = (j.docs || []).map((d: any) => `<option value="${esc(`${d.brand} ${d.name}`)}">`).join('')
     })
+    ic.querySelectorAll<HTMLInputElement>('input[name=fotoTur]').forEach((r) => r.addEventListener('change', () => { ic.querySelector<HTMLElement>('[data-emoji-l]')!.hidden = r.value !== 'emoji' || !r.checked }))
     ic.querySelector('[data-ek-ekle]')!.addEventListener('click', () => { const l = ic.querySelector('[data-ekler]')!; if (l.children.length < 12) l.insertAdjacentHTML('beforeend', ek()) })
     ic.addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest('[data-ek-sil]'); if (b) b.parentElement!.remove() })
     ic.querySelector<HTMLFormElement>('[data-profil]')!.addEventListener('submit', async (e) => {
       e.preventDefault()
       const f = e.target as HTMLFormElement, fd = new FormData(f)
       const ekipman = [...f.querySelectorAll('.hs-ek')].map((r) => ({ tur: (r.querySelector('select') as HTMLSelectElement).value, ad: (r.querySelector('input') as HTMLInputElement).value.trim() })).filter((x) => x.ad)
-      const y = await api('/uye/ben', 'PATCH', { ad: fd.get('ad'), kullaniciAdi: String(fd.get('kullaniciAdi') || '').toLowerCase(), bio: fd.get('bio'), renk: fd.get('renk'), ekipman })
+      const y = await api('/uye/ben', 'PATCH', { ad: fd.get('ad'), kullaniciAdi: String(fd.get('kullaniciAdi') || '').toLowerCase(), bio: fd.get('bio'), renk: fd.get('renk'), ekipman, fotoTur: fd.get('fotoTur') || 'harf', emoji: fd.get('emoji') })
       if (y.s !== 200) return bildir(y.j?.hata || 'Kaydedilemedi.', 'hata')
       await ben(true); bilgi = 'Profilin kaydedildi.'; cizim()
     })

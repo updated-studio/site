@@ -1,4 +1,5 @@
 import { headersWithCors, type Endpoint, type Payload, type PayloadRequest } from 'payload'
+import { createHash } from 'node:crypto'
 import {
   PUAN, SEVIYELER, anahtarCoz, bildirimEkle, ekibeHaberVer, ekipMi, girisYonetim, havuz, hedefBul, hizSiniri, ipOzet, onayNedeni,
   puanEkle, SAYFA_ON, sayfaTemizle, seviye, yanitBildir, type Kimlik,
@@ -10,7 +11,7 @@ import {
  */
 type Uye = {
   id: number; authId: string; email: string; kullaniciAdi: string; ad: string; bio?: string | null; renk?: string | null; durum: string
-  guvenilir?: boolean | null; ekip?: boolean | null; puan?: number | null; bildirimEposta?: boolean | null; giris?: string | null
+  guvenilir?: boolean | null; ekip?: boolean | null; puan?: number | null; fotoTur?: string | null; foto?: string | null; emoji?: string | null; bildirimEposta?: boolean | null; giris?: string | null
   ekipman?: { tur?: string | null; ad: string; urun?: number | { id: number; title?: string; slug?: string } | null }[] | null
   unvan?: string | null; createdAt: string; sonGiris?: string | null; onaylar?: { sozlesme?: string | null; kvkk?: string | null } | null
 }
@@ -86,7 +87,12 @@ async function ekipRol(p: Payload, u: Pick<Uye, 'email' | 'ekip'>): Promise<Ekip
   ROL_ON.set(u.email, { r, t: Date.now() })
   return r
 }
-const herkeseAcik = (u: Pick<Uye, 'kullaniciAdi' | 'ad' | 'renk' | 'puan' | 'unvan'>, rol: EkipRol) => ({ kullaniciAdi: u.kullaniciAdi, ad: u.ad, renk: u.renk || 'turuncu', seviye: seviye(Number(u.puan) || 0), ekip: rol, unvan: u.unvan || null })
+const herkeseAcik = (u: Pick<Uye, 'kullaniciAdi' | 'ad' | 'renk' | 'puan' | 'unvan' | 'fotoTur' | 'foto' | 'emoji'>, rol: EkipRol) => ({ kullaniciAdi: u.kullaniciAdi, ad: u.ad, renk: u.renk || 'turuncu', seviye: seviye(Number(u.puan) || 0), ekip: rol, unvan: u.unvan || null,
+  foto: (u.fotoTur === 'google' || u.fotoTur === 'gravatar') && u.foto ? u.foto : null, emoji: u.fotoTur === 'emoji' && u.emoji ? u.emoji : null })
+/** Profil resmi seçenekleri (25 Ekim 2026): baş harf, Google fotoğrafı (Google ile girenler), Gravatar (e-postaya bağlı), emoji */
+export const PROFIL_EMOJI = ['📷', '🎥', '🎬', '🚁', '🎧', '🎮', '💻', '📱', '🔭', '🌄', '🌃', '⚡', '🔥', '🦊', '🐙', '🐼', '🦁', '🐺', '🦉', '🚀', '🎯', '🎨', '🧠', '👾']
+const googleFoto = (k?: Kimlik | null) => { const u = String(k?.meta?.avatar_url || k?.meta?.picture || ''); try { return /^https:$/.test(new URL(u).protocol) && /(^|\.)googleusercontent\.com$/.test(new URL(u).hostname) ? u : null } catch { return null } }
+const gravatar = (email: string) => `https://www.gravatar.com/avatar/${createHash('md5').update(email.trim().toLowerCase()).digest('hex')}?s=200&d=404`
 
 async function adOner(p: Payload, email: string) {
   let kok = email.split('@')[0].toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ı/g, 'i').replace(/[^a-z0-9_.]/g, '').slice(0, 16)
@@ -126,11 +132,12 @@ async function istatistik(p: Payload, uyeId: number) {
   ])
   return { yorum: y.totalDocs, begeni: b.rows[0].t, kulup: k.rows[0].t }
 }
-const benimProfil = async (p: Payload, u: Uye) => {
+const benimProfil = async (p: Payload, u: Uye, k?: Kimlik | null) => {
   const s = await istatistik(p, u.id), rol = await ekipRol(p, u)
   return {
     kayitli: true, id: u.id, kullaniciAdi: u.kullaniciAdi, ad: u.ad, bio: u.bio || '', renk: u.renk || 'turuncu', email: u.email, giris: u.giris,
     ekipman: (u.ekipman || []).map((e) => ({ tur: e.tur, ad: e.ad, urun: typeof e.urun === 'object' ? e.urun?.id : e.urun })),
+    fotoTur: u.fotoTur || 'harf', foto: u.foto || null, emoji: u.emoji || null, googleFoto: googleFoto(k), gravatar: gravatar(u.email), emojiler: PROFIL_EMOJI,
     bildirimEposta: u.bildirimEposta !== false, durum: u.durum, ekip: rol, unvan: u.unvan || null, seviye: seviye(Number(u.puan) || 0), istatistik: s, rozetler: rozetler(u, s), uyelik: u.createdAt,
   }
 }
@@ -146,14 +153,14 @@ export const uyeEndpoints: Endpoint[] = [
   })),
 
   uc('/uye/ben', 'get', 'kimlik', async ({ req, p, kimlik, uye }) => {
-    if (uye) return yanit(req, await benimProfil(p, uye))
+    if (uye) return yanit(req, await benimProfil(p, uye, kimlik))
     const m = kimlik!.meta as Record<string, unknown>
     return yanit(req, { kayitli: false, email: kimlik!.email, oneri: { kullaniciAdi: await adOner(p, kimlik!.email), ad: String(m.ad || m.full_name || m.name || '').slice(0, 40) } })
   }),
 
   // Profil oluşturma: kullanıcı adı + iki onay (üyelik sözleşmesi, aydınlatma metni)
   uc('/uye/ben', 'post', 'kimlik', async ({ req, p, kimlik, uye }) => {
-    if (uye) return yanit(req, await benimProfil(p, uye))
+    if (uye) return yanit(req, await benimProfil(p, uye, kimlik))
     const b = await govde(req)
     if (b.sozlesme !== true || b.kvkk !== true) return hata(req, 'Üyelik sözleşmesini ve aydınlatma metnini onaylaman gerekiyor.')
     const ad = temizMetin(b.ad, 40), kAdi = String(b.kullaniciAdi || '').trim().toLowerCase()
@@ -175,7 +182,7 @@ export const uyeEndpoints: Endpoint[] = [
     return yanit(req, await benimProfil(p, tazesi), 201)
   }),
 
-  uc('/uye/ben', 'patch', 'uye', async ({ req, p, uye }) => {
+  uc('/uye/ben', 'patch', 'uye', async ({ req, p, uye, kimlik }) => {
     const b = await govde(req), data: Record<string, unknown> = {}
     if (b.ad !== undefined) { const ad = temizMetin(b.ad, 40); if (ad.length < 2) return hata(req, 'Görünen adın en az 2 karakter olmalı.'); data.ad = ad }
     if (b.kullaniciAdi !== undefined) {
@@ -185,6 +192,12 @@ export const uyeEndpoints: Endpoint[] = [
     if (b.bio !== undefined) data.bio = temizMetin(b.bio, 160)
     if (b.renk !== undefined && ['turuncu', 'mavi', 'siyah', 'gri'].includes(b.renk)) data.renk = b.renk
     if (b.bildirimEposta !== undefined) data.bildirimEposta = !!b.bildirimEposta
+    if (b.fotoTur !== undefined) {
+      if (b.fotoTur === 'google') { const g = googleFoto(kimlik); if (!g) return hata(req, 'Google fotoğrafı yalnız Google ile giriş yapanlarda var.'); Object.assign(data, { fotoTur: 'google', foto: g }) }
+      else if (b.fotoTur === 'gravatar') Object.assign(data, { fotoTur: 'gravatar', foto: gravatar(uye!.email) })
+      else if (b.fotoTur === 'emoji') { if (!PROFIL_EMOJI.includes(b.emoji)) return hata(req, 'Listeden bir emoji seç.'); Object.assign(data, { fotoTur: 'emoji', emoji: b.emoji, foto: null }) }
+      else Object.assign(data, { fotoTur: 'harf', foto: null })
+    }
     if (Array.isArray(b.ekipman)) {
       const TUR = ['Kamera', 'Lens', 'Gimbal', 'Dron', 'Işık', 'Ses', 'Telefon', 'Bilgisayar', 'Diğer']
       data.ekipman = b.ekipman.slice(0, 12).map((e: any) => ({ tur: TUR.includes(e?.tur) ? e.tur : 'Diğer', ad: temizMetin(e?.ad, 60), urun: Number.isInteger(e?.urun) ? e.urun : null })).filter((e: any) => e.ad)
@@ -197,7 +210,7 @@ export const uyeEndpoints: Endpoint[] = [
     const u = await p.update({ collection: 'uyeler', id: uye!.id, data: data as never, overrideAccess: true, context: { uyeIslemi: true } }).catch((e) => { throw e }) as unknown as Uye
     if (u.bio && (u.ekipman || []).length) await puanEkle(p, u.id, 'profil', 'profil')
     const tazesi = await p.findByID({ collection: 'uyeler', id: u.id, depth: 0, overrideAccess: true }) as unknown as Uye
-    return yanit(req, await benimProfil(p, tazesi))
+    return yanit(req, await benimProfil(p, tazesi, kimlik))
   }),
 
   // Hesabı silme (KVKK): yanıt almış yorumlar "silindi" olarak kalır (konuşma bozulmasın), diğerleri silinir; hesap giriş servisinden de silinir.
