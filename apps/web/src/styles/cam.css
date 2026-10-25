@@ -87,3 +87,13 @@
 @media (max-width:767px){.cam .c-man h2{font-size:30px}.cam .sh h2{font-size:26px}.cam .c-std h3{font-size:21px}}
 .cam .art-head h1{font-size:54px;line-height:1.1}
 @media (max-width:767px){.cam .art-head h1{font-size:34px}}
+
+/* Telefonda dokununca çıkan mavi kutu yok (25 Ekim 2026); yerine dokunulan öğe hafifçe solar */
+.cam{-webkit-tap-highlight-color:transparent}
+@media (hover:none){.cam a:active,.cam button:active{opacity:.65;transition:opacity 60ms}}
+/* Akış yüklenirken yer tutucular: yuvarlak, yumuşak nabız (boş kutu gibi durmasın) */
+.cam .skel i{border-radius:var(--r-kart);background:var(--surface-2);border:1px solid var(--line);animation:cam-nabiz 1.2s ease-in-out infinite alternate}
+.cam .skel i:nth-child(2){animation-delay:.15s}.cam .skel i:nth-child(3){animation-delay:.3s}.cam .skel i:nth-child(4){animation-delay:.45s}
+@keyframes cam-nabiz{from{opacity:.45}to{opacity:1}}
+@media (max-width:900px){.cam .skel{grid-template-columns:1fr}.cam .skel i:nth-child(n+2){display:none}}
+@media (prefers-reduced-motion:reduce){.cam .skel i{animation:none}}
