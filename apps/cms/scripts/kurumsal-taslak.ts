@@ -18,7 +18,7 @@ Haberlerimizi birincil kaynaklara dayandırır, kaynaklarımızı açıkça gös
 Resmî olarak doğrulanmamış bilgileri "Sızıntı" etiketiyle yayınlar, kesinleşmiş bilgiden açıkça ayırırız.
 
 ## Teknoloji ile çalışırız
-Editörlerimiz, haber takibi ve araştırmada kendi geliştirdiğimiz yapay zekâ destekli araçlarla çalışır. Her içerik yayından önce editörlerimizin kontrolünden ve onayından geçer; sorumluluğu UPDATED'a aittir.
+Editörlerimiz, haber takibi ve araştırmada kendi geliştirdiğimiz yapay zekâ destekli araçlarla çalışır. Her içerik yayından önce editörlerimizin kontrolünden ve onayından geçer.
 
 ## Bağımsızlık
 Haber ve incelemelerimize hiçbir firma karışamaz. Reklam ve sponsorlu içerik editoryal içerikten açıkça ayrılır: [Reklam ve sponsorluk](/reklam).
