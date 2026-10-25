@@ -1,5 +1,6 @@
 ---
 /** İnceleme: kısa karar en üstte, puan kutusu metnin sonunda (kit), sonra yöntem ve videolu inceleme. */
+import YanSutun from '../../components/YanSutun.astro'
 import Base from '../../layouts/Base.astro'
 import Img from '../../components/Img.astro'
 import ScoreBox from '../../components/ScoreBox.astro'
@@ -53,11 +54,10 @@ const cat = r.product.type === 'drone' || r.product.type === 'camera' || r.produ
       </div>
       <Topluluk hedef={`reviews:${r.id}`} />
     </article>
-    <div class="rail" style="padding-top:48px">
+    <YanSutun haric={r.path} ads={ads}>
       <div><h4 class="label" style="color:var(--text-3);margin:0 0 8px">Ürün künyesi</h4><KunyeMini p={{ ...r.product, score: r.score }} /></div>
-      <Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare />
       <div><h4 class="label" style="color:var(--text-3);margin:0 0 8px">Puan tablosu</h4><CardList items={top.filter((x) => x.id !== r.id).slice(0, 4)} score /></div>
-    </div>
+    </YanSutun>
   </div>
   <div class="wrap" style="padding-top:48px">
     <InfiniteFeed title="Okumaya devam et" source="son" items={[]} videos={videos} reels={reels} ads={ads} channel={site.youtube} profile={site.instagram} renderFirst={false} />

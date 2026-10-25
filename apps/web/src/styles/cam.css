@@ -45,7 +45,7 @@
 .cam .sd .nv button{border-radius:10px}
 
 /* Kartlar ve kutular: yuvarlak, yarı saydam, yumuşak gölge */
-.cam .c-std,.cam .c-man,.cam .c-list,.cam .sdk,.cam .c-spo,.cam .s60,.cam .kd,.cam .tbl,.cam .kv > div{
+.cam .c-std,.cam .c-man,.cam .c-list,.cam .sdk,.cam .ys-oneri,.cam .c-spo,.cam .s60,.cam .kd,.cam .tbl,.cam .kv > div{
   border-radius:var(--r-kart);overflow:hidden;border-color:var(--line);box-shadow:inset 0 1px 0 var(--cam-isik),var(--cam-golge)}
 .cam .c-man{border-radius:var(--r-buyuk)}
 .cam .c-std,.cam .c-man{transition:transform var(--t2) var(--ease),box-shadow var(--t2) var(--ease)}

@@ -1,8 +1,7 @@
 ---
 /** Liste sayfası iskeleti: başlık, sonsuz akış (ilk sayfa sunucuda), yan sütunda son dakika + kutu reklam. */
 import Base from '../layouts/Base.astro'
-import SonDakika from './SonDakika.astro'
-import Ad from './Ad.astro'
+import YanSutun from './YanSutun.astro'
 import InfiniteFeed from './InfiniteFeed.astro'
 import * as api from '../lib/api'
 import { listMeta } from '../lib/seo'
@@ -20,7 +19,7 @@ const meta = { ...listMeta(page > 1 ? `${title} · sayfa ${page}` : title, lead,
       <div>
         {items.length ? <InfiniteFeed title="Son haberler" source={source} basePath={path} items={items} startPage={page} videos={videos} reels={reels} ads={ads} channel={site.youtube} profile={site.instagram} /> : <p class="lead">Bu bölümde henüz yayımlanmış haber yok.</p>}
       </div>
-      <div class="rail"><SonDakika items={latest} /><Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare /></div>
+      <YanSutun ads={ads} />
     </div>
   </div>
 </Base>

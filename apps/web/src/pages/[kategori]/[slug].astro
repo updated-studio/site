@@ -1,8 +1,8 @@
 ---
+import YanSutun from '../../components/YanSutun.astro'
 import Base from '../../layouts/Base.astro'
 import ArticleBody from '../../components/ArticleBody.astro'
 import KunyeMini from '../../components/KunyeMini.astro'
-import Ad from '../../components/Ad.astro'
 import InfiniteFeed from '../../components/InfiniteFeed.astro'
 import * as api from '../../lib/api'
 import { newsMeta } from '../../lib/seo'
@@ -16,10 +16,9 @@ const [related, ads, videos, reels, site] = await Promise.all([api.getRelated(n)
 <Base meta={newsMeta(n)}>
   <div class="wrap with-rail">
     <ArticleBody n={n} related={related} ads={ads} />
-    <div class="rail" style="padding-top:48px">
+    <YanSutun haric={n.path} ads={ads}>
       {n.products.length > 0 && <div><h4 class="label" style="color:var(--text-3);margin:0 0 8px">Bu haberdeki ürünler · künye</h4><div class="kstack">{n.products.map((p) => <KunyeMini p={p} />)}</div></div>}
-      <Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare />
-    </div>
+    </YanSutun>
   </div>
   <div class="wrap" style="padding-top:48px">
     <InfiniteFeed title="Okumaya devam et" source="son" items={[]} startPage={1} videos={videos} reels={reels} ads={ads} channel={site.youtube} profile={site.instagram} renderFirst={false} />

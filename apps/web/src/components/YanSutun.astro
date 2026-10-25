@@ -1,0 +1,47 @@
+---
+/**
+ * Yazı ve liste sayfalarının sağ sütunu (yol haritası Görsel 4, 25 Ekim 2026): boş kalmasın diye
+ * (varsa) bu yazıdaki ürünler → son dakika → günün önerisi (her gün başka bir inceleme) → kutu reklam → en çok okunanlar → reels.
+ * Telefonda (≤1100 px) sütun yazının altına iner; orada son dakika ve reels gizlenir (sayfada zaten var / uzamasın).
+ */
+import SonDakika from './SonDakika.astro'
+import Ad from './Ad.astro'
+import Img from './Img.astro'
+import CardList from './CardList.astro'
+import * as api from '../lib/api'
+import { s20 } from '../lib/ui'
+interface Props { haric?: string; ads: import('../lib/types').Ad[]; sonDakika?: boolean }
+const { haric, ads, sonDakika = true } = Astro.props
+const [latest, reviews, okunan, reels, site] = await Promise.all([api.getLatest(1, 8), api.getReviews(1, 12), api.getMostRead(5, '7g'), api.getReels(), api.getSite()])
+const son = latest.filter((n) => n.path !== haric).slice(0, 7)
+// Günün önerisi: yayımlanmış incelemelerden her gün sıradaki (derleme günü İstanbul saatiyle)
+const gun = Math.floor((Date.now() + 3 * 3600e3) / 86400e3)
+const adaylar = reviews.filter((r) => r.path !== haric)
+const oneri = adaylar.length ? adaylar[gun % adaylar.length] : null
+const enCok = okunan.filter((n) => n.path !== haric).slice(0, 5)
+---
+<div class="rail rail-yan">
+  <slot />
+  {sonDakika && son.length > 0 && <div class="ys-sd"><SonDakika items={son} /></div>}
+  {oneri && (
+    <a class="ys-oneri" href={oneri.path}>
+      <span class="label ys-baslik">Günün önerisi</span>
+      <span class="c-img"><Img img={oneri.cover} alt="" sizes="320px" /><span class="lbl l-inc">İnceleme</span></span>
+      <span class="ys-ic">
+        <b>{oneri.title}</b>
+        <span class="meta">{oneri.product?.name}{oneri.score ? <> · <strong class="ys-puan">{s20(oneri.score)}</strong></> : null}</span>
+      </span>
+    </a>
+  )}
+  <Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare />
+  {enCok.length > 0 && <div><h4 class="label ys-baslik">En çok okunanlar</h4><CardList items={enCok} /></div>}
+  {reels.length > 0 && (
+    <div class="ys-reels">
+      <h4 class="label ys-baslik">Reels · @updated.tr</h4>
+      <div class="ys-reel-l">
+        {reels.slice(0, 2).map((r) => <a class="reel" href={r.url} target="_blank" rel="noopener"><span class="c-img"><Img img={r.cover} alt="" sizes="150px" /><span class="cap">{r.caption}</span></span></a>)}
+      </div>
+      <a class="btn-t btn" href={site.instagram} target="_blank" rel="noopener">Instagram'da takip et</a>
+    </div>
+  )}
+</div>
