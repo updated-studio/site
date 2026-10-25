@@ -97,3 +97,5 @@
 @keyframes cam-nabiz{from{opacity:.45}to{opacity:1}}
 @media (max-width:900px){.cam .skel{grid-template-columns:1fr}.cam .skel i:nth-child(n+2){display:none}}
 @media (prefers-reduced-motion:reduce){.cam .skel i{animation:none}}
+/* Küçük bölüm etiketleri (alt bilgi, kutu başlıkları) başlık değil, etiket: mono büyük harf kalır */
+.cam .ftr h4,.cam h4.label,.cam .label{font-family:var(--f-mono);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;line-height:1.4}

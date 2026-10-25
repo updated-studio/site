@@ -1,4 +1,5 @@
-// Marka Kiti 1.2 denetimi: sayfadaki görünür öğelerin hesaplanmış stillerini kit kurallarıyla karşılaştırır.
+// Marka Kiti 1.3 denetimi: sayfadaki görünür öğelerin hesaplanmış stillerini kit kurallarıyla karşılaştırır.
+// Cam görünümde (<html class="cam">, kit §12c) köşe, gölge, gradyan, saydamlık serbest; saydam renkler palete göre (alfasız) denetlenir.
 // Kullanım: node denetim.mjs <adres> [genişlik] [acik|koyu]
 import { chromium } from 'playwright'
 const [,, url, w = '1280', tema = 'acik'] = process.argv
@@ -9,6 +10,9 @@ const r = await p.evaluate(() => {
   // Kit paleti + arayüz nötrleri + koyu mod değerleri (12b)
   const PALET = ['#000000','#ffffff','#2563eb','#ff6b1a','#f2f2f2','#171717','#55585c','#6b6f74','#e2e2e2','#9a9ea3',
     '#121212','#1c1c1c','#262626','#333333','#b4b7bb','#8e9297']
+  const cam = document.documentElement.classList.contains('cam')
+  // Cam görünümün nötrleri (styles/cam.css): zemin, yüzey, görsel yeri, koyu cam, mavi düğme üzeri
+  if (cam) PALET.push('#eceef2','#0e1013','#dde1e7','#22262b','#22252a','#2c3036','#16181c','#121418','#08090b','#1d4fd8','#1e2023','#25282c','#2e3236','#3a3e44')
   const hex = (c) => { const m = c.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?/); if (!m) return null
     if (m[4] !== undefined && +m[4] === 0) return 'şeffaf'
     const h = '#' + [m[1], m[2], m[3]].map((x) => (+x).toString(16).padStart(2, '0')).join('')
@@ -22,16 +26,16 @@ const r = await p.evaluate(() => {
     const metinVar = [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())
     for (const [k, v] of [['metin rengi', metinVar ? s.color : null], ['zemin', s.backgroundColor], ['çerçeve', parseFloat(s.borderTopWidth) || parseFloat(s.borderBottomWidth) || parseFloat(s.borderLeftWidth) ? (parseFloat(s.borderTopWidth) ? s.borderTopColor : parseFloat(s.borderBottomWidth) ? s.borderBottomColor : s.borderLeftColor) : null]]) {
       if (!v) continue; const h = hex(v); if (!h || h === 'şeffaf') continue
-      if (!PALET.includes(h)) ekle(`palet dışı ${k}`, `${h} (${ad(e)})`)
+      if (!PALET.includes(cam ? h.split('@')[0] : h)) ekle(`palet dışı ${k}`, `${h} (${ad(e)})`)
     }
-    if (s.borderRadius !== '0px' && !['img','svg','path'].includes(e.tagName.toLowerCase())) ekle('köşe yarıçapı ≠ 0', `${s.borderRadius} (${ad(e)})`)
-    if (s.boxShadow !== 'none') ekle('gölge', ad(e))
-    if (s.backgroundImage.includes('gradient')) ekle('gradyan', ad(e))
-    if (+s.opacity < 1 && +s.opacity > 0) ekle('saydamlık', `${s.opacity} (${ad(e)})`)
+    if (!cam && s.borderRadius !== '0px' && !['img','svg','path'].includes(e.tagName.toLowerCase())) ekle('köşe yarıçapı ≠ 0', `${s.borderRadius} (${ad(e)})`)
+    if (!cam && s.boxShadow !== 'none') ekle('gölge', ad(e))
+    if (!cam && s.backgroundImage.includes('gradient')) ekle('gradyan', ad(e))
+    if (!cam && +s.opacity < 1 && +s.opacity > 0) ekle('saydamlık', `${s.opacity} (${ad(e)})`)
     if (metinVar) {
       const fs = parseFloat(s.fontSize), aile = s.fontFamily.split(',')[0].replace(/["']/g, '').trim()
-      if (!['Big Shoulders Display','IBM Plex Sans','IBM Plex Mono','Newsreader'].includes(aile)) ekle('set dışı yazı tipi', `${aile} (${ad(e)})`)
-      if (aile === 'Big Shoulders Display' && fs < 20) ekle('Big Shoulders 20 px altında', `${fs}px (${ad(e)})`)
+      if (!['Big Shoulders Display','IBM Plex Sans','IBM Plex Sans Condensed','IBM Plex Mono','Newsreader'].includes(aile)) ekle('set dışı yazı tipi', `${aile} (${ad(e)})`)
+      if (aile === 'Big Shoulders Display' && fs < 18) ekle('Big Shoulders 18 px altında', `${fs}px (${ad(e)})`)
       if (aile === 'Newsreader' && !e.closest('blockquote, q, .alinti, [class*=quote], [class*=alinti]')) ekle('Newsreader alıntı dışında', ad(e))
       if (fs < 12) ekle('12 px altı yazı', `${fs}px (${ad(e)})`)
       else if (fs < 14 && !(aile === 'IBM Plex Mono' && s.textTransform === 'uppercase')) ekle('14 px altı yazı (etiket değil)', `${fs}px ${aile} (${ad(e)})`)
@@ -39,7 +43,7 @@ const r = await p.evaluate(() => {
         const lh = s.lineHeight === 'normal' ? NaN : parseFloat(s.lineHeight) / fs
         if (aile === 'Big Shoulders Display' && !(Math.abs(lh - 1.2) < 0.02)) ekle('başlık satır yüksekliği ≠ 1,2', `${lh.toFixed(2)} (${ad(e)})`)
         if (aile === 'Big Shoulders Display' && s.textTransform !== 'uppercase') ekle('başlık büyük harf değil', ad(e))
-        if (s.letterSpacing !== 'normal' && parseFloat(s.letterSpacing) !== 0) ekle('başlıkta harf aralığı', `${s.letterSpacing} (${ad(e)})`)
+        if (aile === 'Big Shoulders Display' && s.letterSpacing !== 'normal' && parseFloat(s.letterSpacing) !== 0) ekle('başlıkta harf aralığı', `${s.letterSpacing} (${ad(e)})`)
       }
     }
   }

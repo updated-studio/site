@@ -1,4 +1,4 @@
-# Marka Kiti denetimi (sunucuda)
+# Marka Kiti denetimi (sunucuda; kit 1.3, cam görünüm kuralları dahil)
 
 Sayfanın hesaplanmış stillerini Marka Kiti 1.2 kurallarıyla karşılaştırır: palet dışı renk, köşe, gölge, saydamlık, gradyan,
 set dışı yazı tipi, Big Shoulders < 20 px, 14 px altı yazı (etiket hariç), başlık satır yüksekliği 1,2 ve büyük harf, tek H1,
