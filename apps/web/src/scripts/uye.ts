@@ -352,6 +352,18 @@ function kartSayilari() {
 if (document.querySelector('[data-yorum-kart]')) kartSayilari()
 new MutationObserver(() => { clearTimeout(sayiZaman); sayiZaman = window.setTimeout(kartSayilari, 300) }).observe(document.body, { childList: true, subtree: true })
 
+/* ---------------- künyede kullananlar ---------------- */
+// Profiline bu ürünü ekleyen Uper'ler; yoksa kendini eklemeye davet (zorunlu değil)
+async function kullananlar(kok: HTMLElement) {
+  const ic = kok.querySelector<HTMLElement>('[data-ic]')!
+  const { s, j } = await api(`/uye/kullananlar?urun=${encodeURIComponent(kok.dataset.kullananlar!)}`)
+  if (s !== 200 || !j) { ic.textContent = 'Şu an yüklenemedi.'; return }
+  const davet = `<a href="/hesap#ayarlar">${oturum ? 'Sen de kullanıyorsan profiline ekle' : 'Kullanıyorsan Uper ol, profiline ekle'}</a>`
+  if (!j.sayi) { ic.innerHTML = `Henüz kimse eklemedi. ${davet}.`; return }
+  ic.outerHTML = `<p class="meta" style="margin:0 0 8px">${j.sayi} Uper kullanıyor</p><ul class="ku-uperler">${j.uyeler.map((u: any) => `<li><a href="/uper?ad=${esc(u.kullaniciAdi)}" title="${esc(u.ad)} · ${esc(u.seviye?.ad || '')}">${avatar(u, 36)}<span>${esc(u.ad)}</span></a></li>`).join('')}</ul><p class="meta" style="margin:8px 0 0">${davet}</p>`
+}
+
 /* ---------------- başlat ---------------- */
 ustCubuk()
 document.querySelectorAll<HTMLElement>('#topluluk[data-hedef]').forEach(topluluk)
+document.querySelectorAll<HTMLElement>('[data-kullananlar]').forEach(kullananlar)

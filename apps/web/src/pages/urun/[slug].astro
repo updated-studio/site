@@ -70,6 +70,7 @@ const kiyas = p.comparisons?.[0] ? p.comparisons[0].path : p.rivals[0] ? `/karsi
     </div>
     <aside class="rail" aria-label="Yan sütun">
       <div class="ku-box"><h4>Kıyasla</h4>{p.rivals.length ? <Fragment set:html={p.rivals.map((r) => chip(r)).join('')} /> : <p class="pc-unk">Henüz kıyas yok.</p>}<a class="btn" href="/karsilastirma" style="margin-top:10px">Kıyas Robotu ile seç</a></div>
+      {p.id && <div class="ku-box ku-kullanan" data-kullananlar={p.id}><h4>Kullananlar</h4><p class="pc-unk" data-ic>Yükleniyor…</p></div>}
       <div class="ku-box"><h4>Çıkış radarı</h4><div class="pc-st"><Fragment set:html={conf(p.certainty)} /><span>{status} · {LVN[p.certainty]}{p.releaseWhen ? ` · ${p.releaseWhen}` : ''}</span></div></div>
       <Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare />
     </aside>

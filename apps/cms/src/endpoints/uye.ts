@@ -59,6 +59,18 @@ const uc = (path: string, method: Endpoint['method'], gerek: 'yok' | 'kimlik' | 
 /* ---------------- yardımcılar ---------------- */
 const ADI = /^[a-z0-9_.]{3,20}$/
 const SAYI_ON = new Map<string, { t: number; n: number }>()
+const KULLANAN_ON = new Map<number, { t: number; g: unknown }>()
+/** Ürün adı eşleştirme: küçük harf, boşluk/tire/nokta yok ("Sony A7 IV" = "sony-a7iv") */
+const adAnahtari = (s: string) => String(s || '').toLocaleLowerCase('tr-TR').replace(/[\s\-_.·/]+/g, '')
+let URUN_AD: { t: number; m: Map<string, number> } | null = null
+async function urunAdlari(p: Payload) {
+  if (URUN_AD && Date.now() - URUN_AD.t < 10 * 60_000) return URUN_AD.m
+  const r = await p.find({ collection: 'products', limit: 5000, depth: 0, pagination: false, select: { name: true, brand: true } as never, overrideAccess: true })
+  const m = new Map<string, number>()
+  for (const d of r.docs as any[]) { m.set(adAnahtari(d.name), d.id); m.set(adAnahtari(`${d.brand} ${d.name}`), d.id) }
+  URUN_AD = { t: Date.now(), m }
+  return m
+}
 const AYRILMIS = new Set(['admin', 'yonetici', 'updated', 'editor', 'editör', 'ekip', 'moderator', 'mod', 'destek', 'uper', 'upers', 'root', 'sistem', 'kulup', 'hesap', 'yardim'])
 const temizMetin = (s: unknown, n: number) => String(s ?? '').replace(/\r\n?/g, '\n').replace(/[\u0000-\u0008\u000B-\u001F\u007F​-‏‪-‮⁦-⁩]/g, '').replace(/\n{3,}/g, '\n\n').trim().slice(0, n)
 /** Ekip üyesinin güncel rolü Stüdyo'dan (onay işareti: yönetici altın, diğer ekip mavi); 10 dk bellekte */
@@ -176,6 +188,9 @@ export const uyeEndpoints: Endpoint[] = [
     if (Array.isArray(b.ekipman)) {
       const TUR = ['Kamera', 'Lens', 'Gimbal', 'Dron', 'Işık', 'Ses', 'Telefon', 'Bilgisayar', 'Diğer']
       data.ekipman = b.ekipman.slice(0, 12).map((e: any) => ({ tur: TUR.includes(e?.tur) ? e.tur : 'Diğer', ad: temizMetin(e?.ad, 60), urun: Number.isInteger(e?.urun) ? e.urun : null })).filter((e: any) => e.ad)
+      // Yazılan model künyedeki bir ürünle aynıysa (marka dahil ya da hariç) kendiliğinden bağlanır: künyede "kullananlar"da görünür
+      const urunler = await urunAdlari(p)
+      for (const e of data.ekipman as any[]) if (!e.urun) e.urun = urunler.get(adAnahtari(e.ad)) ?? null
     }
     const k = onayNedeni(`${data.ad ?? ''} ${data.bio ?? ''} ${data.kullaniciAdi ?? ''}`, true)
     if (k === 'Uygunsuz kelime') return hata(req, 'Profilinde topluluk kurallarına uymayan bir ifade var.')
@@ -243,7 +258,7 @@ export const uyeEndpoints: Endpoint[] = [
     const basliklar = await Promise.all(son.docs.map((y: any) => hedefBul(p, `${y.hedef?.relationTo}:${hedefDegeri(y)}`)))
     return yanit(req, {
       ...herkeseAcik(u, await ekipRol(p, u)), bio: u.bio || '', uyelik: u.createdAt, istatistik: s, rozetler: rozetler(u, s),
-      ekipman: (u.ekipman || []).map((e) => ({ tur: e.tur, ad: e.ad, urun: typeof e.urun === 'object' && e.urun ? { ad: e.urun.title, yol: e.urun.slug ? `/urun/${e.urun.slug}` : null } : null })),
+      ekipman: (u.ekipman || []).map((e) => ({ tur: e.tur, ad: e.ad, urun: typeof e.urun === 'object' && e.urun ? { ad: (e.urun as any).name, yol: e.urun.slug ? `/urun/${e.urun.slug}` : null } : null })),
       yorumlar: son.docs.map((y: any, i) => ({ id: y.id, metin: y.metin.slice(0, 280), at: y.createdAt, yol: y.yol, baslik: basliklar[i]?.baslik || '' })),
     })
   }),
@@ -298,6 +313,20 @@ export const uyeEndpoints: Endpoint[] = [
     const govdeS = { hedef: h.anahtar, yol: h.yol, tepkiler: Object.fromEntries(tep.rows.map((r: any) => [r.tur, r.n])), benim, yorumSayisi: sayi, yorumlar: konular, girisli: !!uye }
     if (!uye) { if (SAYFA_ON.size > 3000) SAYFA_ON.clear(); SAYFA_ON.set(onKey, { t: Date.now(), govde: govdeS }) }
     return yanit(req, { ...govdeS, profilYok: !uye && !!req.headers.get('authorization') })
+  }),
+
+  // Künyede "bu ürünü kullananlar": profiline ürünü ekleyen Uper'ler (en fazla 24), 5 dk bellekte
+  uc('/uye/kullananlar', 'get', 'yok', async ({ req, p }) => {
+    const id = Number(new URL(req.url || '', 'http://x').searchParams.get('urun'))
+    if (!Number.isInteger(id) || id < 1) return hata(req, 'Ürün belirtilmedi.')
+    const o = KULLANAN_ON.get(id)
+    if (o && Date.now() - o.t < 5 * 60_000) return yanit(req, o.g)
+    const r = await p.find({ collection: 'uyeler', where: { and: [{ 'ekipman.urun': { equals: id } }, { durum: { not_equals: 'engelli' } }] }, limit: 24, depth: 0, sort: '-puan', overrideAccess: true })
+    const uyeler = await Promise.all((r.docs as unknown as Uye[]).filter((u) => u.kullaniciAdi).map(async (u) => herkeseAcik(u, await ekipRol(p, u))))
+    const g = { sayi: r.totalDocs, uyeler }
+    if (KULLANAN_ON.size > 2000) KULLANAN_ON.clear()
+    KULLANAN_ON.set(id, { t: Date.now(), g })
+    return yanit(req, g)
   }),
 
   // Kartlardaki yorum sayıları: ?h=news:1,reviews:2 (en fazla 80), yalnız yayındaki yorumlar; 60 sn bellekte
