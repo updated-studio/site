@@ -2,6 +2,7 @@
 import '../styles/brand.css'
 import '../styles/kunye.css'
 import '../styles/uye.css'
+import '../styles/cam.css'
 import Header from '../components/Header.astro'
 import BreakingStrip from '../components/BreakingStrip.astro'
 import Footer from '../components/Footer.astro'
@@ -48,6 +49,8 @@ const ld = { '@context': 'https://schema.org', '@graph': [...siteLd(sayfalar), .
   <link rel="preload" href="/yazi-tipleri/ibm-plex-sans-400-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="/yazi-tipleri/yazi-tipleri.css?v=20261023" />
   <script is:inline>try{var t=localStorage.getItem('up-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+  <!-- Cam görünüm denemesi: ?tema=cam açar, ?tema=duz kapatır (styles/cam.css) -->
+  <script is:inline>try{var q=new URLSearchParams(location.search).get('tema');if(q==='cam')localStorage.setItem('up-cam','1');if(q==='duz')localStorage.removeItem('up-cam');if(localStorage.getItem('up-cam')==='1'){document.documentElement.classList.add('cam');addEventListener('DOMContentLoaded',function(){var r=document.createElement('div');r.className='cam-rozet';r.innerHTML='Cam görünüm (deneme)<a href="?tema=duz">Kapat</a>';document.body.appendChild(r)})}}catch(e){}</script>
   <script type="application/ld+json" set:html={JSON.stringify(ld)} />
   <slot name="head" />
 </head>

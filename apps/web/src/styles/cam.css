@@ -1,0 +1,80 @@
+/* Cam görünüm (deneme, 25 Ekim 2026; marka kiti 1.3 §12c). Yalnız <html class="cam"> iken geçerli:
+   adresin sonuna ?tema=cam eklenince açılır, ?tema=duz ile kapanır (tercih tarayıcıda saklanır, Base.astro).
+   Bulanıklık yalnız üst katmanlarda (üst bar, son dakika şeridi, menü); kartlar yarı saydam düz renk (telefon yorulmasın). */
+:root.cam{
+  --bg:#ECEEF2; --surface:rgb(255 255 255 / .74); --surface-2:rgb(255 255 255 / .55); --line:rgb(23 23 23 / .08); --img:#DDE1E7;
+  --cam-bar:rgb(255 255 255 / .62); --cam-koyu:rgb(18 20 24 / .86); --cam-isik:rgb(255 255 255 / .9);
+  --cam-golge:0 1px 2px rgb(16 24 40 / .04), 0 8px 24px rgb(16 24 40 / .06);
+  --cam-leke-1:rgb(37 99 235 / .20); --cam-leke-2:rgb(255 107 26 / .14); --cam-leke-3:rgb(37 99 235 / .10);
+  --r-kart:18px; --r-buyuk:26px; --r-dugme:12px; --r-etiket:8px;
+}
+@media (prefers-color-scheme: dark){:root.cam:not([data-theme="light"]){
+  --bg:#0E1013; --surface:rgb(34 37 42 / .62); --surface-2:rgb(44 48 54 / .55); --line:rgb(255 255 255 / .08); --img:#22262B;
+  --cam-bar:rgb(22 24 28 / .58); --cam-koyu:rgb(8 9 11 / .72); --cam-isik:rgb(255 255 255 / .07);
+  --cam-golge:0 1px 2px rgb(0 0 0 / .2), 0 10px 30px rgb(0 0 0 / .28);
+  --cam-leke-1:rgb(37 99 235 / .26); --cam-leke-2:rgb(255 107 26 / .12); --cam-leke-3:rgb(106 152 248 / .10)}}
+:root.cam[data-theme="dark"]{
+  --bg:#0E1013; --surface:rgb(34 37 42 / .62); --surface-2:rgb(44 48 54 / .55); --line:rgb(255 255 255 / .08); --img:#22262B;
+  --cam-bar:rgb(22 24 28 / .58); --cam-koyu:rgb(8 9 11 / .72); --cam-isik:rgb(255 255 255 / .07);
+  --cam-golge:0 1px 2px rgb(0 0 0 / .2), 0 10px 30px rgb(0 0 0 / .28);
+  --cam-leke-1:rgb(37 99 235 / .26); --cam-leke-2:rgb(255 107 26 / .12); --cam-leke-3:rgb(106 152 248 / .10)}
+
+/* Zemin: sabit, bulanık renk lekeleri (yalnız degrade; bulanıklık filtresi yok, hızlı) */
+.cam body{background:var(--bg)}
+.cam body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(60vmax 50vmax at 8% -10%, var(--cam-leke-1), transparent 60%),
+    radial-gradient(50vmax 45vmax at 105% 20%, var(--cam-leke-3), transparent 62%),
+    radial-gradient(55vmax 50vmax at 90% 110%, var(--cam-leke-2), transparent 60%)}
+.cam body::before{background:transparent}
+
+/* Üst bar: yüzen cam şerit */
+.cam .hdr{top:calc(env(safe-area-inset-top,0px) + 10px);margin:10px max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px));
+  background:var(--cam-bar);border:1px solid var(--line);border-radius:var(--r-buyuk);box-shadow:inset 0 1px 0 var(--cam-isik),var(--cam-golge);
+  -webkit-backdrop-filter:blur(22px) saturate(1.7);backdrop-filter:blur(22px) saturate(1.7)}
+.cam .hdr .wrap{padding-left:max(calc(var(--edge) - 12px),12px);padding-right:max(calc(var(--edge) - 12px),12px)}
+.cam .nav a{border-radius:10px}
+.cam .nav a:hover,.cam .nav a[aria-current="page"]{background:var(--surface-2);color:var(--text)}
+.cam .sheet{top:calc(86px + env(safe-area-inset-top,0px));margin:0 12px 12px;border-radius:var(--r-buyuk);border:1px solid var(--line);
+  background:var(--cam-bar);-webkit-backdrop-filter:blur(26px) saturate(1.7);backdrop-filter:blur(26px) saturate(1.7)}
+
+/* Son dakika şeridi: koyu cam hap */
+.cam .sd{margin:10px max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px));border-radius:16px;overflow:hidden;
+  background:var(--cam-koyu);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);box-shadow:var(--cam-golge)}
+.cam .sd .wrap{padding-left:max(calc(var(--edge) - 12px),12px);padding-right:max(calc(var(--edge) - 12px),6px)}
+.cam .sd .nv button{border-radius:10px}
+
+/* Kartlar ve kutular: yuvarlak, yarı saydam, yumuşak gölge */
+.cam .c-std,.cam .c-man,.cam .c-list,.cam .sdk,.cam .c-spo,.cam .s60,.cam .kd,.cam .tbl,.cam .kv > div{
+  border-radius:var(--r-kart);overflow:hidden;border-color:var(--line);box-shadow:inset 0 1px 0 var(--cam-isik),var(--cam-golge)}
+.cam .c-man{border-radius:var(--r-buyuk)}
+.cam .c-std,.cam .c-man{transition:transform var(--t2) var(--ease),box-shadow var(--t2) var(--ease)}
+@media (hover:hover){.cam .c-std:hover{transform:translateY(-2px);box-shadow:inset 0 1px 0 var(--cam-isik),0 14px 34px rgb(16 24 40 / .12)}}
+.cam .c-img{background:var(--img)}
+.cam .c-img .lbl{left:10px;top:10px}
+.cam .lbl{border-radius:var(--r-etiket)}
+.cam .sdk-h{background:var(--cam-koyu)}
+.cam .sdk li.hot .t{border-radius:6px}
+.cam .sdk li,.cam .c-list li{border-bottom-color:var(--line)}
+.cam .akp{border-radius:var(--r-kart)}
+.cam .akp .tab{background:var(--cam-koyu);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.cam .akp .blk{background:var(--cam-koyu);border-radius:0 var(--r-kart) 0 0;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.cam .sec + .sec{border-top:0}
+
+/* Düğmeler */
+.cam .btn,.cam .ibtn,.cam .save{border-radius:var(--r-dugme)}
+.cam .ibtn{background:var(--surface-2);border-color:var(--line)}
+.cam .btn-p{box-shadow:inset 0 1px 0 rgb(255 255 255 / .25),0 4px 14px rgb(37 99 235 / .28)}
+.cam .btn-p:hover{background:#1D4FD8;border-color:#1D4FD8}
+.cam input,.cam select,.cam textarea{border-radius:var(--r-dugme)}
+
+/* Alt bilgi: koyu cam pano */
+.cam .ftr{margin:48px max(12px,env(safe-area-inset-right,0px)) 12px max(12px,env(safe-area-inset-left,0px));border-radius:var(--r-buyuk);background:var(--cam-koyu)}
+.cam .ftr .bt{border-top-color:rgb(255 255 255 / .1)}
+
+/* Deneme rozeti: cam görünümün açık olduğunu ve nasıl kapanacağını gösterir */
+.cam-rozet{position:fixed;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:70;display:flex;align-items:center;gap:10px;
+  padding:8px 8px 8px 14px;border-radius:99px;font-size:13px;font-weight:600;color:var(--text);background:var(--cam-bar);border:1px solid var(--line);
+  box-shadow:var(--cam-golge);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6)}
+.cam-rozet a{padding:6px 12px;border-radius:99px;background:var(--text);color:var(--bg);text-decoration:none}
+@media (prefers-reduced-motion:reduce){.cam .c-std,.cam .c-man{transition:none}.cam .c-std:hover{transform:none}}
