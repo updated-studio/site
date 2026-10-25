@@ -10,7 +10,7 @@ import AracSayfa from '../../components/AracSayfa.astro'
   </form>
   <svg class="bk-sahne" data-sahne viewBox="0 0 400 240" role="img" aria-label="Baskının bir insanın boyuna göre gerçek ölçüsü">
     <rect width="400" height="240" fill="var(--surface-2)" /><rect y="214" width="400" height="26" fill="rgb(0 0 0 / .12)" />
-    <g data-insan fill="var(--text-3)"></g><g data-baski></g>
+    <g data-insan fill="var(--text-3)"></g><g data-baski-g></g>
   </svg>
   <div class="arac-sonuc" data-sonuc aria-live="polite"></div>
   <Fragment slot="nasil">
@@ -32,7 +32,7 @@ import AracSayfa from '../../components/AracSayfa.astro'
       <div class="bk-ebat">${EBAT.map(([a, k, u]) => { const ok = k <= kisaCm + 0.5 && u <= uzunCm + 0.5; return `<span class="pill-${ok ? 'ok' : 'no'}">${ok ? '✓' : '✕'} ${a}</span>` }).join('')}</div>`
   }
   // Duvar sahnesi: 1,75 m'lik insan silüetinin yanında en büyük baskı (ölçekli; 1 birim = 1 cm × olcek)
-  const insan = document.querySelector<SVGGElement>('[data-insan]')!, baski = document.querySelector<SVGGElement>('[data-baski]')!
+  const insan = document.querySelector<SVGGElement>('[data-insan]')!, baski = document.querySelector<SVGGElement>('[data-baski-g]')!
   function sahne() {
     const mp = Number((f.querySelector('#bk-mp') as HTMLInputElement).value), oran = Number((f.querySelector('#bk-oran') as HTMLSelectElement).value), dpi = Number((f.querySelector('#bk-dpi') as HTMLSelectElement).value)
     if (!mp) return

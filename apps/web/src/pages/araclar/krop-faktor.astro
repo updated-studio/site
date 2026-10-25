@@ -47,8 +47,7 @@ const SENSOR: [string, number][] = [['Full frame (35 mm)', 1], ['APS-C · Sony, 
     const s = kutu(Math.max(k, 1)); Object.entries(s).forEach(([a, v]) => delik.setAttribute(a === 'w' ? 'width' : a === 'h' ? 'height' : a, String(v)))
     cer.innerHTML = SENSORLER.filter(([, kk]) => kk >= 1).map(([ad, kk]) => { const b = kutu(kk), sec = Math.abs(kk - k) < 0.01
       return `<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" stroke="${sec ? '#FF6B1A' : 'rgb(255 255 255 / .6)'}" stroke-width="${sec ? 2.5 : 1}" stroke-dasharray="${sec ? '' : '4 4'}" /><text x="${b.x + 4}" y="${b.y + 11}" font-size="9" font-family="IBM Plex Mono, monospace" fill="${sec ? '#FF6B1A' : '#fff'}">${ad}</text>` }).join('')
-    const en = 43.8, olcek = 100 / en
-    boy.innerHTML = SENSORLER.map(([ad, kk, w, h]) => `<div class="${Math.abs(kk - k) < 0.01 ? 'sec' : ''}"><i style="width:${(w * olcek).toFixed(1)}%;aspect-ratio:${w}/${h}"></i><span>${ad} · ${String(w).replace('.', ',')}×${String(h).replace('.', ',')} mm</span></div>`).join('')
+    boy.innerHTML = SENSORLER.map(([ad, kk, w, h]) => `<div class="${Math.abs(kk - k) < 0.01 ? 'sec' : ''}"><i style="width:${(w * 2.6).toFixed(0)}px;height:${(h * 2.6).toFixed(0)}px"></i><span>${ad} · ${String(w).replace('.', ',')}×${String(h).replace('.', ',')} mm</span></div>`).join('')
   }
   f.addEventListener('input', () => { ciz(); sahne() }); ciz(); sahne()
 </script>
