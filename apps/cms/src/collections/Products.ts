@@ -6,6 +6,9 @@ import { autoSeo } from '../hooks/autoSeo'
 import { revalidate } from '../hooks/revalidate'
 import { sablonSatirlari } from '../lib/urunSablon'
 
+/** Marka + ad (ad markayla başlıyorsa tekrarlanmaz): "Sony A7 IV" */
+const tamAd = (d: any) => (d.brand && !String(d.name || '').toLocaleLowerCase('tr-TR').startsWith(String(d.brand).toLocaleLowerCase('tr-TR')) ? `${d.brand} ${d.name}` : d.name)
+
 /**
  * KÜNYE — ürün veritabanı. Her değer kaynağı ve tarihiyle tutulur (üretici beyanı, Updated ölçümü, sızıntı…).
  * Haber/inceleme/kıyas bu kayda bağlanır; ürün sayfası join alanlarıyla hepsini listeler.
@@ -72,7 +75,7 @@ export const Products: CollectionConfig = {
     { name: 'path', type: 'text', admin: { position: 'sidebar', readOnly: true } },
   ],
   hooks: {
-    beforeChange: [autoSeo({ title: (d) => `${d.name} künyesi: özellikler ve haberler`, desc: (d) => d.blurb || `${d.name} için kaynaklı teknik veriler, ilgili haberler ve incelemeler.`, entities: (d) => [d.brand, d.name] }), ({ data }) => { if (data.slug) data.path = `/urun/${data.slug}`; return data },
+    beforeChange: [autoSeo({ title: (d) => `${tamAd(d)} künyesi: özellikler ve haberler`, desc: (d) => d.blurb || `${tamAd(d)} teknik özellikleri: kaynaklı veriler, ilgili haberler, incelemeler ve karşılaştırmalar.`, entities: (d) => [d.brand, d.name] }), ({ data }) => { if (data.slug) data.path = `/urun/${data.slug}`; return data },
       // Özellik listesi boşsa (yeni ürün ya da tür ilk kez seçildi) türün şablonu dolar; dolu listeye dokunulmaz
       ({ data, originalDoc }) => { const mevcut = data.specs ?? originalDoc?.specs; if (data.type && (!mevcut || !mevcut.length)) data.specs = sablonSatirlari(data.type); return data }],
     afterChange: [revalidate((d) => [d.path].filter(Boolean))],
