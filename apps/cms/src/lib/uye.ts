@@ -49,14 +49,14 @@ export async function girisYonetim(yol: string, method: string, govde?: unknown)
 }
 
 /* ---------------- seviye, puan ---------------- */
-/** Seviyeler (ekipman ilerlemesi): puan arttıkça Kamera'dan Stüdyo'ya. */
+/** Seviyeler (sürüm ilerlemesi, 25 Ekim 2026): puan arttıkça Beta'dan Updated'a. */
 export const SEVIYELER = [
-  { ad: 'Kamera', puan: 0 },
-  { ad: 'Lens', puan: 100 },
-  { ad: 'Gimbal', puan: 300 },
-  { ad: 'Işık', puan: 700 },
-  { ad: 'Dron', puan: 1500 },
-  { ad: 'Stüdyo', puan: 3000 },
+  { ad: 'Beta', puan: 0 },
+  { ad: 'v1.0', puan: 100 },
+  { ad: 'v2.0', puan: 300 },
+  { ad: 'Pro', puan: 700 },
+  { ad: 'Ultra', puan: 1500 },
+  { ad: 'Updated', puan: 3000 },
 ] as const
 export function seviye(puan: number) {
   let i = 0
