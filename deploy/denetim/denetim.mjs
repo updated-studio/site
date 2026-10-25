@@ -12,7 +12,7 @@ const r = await p.evaluate(() => {
     '#121212','#1c1c1c','#262626','#333333','#b4b7bb','#8e9297']
   const cam = document.documentElement.classList.contains('cam')
   // Cam görünümün nötrleri (styles/cam.css): zemin, yüzey, görsel yeri, koyu cam, mavi düğme üzeri
-  if (cam) PALET.push('#eceef2','#0e1013','#dde1e7','#22262b','#22252a','#2c3036','#16181c','#121418','#08090b','#1d4fd8','#1e2023','#25282c','#2e3236','#3a3e44')
+  if (cam) PALET.push('#eceef2','#0e1013','#dde1e7','#22262b','#22252a','#2c3036','#16181c','#121418','#08090b','#1d4fd8','#1e2023','#25282c','#2e3236','#3a3e44','#1b1e23','#2e3239','#3a3f47','#2c3037','#262a30','#14161a')
   const hex = (c) => { const m = c.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?/); if (!m) return null
     if (m[4] !== undefined && +m[4] === 0) return 'şeffaf'
     const h = '#' + [m[1], m[2], m[3]].map((x) => (+x).toString(16).padStart(2, '0')).join('')

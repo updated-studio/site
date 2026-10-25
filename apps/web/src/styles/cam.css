@@ -9,16 +9,17 @@
   --r-kart:18px; --r-buyuk:26px; --r-dugme:12px; --r-etiket:8px;
 }
 @media (prefers-color-scheme: dark){:root.cam:not([data-theme="light"]){
-  --bg:#0E1013; --surface:rgb(34 37 42 / .62); --surface-2:rgb(44 48 54 / .55); --line:rgb(255 255 255 / .08); --img:#22262B;
-  --cam-bar:rgb(22 24 28 / .58); --cam-koyu:rgb(8 9 11 / .72); --cam-isik:rgb(255 255 255 / .07);
+  --bg:#1B1E23; --surface:rgb(46 50 57 / .66); --surface-2:rgb(58 63 71 / .55); --line:rgb(255 255 255 / .09); --img:#2C3037;
+  --cam-bar:rgb(38 42 48 / .6); --cam-koyu:rgb(20 22 26 / .74); --cam-isik:rgb(255 255 255 / .07);
   --cam-golge:0 1px 2px rgb(0 0 0 / .2), 0 10px 30px rgb(0 0 0 / .28);
   --cam-leke-1:rgb(37 99 235 / .26); --cam-leke-2:rgb(255 107 26 / .12); --cam-leke-3:rgb(106 152 248 / .10)}}
 :root.cam[data-theme="dark"]{
-  --bg:#0E1013; --surface:rgb(34 37 42 / .62); --surface-2:rgb(44 48 54 / .55); --line:rgb(255 255 255 / .08); --img:#22262B;
-  --cam-bar:rgb(22 24 28 / .58); --cam-koyu:rgb(8 9 11 / .72); --cam-isik:rgb(255 255 255 / .07);
+  --bg:#1B1E23; --surface:rgb(46 50 57 / .66); --surface-2:rgb(58 63 71 / .55); --line:rgb(255 255 255 / .09); --img:#2C3037;
+  --cam-bar:rgb(38 42 48 / .6); --cam-koyu:rgb(20 22 26 / .74); --cam-isik:rgb(255 255 255 / .07);
   --cam-golge:0 1px 2px rgb(0 0 0 / .2), 0 10px 30px rgb(0 0 0 / .28);
   --cam-leke-1:rgb(37 99 235 / .26); --cam-leke-2:rgb(255 107 26 / .12); --cam-leke-3:rgb(106 152 248 / .10)}
 
+/* Koyu tema 25 Ekim 2026'da yumuşatıldı (#0E1013 → #1B1E23; kullanıcı: "çok koyu", 24 Ekim'deki isteğin devamı) */
 /* Zemin: sabit, bulanık renk lekeleri (yalnız degrade; bulanıklık filtresi yok, hızlı) */
 .cam body{background:var(--bg)}
 .cam body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
@@ -103,3 +104,7 @@
 /* Araçlar: iç kutular ve form alanları yuvarlak */
 .cam .arac-buyuk,.cam .as-kutu{border-radius:12px}.cam .as-sat{border-radius:8px}.cam .bk-ebat span{border-radius:99px}
 .cam .arac-form input,.cam .arac-form select{border-radius:var(--r-dugme);border-color:var(--line);background:var(--surface-2)}
+
+/* Telefonda Bülten düğmesi yok (yer ileride başka şeylere; bülten alt bilgide), Beta etiketi sığsın */
+@media (max-width:767px){.cam .hdr .btn-p{display:none}}
+@media (max-width:374px){.cam .logo svg{height:18px}.cam .beta summary{font-size:11px;padding:1px 6px;min-height:20px}.cam .hdr .wrap{gap:8px}.cam .hdr-r{gap:4px}.cam .beta{margin-left:-4px}}
