@@ -1,5 +1,5 @@
-/* Cam görünüm (deneme, 25 Ekim 2026; marka kiti 1.3 §12c). Yalnız <html class="cam"> iken geçerli:
-   adresin sonuna ?tema=cam eklenince açılır, ?tema=duz ile kapanır (tercih tarayıcıda saklanır, Base.astro).
+/* Cam görünüm (25 Ekim 2026'dan beri varsayılan; marka kiti 1.3 §12c). <html class="cam"> iken geçerli (Base.astro);
+   ?tema=duz eski düz görünüme döner (tercih tarayıcıda saklanır), ?tema=cam geri getirir.
    Bulanıklık yalnız üst katmanlarda (üst bar, son dakika şeridi, menü); kartlar yarı saydam düz renk (telefon yorulmasın). */
 :root.cam{
   --bg:#ECEEF2; --surface:rgb(255 255 255 / .74); --surface-2:rgb(255 255 255 / .55); --line:rgb(23 23 23 / .08); --img:#DDE1E7;
@@ -72,11 +72,6 @@
 .cam .ftr{margin:48px max(12px,env(safe-area-inset-right,0px)) 12px max(12px,env(safe-area-inset-left,0px));border-radius:var(--r-buyuk);background:var(--cam-koyu)}
 .cam .ftr .bt{border-top-color:rgb(255 255 255 / .1)}
 
-/* Deneme rozeti: cam görünümün açık olduğunu ve nasıl kapanacağını gösterir */
-.cam-rozet{position:fixed;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:70;display:flex;align-items:center;gap:10px;
-  padding:8px 8px 8px 14px;border-radius:99px;font-size:13px;font-weight:600;color:var(--text);background:var(--cam-bar);border:1px solid var(--line);
-  box-shadow:var(--cam-golge);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6)}
-.cam-rozet a{padding:6px 12px;border-radius:99px;background:var(--text);color:var(--bg);text-decoration:none}
 @media (prefers-reduced-motion:reduce){.cam .c-std,.cam .c-man{transition:none}.cam .c-std:hover{transform:none}}
 
 /* Tipografi (25 Ekim 2026, kullanıcı: "Big Shoulders yalnız yukarıda, menüde"): başlıklar IBM Plex Sans Condensed kalın, normal yazım;

@@ -20,7 +20,7 @@ const title = meta.path === '/' ? meta.title : `${meta.title} · UPDATED`
 const ld = { '@context': 'https://schema.org', '@graph': [...siteLd(sayfalar), ...(meta.jsonld || [])] }
 ---
 <!doctype html>
-<html lang="tr" data-cms={env('CMS_URL').replace(/\/$/, '') || undefined} data-base={import.meta.env.BASE_URL === '/' ? undefined : import.meta.env.BASE_URL}>
+<html lang="tr" class="cam" data-cms={env('CMS_URL').replace(/\/$/, '') || undefined} data-base={import.meta.env.BASE_URL === '/' ? undefined : import.meta.env.BASE_URL}>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -41,16 +41,16 @@ const ld = { '@context': 'https://schema.org', '@graph': [...siteLd(sayfalar), .
   <meta name="twitter:card" content="summary_large_image" />
   {meta.published && <meta property="article:published_time" content={meta.published} />}
   {meta.modified && <meta property="article:modified_time" content={meta.modified} />}
-  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
-  <meta name="theme-color" content="#1E2023" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#ECEEF2" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0E1013" media="(prefers-color-scheme: dark)" />
   <link rel="icon" href="/marka/updated-up-black.svg" type="image/svg+xml" />
   <link rel="alternate" type="application/rss+xml" title="UPDATED" href="/rss.xml" />
   <!-- Yazı tipleri kendi sitemizde (Google'a bağlanılmaz): public/yazi-tipleri, üretici deploy/yazi-tipi-indir.mjs -->
   <link rel="preload" href="/yazi-tipleri/ibm-plex-sans-400-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="/yazi-tipleri/yazi-tipleri.css?v=20261025" />
   <script is:inline>try{var t=localStorage.getItem('up-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
-  <!-- Cam görünüm denemesi: ?tema=cam açar, ?tema=duz kapatır (styles/cam.css) -->
-  <script is:inline>try{var q=new URLSearchParams(location.search).get('tema');if(q==='cam')localStorage.setItem('up-cam','1');if(q==='duz')localStorage.removeItem('up-cam');if(localStorage.getItem('up-cam')==='1'){document.documentElement.classList.add('cam');addEventListener('DOMContentLoaded',function(){var r=document.createElement('div');r.className='cam-rozet';r.innerHTML='Cam görünüm (deneme)<a href="?tema=duz">Kapat</a>';document.body.appendChild(r)})}}catch(e){}</script>
+  <!-- Cam görünüm 25 Ekim 2026'dan beri varsayılan (styles/cam.css); eski düz görünüm ?tema=duz ile (tercih saklanır), ?tema=cam geri getirir -->
+  <script is:inline>try{var q=new URLSearchParams(location.search).get('tema');if(q==='duz')localStorage.setItem('up-duz','1');if(q==='cam')localStorage.removeItem('up-duz');localStorage.removeItem('up-cam');if(localStorage.getItem('up-duz')==='1')document.documentElement.classList.remove('cam')}catch(e){}</script>
   <script type="application/ld+json" set:html={JSON.stringify(ld)} />
   <slot name="head" />
 </head>
