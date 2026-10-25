@@ -295,7 +295,7 @@ async function hesabim(u: any, sekme: Sekme) {
     const sv = AYAR?.seviyeler || []
     ic.innerHTML = `
       <div class="hs-iki">
-        <div><h2 class="label">Seviyeler: ekipman ilerlemesi</h2>
+        <div><h2 class="label">Seviyeler: sürüm ilerlemesi</h2>
           <ol class="sv-l">${sv.map((s, i) => `<li class="${s.ad === u.seviye.ad ? 'on' : u.seviye.puan >= s.puan ? 'gecti' : ''}"><span class="num">${i + 1}</span><b>${esc(s.ad)}</b><span class="meta">${s.puan} puan</span></li>`).join('')}</ol>
           ${ilerleme(u.seviye)}</div>
         <div><h2 class="label">Puan nasıl kazanılır</h2>
