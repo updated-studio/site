@@ -165,7 +165,7 @@ function topluluk(kok: HTMLElement) {
     if (y.s !== 200) { ic.innerHTML = `<p class="meta">Yorumlar şu an yüklenemedi.</p>`; return }
     veri = y.j; profil = p
     ciz()
-    if (say) { say.hidden = false; say.textContent = veri.yorumSayisi ? `${veri.yorumSayisi} yorum` : 'Yorum yap' }
+    if (say) { say.hidden = false; say.classList.add('yr-say'); say.innerHTML = `${YORUM_IKON}<span>${veri.yorumSayisi ? `${veri.yorumSayisi} yorum` : 'Yorum yap'}</span>` }
     const hedefYorum = /^#yorum-(\d+)$/.exec(location.hash)
     if (hedefYorum) { const el = document.getElementById(`yorum-${hedefYorum[1]}`); if (el) { el.scrollIntoView({ block: 'center' }); el.classList.add('vurgu') } }
   }
@@ -327,6 +327,30 @@ function topluluk(kok: HTMLElement) {
     }
   }
 }
+
+const YORUM_IKON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>'
+
+/* ---------------- kartlardaki yorum sayısı ---------------- */
+// Kartta yorum varsa ikon + sayı görünür (yoksa hiçbir şey); sonsuz akışla gelen kartlar da sayılır
+const sorulan = new Set<string>()
+let sayiZaman = 0
+function kartSayilari() {
+  const yeni = [...document.querySelectorAll<HTMLElement>('[data-yorum-kart]')].map((a) => a.dataset.yorumKart!).filter((h) => !sorulan.has(h))
+  if (!yeni.length) return
+  const parca = [...new Set(yeni)].slice(0, 80)
+  parca.forEach((h) => sorulan.add(h))
+  api(`/uye/sayilar?h=${encodeURIComponent(parca.join(','))}`).then(({ s, j }) => {
+    if (s !== 200 || !j) return
+    document.querySelectorAll<HTMLAnchorElement>('[data-yorum-kart]').forEach((a) => {
+      const n = j[a.dataset.yorumKart!]
+      if (!n) return
+      a.innerHTML = `${YORUM_IKON}<span>${n}</span>`; a.setAttribute('aria-label', `${n} yorum`); a.hidden = false
+    })
+    if (yeni.length > parca.length) kartSayilari()
+  })
+}
+if (document.querySelector('[data-yorum-kart]')) kartSayilari()
+new MutationObserver(() => { clearTimeout(sayiZaman); sayiZaman = window.setTimeout(kartSayilari, 300) }).observe(document.body, { childList: true, subtree: true })
 
 /* ---------------- başlat ---------------- */
 ustCubuk()

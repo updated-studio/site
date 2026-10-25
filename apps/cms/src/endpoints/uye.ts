@@ -58,6 +58,7 @@ const uc = (path: string, method: Endpoint['method'], gerek: 'yok' | 'kimlik' | 
 
 /* ---------------- yardımcılar ---------------- */
 const ADI = /^[a-z0-9_.]{3,20}$/
+const SAYI_ON = new Map<string, { t: number; n: number }>()
 const AYRILMIS = new Set(['admin', 'yonetici', 'updated', 'editor', 'editör', 'ekip', 'moderator', 'mod', 'destek', 'uper', 'upers', 'root', 'sistem', 'kulup', 'hesap', 'yardim'])
 const temizMetin = (s: unknown, n: number) => String(s ?? '').replace(/\r\n?/g, '\n').replace(/[\u0000-\u0008\u000B-\u001F\u007F​-‏‪-‮⁦-⁩]/g, '').replace(/\n{3,}/g, '\n\n').trim().slice(0, n)
 /** Ekip üyesinin güncel rolü Stüdyo'dan (onay işareti: yönetici altın, diğer ekip mavi); 10 dk bellekte */
@@ -297,6 +298,23 @@ export const uyeEndpoints: Endpoint[] = [
     const govdeS = { hedef: h.anahtar, yol: h.yol, tepkiler: Object.fromEntries(tep.rows.map((r: any) => [r.tur, r.n])), benim, yorumSayisi: sayi, yorumlar: konular, girisli: !!uye }
     if (!uye) { if (SAYFA_ON.size > 3000) SAYFA_ON.clear(); SAYFA_ON.set(onKey, { t: Date.now(), govde: govdeS }) }
     return yanit(req, { ...govdeS, profilYok: !uye && !!req.headers.get('authorization') })
+  }),
+
+  // Kartlardaki yorum sayıları: ?h=news:1,reviews:2 (en fazla 80), yalnız yayındaki yorumlar; 60 sn bellekte
+  uc('/uye/sayilar', 'get', 'yok', async ({ req, p }) => {
+    const istenen = [...new Set((new URL(req.url || '', 'http://x').searchParams.get('h') || '').split(',').filter((x) => /^(news|reviews|comparisons):\d{1,9}$/.test(x)))].slice(0, 80)
+    const sonuc: Record<string, number> = {}, eksik: string[] = []
+    for (const k of istenen) { const o = SAYI_ON.get(k); if (o && Date.now() - o.t < 60_000) { if (o.n) sonuc[k] = o.n } else eksik.push(k) }
+    if (eksik.length) {
+      const id = (t: string) => eksik.filter((k) => k.startsWith(t + ':')).map((k) => Number(k.split(':')[1]))
+      const r = await havuz(p).query(`select coalesce('news:' || r.news_id, 'reviews:' || r.reviews_id, 'comparisons:' || r.comparisons_id) as k, count(*)::int as n
+        from payload.yorumlar y join payload.yorumlar_rels r on r.parent_id = y.id and r.path = 'hedef'
+        where y.durum = 'yayinda' and (r.news_id = any($1::int[]) or r.reviews_id = any($2::int[]) or r.comparisons_id = any($3::int[])) group by 1`, [id('news'), id('reviews'), id('comparisons')])
+      const bulunan = new Map(r.rows.map((x: any) => [x.k, x.n as number]))
+      if (SAYI_ON.size > 5000) SAYI_ON.clear()
+      for (const k of eksik) { const n = bulunan.get(k) || 0; SAYI_ON.set(k, { t: Date.now(), n }); if (n) sonuc[k] = n }
+    }
+    return yanit(req, sonuc)
   }),
 
   // Yorum yaz
