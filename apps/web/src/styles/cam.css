@@ -78,3 +78,17 @@
   box-shadow:var(--cam-golge);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6)}
 .cam-rozet a{padding:6px 12px;border-radius:99px;background:var(--text);color:var(--bg);text-decoration:none}
 @media (prefers-reduced-motion:reduce){.cam .c-std,.cam .c-man{transition:none}.cam .c-std:hover{transform:none}}
+
+/* Tipografi (25 Ekim 2026, kullanıcı: "Big Shoulders yalnız yukarıda, menüde"): başlıklar IBM Plex Sans Condensed kalın, normal yazım;
+   Big Shoulders yalnız üst menü, mobil menü, KULÜP ve içerik etiketlerinde (SON DAKİKA…). */
+.cam{--f-baslik:"IBM Plex Sans Condensed","IBM Plex Sans","Arial Narrow",sans-serif}
+.cam h1,.cam h2,.cam h3,.cam h4{font-family:var(--f-baslik);font-weight:700;text-transform:none;letter-spacing:-.01em;line-height:1.15}
+.cam .c-man h2{font-size:46px}
+.cam .c-std h3{font-size:22px;line-height:1.22}
+.cam .sh h2{font-size:34px}
+.cam .nav a{font-family:var(--f-head);font-weight:900;text-transform:uppercase;font-size:19px;letter-spacing:0;white-space:nowrap;line-height:1.2}
+@media (max-width:1439px){.cam .nav a{font-size:18px}}
+@media (max-width:980px){.cam .c-man h2{font-size:36px}}
+@media (max-width:767px){.cam .c-man h2{font-size:30px}.cam .sh h2{font-size:26px}.cam .c-std h3{font-size:21px}}
+.cam .art-head h1{font-size:54px;line-height:1.1}
+@media (max-width:767px){.cam .art-head h1{font-size:34px}}
