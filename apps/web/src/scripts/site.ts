@@ -69,17 +69,20 @@ function search() {
   })
 }
 
-/* ---------- son dakika şeridi: elle ileri/geri ---------- */
+/* ---------- son dakika şeridi: kayan şerit ---------- */
+// Haberler iki kez yazılır (ikincisi ekran okuyucudan gizli), şerit yarısı kadar kayınca başa döner; hız sabit (~70 px/sn).
+// Yeni son dakika gelince canli.ts data-items'ı günceller ve 'sd-yenile' olayını gönderir.
 function breaking() {
   const sd = $('#sd'); if (!sd) return
-  const items = JSON.parse(sd.dataset.items || '[]') as { t: string; h: string; at: string }[]
-  let i = 0
-  const a = $<HTMLAnchorElement>('[data-sd-link]', sd)!, tm = $('[data-sd-time]', sd)!
-  $$('[data-sd]', sd).forEach((b) => b.addEventListener('click', () => {
-    i = (i + Number(b.dataset.sd) + items.length) % items.length
-    a.textContent = items[i].t; a.href = items[i].h; tm.textContent = items[i].at
-    a.classList.remove('fade'); void a.offsetWidth; a.classList.add('fade')
-  }))
+  const ray = $('[data-sd-ray]', sd)!
+  const ciz = () => {
+    const items = JSON.parse(sd.dataset.items || '[]') as { t: string; h: string; at: string }[]
+    const tek = items.map((n) => `<a href="${escH(n.h)}"><span class="t">${escH(n.at)}</span>${escH(n.t)}</a>`).join('')
+    ray.innerHTML = tek + `<span class="sd-kopya" aria-hidden="true">${tek.replace(/<a /g, '<a tabindex="-1" ')}</span>`
+    requestAnimationFrame(() => { ray.style.setProperty('--sure', `${Math.max(12, Math.round(ray.scrollWidth / 2 / 70))}s`) })
+  }
+  ciz()
+  sd.addEventListener('sd-yenile', ciz)
 }
 
 /* ---------- şeritler: oklar + noktalar ---------- */

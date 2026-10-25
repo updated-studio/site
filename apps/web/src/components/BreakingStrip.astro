@@ -1,8 +1,8 @@
 ---
-/** Son dakika şeridi (kit 10b): yalnız aktif haber varken, 40 px siyah; elle ileri/geri, otomatik dönmez. */
+/** Son dakika şeridi: yalnız aktif haber varken. Kayan şerit (25 Ekim 2026, kullanıcı isteği): haberler sağdan sola akar,
+ *  üzerine gelince / odaklanınca durur; "hareketi azalt" açıksa akmaz, elle kaydırılır. Akış scripts/site.ts breaking(). */
 import type { News } from '../lib/types'
 import { time } from '../lib/format'
-import { ico } from '../lib/ui'
 interface Props { items: News[] }
 const { items } = Astro.props
 const data = items.map((n) => ({ t: n.title, h: n.path, at: time(n.publishedAt) }))
@@ -11,9 +11,11 @@ const data = items.map((n) => ({ t: n.title, h: n.path, at: time(n.publishedAt) 
   <div class="sd" id="sd" role="region" aria-label="Son dakika" data-items={JSON.stringify(data)}>
     <div class="wrap">
       <span class="lbl l-son">Son dakika</span>
-      <a class="fade" href={items[0].path} data-sd-link>{items[0].title}</a>
-      <span class="t" data-sd-time>{time(items[0].publishedAt)}</span>
-      {items.length > 1 && <span class="nv"><button type="button" data-sd="-1" aria-label="Önceki son dakika"><Fragment set:html={ico('left')} /></button><button type="button" data-sd="1" aria-label="Sonraki son dakika"><Fragment set:html={ico('right')} /></button></span>}
+      <div class="sd-kay" data-sd-kay>
+        <div class="sd-ray" data-sd-ray>
+          {data.map((n) => <a href={n.h}><span class="t">{n.at}</span>{n.t}</a>)}
+        </div>
+      </div>
     </div>
   </div>
 )}

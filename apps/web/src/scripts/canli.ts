@@ -31,9 +31,8 @@ async function tazele() {
   const sd = document.getElementById('sd')
   const hot = items.filter((n) => n.l === 'son-dakika' && Date.now() - +new Date(n.at) < 2 * 3600e3)
   if (sd && hot.length) {
-    const a = sd.querySelector<HTMLAnchorElement>('[data-sd-link]'), t = sd.querySelector('[data-sd-time]')
-    sd.dataset.items = JSON.stringify(hot.map((n) => ({ t: n.t, h: BASE + n.h, at: saat(n.at) })))
-    if (a && a.getAttribute('href') !== BASE + hot[0].h) { a.textContent = hot[0].t; a.href = BASE + hot[0].h; if (t) t.textContent = saat(hot[0].at) }
+    const yeni = JSON.stringify(hot.map((n) => ({ t: n.t, h: BASE + n.h, at: saat(n.at) })))
+    if (sd.dataset.items !== yeni) { sd.dataset.items = yeni; sd.dispatchEvent(new Event('sd-yenile')) }
   }
 }
 

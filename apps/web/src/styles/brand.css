@@ -85,11 +85,17 @@ h3{font-weight:700}
 /* breaking strip */
 .sd{background:var(--black);color:var(--white);height:40px}
 .sd .wrap{height:40px;display:flex;align-items:center;gap:12px}
-.sd a{display:block;height:40px;line-height:40px;color:var(--white);text-decoration:none;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
-.sd a:hover{text-decoration:underline}
-.sd .t{font-family:var(--f-mono);font-size:14px;color:#B4B7BB;flex:none}
-.sd .nv{display:flex;flex:none}
-.sd .nv button{width:40px;height:40px;background:transparent;border:0;color:var(--white);cursor:pointer;display:grid;place-items:center}
+.sd .lbl{position:relative;z-index:1;flex:none}
+.sd-kay{flex:1;min-width:0;overflow:hidden;height:40px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 40px),transparent)}
+.sd-ray{display:inline-flex;white-space:nowrap;height:40px;align-items:center;animation:sd-ak var(--sure,40s) linear infinite;will-change:transform}
+.sd-ray .sd-kopya{display:inline-flex}
+.sd-kay:hover .sd-ray,.sd-kay:focus-within .sd-ray{animation-play-state:paused}
+.sd-ray a{display:inline-flex;align-items:center;gap:10px;height:40px;padding-right:40px;color:var(--white);text-decoration:none;font-weight:600;font-size:15px}
+.sd-ray a::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--orange);margin-left:30px}
+.sd-ray a:hover{text-decoration:underline}
+.sd-ray .t{font-family:var(--f-mono);font-size:14px;font-weight:400;color:#B4B7BB}
+@keyframes sd-ak{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.sd-ray{animation:none}.sd-ray .sd-kopya{display:none}.sd-kay{overflow-x:auto;-webkit-mask-image:none;mask-image:none}}
 .sd .fade{animation:fd var(--t2) var(--ease)}
 @keyframes fd{from{opacity:0}}
 
