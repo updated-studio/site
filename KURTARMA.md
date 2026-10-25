@@ -30,6 +30,9 @@ Bu dosya, Claude'a ya da bir kişiye erişilemese bile sistemi ayakta tutmak ve 
 - **Stüdyo'da rol değişti ama panele yansımadı / veritabanı yeniden kurulduysa:** tetikleyicinin izni (bir kez): `sudo docker exec -i supabase-db psql -U supabase_admin -d postgres -c "grant usage on schema payload to postgres; grant select, update (role, name, enable_a_p_i_key, api_key, api_key_index) on payload.users to postgres; grant select, delete on payload.users_sessions to postgres"`.
 - **Okurlar giriş yapamıyor / kayıt e-postası gelmiyor:** `sudo docker logs --tail 50 supabase-uye-auth`; servis kapalıysa `cd /opt/updated/supabase && sudo docker compose up -d uye-auth`. Ayarları yeniden yazmak: `sudo bash /opt/updated/site/deploy/altyapi/uye/kur.sh`.
 - **Yorumlar yüklenmiyor:** panel uçları `/api/uye/*` (`apps/cms/src/endpoints/uye.ts`); `journalctl -u updated-panel -n 50 | grep uye`.
+- **İlk bakılacak yer:** Stüdyo → profil menüsü → **Sistem durumu** (yöneticiler). Sunucu 5 dk'da bir özet yazar: `sudo updated-durum` (elle), `systemctl status updated-durum.timer`, çıktı `/var/lib/updated-durum/durum.json`. Kurulum: `sudo bash deploy/altyapi/durum/kur.sh`.
+- **Telefon bildirimi gelmiyor:** kişi Profilim'de "Bu cihaza bildirim"i açmış mı (iPhone'da Stüdyo ana ekrana eklenmiş olmalı)? Gönderen `notify-email` fonksiyonu; anahtarlar `/opt/updated/supabase/functions.env` (VAPID_*). Dosya değişince `cd /opt/updated/supabase && sudo docker compose up -d functions` (restart yetmez). Kayıtlar `public.push_abonelikleri`.
+- **Takvim aboneliği boş/eski:** fonksiyon `takvim` (`?k=` kişinin anahtarı, `public.takvim_anahtarlari`); takvim uygulamaları saatte bir çeker. Kişi Takvim'de "Bağlantıyı yenile" ile yeni bağlantı alabilir.
 - **Sunucu yeniden başladı:** her şey kendiliğinden açılır (Docker ve servisler otomatik). Claude: `claude-sunucu`.
 
 ## Yedekten geri kurma (özet)
