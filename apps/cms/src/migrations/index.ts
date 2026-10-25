@@ -2,6 +2,7 @@ import * as migration_20261022_171249_ilk_kurulum from './20261022_171249_ilk_ku
 import * as migration_20261024_145308_uye_topluluk from './20261024_145308_uye_topluluk';
 import * as migration_20261024_161937_uye_giris_ayar from './20261024_161937_uye_giris_ayar';
 import * as migration_20261024_205512_uye_unvan from './20261024_205512_uye_unvan';
+import * as migration_20261025_155645_urun_turleri from './20261025_155645_urun_turleri';
 
 export const migrations = [
   {
@@ -22,6 +23,11 @@ export const migrations = [
   {
     up: migration_20261024_205512_uye_unvan.up,
     down: migration_20261024_205512_uye_unvan.down,
-    name: '20261024_205512_uye_unvan'
+    name: '20261024_205512_uye_unvan',
+  },
+  {
+    up: migration_20261025_155645_urun_turleri.up,
+    down: migration_20261025_155645_urun_turleri.down,
+    name: '20261025_155645_urun_turleri'
   },
 ];

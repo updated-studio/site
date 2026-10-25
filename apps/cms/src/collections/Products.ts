@@ -4,6 +4,7 @@ import { slugField } from '../fields/slug'
 import { seoFields } from '../fields/seo'
 import { autoSeo } from '../hooks/autoSeo'
 import { revalidate } from '../hooks/revalidate'
+import { sablonSatirlari } from '../lib/urunSablon'
 
 /**
  * KÜNYE — ürün veritabanı. Her değer kaynağı ve tarihiyle tutulur (üretici beyanı, Updated ölçümü, sızıntı…).
@@ -20,9 +21,11 @@ export const Products: CollectionConfig = {
     slugField('name'),
     {
       type: 'row', fields: [
-        { name: 'type', type: 'select', label: 'Tür (söküm çizimi)', required: true, options: [
-          { label: 'Telefon', value: 'phone' }, { label: 'Dron', value: 'drone' }, { label: '360/aksiyon kamera', value: 'cam360' }, { label: 'Kamera', value: 'camera' },
-          { label: 'Kumanda/konsol', value: 'pad' }, { label: 'Ses', value: 'audio' }, { label: 'Bilgisayar', value: 'laptop' }, { label: 'Diğer', value: 'other' } ] },
+        { name: 'type', type: 'select', label: 'Tür', required: true, admin: { description: 'Teknik özellik şablonunu belirler (lib/urunSablon.ts); özellik listesi boşken tür seçilince şablon dolar.' }, options: [
+          { label: 'Kamera', value: 'camera' }, { label: 'Lens', value: 'lens' }, { label: 'Dron', value: 'drone' }, { label: '360/aksiyon kamera', value: 'cam360' }, { label: 'Telefon', value: 'phone' },
+          { label: 'Gimbal', value: 'gimbal' }, { label: 'Işık', value: 'light' }, { label: 'Mikrofon', value: 'mic' }, { label: 'Kulaklık', value: 'headphones' },
+          { label: 'Bilgisayar', value: 'laptop' }, { label: 'Tablet', value: 'tablet' }, { label: 'Akıllı saat', value: 'watch' }, { label: 'Kumanda/konsol', value: 'pad' },
+          { label: 'Ses (diğer)', value: 'audio' }, { label: 'Aksesuar', value: 'accessory' }, { label: 'Diğer', value: 'other' } ] },
         { name: 'category', type: 'relationship', relationTo: 'categories', label: 'Kategori' },
       ],
     },
@@ -69,7 +72,9 @@ export const Products: CollectionConfig = {
     { name: 'path', type: 'text', admin: { position: 'sidebar', readOnly: true } },
   ],
   hooks: {
-    beforeChange: [autoSeo({ title: (d) => `${d.name} künyesi: özellikler ve haberler`, desc: (d) => d.blurb || `${d.name} için kaynaklı teknik veriler, ilgili haberler ve incelemeler.`, entities: (d) => [d.brand, d.name] }), ({ data }) => { if (data.slug) data.path = `/urun/${data.slug}`; return data }],
+    beforeChange: [autoSeo({ title: (d) => `${d.name} künyesi: özellikler ve haberler`, desc: (d) => d.blurb || `${d.name} için kaynaklı teknik veriler, ilgili haberler ve incelemeler.`, entities: (d) => [d.brand, d.name] }), ({ data }) => { if (data.slug) data.path = `/urun/${data.slug}`; return data },
+      // Özellik listesi boşsa (yeni ürün ya da tür ilk kez seçildi) türün şablonu dolar; dolu listeye dokunulmaz
+      ({ data, originalDoc }) => { const mevcut = data.specs ?? originalDoc?.specs; if (data.type && (!mevcut || !mevcut.length)) data.specs = sablonSatirlari(data.type); return data }],
     afterChange: [revalidate((d) => [d.path].filter(Boolean))],
   },
 }
