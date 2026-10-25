@@ -83,7 +83,17 @@
 - **23 Ekim 2026** (Fatih'in Claude'u): Görseller yeni kaliteyle yeniden üretildi (537/537). Stüdyo'da etiket kuralı (en fazla 3, izinli liste) ve otomatik taslak ataması duraklatıldı (Stüdyo deposu; Edge Function yayını için `SUPABASE_ACCESS_TOKEN` secret'ı bekleniyor). Eski site raporu: `deploy/rapor` (çıktı `raporlar` dalında). Bu dosya ve `CLAUDE.md` eklendi.
 - **22 Ekim 2026** (Fatih'in Claude'u): WordPress taşıması, görsel onarımı, kurumsal sayfalar, eski adres yönlendirmeleri, panel Türkçe + logo, yayın anahtarı.
 
+## Ertelenenler (kullanıcı, 25 Ekim 2026: "sonraya bırak")
+- Yedek: `YEDEK_SIFRESI` (Fatih belirler) + Natro dışı ikinci kopya (Sıradaki işler 2-3).
+- Cloudflare (ücretsiz; artı/eksi 25 Ekim'de anlatıldı).
+- Stüdyo'nun eski GitHub Pages kopyasını kapatmak (https://github.com/updated-studio/studio/settings/pages → Unpublish).
+- Şirket unvanı, adresi, MERSİS: üyelik sözleşmesi ve aydınlatma metnine "veri sorumlusu" olarak.
+- Taslak puanlama "algoritması" konuşması; editörlere kategoriye göre atama (kim hangi konu netleşince açılacak).
+- Fotoğrafçılık bölümü yeni tasarımı (Fatih ile).
+- Yol haritası Panel/altyapı (5) "offocus"tan özellik listesi çekme: kaynağın ne olduğu sorulacak.
+
 ## Yol haritası (Fatih, 23 Ekim 2026; altyapı temelleri bittikten sonra sırayla)
+Durum 25 Ekim: Görsel 1 ✅ (panel kit görünümü, sonra Stüdyo'ya taşındı), 5 ✅ (logo temaya göre), 6 ✅ (kit 1.3 + cam, denetim temiz); Otomasyon 3-4 ✅; Panel/altyapı 1 ✅, 3 ✅ (kendi önlemler; Cloudflare ertelendi), 4 ✅ (ekipman profilde, seviyeler sürüm adlı).
 Görsel: (1) Payload panel görünümü · (2) Stüdyo İçerik tasarım aracı: ana şablon kararı + yeni örnekler · (3) site arayüzü eksikleri, (3b) sonra geliştirme · (4) kategori/haber sayfalarında boş sağ sütun: reklam, önerilenler, günün önerisi, reels · (5) temaya göre ters logo · (6) marka kitinin sitenin tamamına uygulanması.
 Otomasyon: (1) ✅ Stüdyo ↔ Payload tam bağlantı, tek kullanıcı girişi (24 Ekim) · (2) ✅ taslak Payload'a tam hazır gelir (SEO, GEO, adres, metadata, zorunlu düzenlemeler) (24 Ekim; taslak birikmesi: günde 30 + 2 gün süre dolumu) · (3) tasarım aracına düşen haberin türü Story/Post'u belirler · (4) siteye eklenen haber Stüdyo tasarım aracına düşer (hangi editör girdiyse onda).
 Panel/altyapı: (1) hızlı yorum + üyelik, puan kazanma · (2) panelde sitenin ayrıntılı ayarları · (3) kullanıcı sistemi (bot koruması, güvenlik) · (4) profillere ekipman ilerlemesi (kamera → lens → gimbal) · (5) "offocus"tan özellik listesi çekme.
