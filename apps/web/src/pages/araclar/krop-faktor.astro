@@ -9,6 +9,18 @@ const SENSOR: [string, number][] = [['Full frame (35 mm)', 1], ['APS-C · Sony, 
     <label for="kr-odak">Odak uzaklığı (mm)<input id="kr-odak" type="number" inputmode="decimal" min="1" max="2000" value="35" /></label>
     <label for="kr-f">Diyafram (f/)<input id="kr-f" type="number" inputmode="decimal" min="0.7" max="64" step="0.1" value="1.8" /></label>
   </form>
+  <svg class="kr-sahne" data-sahne viewBox="0 0 360 240" role="img" aria-label="Seçilen sensörün kadrajı full frame kadrajın içinde">
+    <defs><linearGradient id="kr-gok" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5B8FD6" /><stop offset="1" stop-color="#F3C08A" /></linearGradient>
+      <mask id="kr-maske"><rect width="360" height="240" fill="#fff" /><rect data-delik fill="#000" /></mask></defs>
+    <rect width="360" height="240" fill="url(#kr-gok)" />
+    <circle cx="282" cy="62" r="18" fill="#FFE2A8" />
+    <path d="M0 170 L60 110 L110 150 L170 85 L240 160 L300 120 L360 165 L360 240 L0 240Z" fill="#4A5A6E" />
+    <path d="M0 200 L80 165 L150 190 L230 170 L300 195 L360 180 L360 240 L0 240Z" fill="#2E3A47" />
+    <g fill="#14181D"><circle cx="180" cy="150" r="9" /><path d="M168 160 h24 l4 40 h-32Z" /><rect x="186" y="164" width="22" height="12" rx="2" /></g>
+    <rect width="360" height="240" fill="rgb(0 0 0 / .55)" mask="url(#kr-maske)" />
+    <g data-cerceveler fill="none"></g>
+  </svg>
+  <div class="kr-boy" data-boy aria-hidden="true"></div>
   <div class="arac-sonuc" data-sonuc aria-live="polite"></div>
   <Fragment slot="nasil">
     <h2>Krop faktör ne işe yarar?</h2>
@@ -26,5 +38,17 @@ const SENSOR: [string, number][] = [['Full frame (35 mm)', 1], ['APS-C · Sony, 
     out.innerHTML = `<div class="arac-ikili"><div class="arac-buyuk"><span class="label">Full frame karşılığı</span><b>${sayi(mm * k)} mm</b><span class="meta">Köşegen görüş açısı ${sayi(fov, 1)}°</span></div>
       <div class="arac-buyuk"><span class="label">Alan derinliği karşılığı</span><b>f/${sayi(fs * k, 1)}</b><span class="meta">Pozlama değişmez: f/${sayi(fs, 1)}</span></div></div>`
   }
-  f.addEventListener('input', ciz); ciz()
+  // Kadraj ve sensör boyutu çizimi
+  const SENSORLER: [string, number, number, number][] = [['FF', 1, 36, 24], ['APS-C', 1.5, 23.5, 15.6], ['Canon', 1.6, 22.3, 14.9], ['MFT', 2, 17.3, 13], ['1″', 2.7, 13.2, 8.8], ['GFX', 0.79, 43.8, 32.9], ['S35', 1.43, 24.9, 14], ['Telefon', 3.5, 9.8, 7.4]]
+  const cer = document.querySelector<SVGGElement>('[data-cerceveler]')!, delik = document.querySelector<SVGRectElement>('[data-delik]')!, boy = document.querySelector<HTMLElement>('[data-boy]')!
+  function sahne() {
+    const k = Number((f.querySelector('#kr-sensor') as HTMLSelectElement).value)
+    const kutu = (kk: number) => { const w = 360 / kk, h = 240 / kk; return { x: (360 - w) / 2, y: (240 - h) / 2, w, h } }
+    const s = kutu(Math.max(k, 1)); Object.entries(s).forEach(([a, v]) => delik.setAttribute(a === 'w' ? 'width' : a === 'h' ? 'height' : a, String(v)))
+    cer.innerHTML = SENSORLER.filter(([, kk]) => kk >= 1).map(([ad, kk]) => { const b = kutu(kk), sec = Math.abs(kk - k) < 0.01
+      return `<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" stroke="${sec ? '#FF6B1A' : 'rgb(255 255 255 / .6)'}" stroke-width="${sec ? 2.5 : 1}" stroke-dasharray="${sec ? '' : '4 4'}" /><text x="${b.x + 4}" y="${b.y + 11}" font-size="9" font-family="IBM Plex Mono, monospace" fill="${sec ? '#FF6B1A' : '#fff'}">${ad}</text>` }).join('')
+    const en = 43.8, olcek = 100 / en
+    boy.innerHTML = SENSORLER.map(([ad, kk, w, h]) => `<div class="${Math.abs(kk - k) < 0.01 ? 'sec' : ''}"><i style="width:${(w * olcek).toFixed(1)}%;aspect-ratio:${w}/${h}"></i><span>${ad} · ${String(w).replace('.', ',')}×${String(h).replace('.', ',')} mm</span></div>`).join('')
+  }
+  f.addEventListener('input', () => { ciz(); sahne() }); ciz(); sahne()
 </script>

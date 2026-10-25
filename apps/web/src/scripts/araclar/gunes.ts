@@ -49,3 +49,24 @@ export const ILLER: [string, number, number][] = [
   ['Iğdır', 39.92, 44.04], ['Yalova', 40.65, 29.27], ['Karabük', 41.20, 32.62], ['Kilis', 36.72, 37.12], ['Osmaniye', 37.07, 36.25],
   ['Düzce', 40.84, 31.16],
 ]
+
+/** Güneşin o andaki ufka göre yüksekliği (derece) ve yönü (azimut, kuzeyden derece) */
+export function gunesKonumu(tarih: Date, lat: number, lng: number) {
+  const lw = rad * -lng, phi = rad * lat, d = toDays(tarih)
+  const M = solarMeanAnomaly(d), L = eclipticLongitude(M)
+  const dec = declination(L), ra = Math.atan2(Math.sin(L) * Math.cos(e), Math.cos(L))
+  const H = rad * (280.16 + 360.9856235 * d) - lw - ra
+  const yukseklik = Math.asin(Math.sin(phi) * Math.sin(dec) + Math.cos(phi) * Math.cos(dec) * Math.cos(H))
+  const azimut = Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(phi) - Math.tan(dec) * Math.cos(phi))
+  return { yukseklik: yukseklik / rad, azimut: (azimut / rad + 180) % 360 }
+}
+
+/** Güneş yüksekliğine göre gökyüzü rengi ve ışık adı (çizelge ve önizleme için) */
+export function gokyuzu(h: number): { ad: string; ust: string; alt: string; isik: string } {
+  if (h < -6) return { ad: 'Gece', ust: '#0B1026', alt: '#1A2140', isik: '#0B1026' }
+  if (h < -4) return { ad: 'Mavi saat', ust: '#16295E', alt: '#3B5BA9', isik: '#2F4F9E' }
+  if (h < 0) return { ad: 'Altın saat', ust: '#3B4E8C', alt: '#F08A4B', isik: '#E9824A' }
+  if (h < 6) return { ad: 'Altın saat', ust: '#6E8FC9', alt: '#FFB25B', isik: '#FFA94D' }
+  if (h < 20) return { ad: 'Gündüz (yumuşak)', ust: '#5B9BE0', alt: '#BFDDF5', isik: '#F6E7B8' }
+  return { ad: 'Gündüz (sert ışık)', ust: '#3F87DA', alt: '#A9D3F5', isik: '#FFFFFF' }
+}

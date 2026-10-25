@@ -468,3 +468,45 @@ main{overflow-x:clip}
 .sheet-kat{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;padding:16px 0;border-bottom:1px solid var(--line)}
 .sheet-kat .label{grid-column:1/-1;color:var(--text-3);padding-bottom:4px}
 .sheet .sheet-kat a{font-family:var(--f-body);font-weight:600;font-size:16px;text-transform:none;border:0;padding:8px 0}
+/* Altın saat sahnesi ve gün çizelgesi */
+.gs-sahne{position:relative;height:220px;overflow:hidden;border-radius:14px;isolation:isolate}
+.gs-gok{position:absolute;inset:0;transition:background var(--t3) var(--ease)}
+.gs-yay{position:absolute;left:0;right:0;bottom:22%;height:64%;width:100%}
+.gs-gunes{position:absolute;width:34px;height:34px;margin-left:-17px;margin-bottom:-17px;border-radius:50%;box-shadow:0 0 30px 10px rgb(255 190 90 / .55);transition:left 80ms linear,bottom 80ms linear,opacity var(--t2)}
+.gs-ufuk{position:absolute;left:0;right:0;bottom:0;height:22%;background:linear-gradient(180deg,#22262c,#121417)}
+.gs-ufuk::before{content:"";position:absolute;left:0;right:0;top:-18px;height:20px;background:radial-gradient(60% 100% at 30% 100%,#22262c 60%,transparent 61%),radial-gradient(40% 100% at 75% 100%,#22262c 60%,transparent 61%)}
+.gs-bilgi{position:absolute;left:16px;bottom:14px;display:flex;flex-direction:column;color:#fff;text-shadow:0 1px 3px rgb(0 0 0 / .5)}
+.gs-bilgi b{font-family:var(--f-mono);font-size:32px;line-height:1}
+.gs-bilgi span{font-size:14px;font-weight:600}
+.gs-cizelge{position:relative;display:flex;flex-direction:column;gap:6px}
+.gs-serit{height:18px;border-radius:99px}
+.gs-kaydir{position:absolute;left:0;right:0;top:-6px;width:100%;height:30px;margin:0;background:transparent;-webkit-appearance:none;appearance:none;cursor:pointer}
+.gs-kaydir::-webkit-slider-runnable-track{background:transparent;height:30px}
+.gs-kaydir::-moz-range-track{background:transparent;height:30px}
+.gs-kaydir::-webkit-slider-thumb{-webkit-appearance:none;width:8px;height:30px;border-radius:4px;background:#fff;border:2px solid var(--text);box-shadow:0 2px 6px rgb(0 0 0 / .3)}
+.gs-kaydir::-moz-range-thumb{width:8px;height:30px;border-radius:4px;background:#fff;border:2px solid var(--text)}
+.gs-saatler{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:12px;color:var(--text-3);margin-top:12px}
+/* ND filtre sahnesi */
+.nd-sahne{position:relative;aspect-ratio:800/380;max-width:100%;overflow:hidden;border-radius:14px;background:#0F2C47}
+.nd-sahne canvas{position:absolute;left:0;width:100%;transition:filter var(--t3) var(--ease)}
+.nd-bulut{top:0;height:47.4%}.nd-su{top:47.4%;height:52.6%;transform:scale(1.04)}.nd-on{top:0;height:100%}
+.nd-etiket{position:absolute;left:14px;top:12px;padding:4px 10px;border-radius:99px;background:rgb(0 0 0 / .45);color:#fff;font-size:13px;font-weight:600}
+.nd-merdiven{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.nd-merdiven i{width:18px;height:18px;border-radius:4px;background:#FFD27A;box-shadow:0 0 8px rgb(255 190 90 / .6)}
+.nd-merdiven i.on{background:#2B2F36;box-shadow:none}
+.nd-merdiven span{margin-left:8px;font-size:14px;color:var(--text-2)}
+/* Krop faktör sahnesi ve sensör boyutları */
+.kr-sahne{width:100%;height:auto;border-radius:14px;display:block}
+.kr-boy{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;align-items:end}
+.kr-boy div{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--text-2);font-family:var(--f-mono)}
+.kr-boy i{display:block;max-width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:3px}
+.kr-boy .sec i{background:rgb(255 107 26 / .25);border-color:var(--orange)}
+.kr-boy .sec{color:var(--text);font-weight:600}
+/* SD kart ve baskı sahneleri */
+.sd-gorsel{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.sd-kart{width:110px;height:auto;flex:none}
+.sd-serit-k{flex:1;min-width:200px;display:flex;flex-direction:column;gap:8px}
+.sd-serit{display:flex;flex-wrap:wrap;gap:3px}
+.sd-serit i{width:12px;height:12px;border-radius:3px;background:rgb(255 107 26 / .55)}
+.sd-serit i.saat{background:var(--orange)}
+.bk-sahne{width:100%;height:auto;border-radius:14px;display:block}

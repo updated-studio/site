@@ -10,6 +10,13 @@ const ND: [string, number][] = [['ND2 (1 stop)', 1], ['ND4 (2 stop)', 2], ['ND8 
     <label for="nd-filtre">ND filtre<select id="nd-filtre">{ND.map(([a, s]) => <option value={s} selected={s === 10}>{a}</option>)}</select></label>
     <label for="nd-ek">İkinci filtre (üst üste)<select id="nd-ek"><option value="0">Yok</option>{ND.map(([a, s]) => <option value={s}>{a}</option>)}</select></label>
   </form>
+  <div class="nd-sahne" aria-hidden="true">
+    <canvas class="nd-bulut" data-bulut width="800" height="180"></canvas>
+    <canvas class="nd-su" data-su width="800" height="200"></canvas>
+    <canvas class="nd-on" data-on width="800" height="380"></canvas>
+    <span class="nd-etiket" data-etiket></span>
+  </div>
+  <div class="nd-merdiven" data-merdiven aria-hidden="true"></div>
   <div class="arac-sonuc" data-sonuc aria-live="polite"></div>
   <Fragment slot="nasil">
     <h2>Nasıl kullanılır?</h2>
@@ -40,5 +47,31 @@ const ND: [string, number][] = [['ND2 (1 stop)', 1], ['ND4 (2 stop)', 2], ['ND8 
       tik(); sayac = window.setInterval(tik, 1000)
     })
   }
-  f.addEventListener('change', ciz); ciz()
+  // Sahne: deniz, bulutlar ve kayalar çizilir; enstantane uzadıkça su ve bulutlar bulanıklaşır (uzun pozlama etkisi)
+  const ciz2 = (c: HTMLCanvasElement, f2: (x: CanvasRenderingContext2D, w: number, h: number) => void) => { const x = c.getContext('2d')!; f2(x, c.width, c.height) }
+  ciz2(document.querySelector('[data-bulut]')!, (x, w, h) => {
+    const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#4D74B8'); g.addColorStop(1, '#F2B37A'); x.fillStyle = g; x.fillRect(0, 0, w, h)
+    for (let i = 0; i < 9; i++) { x.fillStyle = `rgba(255,255,255,${0.35 + (i % 3) * 0.15})`; x.beginPath(); x.ellipse(60 + i * 95, 40 + (i % 4) * 25, 70, 16 + (i % 2) * 8, 0, 0, Math.PI * 2); x.fill() }
+  })
+  ciz2(document.querySelector('[data-su]')!, (x, w, h) => {
+    const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#2C5D8F'); g.addColorStop(1, '#0F2C47'); x.fillStyle = g; x.fillRect(0, 0, w, h)
+    for (let y = 6; y < h; y += 7) { x.strokeStyle = `rgba(255,255,255,${0.12 + Math.random() * 0.35})`; x.lineWidth = 1 + Math.random() * 2; x.beginPath(); for (let i = 0; i <= w; i += 10) x.lineTo(i, y + Math.sin(i / (14 + y / 10) + y) * 3); x.stroke() }
+    for (let i = 0; i < 160; i++) { x.fillStyle = 'rgba(255,255,255,.85)'; x.fillRect(Math.random() * w, Math.random() * h, 2 + Math.random() * 5, 1.5) }
+  })
+  ciz2(document.querySelector('[data-on]')!, (x, w, h) => {
+    x.fillStyle = '#15181C'
+    x.beginPath(); x.moveTo(0, h); x.lineTo(0, 250); x.lineTo(70, 215); x.lineTo(150, 240); x.lineTo(210, 300); x.lineTo(260, h); x.fill()
+    x.beginPath(); x.moveTo(w, h); x.lineTo(w, 230); x.lineTo(700, 205); x.lineTo(630, 260); x.lineTo(560, 300); x.lineTo(520, h); x.fill()
+    x.beginPath(); x.ellipse(400, 330, 60, 26, 0, Math.PI, 0); x.fill()
+  })
+  const su = document.querySelector<HTMLElement>('[data-su]')!, bulut = document.querySelector<HTMLElement>('[data-bulut]')!, etiket = document.querySelector<HTMLElement>('[data-etiket]')!, merdiven = document.querySelector<HTMLElement>('[data-merdiven]')!
+  function sahne() {
+    const t0 = deger((f.querySelector('#nd-hiz') as HTMLSelectElement).value)
+    const stop = Number((f.querySelector('#nd-filtre') as HTMLSelectElement).value) + Number((f.querySelector('#nd-ek') as HTMLSelectElement).value)
+    const t = t0 * 2 ** stop, k = Math.max(0, Math.min(1, (Math.log2(t) + 7) / 12)) // 1/125 sn → 0, ~30 sn → 1
+    su.style.filter = `blur(${(k * 14).toFixed(1)}px)`; bulut.style.filter = `blur(${(Math.max(0, k - 0.45) * 22).toFixed(1)}px)`
+    etiket.textContent = k < 0.2 ? 'Hareket donuyor' : k < 0.5 ? 'Su yumuşamaya başlıyor' : k < 0.8 ? 'İpeksi su' : 'Sis gibi su, akan bulutlar'
+    merdiven.innerHTML = Array.from({ length: 16 }, (_, i) => `<i class="${i < Math.round(stop) ? 'on' : ''}" title="${i + 1}. stop"></i>`).join('') + `<span>${Math.round(stop)} stop: ışığın ${Math.round(2 ** stop).toLocaleString('tr-TR')}'de biri geçiyor</span>`
+  }
+  f.addEventListener('change', () => { ciz(); sahne() }); ciz(); sahne()
 </script>

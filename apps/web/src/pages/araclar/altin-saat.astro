@@ -10,6 +10,18 @@ const siralı = [...ILLER].sort((a, b) => a[0].localeCompare(b[0], 'tr'))
     <label for="as-tarih">Tarih<input id="as-tarih" name="tarih" type="date" /></label>
     <button type="button" class="btn" data-konum>Konumumu kullan</button>
   </form>
+  <div class="gs-sahne" data-sahne aria-hidden="true">
+    <div class="gs-gok" data-gok></div>
+    <svg class="gs-yay" viewBox="0 0 1000 300" preserveAspectRatio="none"><path d="M0 260 Q500 -60 1000 260" fill="none" stroke="rgb(255 255 255 / .35)" stroke-width="2" stroke-dasharray="6 8" /></svg>
+    <div class="gs-gunes" data-gunes></div>
+    <div class="gs-ufuk"></div>
+    <div class="gs-bilgi"><b data-saat>—</b><span data-isik>—</span></div>
+  </div>
+  <div class="gs-cizelge">
+    <div class="gs-serit" data-serit></div>
+    <input class="gs-kaydir" type="range" min="0" max="1439" step="1" value="720" data-kaydir aria-label="Saat seç (gün çizelgesi)" />
+    <div class="gs-saatler" aria-hidden="true"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>
+  </div>
   <div class="arac-sonuc" data-sonuc aria-live="polite"><p class="meta">Hesaplanıyor…</p></div>
   <Fragment slot="nasil">
     <h2>Altın saat ve mavi saat nedir?</h2>
@@ -19,7 +31,7 @@ const siralı = [...ILLER].sort((a, b) => a[0].localeCompare(b[0], 'tr'))
   </Fragment>
 </AracSayfa>
 <script>
-  import { gunesSaatleri, ILLER } from '../../scripts/araclar/gunes'
+  import { gunesSaatleri, gunesKonumu, gokyuzu, ILLER } from '../../scripts/araclar/gunes'
   const f = document.querySelector<HTMLFormElement>('[data-altin]')!, out = document.querySelector<HTMLElement>('[data-sonuc]')!
   const il = f.querySelector<HTMLSelectElement>('#as-il')!, tarih = f.querySelector<HTMLInputElement>('#as-tarih')!
   const saat = (d: Date) => isNaN(+d) ? '—' : d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Istanbul' })
@@ -27,7 +39,7 @@ const siralı = [...ILLER].sort((a, b) => a[0].localeCompare(b[0], 'tr'))
   try { il.value = localStorage.getItem('up-arac-il') || il.value } catch { /* depolama kapalı */ }
   tarih.value = bugun
   let ozel: [number, number] | null = null
-  function ciz() {
+  let ciz = function () {
     const [ad, lat, lng] = ozel ? ['Konumun', ozel[0], ozel[1]] as const : ILLER.find((x) => x[0] === il.value)!
     const g = gunesSaatleri(new Date(tarih.value + 'T12:00:00+03:00'), lat, lng), o = g.olaylar
     const sat = (b: string, a: Date, c: Date, s: string) => `<div class="as-sat ${s}"><span>${b}</span><b>${saat(a)} – ${saat(c)}</b></div>`
@@ -38,8 +50,33 @@ const siralı = [...ILLER].sort((a, b) => a[0].localeCompare(b[0], 'tr'))
       </div>
       <p class="meta">Öğle (güneş en tepede): ${saat(g.ogle)} · Gün uzunluğu: ${Math.floor((+g.batis - +g.dogus) / 36e5)} sa ${Math.round(((+g.batis - +g.dogus) % 36e5) / 6e4)} dk</p>`
   }
+  // Gün çizelgesi: 5 dakikada bir güneş yüksekliğine göre renk; kaydırınca sahne (gökyüzü, güneşin yayı, ışık adı) değişir
+  const serit = document.querySelector<HTMLElement>('[data-serit]')!, kaydir = document.querySelector<HTMLInputElement>('[data-kaydir]')!
+  const gok = document.querySelector<HTMLElement>('[data-gok]')!, gunes = document.querySelector<HTMLElement>('[data-gunes]')!
+  const saatEl = document.querySelector<HTMLElement>('[data-saat]')!, isikEl = document.querySelector<HTMLElement>('[data-isik]')!
+  const konum = () => (ozel ? [ozel[0], ozel[1]] : ILLER.find((x) => x[0] === il.value)!.slice(1)) as [number, number]
+  const an = (dk: number) => new Date(`${tarih.value}T${String(Math.floor(dk / 60)).padStart(2, '0')}:${String(dk % 60).padStart(2, '0')}:00+03:00`)
+  function cizelge() {
+    const [la, lo] = konum(), duraklar: string[] = []
+    for (let dk = 0; dk <= 1440; dk += 10) duraklar.push(`${gokyuzu(gunesKonumu(an(Math.min(dk, 1439)), la, lo).yukseklik).isik} ${(dk / 1440 * 100).toFixed(2)}%`)
+    serit.style.background = `linear-gradient(90deg, ${duraklar.join(',')})`
+    sahne()
+  }
+  function sahne() {
+    const [la, lo] = konum(), dk = Number(kaydir.value), p = gunesKonumu(an(dk), la, lo), g = gokyuzu(p.yukseklik)
+    gok.style.background = `linear-gradient(180deg, ${g.ust}, ${g.alt})`
+    const x = dk / 1439, y = Math.max(-0.15, Math.min(1, p.yukseklik / 60))
+    gunes.style.left = `${x * 100}%`; gunes.style.bottom = `${22 + y * 64}%`; gunes.style.opacity = p.yukseklik < -8 ? '0' : '1'
+    gunes.style.background = g.isik === '#FFFFFF' ? '#FFF6D5' : g.isik
+    saatEl.textContent = `${String(Math.floor(dk / 60)).padStart(2, '0')}.${String(dk % 60).padStart(2, '0')}`
+    isikEl.textContent = `${g.ad} · güneş ${p.yukseklik.toFixed(1).replace('.', ',')}°`
+  }
+  kaydir.addEventListener('input', sahne)
+  { const sim = new Date(); const ist = new Date(sim.toLocaleString('en-US', { timeZone: 'Europe/Istanbul' })); kaydir.value = String(ist.getHours() * 60 + ist.getMinutes()) }
+  const eskiCiz = ciz
+  ciz = () => { eskiCiz(); cizelge() }
   il.addEventListener('change', () => { ozel = null; try { localStorage.setItem('up-arac-il', il.value) } catch { /* */ } ciz() })
-  tarih.addEventListener('change', ciz)
+  tarih.addEventListener('change', () => ciz())
   f.querySelector('[data-konum]')!.addEventListener('click', () => navigator.geolocation?.getCurrentPosition((p) => { ozel = [p.coords.latitude, p.coords.longitude]; ciz() }, () => { out.insertAdjacentHTML('afterbegin', '<p class="meta">Konum alınamadı; listeden il seç.</p>') }))
   ciz()
 </script>

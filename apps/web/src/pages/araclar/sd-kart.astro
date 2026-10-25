@@ -10,6 +10,15 @@ const KAPASITE = [32, 64, 128, 256, 512, 1000, 2000]
     <label for="sd-mbps" data-ozel hidden>Bit hızı (Mbps)<input id="sd-mbps" type="number" inputmode="numeric" min="1" value="150" /></label>
     <label for="sd-gb">Kart kapasitesi<select id="sd-gb">{KAPASITE.map((g) => <option value={g} selected={g === 128}>{g >= 1000 ? `${g / 1000} TB` : `${g} GB`}</option>)}</select></label>
   </form>
+  <div class="sd-gorsel" aria-hidden="true">
+    <svg class="sd-kart" viewBox="0 0 120 160"><path d="M14 4 H96 L116 24 V152 a4 4 0 0 1 -4 4 H8 a4 4 0 0 1 -4 -4 V14 Z" fill="#23272E" stroke="#3A3F47" stroke-width="2" />
+      <clipPath id="sd-ic"><path d="M14 4 H96 L116 24 V152 a4 4 0 0 1 -4 4 H8 a4 4 0 0 1 -4 -4 V14 Z" /></clipPath>
+      <rect data-dolu clip-path="url(#sd-ic)" x="0" width="120" fill="#FF6B1A" opacity=".85" y="160" height="0" />
+      <g fill="#C9A24A">{[0, 1, 2, 3, 4, 5].map((i) => <rect x={22 + i * 13} y="12" width="8" height="18" rx="1" />)}</g>
+      <text data-kap x="60" y="96" text-anchor="middle" font-size="18" font-weight="700" fill="#fff" font-family="IBM Plex Sans, sans-serif"></text>
+      <text data-sinif x="60" y="118" text-anchor="middle" font-size="11" fill="#fff" font-family="IBM Plex Mono, monospace"></text></svg>
+    <div class="sd-serit-k"><div class="sd-serit" data-serit></div><span class="meta" data-serit-yazi></span></div>
+  </div>
   <div class="arac-sonuc" data-sonuc aria-live="polite"></div>
   <Fragment slot="nasil">
     <h2>Hesap nasıl yapılıyor?</h2>
@@ -29,5 +38,22 @@ const KAPASITE = [32, 64, 128, 256, 512, 1000, 2000]
     out.innerHTML = `<div class="arac-ikili"><div class="arac-buyuk"><span class="label">Kayıt süresi</span><b>${sa ? `${sa} sa ` : ''}${kalanDk} dk</b><span class="meta">${mbps} Mbps · saatte ${((mbps * 3600) / 8000).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} GB</span></div>
       <div class="arac-buyuk"><span class="label">Önerilen kart</span><b>${sinif[0]}</b><span class="meta">${sinif[1]}</span></div></div>`
   }
-  f.addEventListener('input', ciz); f.addEventListener('change', ciz); ciz()
+  // Kart çizimi: kayıt süresi boyunca dolan kart, saat saat şerit (her kutu 10 dakika)
+  const dolu = document.querySelector<SVGRectElement>('[data-dolu]')!, kap = document.querySelector<SVGTextElement>('[data-kap]')!, sinifEl = document.querySelector<SVGTextElement>('[data-sinif]')!
+  const serit = document.querySelector<HTMLElement>('[data-serit]')!, seritYazi = document.querySelector<HTMLElement>('[data-serit-yazi]')!
+  let anim = 0
+  function sahne() {
+    const mbps = kodek.value === 'ozel' ? Number(mbpsI.value) : Number(kodek.value), gb = Number((f.querySelector('#sd-gb') as HTMLSelectElement).value)
+    if (!mbps) return
+    const dk = (gb * 0.93 * 8000) / mbps / 60
+    kap.textContent = gb >= 1000 ? `${gb / 1000} TB` : `${gb} GB`
+    sinifEl.textContent = mbps * 1.25 <= 240 ? 'V30' : mbps * 1.25 <= 480 ? 'V60' : mbps * 1.15 <= 720 ? 'V90' : 'CFexpress'
+    cancelAnimationFrame(anim); const bas = performance.now()
+    const adim = (t: number) => { const p = Math.min(1, (t - bas) / 900); dolu.setAttribute('y', String(160 - 156 * p)); dolu.setAttribute('height', String(156 * p)); if (p < 1) anim = requestAnimationFrame(adim) }
+    anim = requestAnimationFrame(adim)
+    const kutu = Math.min(120, Math.round(dk / 10))
+    serit.innerHTML = Array.from({ length: kutu }, (_, i) => `<i class="${(i + 1) % 6 === 0 ? 'saat' : ''}"></i>`).join('')
+    seritYazi.textContent = `Her kutu 10 dakika${dk > 1200 ? ' (ilk 20 saat gösteriliyor)' : ''}; koyu kutular saat başları.`
+  }
+  f.addEventListener('input', () => { ciz(); sahne() }); f.addEventListener('change', () => { ciz(); sahne() }); ciz(); sahne()
 </script>
