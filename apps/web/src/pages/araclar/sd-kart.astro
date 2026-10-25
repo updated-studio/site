@@ -1,0 +1,33 @@
+---
+import AracSayfa from '../../components/AracSayfa.astro'
+const KODEK: [string, number][] = [['Full HD 30p · H.264 (~25 Mbps)', 25], ['Full HD 60p · H.264 (~50 Mbps)', 50], ['4K 30p · H.264 (~100 Mbps)', 100], ['4K 60p · H.265 (~150 Mbps)', 150], ['4K 60p · XAVC S (~200 Mbps)', 200], ['4K 120p · H.265 (~280 Mbps)', 280], ['4K 60p · XAVC S-I / All-I (~600 Mbps)', 600], ['4K 30p · ProRes 422 HQ (~740 Mbps)', 740], ['8K 30p · H.265 (~400 Mbps)', 400], ['6K · Blackmagic RAW 8:1 (~1000 Mbps)', 1000]]
+const KAPASITE = [32, 64, 128, 256, 512, 1000, 2000]
+---
+<AracSayfa yol="/araclar/sd-kart" baslik="SD kart kayıt süresi" lead="Kartına seçtiğin kalitede kaç dakika video sığar ve hangi hız sınıfı gerekir?"
+  aciklama="SD kart ve CFexpress kayıt süresi hesaplayıcı: 4K, 8K, ProRes ve RAW için dakika hesabı, V30/V60/V90 hız sınıfı önerisi. Ücretsiz.">
+  <form class="arac-form" data-sd onsubmit="return false">
+    <label for="sd-kodek">Kayıt kalitesi<select id="sd-kodek">{KODEK.map(([a, m]) => <option value={m} selected={m === 150}>{a}</option>)}<option value="ozel">Kendim yazacağım…</option></select></label>
+    <label for="sd-mbps" data-ozel hidden>Bit hızı (Mbps)<input id="sd-mbps" type="number" inputmode="numeric" min="1" value="150" /></label>
+    <label for="sd-gb">Kart kapasitesi<select id="sd-gb">{KAPASITE.map((g) => <option value={g} selected={g === 128}>{g >= 1000 ? `${g / 1000} TB` : `${g} GB`}</option>)}</select></label>
+  </form>
+  <div class="arac-sonuc" data-sonuc aria-live="polite"></div>
+  <Fragment slot="nasil">
+    <h2>Hesap nasıl yapılıyor?</h2>
+    <p>Bit hızı saniyede kaydedilen veri miktarıdır (megabit). Kart kapasitesi gigabayt olarak satılır; dosya sistemi ve makinenin ayırdığı alan için kullanılabilir alanı %93 kabul ediyoruz. Ses ve küçük ek dosyalar süreyi birkaç saniye kısaltabilir.</p>
+    <p><b>Hız sınıfı:</b> V30 kart saniyede en az 30 MB (240 Mbps), V60 en az 60 MB (480 Mbps), V90 en az 90 MB (720 Mbps) yazar. Kaydı kesintisiz almak için bit hızının üstünde pay bırakan sınıfı seç; 720 Mbps üstü için genellikle CFexpress kart gerekir.</p>
+  </Fragment>
+</AracSayfa>
+<script>
+  const f = document.querySelector<HTMLFormElement>('[data-sd]')!, out = document.querySelector<HTMLElement>('[data-sonuc]')!
+  const kodek = f.querySelector<HTMLSelectElement>('#sd-kodek')!, ozel = f.querySelector<HTMLElement>('[data-ozel]')!, mbpsI = f.querySelector<HTMLInputElement>('#sd-mbps')!
+  function ciz() {
+    ozel.hidden = kodek.value !== 'ozel'
+    const mbps = kodek.value === 'ozel' ? Number(mbpsI.value) : Number(kodek.value), gb = Number((f.querySelector('#sd-gb') as HTMLSelectElement).value)
+    if (!mbps) { out.innerHTML = '<p class="meta">Bit hızını yaz.</p>'; return }
+    const dk = (gb * 0.93 * 8000) / mbps / 60, sa = Math.floor(dk / 60), kalanDk = Math.round(dk % 60)
+    const sinif = mbps * 1.25 <= 240 ? ['V30', 'UHS-I kartlar yeterli.'] : mbps * 1.25 <= 480 ? ['V60', 'UHS-II kart önerilir.'] : mbps * 1.15 <= 720 ? ['V90', 'UHS-II V90 kart gerekir.'] : ['CFexpress', 'SD kart bu hızı kesintisiz yazamaz; makinen destekliyorsa CFexpress (Type A/B) kullan.']
+    out.innerHTML = `<div class="arac-ikili"><div class="arac-buyuk"><span class="label">Kayıt süresi</span><b>${sa ? `${sa} sa ` : ''}${kalanDk} dk</b><span class="meta">${mbps} Mbps · saatte ${((mbps * 3600) / 8000).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} GB</span></div>
+      <div class="arac-buyuk"><span class="label">Önerilen kart</span><b>${sinif[0]}</b><span class="meta">${sinif[1]}</span></div></div>`
+  }
+  f.addEventListener('input', ciz); f.addEventListener('change', ciz); ciz()
+</script>

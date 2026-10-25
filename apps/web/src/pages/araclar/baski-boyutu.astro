@@ -1,0 +1,31 @@
+---
+import AracSayfa from '../../components/AracSayfa.astro'
+---
+<AracSayfa yol="/araclar/baski-boyutu" baslik="Baskı boyutu hesaplayıcı" lead="Fotoğrafının çözünürlüğünü yaz; kaliteli baskıda en fazla kaç santime çıkabileceğini gör."
+  aciklama="Fotoğraf baskı boyutu hesaplayıcı: megapiksel ya da piksel ölçüsünden 300, 240 ve 150 DPI ile en büyük baskı ölçüsü, standart ebatlar. Ücretsiz.">
+  <form class="arac-form" data-baski onsubmit="return false">
+    <label for="bk-mp">Megapiksel<input id="bk-mp" type="number" inputmode="decimal" min="1" max="400" value="24" /></label>
+    <label for="bk-oran">En-boy oranı<select id="bk-oran"><option value="1.5">3:2 (çoğu fotoğraf makinesi)</option><option value="1.3333">4:3 (telefon, Micro 4/3)</option><option value="1.7778">16:9</option><option value="1">1:1</option><option value="1.25">5:4</option></select></label>
+    <label for="bk-dpi">Kullanım<select id="bk-dpi"><option value="300">Elde bakılan baskı, albüm (300 DPI)</option><option value="240">Duvar baskısı, yakından (240 DPI)</option><option value="150">Poster, 1-2 metreden (150 DPI)</option><option value="100">Büyük poster, uzaktan (100 DPI)</option></select></label>
+  </form>
+  <div class="arac-sonuc" data-sonuc aria-live="polite"></div>
+  <Fragment slot="nasil">
+    <h2>DPI neden önemli?</h2>
+    <p>DPI, baskının her inçine düşen piksel sayısıdır. Elde bakılan fotoğraflarda 300 DPI keskin görünür; duvara asılan ve birkaç adım geriden bakılan baskılarda 150 DPI bile yeterlidir. Çünkü baskıdan uzaklaştıkça göz ayrıntıyı daha az seçer.</p>
+    <p>Hesap fotoğrafın kırpılmadan basıldığı duruma göredir. Fotoğrafı kırparsan megapiksel düşer; kırpılmış dosyanın piksel ölçüsünü bilmiyorsan dosya bilgisinden bakabilirsin (genişlik × yükseklik ÷ 1.000.000 = megapiksel).</p>
+  </Fragment>
+</AracSayfa>
+<script>
+  const f = document.querySelector<HTMLFormElement>('[data-baski]')!, out = document.querySelector<HTMLElement>('[data-sonuc]')!
+  const EBAT: [string, number, number][] = [['10×15', 10, 15], ['13×18', 13, 18], ['15×21 (A5)', 15, 21], ['20×30', 20, 30], ['21×30 (A4)', 21, 29.7], ['30×40', 30, 40], ['30×45', 30, 45], ['40×60', 40, 60], ['50×70', 50, 70], ['60×90', 60, 90], ['70×100', 70, 100]]
+  const cm = (n: number) => n.toLocaleString('tr-TR', { maximumFractionDigits: 0 })
+  function ciz() {
+    const mp = Number((f.querySelector('#bk-mp') as HTMLInputElement).value), oran = Number((f.querySelector('#bk-oran') as HTMLSelectElement).value), dpi = Number((f.querySelector('#bk-dpi') as HTMLSelectElement).value)
+    if (!mp) { out.innerHTML = '<p class="meta">Megapikseli yaz.</p>'; return }
+    const kisa = Math.sqrt((mp * 1e6) / oran), uzun = kisa * oran
+    const kisaCm = (kisa / dpi) * 2.54, uzunCm = (uzun / dpi) * 2.54
+    out.innerHTML = `<div class="arac-buyuk"><span class="label">En büyük baskı (${dpi} DPI)</span><b>${cm(kisaCm)} × ${cm(uzunCm)} cm</b><span class="meta">${Math.round(uzun).toLocaleString('tr-TR')} × ${Math.round(kisa).toLocaleString('tr-TR')} piksel</span></div>
+      <div class="bk-ebat">${EBAT.map(([a, k, u]) => { const ok = k <= kisaCm + 0.5 && u <= uzunCm + 0.5; return `<span class="pill-${ok ? 'ok' : 'no'}">${ok ? '✓' : '✕'} ${a}</span>` }).join('')}</div>`
+  }
+  f.addEventListener('input', ciz); f.addEventListener('change', ciz); ciz()
+</script>

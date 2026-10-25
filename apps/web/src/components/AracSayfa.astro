@@ -1,0 +1,31 @@
+---
+/** Araç sayfası iskeleti: başlık, araç (slot), nasıl kullanılır (slot "nasil"), yan sütunda diğer araçlar ve üyelik önerisi (zorunlu değil). */
+import Base from '../layouts/Base.astro'
+import { ARACLAR } from '../lib/araclar'
+import { SITE } from '../lib/seo'
+interface Props { yol: string; baslik: string; aciklama: string; lead: string }
+const { yol, baslik, aciklama, lead } = Astro.props
+const jsonld = [{ '@context': 'https://schema.org', '@type': 'WebApplication', name: baslik, url: SITE + yol, applicationCategory: 'PhotographyApplication', operatingSystem: 'Web', inLanguage: 'tr-TR', isAccessibleForFree: true, offers: { '@type': 'Offer', price: 0, priceCurrency: 'TRY' }, publisher: { '@id': `${SITE}/#org` } },
+  { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Araçlar', item: `${SITE}/araclar` }, { '@type': 'ListItem', position: 2, name: baslik, item: SITE + yol }] }]
+---
+<Base meta={{ title: `${baslik} | UPDATED`, description: aciklama, path: yol, jsonld }}>
+  <div class="wrap">
+    <div class="art-head" style="max-width:none;padding-bottom:24px"><a class="cat" href="/araclar">Araçlar</a><h1 class="h1">{baslik}</h1><p class="lead" style="margin:0">{lead}</p></div>
+    <div class="with-rail">
+      <div class="arac-ana">
+        <div class="arac"><slot /></div>
+        <div class="prose arac-nasil"><slot name="nasil" /></div>
+      </div>
+      <aside class="rail rail-yan">
+        <div><h4 class="label ys-baslik">Diğer araçlar</h4>
+          <ul class="arac-l">{ARACLAR.filter((a) => a.yol !== yol).map((a) => <li><a href={a.yol}><b>{a.ad}</b><span>{a.aciklama}</span></a></li>)}</ul>
+        </div>
+        <div class="arac-uper" data-uper-oneri>
+          <b>Araçlar herkese açık.</b>
+          <span>Uper olursan ayarlarını hatırlarız, yorum yapar ve puan kazanırsın. Zorunlu değil.</span>
+          <a class="btn" href="/hesap">Uper ol</a>
+        </div>
+      </aside>
+    </div>
+  </div>
+</Base>

@@ -1,0 +1,44 @@
+---
+import AracSayfa from '../../components/AracSayfa.astro'
+const HIZLAR = ['1/8000', '1/4000', '1/2000', '1/1000', '1/500', '1/250', '1/125', '1/60', '1/30', '1/15', '1/8', '1/4', '1/2', '1', '2', '4', '8', '15', '30']
+const ND: [string, number][] = [['ND2 (1 stop)', 1], ['ND4 (2 stop)', 2], ['ND8 (3 stop)', 3], ['ND16 (4 stop)', 4], ['ND32 (5 stop)', 5], ['ND64 (6 stop)', 6], ['ND100 (6,6 stop)', 6.64], ['ND400 (8,6 stop)', 8.64], ['ND1000 (10 stop)', 10], ['ND2000 (11 stop)', 11], ['ND32000 (15 stop)', 15]]
+---
+<AracSayfa yol="/araclar/nd-filtre" baslik="ND filtre hesaplayıcı" lead="Filtresiz ölçtüğün enstantaneyi ve ND filtreni seç; filtreyle kaç saniye pozlaman gerektiğini bul."
+  aciklama="ND filtre pozlama hesaplayıcı: ND8, ND64, ND1000 ve 15 stop filtrelerle yeni enstantane süresi. Uzun pozlama için sayaç. Ücretsiz.">
+  <form class="arac-form" data-nd onsubmit="return false">
+    <label for="nd-hiz">Filtresiz enstantane<select id="nd-hiz">{HIZLAR.map((h) => <option value={h} selected={h === '1/125'}>{h.includes('/') ? h + ' sn' : h + ' sn'}</option>)}</select></label>
+    <label for="nd-filtre">ND filtre<select id="nd-filtre">{ND.map(([a, s]) => <option value={s} selected={s === 10}>{a}</option>)}</select></label>
+    <label for="nd-ek">İkinci filtre (üst üste)<select id="nd-ek"><option value="0">Yok</option>{ND.map(([a, s]) => <option value={s}>{a}</option>)}</select></label>
+  </form>
+  <div class="arac-sonuc" data-sonuc aria-live="polite"></div>
+  <Fragment slot="nasil">
+    <h2>Nasıl kullanılır?</h2>
+    <p>Önce filtresiz, doğru pozlanmış bir kare için enstantaneyi ölç (diyafram ve ISO aynı kalacak). Sonra filtreni seç: her stop ışığı yarıya indirir, enstantane iki katına çıkar. 10 stop filtre ışığı 1024'te bire düşürür; 1/125 sn, 8 saniyeye döner.</p>
+    <p>30 saniyeden uzun pozlamalarda makineyi <b>Bulb (B)</b> moduna al, uzaktan kumanda ya da kablo deklanşörle sayacı kullan. Vizörden ışık sızmasın diye vizör kapağını kapat.</p>
+  </Fragment>
+</AracSayfa>
+<script>
+  const f = document.querySelector<HTMLFormElement>('[data-nd]')!, out = document.querySelector<HTMLElement>('[data-sonuc]')!
+  const deger = (s: string) => s.includes('/') ? 1 / Number(s.split('/')[1]) : Number(s)
+  const STD = [1 / 8000, 1 / 4000, 1 / 2000, 1 / 1000, 1 / 500, 1 / 250, 1 / 125, 1 / 60, 1 / 30, 1 / 15, 1 / 8, 1 / 4, 1 / 2, 1, 2, 4, 8, 15, 30]
+  const yaz = (t: number) => {
+    if (t < 1) { const y = STD.reduce((a, b) => Math.abs(Math.log(b / t)) < Math.abs(Math.log(a / t)) ? b : a); return `1/${Math.round(1 / y)} sn` }
+    if (t < 60) return `${t < 10 ? t.toFixed(1).replace('.', ',').replace(',0', '') : Math.round(t)} sn`
+    const sa = Math.floor(t / 3600), dk = Math.floor((t % 3600) / 60), sn = Math.round(t % 60)
+    return [sa && `${sa} sa`, dk && `${dk} dk`, sn && `${sn} sn`].filter(Boolean).join(' ')
+  }
+  let sayac = 0, kalan = 0
+  function ciz() {
+    const t0 = deger((f.querySelector('#nd-hiz') as HTMLSelectElement).value)
+    const stop = Number((f.querySelector('#nd-filtre') as HTMLSelectElement).value) + Number((f.querySelector('#nd-ek') as HTMLSelectElement).value)
+    const t = t0 * 2 ** stop
+    out.innerHTML = `<div class="arac-buyuk"><span class="label">Yeni enstantane</span><b>${yaz(t)}</b><span class="meta">${stop.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} stop · ışık ${Math.round(2 ** stop).toLocaleString('tr-TR')}'de bire iner</span></div>
+      ${t >= 1 ? `<div class="row" style="gap:12px;align-items:center;flex-wrap:wrap"><button type="button" class="btn btn-p" data-baslat>Sayacı başlat</button><span class="mono" data-kalan style="font-size:28px"></span></div>` : ''}`
+    out.querySelector('[data-baslat]')?.addEventListener('click', () => {
+      clearInterval(sayac); kalan = Math.round(t); const el = out.querySelector<HTMLElement>('[data-kalan]')!
+      const tik = () => { el.textContent = kalan > 0 ? yaz(kalan) : 'Bitti, deklanşörü bırak'; if (kalan-- <= 0) { clearInterval(sayac); navigator.vibrate?.(400) } }
+      tik(); sayac = window.setInterval(tik, 1000)
+    })
+  }
+  f.addEventListener('change', ciz); ciz()
+</script>

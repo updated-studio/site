@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro'
+import { ARACLAR } from '../lib/araclar'
 import { allPages, allPaths, getCategories } from '../lib/api'
 import { SITE } from '../lib/seo'
 import { esc } from '../lib/format'
@@ -10,7 +11,7 @@ export const GET: APIRoute = async ({ params }) => {
   let urls: { loc: string; lastmod?: string; image?: string }[] = []
   if (tur === 'sayfalar') {
     const cats = await getCategories()
-    urls = ['/', '/haberler', '/inceleme', '/karsilastirma', '/urun', '/kulup', ...cats.map((c) => `/${c.slug}`), ...(await allPages()).map((s) => `/${s}`), '/topluluk-kurallari', '/uyelik-sozlesmesi', '/uyelik-aydinlatma-metni'].map((p) => ({ loc: SITE + (p === '/' ? '' : p) }))
+    urls = ['/', '/haberler', '/inceleme', '/karsilastirma', '/urun', '/kulup', ...cats.map((c) => `/${c.slug}`), ...(await allPages()).map((s) => `/${s}`), '/topluluk-kurallari', '/uyelik-sozlesmesi', '/uyelik-aydinlatma-metni', '/araclar', ...ARACLAR.map((a) => a.yol)].map((p) => ({ loc: SITE + (p === '/' ? '' : p) }))
   } else if (tur in MAP) {
     urls = (await allPaths(MAP[tur as keyof typeof MAP])).map((d) => ({ loc: SITE + d.path, lastmod: d.updatedAt, image: d.image }))
   } else return new Response(null, { status: 404 })

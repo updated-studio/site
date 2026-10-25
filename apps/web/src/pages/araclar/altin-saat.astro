@@ -1,0 +1,45 @@
+---
+import AracSayfa from '../../components/AracSayfa.astro'
+import { ILLER } from '../../scripts/araclar/gunes'
+const siralı = [...ILLER].sort((a, b) => a[0].localeCompare(b[0], 'tr'))
+---
+<AracSayfa yol="/araclar/altin-saat" baslik="Altın saat hesaplayıcı" lead="Türkiye'nin 81 ili için gün doğumu, gün batımı, altın saat ve mavi saat. Tarih seç, çekimini planla."
+  aciklama="81 il için altın saat ve mavi saat hesaplayıcı: gün doğumu, gün batımı, sabah ve akşam altın saat saatleri. Ücretsiz, üyelik gerekmez.">
+  <form class="arac-form" data-altin onsubmit="return false">
+    <label for="as-il">İl<select id="as-il" name="il">{siralı.map(([ad]) => <option selected={ad === 'İstanbul'}>{ad}</option>)}</select></label>
+    <label for="as-tarih">Tarih<input id="as-tarih" name="tarih" type="date" /></label>
+    <button type="button" class="btn" data-konum>Konumumu kullan</button>
+  </form>
+  <div class="arac-sonuc" data-sonuc aria-live="polite"><p class="meta">Hesaplanıyor…</p></div>
+  <Fragment slot="nasil">
+    <h2>Altın saat ve mavi saat nedir?</h2>
+    <p><b>Altın saat</b>, güneşin ufkun hemen üstünde olduğu, ışığın sıcak, yumuşak ve yatay geldiği zamandır: gün doğumundan sonraki ve gün batımından önceki yaklaşık bir saat. Gölgeler uzar, kontrast düşer; portre ve manzara için en sevilen ışıktır.</p>
+    <p><b>Mavi saat</b>, güneş ufkun altındayken gökyüzünün koyu maviye döndüğü kısa aradır: gün doğumundan hemen önce ve gün batımından hemen sonra. Şehir ışıklarıyla gökyüzü dengelenir; gece şehir çekimleri için idealdir.</p>
+    <p>Hesap, güneşin ufka göre açısına göre yapılır: altın saat güneş ufkun 4° altı ile 6° üstü arasındayken, mavi saat 6° altı ile 4° altı arasındayken. Saatler il merkezine göredir; dağlık arazide ufuk daha yüksekse güneş daha erken kaybolur.</p>
+  </Fragment>
+</AracSayfa>
+<script>
+  import { gunesSaatleri, ILLER } from '../../scripts/araclar/gunes'
+  const f = document.querySelector<HTMLFormElement>('[data-altin]')!, out = document.querySelector<HTMLElement>('[data-sonuc]')!
+  const il = f.querySelector<HTMLSelectElement>('#as-il')!, tarih = f.querySelector<HTMLInputElement>('#as-tarih')!
+  const saat = (d: Date) => isNaN(+d) ? '—' : d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Istanbul' })
+  const bugun = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul' }).format(new Date())
+  try { il.value = localStorage.getItem('up-arac-il') || il.value } catch { /* depolama kapalı */ }
+  tarih.value = bugun
+  let ozel: [number, number] | null = null
+  function ciz() {
+    const [ad, lat, lng] = ozel ? ['Konumun', ozel[0], ozel[1]] as const : ILLER.find((x) => x[0] === il.value)!
+    const g = gunesSaatleri(new Date(tarih.value + 'T12:00:00+03:00'), lat, lng), o = g.olaylar
+    const sat = (b: string, a: Date, c: Date, s: string) => `<div class="as-sat ${s}"><span>${b}</span><b>${saat(a)} – ${saat(c)}</b></div>`
+    out.innerHTML = `<h2 class="as-baslik">${ad} · ${new Date(tarih.value + 'T12:00:00+03:00').toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' })}</h2>
+      <div class="as-grid">
+        <div class="as-kutu"><h3>Sabah</h3>${sat('Mavi saat', o['-6'][0], o['-4'][0], 'mavi')}${sat('Altın saat', o['-4'][0], o['6'][0], 'altin')}<div class="as-sat"><span>Gün doğumu</span><b>${saat(g.dogus)}</b></div></div>
+        <div class="as-kutu"><h3>Akşam</h3><div class="as-sat"><span>Gün batımı</span><b>${saat(g.batis)}</b></div>${sat('Altın saat', o['6'][1], o['-4'][1], 'altin')}${sat('Mavi saat', o['-4'][1], o['-6'][1], 'mavi')}</div>
+      </div>
+      <p class="meta">Öğle (güneş en tepede): ${saat(g.ogle)} · Gün uzunluğu: ${Math.floor((+g.batis - +g.dogus) / 36e5)} sa ${Math.round(((+g.batis - +g.dogus) % 36e5) / 6e4)} dk</p>`
+  }
+  il.addEventListener('change', () => { ozel = null; try { localStorage.setItem('up-arac-il', il.value) } catch { /* */ } ciz() })
+  tarih.addEventListener('change', ciz)
+  f.querySelector('[data-konum]')!.addEventListener('click', () => navigator.geolocation?.getCurrentPosition((p) => { ozel = [p.coords.latitude, p.coords.longitude]; ciz() }, () => { out.insertAdjacentHTML('afterbegin', '<p class="meta">Konum alınamadı; listeden il seç.</p>') }))
+  ciz()
+</script>

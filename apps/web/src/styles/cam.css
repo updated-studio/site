@@ -45,7 +45,7 @@
 .cam .sd .nv button{border-radius:10px}
 
 /* Kartlar ve kutular: yuvarlak, yarı saydam, yumuşak gölge */
-.cam .c-std,.cam .c-man,.cam .c-list,.cam .sdk,.cam .ys-oneri,.cam .c-spo,.cam .s60,.cam .kd,.cam .tbl,.cam .kv > div{
+.cam .c-std,.cam .c-man,.cam .c-list,.cam .sdk,.cam .ys-oneri,.cam .arac,.cam .arac-l,.cam .arac-uper,.cam .arac-kart,.cam .c-spo,.cam .s60,.cam .kd,.cam .tbl,.cam .kv > div{
   border-radius:var(--r-kart);overflow:hidden;border-color:var(--line);box-shadow:inset 0 1px 0 var(--cam-isik),var(--cam-golge)}
 .cam .c-man{border-radius:var(--r-buyuk)}
 .cam .c-std,.cam .c-man{transition:transform var(--t2) var(--ease),box-shadow var(--t2) var(--ease)}
@@ -99,3 +99,7 @@
 @media (prefers-reduced-motion:reduce){.cam .skel i{animation:none}}
 /* Küçük bölüm etiketleri (alt bilgi, kutu başlıkları) başlık değil, etiket: mono büyük harf kalır */
 .cam .ftr h4,.cam h4.label,.cam .label{font-family:var(--f-mono);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;line-height:1.4}
+
+/* Araçlar: iç kutular ve form alanları yuvarlak */
+.cam .arac-buyuk,.cam .as-kutu{border-radius:12px}.cam .as-sat{border-radius:8px}.cam .bk-ebat span{border-radius:99px}
+.cam .arac-form input,.cam .arac-form select{border-radius:var(--r-dugme);border-color:var(--line);background:var(--surface-2)}
