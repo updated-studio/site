@@ -84,6 +84,21 @@
 - **23 Ekim 2026** (Fatih'in Claude'u): Görseller yeni kaliteyle yeniden üretildi (537/537). Stüdyo'da etiket kuralı (en fazla 3, izinli liste) ve otomatik taslak ataması duraklatıldı (Stüdyo deposu; Edge Function yayını için `SUPABASE_ACCESS_TOKEN` secret'ı bekleniyor). Eski site raporu: `deploy/rapor` (çıktı `raporlar` dalında). Bu dosya ve `CLAUDE.md` eklendi.
 - **22 Ekim 2026** (Fatih'in Claude'u): WordPress taşıması, görsel onarımı, kurumsal sayfalar, eski adres yönlendirmeleri, panel Türkçe + logo, yayın anahtarı.
 
+## offocus yol haritası (Fatih, 25 Ekim 2026: "her şeyi alacağız", sıra Claude'un önerisi; üyelik hiçbir yerde zorunlu değil, öneri)
+Kaynak: https://www.offocus.tr (fotoğraf/video topluluk sitesi). Yol haritası Panel/altyapı (5) "offocus'tan özellik listesi" bu.
+1. **Araçlar** (/araclar, herkese açık): altın saat (81 il), ND filtre, krop faktör, SD kart, baskı boyutu.
+2. **Künyelerde "kullananlar"**: profilinde ürünü ekleyen Uper'ler + yorumları. Ürünlerin **ayrıntılı teknik özellikleri ve kategorileri** (karşılaştırma motoru bunları kullanır).
+3. Yarışmalar takvimi (fotoğraf/kısa film, son başvuru tarihleri).
+4. Haftalık fotoğraf görevi (Kulüp'te; kör oylama).
+5. Light Lab / Lens Lab (ölçüm sonuçları).
+6. Forum.
+7. İkinci el pazarı (ilan; satışın tarafı değiliz).
+8. Kariyer (iş ilanları, yetenek havuzu).
+9. Stüdyo haritası.
+10. Işık kirliliği haritası, lokasyon rehberi.
+11. Lens etiketi oluşturucu.
+Ayrıca: sitede **Beta** ibaresi (25 Ekim).
+
 ## Ertelenenler (kullanıcı, 25 Ekim 2026: "sonraya bırak")
 - Yedek: `YEDEK_SIFRESI` (Fatih belirler) + Natro dışı ikinci kopya (Sıradaki işler 2-3).
 - Cloudflare (ücretsiz; artı/eksi 25 Ekim'de anlatıldı).
