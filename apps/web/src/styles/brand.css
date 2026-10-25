@@ -463,3 +463,8 @@ main{overflow-x:clip}
 .ku-uperler a{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:15px;font-weight:600}
 .ku-uperler a:hover span{text-decoration:underline}
 .ku-kullanan .pc-unk a,.ku-kullanan .meta a{color:var(--link)}
+
+/* Telefon menüsünde kategoriler: küçük, iki sütun */
+.sheet-kat{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;padding:16px 0;border-bottom:1px solid var(--line)}
+.sheet-kat .label{grid-column:1/-1;color:var(--text-3);padding-bottom:4px}
+.sheet .sheet-kat a{font-family:var(--f-body);font-weight:600;font-size:16px;text-transform:none;border:0;padding:8px 0}
