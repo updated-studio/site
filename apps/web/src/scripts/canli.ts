@@ -20,7 +20,7 @@ async function tazele() {
   document.querySelectorAll<HTMLOListElement>('.sdk ol').forEach((ol) => {
     const var_ = new Set([...ol.querySelectorAll('a')].map((a) => a.getAttribute('href')?.replace(BASE, '')))
     for (const n of items.slice(0, 7).reverse()) {
-      if (var_.has(n.h)) continue
+      if (var_.has(n.h) || BASE + n.h === location.pathname) continue // okunan yazı kendi yan sütununda çıkmaz
       const li = document.createElement('li'); li.className = n.l === 'son-dakika' ? 'hot new' : 'new'
       li.innerHTML = `<span class="t">${saat(n.at)}</span><a href="${BASE}${esc(n.h)}">${esc(n.t)}</a><span class="c">${esc(n.c)}${n.l === 'sizinti' ? ' · sızıntı' : ''}</span>`
       ol.prepend(li)

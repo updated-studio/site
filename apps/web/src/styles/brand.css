@@ -150,7 +150,8 @@ h3{font-weight:700}
 .rail{display:flex;flex-direction:column;gap:var(--gut);position:sticky;top:calc(67px + env(safe-area-inset-top,0px) + 16px)}
 @media (max-width:1100px){.with-rail{grid-template-columns:minmax(0,1fr)}.rail{position:static}}
 /* Yan sütun (YanSutun.astro): uzun olduğu için yapışkan değil; yazı sayfasında başlıkla aynı hizadan başlar */
-.rail-yan{position:static}
+.rail-yan{position:static;align-self:stretch}
+.rail-yan > :last-child{position:sticky;top:calc(86px + env(safe-area-inset-top,0px) + 16px)}
 .with-rail > .art + .rail-yan,.with-rail > article + .rail-yan{padding-top:48px}
 .ys-baslik{color:var(--text-3);margin:0 0 8px;display:block}
 .ys-oneri{display:flex;flex-direction:column;text-decoration:none;border:1px solid var(--line);background:var(--surface)}
@@ -163,7 +164,8 @@ h3{font-weight:700}
 .ys-reel-l{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .ys-reel-l .reel{width:auto}
 .ys-reel-l .reel .cap{font-size:16px;padding:8px 10px}
-@media (max-width:1100px){.rail-yan .ys-sd,.rail-yan .ys-reels{display:none}.with-rail > .art + .rail-yan,.with-rail > article + .rail-yan{padding-top:0}}
+.rail-yan > :last-child{}
+@media (max-width:1100px){.rail-yan > :last-child{position:static}.rail-yan .ys-sd,.rail-yan .ys-reels{display:none}.with-rail > .art + .rail-yan,.with-rail > article + .rail-yan{padding-top:0}}
 /* son dakika column (the reader's favourite) */
 .sdk{border:1px solid var(--line);background:var(--surface)}
 .sdk-h{display:flex;justify-content:space-between;align-items:center;height:48px;padding:0 16px;background:var(--black);color:var(--white)}
