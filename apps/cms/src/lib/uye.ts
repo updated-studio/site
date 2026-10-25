@@ -72,7 +72,7 @@ export const PUAN = {
   yorum: { puan: 5, gunluk: 50, ad: 'Yorumun yayında' },
   begeni: { puan: 2, gunluk: 50, ad: 'Yorumun beğenildi' },
   tepki: { puan: 1, gunluk: 10, ad: 'Bir yazıya tepki verdin' },
-  okuma: { puan: 1, gunluk: 10, ad: 'Bir yazıyı sonuna kadar okudun' },
+  okuma: { puan: 3, gunluk: 30, ad: 'Bir yazıyı sonuna kadar okudun' },
   kulup: { puan: 10, gunluk: 100, ad: "Kulüp'te bir adımı bitirdin" },
 } as const
 export type PuanTur = keyof typeof PUAN
