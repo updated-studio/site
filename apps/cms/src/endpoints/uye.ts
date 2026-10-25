@@ -317,7 +317,7 @@ export const uyeEndpoints: Endpoint[] = [
     }
     const son = await p.find({ collection: 'yorumlar', where: { and: [{ uye: { equals: uye!.id } }, { metin: { equals: metin } }] }, limit: 1, depth: 0, overrideAccess: true })
     if (son.docs[0]) return hata(req, 'Bu yorumu zaten yazdın.')
-    const neden = onayNedeni(metin, !!uye!.guvenilir)
+    const neden = (await ekipRol(p, uye!)) ? null : onayNedeni(metin, !!uye!.guvenilir) // ekibin yorumu onaya düşmez
     const y = await p.create({
       collection: 'yorumlar', overrideAccess: true, context: { uyeIslemi: true },
       data: { metin, durum: neden ? 'onay-bekliyor' : 'yayinda', neden: neden || undefined, hedef: { relationTo: h.tur, value: h.id }, uye: uye!.id, ust: ust || undefined, yanitlanan: yanitlanan?.id || undefined, yol: h.yol } as never,
