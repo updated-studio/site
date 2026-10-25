@@ -17,6 +17,13 @@
 }
 
 studio.updated.com.tr {
+	# Ekip uygulamalarının indirme dosyaları (UPDATED Monitör APK vb.): tahmin edilemez klasör adıyla, dizin listesi kapalı
+	handle_path /indir/* {
+		root * /var/www/indir
+		header Content-Disposition attachment
+		header Cache-Control "no-cache"
+		file_server
+	}
 	import studyo_dosyalar
 }
 
