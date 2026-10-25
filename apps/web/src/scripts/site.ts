@@ -156,8 +156,10 @@ function clocks() {
 function feeds() {
   $$('[data-feed]').forEach((f) => {
     const sentinel = $('[data-sentinel]', f)!, more = $<HTMLAnchorElement>('[data-more]', f)
-    let busy = false, end = false
+    let busy = false, end = false, hata = 0
     if (more) more.hidden = true // JS varken otomatik; yoksa bağlantı kalır
+    // Yükleyici hâlâ ekrana yakınsa bir sonrakini de iste (gözlemci, görünür kalan öğe için yeniden haber vermez; 25 Ekim 2026 takılma)
+    const yakin = () => sentinel.getBoundingClientRect().top < innerHeight + 600
     const load = async () => {
       if (busy || end) return; busy = true
       const page = Number(f.dataset.next || '2')
@@ -170,10 +172,19 @@ function feeds() {
         f.insertBefore(chunk, sentinel)
         f.dataset.next = String(page + 1)
         hydrate(chunk)
-      } catch { if (more) more.hidden = false }
-      finally { setTimeout(() => (busy = false), 300) }
+        hata = 0
+      } catch {
+        // Bağlantı koptuysa iki kez daha dener, sonra "Daha fazla haber" bağlantısı görünür
+        if (++hata >= 3) { end = true; $('.skel', sentinel)?.remove(); if (more) more.hidden = false }
+      } finally {
+        busy = false
+        if (!end) requestAnimationFrame(() => { if (yakin()) setTimeout(load, hata ? 1500 : 0) })
+      }
     }
     new IntersectionObserver((es) => { if (es[0].isIntersecting) load() }, { rootMargin: '600px 0px' }).observe(sentinel)
+    // Yedek: hızlı kaydırmada gözlemci kaçırırsa kaydırma sırasında da bakılır (en fazla 4 kez/sn)
+    let son = 0
+    addEventListener('scroll', () => { const t = Date.now(); if (t - son < 250 || busy || end) return; son = t; const r = sentinel.getBoundingClientRect(); if (r.top < innerHeight + 600 && r.bottom > -600) load() }, { passive: true })
   })
 }
 
