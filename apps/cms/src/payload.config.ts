@@ -23,7 +23,7 @@ import { Uyeler, Yorumlar, UyeGiris } from './collections/Topluluk'
 import { Site, Home } from './globals'
 import { triyajDurum, triyajImport, triyajKapak, triyajTemizle } from './endpoints/triyajImport'
 import { previewEndpoint } from './endpoints/preview'
-import { studyoAlanlar, studyoGiris, studyoOnizleme, studyoSema, studyoZamanla, studyoZamanlaEkle, studyoZamanlaSil } from './endpoints/studyo'
+import { studyoAlanlar, studyoDurum, studyoGiris, studyoOnizleme, studyoSema, studyoZamanla, studyoZamanlaEkle, studyoZamanlaSil } from './endpoints/studyo'
 import { canliEndpoint } from './endpoints/canli'
 import { okunmaEndpoints, okunmaInit } from './endpoints/okunma'
 import { uyeEndpoints } from './endpoints/uye'
@@ -60,7 +60,7 @@ export default buildConfig({
   csrf: origins,
   // Zamanlanmış yayın (schedulePublish) için iş kuyruğu dakikada bir çalışır. Panel kalıcı Node sunucusunda çalışmalı.
   jobs: { autoRun: [{ cron: '* * * * *', queue: 'default', limit: 20 }], tasks: [] },
-  endpoints: [triyajImport, triyajDurum, triyajKapak, triyajTemizle, previewEndpoint, canliEndpoint, studyoSema, studyoOnizleme, studyoAlanlar, studyoGiris, studyoZamanla, studyoZamanlaEkle, studyoZamanlaSil, ...okunmaEndpoints, ...uyeEndpoints],
+  endpoints: [triyajImport, triyajDurum, triyajKapak, triyajTemizle, previewEndpoint, canliEndpoint, studyoSema, studyoOnizleme, studyoAlanlar, studyoDurum, studyoGiris, studyoZamanla, studyoZamanlaEkle, studyoZamanlaSil, ...okunmaEndpoints, ...uyeEndpoints],
   onInit: okunmaInit,
   plugins: [
     s3Storage({

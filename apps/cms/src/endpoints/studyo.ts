@@ -10,6 +10,7 @@ import { semaYap } from '../lib/sema'
  * GET /api/studyo/sema — kit kuralları tek yerden: kontrol listesi, içerik etiketleri, karakter sınırları, durumlar
  * GET /api/studyo/alanlar — bütün koleksiyon ve ayarların alan yapısı (Stüdyo formlarını buradan kurar)
  * POST /api/studyo/giris — Payload'un kendi paneline Stüdyo hesabıyla giriş (yalnız yöneticiler; Stüdyo'nun /#/panel-giris sayfası gönderir)
+ * GET /api/studyo/durum — sistem durumu özeti (yalnız yönetici; sunucu 5 dk'da bir yazar: deploy/altyapi/durum)
  * GET /api/studyo/onizleme/:tur/:id — önizleme adresi (gizli önizleme anahtarı Stüdyo'nun koduna girmesin diye burada eklenir)
  */
 const TUR = { news: 'haber', reviews: 'inceleme', comparisons: 'karsilastirma' } as const
@@ -35,6 +36,22 @@ export const studyoOnizleme: Endpoint = {
     if (!tur || !Number.isInteger(id)) return Response.json({ error: 'Geçersiz' }, { status: 400, headers })
     const url = `${process.env.WEB_URL}/onizleme?tur=${tur}&id=${id}&k=${process.env.PREVIEW_SECRET || ''}`
     return Response.json({ url }, { headers })
+  },
+}
+
+export const studyoDurum: Endpoint = {
+  path: '/studyo/durum',
+  method: 'get',
+  handler: async (req) => {
+    const headers = headersWithCors({ headers: new Headers({ 'Cache-Control': 'no-store' }), req })
+    if (!req.user) return Response.json({ error: 'Giriş gerekli' }, { status: 401, headers })
+    if ((req.user as { role?: string }).role !== 'admin') return Response.json({ error: 'Yalnız yöneticiler' }, { status: 403, headers })
+    try {
+      const { readFile } = await import('node:fs/promises')
+      return new Response(await readFile('/var/lib/updated-durum/durum.json', 'utf8'), { headers: new Headers({ ...Object.fromEntries(headers), 'Content-Type': 'application/json' }) })
+    } catch {
+      return Response.json({ error: 'Durum özeti henüz yok (sunucuda updated-durum.timer kurulu mu?)' }, { status: 503, headers })
+    }
   },
 }
 
