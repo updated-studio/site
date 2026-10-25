@@ -10,6 +10,10 @@ const on = (h: string) => (h !== '/' && current.startsWith(h) ? 'page' : undefin
 <header class="hdr" id="hdr">
   <div class="wrap">
     <a class="logo" href="/" aria-label="UPDATED ana sayfa"><Logo /></a>
+    <details class="beta">
+      <summary title="Beta sürüm">Beta</summary>
+      <div class="beta-not"><b>Yeni UPDATED beta sürümünde.</b> Site yayında ama bazı bölümler hâlâ geliştiriliyor. Bir hata ya da eksik görürsen <a href="mailto:iletisim@updated.com.tr">iletisim@updated.com.tr</a> adresine yaz.</div>
+    </details>
     <nav class="nav" aria-label="Kategoriler">
       {nav.map((n) => <a href={n.href} aria-current={on(n.href)}>{n.label}</a>)}
       <a class="kulup" href={site.kulupUrl}>Kulüp</a>
