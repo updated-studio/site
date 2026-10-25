@@ -457,3 +457,4 @@ main{overflow-x:clip}
 .arac-kart{display:flex;flex-direction:column;gap:8px;padding:24px;border:1px solid var(--line);background:var(--surface);text-decoration:none}
 .arac-kart h2{font-size:24px}.arac-kart p{margin:0;color:var(--text-2);font-size:16px;line-height:1.5}
 .arac-kart:hover h2{text-decoration:underline}
+.arac-buyuk .meta,.arac-sonuc > .meta{text-transform:none;letter-spacing:0;font-size:13px}
