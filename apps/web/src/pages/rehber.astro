@@ -1,0 +1,15 @@
+---
+/** Rehber (26 Ekim 2026, menünün dördüncü bölümü): eskimeyen içerik. Şimdilik "Rehber" etiketli yazılar; konu rafları ve güncellenme tarihi sonraki adımda. */
+import Base from '../layouts/Base.astro'
+import CardStd from '../components/CardStd.astro'
+import * as api from '../lib/api'
+const yazilar = await api.getRehber()
+---
+<Base meta={{ title: 'Rehber | UPDATED', description: 'Satın alma rehberleri, nasıl yapılır yazıları ve temel bilgiler: tarihe göre değil konuya göre.', path: '/rehber', noindex: yazilar.length === 0 }}>
+  <div class="wrap">
+    <div class="art-head" style="max-width:none;padding-bottom:24px"><span class="cat">UPDATED</span><h1 class="h1">Rehber</h1><p class="lead" style="margin:0">Satın alma rehberleri, nasıl yapılır yazıları ve temel bilgiler. Haberden farkı: eskimez, konuya göre bulunur.</p></div>
+    {yazilar.length
+      ? <div class="grid4">{yazilar.map((n) => <CardStd item={n} />)}</div>
+      : <div class="rh-bos"><p class="lead" style="margin:0">İlk rehberler hazırlanıyor. O zamana kadar çekimini planlamak için <a href="/araclar">Araçlar</a>'a, ürün seçerken <a href="/inceleme">İncelemeler &amp; Kıyaslamalar</a>'a bakabilirsin.</p></div>}
+  </div>
+</Base>

@@ -5,9 +5,9 @@
  */
 import type { Ad } from '../lib/types'
 import { showAdSlots } from '../lib/env'
-interface Props { slot: 'lb' | 'mr' | 'in'; ad?: Ad | null; bare?: boolean; placeholder?: boolean }
+interface Props { slot: 'lb' | 'mr' | 'in' | 'hp'; ad?: Ad | null; bare?: boolean; placeholder?: boolean }
 const { slot, ad, bare = false, placeholder = showAdSlots() } = Astro.props
-const SIZE = { lb: 'Masaüstü 970 × 250 · mobil 320 × 100', mr: 'Kutu 300 × 250', in: 'Akış içi yerel reklam · 1 / 20 haber' }
+const SIZE = { lb: 'Masaüstü 970 × 250 · mobil 320 × 100', mr: 'Kutu 300 × 250', in: 'Akış içi yerel reklam · 1 / 20 haber', hp: 'Dikey afiş 300 × 600 · telefonda 300 × 250' }
 const show = !!ad || placeholder
 ---
 {show && (bare ? (

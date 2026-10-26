@@ -1,0 +1,91 @@
+---
+/**
+ * Ana sayfanın ilk bölümü (Fatih, 26 Ekim 2026): solda 13 manşetlik slider (editörün seçtikleri, eksikse en yeni haberler),
+ * ortada slider'da olmayan en yeni 6 haber, sağda 300×600 dikey afiş. Afiş yoksa iki sütun kalır, boş kutu basılmaz.
+ * Slider 7 sn'de bir geçer; fare üstündeyken, sekme arkadayken ve "hareketi azalt" açıkken durur. Kaydırma telefonda parmakla.
+ */
+import Img from '../Img.astro'
+import Ad from '../Ad.astro'
+import type { Ad as AdT, Comparison, News, Review } from '../../lib/types'
+import { date, time } from '../../lib/format'
+import { ico } from '../../lib/ui'
+import { showAdSlots } from '../../lib/env'
+interface Props { slides: (News | Review | Comparison)[]; list: News[]; ad: AdT | null }
+const { slides, list, ad } = Astro.props
+const afis = !!ad || showAdSlots()
+const kat = (m: News | Review | Comparison) => m.kind === 'news' ? { ad: m.category.name, href: `/${m.category.slug}` } : m.kind === 'review' ? { ad: 'İnceleme', href: '/inceleme' } : { ad: 'Karşılaştırma', href: '/karsilastirma' }
+---
+<div class:list={['mn', { 'mn-afissiz': !afis }]}>
+  <section class="mn-sl" data-mn aria-roledescription="slider" aria-label={`Manşet: ${slides.length} haber`}>
+    {slides.map((m, i) => { const k = kat(m); return (
+      <article class="mn-s" hidden={i > 0} aria-roledescription="slayt" aria-label={`${i + 1} / ${slides.length}`}>
+        <a class="mn-g" href={m.path} tabindex="-1" aria-hidden="true"><Img img={m.cover} alt="" eager={i === 0} sizes="(max-width: 1100px) 100vw, 640px" /></a>
+        <div class="mn-b">
+          <a class="cat" href={k.href}>{k.ad}</a>
+          <h2><a href={m.path}>{m.title}</a></h2>
+          <span class="meta">{m.author.name} · {date(m.publishedAt)} · {time(m.publishedAt)}</span>
+        </div>
+      </article>
+    ) })}
+    <div class="mn-sira" data-mn-sira aria-label="Sıradaki manşetler"></div>
+    {slides.length > 1 && <div class="mn-k">
+      <button class="ibtn" type="button" data-mn-yon="-1" aria-label="Önceki manşet"><Fragment set:html={ico('left', 18)} /></button>
+      <span class="mn-say mono num" data-mn-say aria-live="polite">1 / {slides.length}</span>
+      <div class="mn-n">{slides.map((_, i) => <button type="button" data-mn-git={i} aria-label={`${i + 1}. manşet`} aria-current={i === 0 ? 'true' : undefined}></button>)}</div>
+      <button class="ibtn" type="button" data-mn-yon="1" aria-label="Sonraki manşet"><Fragment set:html={ico('right', 18)} /></button>
+    </div>}
+  </section>
+
+  <aside class="mn-ls" aria-label="Son haberler">
+    <div class="mn-ls-h"><h2>Son haberler</h2><a href="/haberler">Tümü <Fragment set:html={ico('right', 14)} /></a></div>
+    <ol>
+      {list.map((n) => (
+        <li>
+          <a class="mn-ls-g" href={n.path} tabindex="-1" aria-hidden="true"><Img img={n.cover} alt="" sizes="96px" /></a>
+          <div><a class="cat" href={`/${n.category.slug}`}>{n.category.name}</a><a class="t" href={n.path}>{n.title}</a><span class="meta">{time(n.publishedAt)}</span></div>
+        </li>
+      ))}
+    </ol>
+  </aside>
+
+  {afis && <div class="mn-af"><Ad slot="hp" ad={ad} bare /></div>}
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-mn]').forEach((s) => {
+    const sl = Array.from(s.querySelectorAll<HTMLElement>('.mn-s'))
+    if (sl.length < 2) return
+    const nk = Array.from(s.querySelectorAll<HTMLButtonElement>('[data-mn-git]'))
+    const say = s.querySelector<HTMLElement>('[data-mn-say]')!
+    const sira = s.querySelector<HTMLElement>('[data-mn-sira]')!
+    let i = 0, dur = false
+    const gorsel = (k: number) => sl[k].querySelector<HTMLImageElement>('img')
+    function siraCiz() {
+      sira.replaceChildren(...[1, 2, 3].map((d) => {
+        const k = (i + d) % sl.length, b = document.createElement('button')
+        b.type = 'button'
+        const g = gorsel(k); if (g) { const im = document.createElement('img'); im.src = g.currentSrc || g.src; im.alt = ''; im.loading = 'lazy'; b.append(im) }
+        const t = document.createElement('span'); t.textContent = sl[k].querySelector('h2')?.textContent || ''; b.append(t)
+        b.addEventListener('click', () => git(k))
+        return b
+      }))
+    }
+    function git(n: number) {
+      i = (n + sl.length) % sl.length
+      sl.forEach((x, k) => { x.hidden = k !== i })
+      nk.forEach((x, k) => k === i ? x.setAttribute('aria-current', 'true') : x.removeAttribute('aria-current'))
+      say.textContent = `${i + 1} / ${sl.length}`
+      const s2 = gorsel((i + 1) % sl.length); if (s2) s2.loading = 'eager' // sıradakini önceden yükle
+      siraCiz()
+    }
+    s.querySelectorAll<HTMLButtonElement>('[data-mn-yon]').forEach((b) => b.addEventListener('click', () => git(i + Number(b.dataset.mnYon))))
+    nk.forEach((b) => b.addEventListener('click', () => git(Number(b.dataset.mnGit))))
+    s.addEventListener('mouseenter', () => { dur = true }); s.addEventListener('mouseleave', () => { dur = false })
+    s.addEventListener('focusin', () => { dur = true }); s.addEventListener('focusout', () => { dur = false })
+    let x0: number | null = null
+    s.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; dur = true }, { passive: true })
+    s.addEventListener('touchend', (e) => { if (x0 != null) { const d = e.changedTouches[0].clientX - x0; if (Math.abs(d) > 40) git(i + (d < 0 ? 1 : -1)) } x0 = null; dur = false })
+    siraCiz()
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) setInterval(() => { if (!dur && !document.hidden) git(i + 1) }, 7000)
+  })
+</script>

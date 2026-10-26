@@ -1,10 +1,7 @@
 ---
-/** Ana sayfa (kit 10b sırası): son dakika → manşet → son haberler → incelemeler → video → çok okunan; ardından modüller ve sonsuz akış. */
+/** Ana sayfa (Fatih, 26 Ekim 2026): manşet slider (13) + son 6 haber + dikey afiş → yatay reklam → son haberler → incelemeler → video → modüller → sonsuz akış. */
 import Base from '../layouts/Base.astro'
-import Akordeon from '../components/hero/Akordeon.astro'
-import Vitrin from '../components/hero/Vitrin.astro'
-import Akis from '../components/hero/Akis.astro'
-import SonDakika from '../components/SonDakika.astro'
+import Manset from '../components/hero/Manset.astro'
 import CardStd from '../components/CardStd.astro'
 import EnCokOkunan from '../components/EnCokOkunan.astro'
 import Ad from '../components/Ad.astro'
@@ -19,30 +16,33 @@ import * as api from '../lib/api'
 import type { News } from '../lib/types'
 
 const [home, latest, reviews, videos, reels, ads, radar, products, site] = await Promise.all([
-  api.getHome(), api.getLatest(1, 24), api.getReviews(1, 4), api.getVideos(), api.getReels(), api.getAds(), api.getRadar(), api.getProducts(12), api.getSite(),
+  api.getHome(), api.getLatest(1, 40), api.getReviews(1, 4), api.getVideos(), api.getReels(), api.getAds(), api.getRadar(), api.getProducts(12), api.getSite(),
 ])
 const m = { radar: true, kiyasRobotu: true, altmisSaniye: true, kunyeRafi: true, videolar: true, reels: true, cokOkunan: true, ...home.modules }
-const heroIds = new Set(home.hero.map((h) => h.id))
-const rest = latest.filter((n) => !heroIds.has(n.id))
+// Slider: editörün seçtikleri (en çok 13), eksik kalan yerler en yeni haberlerle; sağdaki 6 haber slider'da olmayanlar
+const secilen = home.hero.slice(0, 13)
+const anahtar = (x: { kind: string; id: string }) => x.kind + x.id
+const kullanilan = new Set(secilen.map(anahtar))
+const slides = [...secilen, ...latest.filter((n) => !kullanilan.has(anahtar(n)))].slice(0, 13)
+slides.forEach((s) => kullanilan.add(anahtar(s)))
+const yan = latest.filter((n) => !kullanilan.has(anahtar(n))).slice(0, 6)
+yan.forEach((s) => kullanilan.add(anahtar(s)))
+const rest = latest.filter((n) => !kullanilan.has(anahtar(n)))
 const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşılaştırmalar', description: site.tagline, path: '/' }
 ---
 <Base meta={meta}>
   <h1 class="sr">UPDATED · Teknoloji haberleri, incelemeler ve karşılaştırmalar</h1>
   <section class="sec" style="padding-top:24px">
-    <div class="wrap with-rail">
-      <div>
-        {home.heroLayout === 'vitrin' ? <Vitrin items={home.hero} /> : home.heroLayout === 'akis' ? <Akis items={latest} /> : <Akordeon items={home.hero} />}
-      </div>
-      <div class="rail"><SonDakika items={latest} /><Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare /></div>
-    </div>
+    <div class="wrap"><Manset slides={slides} list={yan} ad={api.pickAd(ads, 'hp')} /></div>
   </section>
+  <Ad slot="lb" ad={api.pickAd(ads, 'lb')} />
 
   <section class="sec"><div class="wrap">
     <div class="sh"><h2><span class="no">01</span>Son haberler</h2><a class="btn-t btn" href="/haberler">Tümü</a></div>
     <div class="grid4">{rest.slice(0, 8).map((n) => <CardStd item={n} />)}</div>
   </div></section>
 
-  <Ad slot="lb" ad={api.pickAd(ads, 'lb')} />
+  <Ad slot="lb" ad={api.pickAd(ads, 'lb', 1)} />
 
   {reviews.length > 0 && <section class="sec"><div class="wrap">
     <div class="sh"><h2><span class="no">02</span>İncelemeler</h2><a class="btn-t btn" href="/inceleme">Tümü</a></div>

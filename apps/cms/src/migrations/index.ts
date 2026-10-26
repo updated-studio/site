@@ -6,6 +6,7 @@ import * as migration_20261025_155645_urun_turleri from './20261025_155645_urun_
 import * as migration_20261025_172240_uye_profil_resmi from './20261025_172240_uye_profil_resmi';
 import * as migration_20261026_110246_yarismalar from './20261026_110246_yarismalar';
 import * as migration_20261026_122038_haftalik_gorev from './20261026_122038_haftalik_gorev';
+import * as migration_20261026_154634_manset_afis from './20261026_154634_manset_afis';
 
 export const migrations = [
   {
@@ -46,6 +47,11 @@ export const migrations = [
   {
     up: migration_20261026_122038_haftalik_gorev.up,
     down: migration_20261026_122038_haftalik_gorev.down,
-    name: '20261026_122038_haftalik_gorev'
+    name: '20261026_122038_haftalik_gorev',
+  },
+  {
+    up: migration_20261026_154634_manset_afis.up,
+    down: migration_20261026_154634_manset_afis.down,
+    name: '20261026_154634_manset_afis'
   },
 ];

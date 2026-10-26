@@ -6,7 +6,9 @@ interface Props { site: SiteCfg; current?: string }
 const { site, current = '' } = Astro.props
 const nav = site.nav.slice(0, 7) // kit 10b: en fazla 7
 const kategoriler = await getCategories() // telefon menüsünde kategoriler (üst menü sade: 25 Ekim 2026)
-const on = (h: string) => (h !== '/' && current.startsWith(h) ? 'page' : undefined)
+/** Etkin bölüm: Ana Sayfa yalnız kökte; İncelemeler & Kıyaslamalar karşılaştırma ve künye sayfalarını da kapsar */
+const BOLUM: Record<string, string[]> = { '/inceleme': ['/inceleme', '/karsilastirma', '/urun'] }
+const on = (h: string) => ((h === '/' ? current === '/' : (BOLUM[h] || [h]).some((b) => current.startsWith(b))) ? 'page' : undefined)
 ---
 <header class="hdr" id="hdr">
   <div class="wrap">
@@ -17,7 +19,7 @@ const on = (h: string) => (h !== '/' && current.startsWith(h) ? 'page' : undefin
     </details>
     <nav class="nav" aria-label="Kategoriler">
       {nav.map((n) => <a href={n.href} aria-current={on(n.href)}>{n.label}</a>)}
-      <a class="kulup" href={site.kulupUrl}>Kulüp</a>
+      <a class="kulup" href={site.kulupUrl} aria-current={current.startsWith(site.kulupUrl) || current.startsWith('/gorev') || current.startsWith('/yarismalar') ? 'page' : undefined}>Kulüp</a>
     </nav>
     <div class="hdr-r">
       <button class="srch" type="button" data-open-search><Fragment set:html={ico('search')} /><span>Ara</span></button>
@@ -30,7 +32,7 @@ const on = (h: string) => (h !== '/' && current.startsWith(h) ? 'page' : undefin
 </header>
 <nav class="sheet" id="sheet" aria-label="Mobil menü" hidden>
   {nav.map((n) => <a href={n.href}>{n.label}</a>)}
-  <a href={site.kulupUrl}>Updated Kulüp</a>
+  <a href={site.kulupUrl}>Kulüp</a>
   <a href="/hesap">Hesabım</a>
   {kategoriler.length > 0 && <div class="sheet-kat"><span class="label">Kategoriler</span>{kategoriler.map((c) => <a href={`/${c.slug}`}>{c.name}</a>)}</div>}
   <div class="sheet-tema"><span>Görünüm</span><button class="ibtn" type="button" data-theme-btn aria-label="Görünüm"><Fragment set:html={ico('auto')} /></button></div>

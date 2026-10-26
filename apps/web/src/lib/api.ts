@@ -19,7 +19,8 @@ function qs(o: Record<string, any>, pre = ''): string {
     const key = pre ? `${pre}[${k}]` : k
     if (v === undefined || v === null) return []
     if (typeof v === 'object' && !Array.isArray(v)) return [qs(v, key)]
-    if (Array.isArray(v)) return v.map((x, i) => `${encodeURIComponent(`${key}[${i}]`)}=${encodeURIComponent(x)}`)
+    // Dizideki nesneler (where[and][0][...]) de açılır; önceden "[object Object]" gidiyor, panel süzgeci yok sayıyordu (26 Ekim 2026)
+    if (Array.isArray(v)) return v.map((x, i) => (x && typeof x === 'object' ? qs(x, `${key}[${i}]`) : `${encodeURIComponent(`${key}[${i}]`)}=${encodeURIComponent(x)}`))
     return [`${encodeURIComponent(key)}=${encodeURIComponent(v)}`]
   }).filter(Boolean).join('&')
 }
@@ -103,31 +104,22 @@ const cyc = <T,>(arr: T[], p: number, n = PAGE) => Array.from({ length: n }, (_,
 
 /* ---------- site ---------- */
 export type SiteCfg = { tagline: string; nav: { label: string; href: string }[]; youtube: string; instagram: string; kulupUrl: string; newsletterNote: string }
-const DEF_NAV = [['Haberler', '/haberler'], ['İncelemeler', '/inceleme'], ['Karşılaştırma', '/karsilastirma'], ['Mobil', '/mobil'], ['Kamera & Dron', '/kamera-dron'], ['Oyun', '/oyun']].map(([label, href]) => ({ label, href }))
+/** Üst menü (Fatih, 26 Ekim 2026): altı ana bölüm, her biri ayrı sayfa; Kulüp başlıkta ayrıca vurgulanır. Panelin menü listesi artık kullanılmaz. */
+export const ANA_MENU = [['Ana Sayfa', '/'], ['Haberler', '/haberler'], ['İncelemeler & Kıyaslamalar', '/inceleme'], ['Rehber', '/rehber'], ['Araçlar', '/araclar']].map(([label, href]) => ({ label, href }))
+const DEF_NAV = ANA_MENU
 const DEF_SITE: SiteCfg = { tagline: 'Teknoloji haberleri, incelemeler ve karşılaştırmalar. Önce bilgi, sonra yorum.', nav: DEF_NAV, youtube: 'https://www.youtube.com/@nerdesinfatih', instagram: 'https://www.instagram.com/updated.tr/', kulupUrl: '/kulup', newsletterNote: 'Haftalık bülten pazartesi 08.30.' }
-/**
- * Panelde menü girilmemişse: Haberler + İncelemeler + "Üst menüde" işaretli kategoriler;
- * hiçbiri işaretli değilse en çok haberi olan 4 kategori (kit: menüde en fazla 7 öğe; Kulüp ayrıca eklenir).
- */
-async function autoNav() {
-  const r = await get('categories', { sort: 'order', limit: 100, depth: 0 })
-  let cats = (r.docs as any[]).filter((c) => c.inNav)
-  if (!cats.length) {
-    const counts = await Promise.all((r.docs as any[]).map(async (c) => ({ c, n: (await get('news', { where: { and: [published, { category: { equals: c.id } }] }, limit: 1, depth: 0 })).totalDocs as number })))
-    cats = counts.sort((a, b) => b.n - a.n).filter((x) => x.n > 0).slice(0, 4).map((x) => x.c)
-  }
-  return [['Haberler', '/haberler'], ['İncelemeler', '/inceleme'], ...cats.slice(0, 5).map((c) => [c.name, `/${c.slug}`])].slice(0, 7).map(([label, href]) => ({ label, href }))
-}
 let siteCache: { at: number; v: SiteCfg } | null = null
 export async function getSite(): Promise<SiteCfg> {
   if (siteCache && Date.now() - siteCache.at < 60e3) return siteCache.v
-  const v = await safe(async () => { const g = await get('globals/site', { depth: 0 }); return { ...DEF_SITE, ...Object.fromEntries(Object.entries(g).filter(([, x]) => x != null && x !== '')), nav: g.nav?.length ? g.nav : await autoNav() } as SiteCfg }, () => DEF_SITE)
+  const v = await safe(async () => { const g = await get('globals/site', { depth: 0 }); return { ...DEF_SITE, ...Object.fromEntries(Object.entries(g).filter(([, x]) => x != null && x !== '')), nav: ANA_MENU } as SiteCfg }, () => DEF_SITE)
   siteCache = { at: Date.now(), v }
   return v
 }
 
 /* ---------- haberler ---------- */
 export const getLatest = (p = 1, n = PAGE) => safe(async () => (await list('news', {}, { page: p, limit: n })).docs.map(mNews), () => (p === 1 ? page(S.NEWS, 1, n) : cyc(S.NEWS, p, n)))
+/** Rehber: "Rehber" etiketli haberler (satın alma rehberi, nasıl yapılır); konu rafları Rehber sayfası tamamlanınca */
+export const getRehber = (n = 60) => safe(async () => (await list('news', { label: { equals: 'rehber' } }, { limit: n })).docs.map(mNews), () => S.NEWS.filter((x) => x.label === 'rehber'))
 export const getBreaking = () => safe(async () => (await list('news', { label: { equals: 'son-dakika' }, publishedAt: { greater_than: new Date(Date.now() - 2 * 3600e3).toISOString() } }, { limit: 5, depth: 1 })).docs.map(mNews), () => S.NEWS.filter((n) => n.label === 'son-dakika'))
 export const getCategory = (slug: string) => safe<(Cat & { description?: string }) | null>(async () => { const r = await get('categories', { where: { slug: { equals: slug } }, limit: 1, depth: 0 }); const c = r.docs[0]; return c ? { name: c.name, slug: c.slug, description: c.description as string | undefined } : null }, () => S.CATS.find((c) => c.slug === slug) || null)
 export const getCategoryNews = (slug: string, p = 1) => safe(async () => (await list('news', { 'category.slug': { equals: slug } }, { page: p })).docs.map(mNews), () => { const a = S.NEWS.filter((n) => n.category.slug === slug); return a.length ? cyc(a, p) : [] })
@@ -182,7 +174,7 @@ export async function getHome(): Promise<Home> {
   return safe(async () => {
     const h = await get('globals/home', { depth: 2 })
     const hero = (h.hero || []).map((r: any) => (r.relationTo === 'reviews' ? mReview(r.value) : r.relationTo === 'comparisons' ? mComparison(r.value) : mNews(r.value)))
-    return { heroLayout: h.heroLayout || 'akordeon', hero: hero.length ? hero : (await getLatest(1, 5)), modules: h.modules || {}, mostRead: (h.mostRead || []).map(mNews) }
+    return { heroLayout: h.heroLayout || 'akordeon', hero, modules: h.modules || {}, mostRead: (h.mostRead || []).map(mNews) }
   }, () => ({ heroLayout: 'akordeon', hero: [S.NEWS[3], S.NEWS[9], S.REVIEWS[0], S.NEWS[12], S.NEWS[6]], modules: {}, mostRead: [S.NEWS[3], S.NEWS[9], S.NEWS[1], S.NEWS[12], S.NEWS[2]] }))
 }
 

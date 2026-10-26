@@ -46,10 +46,10 @@ export const Ads: CollectionConfig = {
     { name: 'name', type: 'text', label: 'Kampanya', required: true },
     { name: 'advertiser', type: 'text', label: 'Reklam veren', required: true },
     { name: 'slot', type: 'select', label: 'Alan', required: true, options: [
-      { label: 'Bant 970×250 (mobil 320×100)', value: 'lb' }, { label: 'Kutu 300×250', value: 'mr' }, { label: 'Akış içi (20 haberde 1)', value: 'in' },
+      { label: 'Bant 970×250 (mobil 320×100)', value: 'lb' }, { label: 'Kutu 300×250', value: 'mr' }, { label: 'Dikey afiş 300×600 (ana sayfa ilk bölüm; telefonda mobil görsel 300×250)', value: 'hp' }, { label: 'Akış içi (20 haberde 1)', value: 'in' },
       { label: 'Video (sessiz, 5 sn sonra geç)', value: 'video' }, { label: 'Sponsorlu kart', value: 'sponsored' } ] },
     { name: 'image', type: 'upload', relationTo: 'media', label: 'Görsel' },
-    { name: 'mobileImage', type: 'upload', relationTo: 'media', label: 'Mobil görsel (320×100)' },
+    { name: 'mobileImage', type: 'upload', relationTo: 'media', label: 'Mobil görsel (bant 320×100, dikey afiş 300×250)' },
     { name: 'videoUrl', type: 'text', label: 'Video dosyası (MP4, ≤15 sn)' },
     { name: 'title', type: 'text', label: 'Sponsorlu kart başlığı' },
     { name: 'url', type: 'text', label: 'Hedef bağlantı', required: true },

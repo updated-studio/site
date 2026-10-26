@@ -13,7 +13,7 @@ export const Site: GlobalConfig = {
   fields: [
     { name: 'tagline', type: 'text', label: 'Kısa tanım', defaultValue: 'Teknoloji haberleri, incelemeler ve karşılaştırmalar.' },
     {
-      name: 'nav', type: 'array', label: 'Üst menü (en fazla 7)', maxRows: 7,
+      name: 'nav', type: 'array', label: 'Üst menü (kullanılmıyor: menü 26 Ekim 2026 itibarıyla sabit altı bölüm)', maxRows: 7,
       fields: [{ name: 'label', type: 'text', required: true }, { name: 'href', type: 'text', required: true }],
     },
     { name: 'youtube', type: 'text', defaultValue: 'https://www.youtube.com/@nerdesinfatih' },
@@ -32,7 +32,7 @@ export const Home: GlobalConfig = {
   access: { read: () => true, update: editorsUp },
   fields: [
     { name: 'heroLayout', type: 'select', label: 'Manşet düzeni', defaultValue: 'akordeon', options: [{ label: 'Akordeon (elle açılır)', value: 'akordeon' }, { label: 'Vitrin (tek manşet + 2 kart)', value: 'vitrin' }, { label: 'Akış (zaman çizgisi)', value: 'akis' }] },
-    { name: 'hero', type: 'relationship', relationTo: ['news', 'reviews', 'comparisons'], hasMany: true, maxRows: 5, label: 'Manşetler (boşsa en yeni ve en yüksek öncelikli)' },
+    { name: 'hero', type: 'relationship', relationTo: ['news', 'reviews', 'comparisons'], hasMany: true, maxRows: 13, label: 'Manşet slider (en çok 13; eksik kalan yerler en yeni haberlerle dolar)' },
     {
       name: 'modules', type: 'group', label: 'Modüller',
       fields: ['radar', 'kiyasRobotu', 'altmisSaniye', 'kunyeRafi', 'videolar', 'reels', 'cokOkunan'].map((n) => ({ name: n, type: 'checkbox' as const, defaultValue: true })),
