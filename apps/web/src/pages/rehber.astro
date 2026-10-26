@@ -10,6 +10,6 @@ const yazilar = await api.getRehber()
     <div class="art-head" style="max-width:none;padding-bottom:24px"><span class="cat">UPDATED</span><h1 class="h1">Rehber</h1><p class="lead" style="margin:0">Satın alma rehberleri, nasıl yapılır yazıları ve temel bilgiler. Haberden farkı: eskimez, konuya göre bulunur.</p></div>
     {yazilar.length
       ? <div class="grid4">{yazilar.map((n) => <CardStd item={n} />)}</div>
-      : <div class="rh-bos"><p class="lead" style="margin:0">İlk rehberler hazırlanıyor. O zamana kadar çekimini planlamak için <a href="/araclar">Araçlar</a>'a, ürün seçerken <a href="/inceleme">İncelemeler &amp; Kıyaslamalar</a>'a bakabilirsin.</p></div>}
+      : <div class="rh-bos"><p class="lead" style="margin:0">İlk rehberler hazırlanıyor. O zamana kadar çekimini planlamak için <a href="/araclar">Araçlar</a>'a, ürün seçerken <a href="/inceleme">İncelemeler</a>'e ve <a href="/karsilastirma">Kıyaslamalar</a>'a bakabilirsin.</p></div>}
   </div>
 </Base>

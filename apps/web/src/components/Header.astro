@@ -6,8 +6,8 @@ interface Props { site: SiteCfg; current?: string }
 const { site, current = '' } = Astro.props
 const nav = site.nav.slice(0, 7) // kit 10b: en fazla 7
 const kategoriler = await getCategories() // telefon menüsünde kategoriler (üst menü sade: 25 Ekim 2026)
-/** Etkin bölüm: Ana Sayfa yalnız kökte; İncelemeler & Kıyaslamalar karşılaştırma ve künye sayfalarını da kapsar */
-const BOLUM: Record<string, string[]> = { '/inceleme': ['/inceleme', '/karsilastirma', '/urun'] }
+/** Etkin bölüm: Ana Sayfa yalnız kökte; Kıyaslamalar künye sayfalarını da kapsar */
+const BOLUM: Record<string, string[]> = { '/karsilastirma': ['/karsilastirma', '/urun'] }
 const on = (h: string) => ((h === '/' ? current === '/' : (BOLUM[h] || [h]).some((b) => current.startsWith(b))) ? 'page' : undefined)
 ---
 <header class="hdr" id="hdr">

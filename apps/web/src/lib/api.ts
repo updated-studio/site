@@ -104,8 +104,8 @@ const cyc = <T,>(arr: T[], p: number, n = PAGE) => Array.from({ length: n }, (_,
 
 /* ---------- site ---------- */
 export type SiteCfg = { tagline: string; nav: { label: string; href: string }[]; youtube: string; instagram: string; kulupUrl: string; newsletterNote: string }
-/** Üst menü (Fatih, 26 Ekim 2026): altı ana bölüm, her biri ayrı sayfa; Kulüp başlıkta ayrıca vurgulanır. Panelin menü listesi artık kullanılmaz. */
-export const ANA_MENU = [['Ana Sayfa', '/'], ['Haberler', '/haberler'], ['İncelemeler & Kıyaslamalar', '/inceleme'], ['Rehber', '/rehber'], ['Araçlar', '/araclar']].map(([label, href]) => ({ label, href }))
+/** Üst menü (Fatih, 26 Ekim 2026): ana bölümler, her biri ayrı sayfa; İncelemeler ve Kıyaslamalar ayrı (Fatih, aynı gün). Kulüp başlıkta ayrıca vurgulanır. Panelin menü listesi kullanılmaz. */
+export const ANA_MENU = [['Ana Sayfa', '/'], ['Haberler', '/haberler'], ['İncelemeler', '/inceleme'], ['Kıyaslamalar', '/karsilastirma'], ['Rehber', '/rehber'], ['Araçlar', '/araclar']].map(([label, href]) => ({ label, href }))
 const DEF_NAV = ANA_MENU
 const DEF_SITE: SiteCfg = { tagline: 'Teknoloji haberleri, incelemeler ve karşılaştırmalar. Önce bilgi, sonra yorum.', nav: DEF_NAV, youtube: 'https://www.youtube.com/@nerdesinfatih', instagram: 'https://www.instagram.com/updated.tr/', kulupUrl: '/kulup', newsletterNote: 'Haftalık bülten pazartesi 08.30.' }
 let siteCache: { at: number; v: SiteCfg } | null = null
