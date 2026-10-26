@@ -1,0 +1,56 @@
+---
+import Base from '../layouts/Base.astro'
+import { getYarismalar } from '../lib/api'
+
+const liste = await getYarismalar()
+const TUR: Record<string, string> = { fotograf: 'Fotoğraf', 'kisa-film': 'Kısa film', video: 'Video', karma: 'Fotoğraf ve video' }
+const AY = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara']
+const gun = (iso: string) => { const d = new Date(iso); return { g: d.toLocaleDateString('tr-TR', { day: 'numeric', timeZone: 'Europe/Istanbul' }), a: AY[Number(d.toLocaleDateString('en-US', { month: 'numeric', timeZone: 'Europe/Istanbul' })) - 1], y: d.toLocaleDateString('tr-TR', { year: 'numeric', timeZone: 'Europe/Istanbul' }) } }
+const uzun = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Istanbul' })
+---
+<Base meta={{ title: 'Fotoğraf ve kısa film yarışmaları takvimi | UPDATED', description: 'Türkiye ve dünyadaki fotoğraf, kısa film ve video yarışmaları son başvuru tarihine göre: tür, ücret ve son tarih. Başvuru bağlantıları ve hatırlatma Uper üyelerine.', path: '/yarismalar' }}>
+  <div class="wrap">
+    <div class="art-head" style="max-width:none;padding-bottom:16px">
+      <span class="cat">UPDATED</span><h1 class="h1">Yarışmalar takvimi</h1>
+      <p class="lead" style="margin:0">Fotoğraf, kısa film ve video yarışmaları son başvuru tarihine göre. Başvuru bağlantısı, ödül ve son tarih hatırlatması Uper'lere açık.</p>
+    </div>
+
+    <div class="yr-uye" data-yr-uye hidden></div>
+
+    <div class="yr-suzgec" role="group" aria-label="Yarışmaları süz">
+      <button class="yr-cip on" data-suz="tur" data-deger="">Tümü</button>
+      <button class="yr-cip" data-suz="tur" data-deger="fotograf">Fotoğraf</button>
+      <button class="yr-cip" data-suz="tur" data-deger="kisa-film">Kısa film</button>
+      <button class="yr-cip" data-suz="tur" data-deger="video">Video</button>
+      <span class="yr-ayrac" aria-hidden="true"></span>
+      <button class="yr-cip" data-suz="ucretsiz" aria-pressed="false">Ücretsiz</button>
+      <button class="yr-cip" data-suz="yakin" aria-pressed="false">Son 7 gün</button>
+      <button class="yr-cip" data-suz="kapsam" data-deger="turkiye" aria-pressed="false">Türkiye</button>
+      <button class="yr-cip" data-suz="kapsam" data-deger="uluslararasi" aria-pressed="false">Uluslararası</button>
+    </div>
+
+    {liste.length === 0 ? (
+      <p class="yr-bos">Takvim hazırlanıyor. Yakında ilk yarışmalar burada.</p>
+    ) : (
+      <ol class="yr-liste" data-yr-liste>
+        {liste.map((y) => { const d = gun(y.sonTarih); return (
+          <li class="yr-kart" id={`y-${y.id}`} data-id={y.id} data-son={y.sonTarih} data-tur={y.tur} data-kapsam={y.kapsam || ''} data-ucretsiz={y.ucretsiz ? '1' : ''} data-ad={y.ad}>
+            <div class="yr-tarih" aria-label={`Son başvuru ${uzun(y.sonTarih)}`}><b>{d.g}</b><span>{d.a}</span><small>{d.y}</small></div>
+            <div class="yr-ic">
+              <p class="meta yr-ust"><span>{TUR[y.tur] || y.tur}</span>{y.kapsam && <span>{y.kapsam === 'turkiye' ? 'Türkiye' : 'Uluslararası'}</span>}{y.ucretsiz && <span class="yr-ucretsiz">Ücretsiz</span>}<span class="yr-kalan" data-kalan></span></p>
+              <h2>{y.ad}</h2>
+              {(y.duzenleyen || y.konu) && <p class="yr-alt">{[y.duzenleyen, y.konu && `Konu: ${y.konu}`].filter(Boolean).join(' · ')}</p>}
+              {y.sonucTarihi && <p class="yr-alt">Sonuçlar: {uzun(y.sonucTarihi)}</p>}
+              <div class="yr-ayrinti" data-ayrinti>
+                <a class="btn" href="/hesap#kayit" data-donus>Başvuru bağlantısı için Uper ol</a>
+              </div>
+            </div>
+          </li>
+        )})}
+      </ol>
+    )}
+    <details class="yr-arsiv" data-yr-arsiv hidden><summary>Süresi geçenler</summary><ol class="yr-liste" data-yr-arsiv-liste></ol></details>
+    <p class="yr-not">Bilgiler düzenleyenlerin duyurularından derlenir; başvurmadan önce şartnameyi resmi sayfadan oku. Eksik ya da yanlış bir bilgi görürsen <a href="https://www.instagram.com/updated.tr/" rel="noopener">Instagram'dan</a> yaz.</p>
+  </div>
+  <script>import '../scripts/yarismalar.ts'</script>
+</Base>

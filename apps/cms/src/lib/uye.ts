@@ -74,6 +74,7 @@ export const PUAN = {
   tepki: { puan: 1, gunluk: 10, ad: 'Bir yazıya tepki verdin' },
   okuma: { puan: 3, gunluk: 30, ad: 'Bir yazıyı sonuna kadar okudun' },
   kulup: { puan: 10, gunluk: 100, ad: "Kulüp'te bir adımı bitirdin" },
+  yarisma: { puan: 10, gunluk: 20, ad: 'Bir yarışmaya katıldığını işaretledin' },
 } as const
 export type PuanTur = keyof typeof PUAN
 
@@ -247,4 +248,24 @@ export const toplulukTemizligi = (c: CollectionConfig): CollectionConfig => {
     HEDEF_ON.delete(anahtar)
   }
   return { ...c, hooks: { ...c.hooks, afterDelete: [...(c.hooks?.afterDelete ?? []), temizle] } }
+}
+
+/* ---------------- yarışma hatırlatması ---------------- */
+/** Takip edilen yarışmanın son başvurusuna 3 gün kala bir kez bildirim (sitede zil + isteğe bağlı e-posta yok: kısa duyuru) */
+export async function yarismaHatirlat(p: Payload) {
+  const db = havuz(p)
+  const r = await db.query(`select k.uye_id, k.yarisma_id, y.ad, y.son_tarih from payload.uye_yarisma k join payload.yarismalar y on y.id = k.yarisma_id
+    where k.takip and not k.hatirlatildi and y.durum = 'yayinda' and y.son_tarih between now() and now() + interval '3 days' limit 500`)
+  for (const x of r.rows) {
+    const gun = Math.max(0, Math.ceil((+new Date(x.son_tarih) - Date.now()) / 86_400_000))
+    await bildirimEkle(p, x.uye_id, 'yarisma', `${x.ad}: son başvuruya ${gun === 0 ? 'bugün son gün' : `${gun} gün kaldı`}.`, `/yarismalar#y-${x.yarisma_id}`)
+    await db.query('update payload.uye_yarisma set hatirlatildi = true where uye_id=$1 and yarisma_id=$2', [x.uye_id, x.yarisma_id])
+  }
+}
+let yarismaSaati: NodeJS.Timeout | null = null
+/** Panel açılınca saatte bir hatırlatma turu (tek panel süreci çalışır) */
+export function yarismaZamanlayici(p: Payload) {
+  if (yarismaSaati) return
+  const tur = () => yarismaHatirlat(p).catch((e) => p.logger.warn(`yarışma hatırlatması: ${e}`))
+  setTimeout(tur, 60_000); yarismaSaati = setInterval(tur, 3600_000)
 }

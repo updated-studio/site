@@ -4,6 +4,7 @@ import * as migration_20261024_161937_uye_giris_ayar from './20261024_161937_uye
 import * as migration_20261024_205512_uye_unvan from './20261024_205512_uye_unvan';
 import * as migration_20261025_155645_urun_turleri from './20261025_155645_urun_turleri';
 import * as migration_20261025_172240_uye_profil_resmi from './20261025_172240_uye_profil_resmi';
+import * as migration_20261026_110246_yarismalar from './20261026_110246_yarismalar';
 
 export const migrations = [
   {
@@ -34,6 +35,11 @@ export const migrations = [
   {
     up: migration_20261025_172240_uye_profil_resmi.up,
     down: migration_20261025_172240_uye_profil_resmi.down,
-    name: '20261025_172240_uye_profil_resmi'
+    name: '20261025_172240_uye_profil_resmi',
+  },
+  {
+    up: migration_20261026_110246_yarismalar.up,
+    down: migration_20261026_110246_yarismalar.down,
+    name: '20261026_110246_yarismalar'
   },
 ];

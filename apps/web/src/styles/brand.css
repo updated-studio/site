@@ -510,3 +510,29 @@ main{overflow-x:clip}
 .sd-serit i{width:12px;height:12px;border-radius:3px;background:rgb(255 107 26 / .55)}
 .sd-serit i.saat{background:var(--orange)}
 .bk-sahne{width:100%;height:auto;border-radius:14px;display:block}
+
+/* ---------- Yarışmalar takvimi (/yarismalar) ---------- */
+.yr-uye{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;padding:20px 24px;margin-bottom:24px;border:1px solid var(--line);background:var(--surface)}
+.yr-uye p{margin:0;max-width:720px;font-size:16px;line-height:1.5;color:var(--text-2)}.yr-uye b{color:var(--text)}
+.yr-suzgec{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:24px}
+.yr-cip{height:40px;padding:0 14px;border:1px solid var(--line);background:var(--surface);color:var(--text);font:600 14px var(--f-body);cursor:pointer}
+.yr-cip:hover{border-color:var(--text)}.yr-cip.on{background:var(--text);border-color:var(--text);color:var(--bg)}
+.yr-ayrac{width:1px;height:24px;background:var(--line);margin:0 4px}
+.yr-liste{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.yr-kart{display:grid;grid-template-columns:76px 1fr;gap:20px;padding:20px 24px;border:1px solid var(--line);background:var(--surface);scroll-margin-top:120px}
+.yr-kart.vurgu{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue)}
+.yr-kart.gecti{opacity:.6}
+.yr-tarih{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:2px;text-align:center;line-height:1}
+.yr-tarih b{font-family:var(--f-head);font-size:40px}.yr-tarih span{font:600 13px var(--f-mono);text-transform:uppercase;letter-spacing:.06em;margin-top:6px}.yr-tarih small{font:12px var(--f-mono);color:var(--text-3);margin-top:4px}
+.yr-ic h2{font-size:22px;line-height:1.25;margin:4px 0 6px}
+.yr-ust{display:flex;flex-wrap:wrap;gap:4px 12px;margin:0}
+.yr-ucretsiz{color:var(--text)}.yr-ucretsiz::before{content:"✓ "}
+.yr-kalan{margin-left:auto}.yr-kart.yakin .yr-kalan{color:var(--orange);font-weight:700}
+.yr-alt{margin:0 0 4px;color:var(--text-2);font-size:15px}
+.yr-ayrinti{margin-top:12px}.yr-ayrinti p{margin:0 0 6px;font-size:15px;line-height:1.5;color:var(--text-2)}.yr-ayrinti b{color:var(--text)}
+.yr-dugmeler{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.yr-dugmeler .btn[aria-pressed="true"]{border-color:var(--blue);color:var(--blue)}
+.yr-bos{padding:32px 0;color:var(--text-2);font-size:17px}
+.yr-arsiv{margin-top:32px}.yr-arsiv summary{cursor:pointer;font:600 15px var(--f-body);padding:8px 0}.yr-arsiv .yr-liste{margin-top:12px}
+.yr-not{margin:32px 0 48px;color:var(--text-3);font-size:14px}
+@media (max-width:600px){.yr-ayrac{display:none}.yr-kart{grid-template-columns:56px 1fr;gap:14px;padding:16px}.yr-tarih b{font-size:32px}.yr-kalan{margin-left:0;width:100%}.yr-dugmeler .btn{flex:1 1 auto}}

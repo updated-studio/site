@@ -255,3 +255,9 @@ export async function pageCount(kind: 'son' | 'kategori' | 'yazar', slug?: strin
     return Math.min(MAX_PAGES, Math.max(1, Math.ceil(r.totalDocs / PAGE)))
   }, () => 3)
 }
+
+/* ---------- yarışmalar takvimi (herkese açık alanlar; başvuru bağlantısı ve ayrıntılar Uper'e /api/uye/yarismalar) ---------- */
+export type Yarisma = { id: number; ad: string; duzenleyen?: string; tur: 'fotograf' | 'kisa-film' | 'video' | 'karma'; kapsam?: 'turkiye' | 'uluslararasi'; sonTarih: string; sonucTarihi?: string; ucretsiz?: boolean; konu?: string }
+export const getYarismalar = () => safe(async () => ((await get('yarismalar', { sort: 'sonTarih', limit: 500, depth: 0 }).catch(() => ({ docs: [] }))).docs as any[]).map((d: any) => ({
+  id: d.id, ad: d.ad, duzenleyen: d.duzenleyen || undefined, tur: d.tur, kapsam: d.kapsam || undefined, sonTarih: d.sonTarih, sonucTarihi: d.sonucTarihi || undefined, ucretsiz: !!d.ucretsiz, konu: d.konu || undefined,
+})) as Yarisma[], () => S.YARISMALAR as Yarisma[])

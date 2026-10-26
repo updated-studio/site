@@ -115,3 +115,11 @@ export const REELS: Reel[] = [
   ['Xbox Nano cebe sığıyor', 'pad'], ['Razr Flex test sonucu', 'flip'], ['Z Slide sızıntısı', 'trifold'], ['Neo elden kalkıyor', 'drone'], ['Wave Go: yaka mı?', 'mic'], ['Atlas teleskop', 'scope'], ['OLED ucuzluyor', 'oled'],
 ].map(([caption, k]) => ({ caption, url: 'https://www.instagram.com/updated.tr/', cover: img(k) }))
 export const AUTHORS = Object.values(AU)
+
+/** Yarışmalar takvimi örnekleri (yalnız CMS bağlı değilken, geliştirmede) */
+const gunSonra = (g: number) => new Date(Date.now() + g * 86_400_000).toISOString()
+export const YARISMALAR = [
+  { id: 1, ad: 'Örnek Ulusal Fotoğraf Yarışması', duzenleyen: 'Örnek Derneği', tur: 'fotograf' as const, kapsam: 'turkiye' as const, sonTarih: gunSonra(5), ucretsiz: true, konu: 'Serbest' },
+  { id: 2, ad: 'Örnek Kısa Film Festivali', duzenleyen: 'Örnek Festival', tur: 'kisa-film' as const, kapsam: 'uluslararasi' as const, sonTarih: gunSonra(24), sonucTarihi: gunSonra(60), ucretsiz: false, konu: 'İklim' },
+  { id: 3, ad: 'Örnek Geçmiş Yarışma', tur: 'video' as const, kapsam: 'turkiye' as const, sonTarih: gunSonra(-3), ucretsiz: true },
+]

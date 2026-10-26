@@ -18,6 +18,7 @@ import { Comparisons } from './collections/Comparisons'
 import { Products } from './collections/Products'
 import { Videos, Reels, Ads } from './collections/Social'
 import { KulupTracks, KulupQuizzes } from './collections/Kulup'
+import { Yarismalar } from './collections/Yarismalar'
 import { Pages } from './collections/Pages'
 import { Uyeler, Yorumlar, UyeGiris } from './collections/Topluluk'
 import { Site, Home } from './globals'
@@ -27,7 +28,8 @@ import { studyoAlanlar, studyoDurum, studyoGiris, studyoOnizleme, studyoSema, st
 import { canliEndpoint } from './endpoints/canli'
 import { okunmaEndpoints, okunmaInit } from './endpoints/okunma'
 import { uyeEndpoints } from './endpoints/uye'
-import { toplulukTemizligi } from './lib/uye'
+import { yarismaOneri } from './endpoints/yarisma'
+import { toplulukTemizligi, yarismaZamanlayici } from './lib/uye'
 import { icerikGelenKancasi } from './lib/icerikGelen'
 import { zamanlamaTemizligi } from './hooks/zamanlamaTemizle'
 
@@ -47,7 +49,7 @@ export default buildConfig({
   },
   // Panel dili Türkçe (isteyen kullanıcı hesap ayarından İngilizceye geçebilir)
   i18n: { supportedLanguages: { tr, en }, fallbackLanguage: 'tr' },
-  collections: [News, Reviews, Comparisons, Products, Categories, Authors, Media, Videos, Reels, Ads, KulupTracks, KulupQuizzes, Pages, Uyeler, Yorumlar, Users].map(zamanlamaTemizligi).map(toplulukTemizligi).map(icerikGelenKancasi),
+  collections: [News, Reviews, Comparisons, Products, Categories, Authors, Media, Videos, Reels, Ads, KulupTracks, KulupQuizzes, Pages, Uyeler, Yorumlar, Yarismalar, Users].map(zamanlamaTemizligi).map(toplulukTemizligi).map(icerikGelenKancasi),
   globals: [Home, Site, UyeGiris],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
@@ -60,8 +62,8 @@ export default buildConfig({
   csrf: origins,
   // Zamanlanmış yayın (schedulePublish) için iş kuyruğu dakikada bir çalışır. Panel kalıcı Node sunucusunda çalışmalı.
   jobs: { autoRun: [{ cron: '* * * * *', queue: 'default', limit: 20 }], tasks: [] },
-  endpoints: [triyajImport, triyajDurum, triyajKapak, triyajTemizle, previewEndpoint, canliEndpoint, studyoSema, studyoOnizleme, studyoAlanlar, studyoDurum, studyoGiris, studyoZamanla, studyoZamanlaEkle, studyoZamanlaSil, ...okunmaEndpoints, ...uyeEndpoints],
-  onInit: okunmaInit,
+  endpoints: [triyajImport, triyajDurum, triyajKapak, triyajTemizle, previewEndpoint, canliEndpoint, studyoSema, studyoOnizleme, studyoAlanlar, studyoDurum, studyoGiris, studyoZamanla, studyoZamanlaEkle, studyoZamanlaSil, ...okunmaEndpoints, ...uyeEndpoints, yarismaOneri],
+  onInit: async (p) => { await okunmaInit(p); yarismaZamanlayici(p) },
   plugins: [
     s3Storage({
       enabled: !!process.env.S3_BUCKET,

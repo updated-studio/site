@@ -530,4 +530,28 @@ export const uyeEndpoints: Endpoint[] = [
     }
     return yanit(req, { durum: yeni })
   }),
+
+  // Yarışmalar takvimi: ayrıntılar (başvuru bağlantısı, ödül, ücret, açıklama) ve kişinin takip/katıldım kaydı yalnız Uper'e
+  uc('/uye/yarismalar', 'get', 'uye', async ({ req, p, uye }) => {
+    const dun = new Date(Date.now() - 86_400_000).toISOString()
+    const r = await p.find({ collection: 'yarismalar', where: { and: [{ durum: { equals: 'yayinda' } }, { sonTarih: { greater_than_equal: dun } }] }, sort: 'sonTarih', limit: 300, depth: 0, overrideAccess: true })
+    const k = await havuz(p).query('select yarisma_id, takip, katildi from payload.uye_yarisma where uye_id=$1', [uye!.id])
+    const kayit = Object.fromEntries(k.rows.map((x: any) => [x.yarisma_id, { takip: x.takip, katildi: x.katildi }]))
+    return yanit(req, { yarismalar: (r.docs as any[]).map((y) => ({ id: y.id, baglanti: y.baglanti, odul: y.odul ?? null, ucret: y.ucret ?? null, aciklama: y.aciklama ?? null })), kayit })
+  }),
+  uc('/uye/yarisma', 'post', 'uye', async ({ req, p, uye }) => {
+    const b = await govde(req)
+    const id = Number(b.id)
+    if (!Number.isInteger(id) || id < 1) return hata(req, 'Yarışma belirtilmedi.')
+    const y = await p.findByID({ collection: 'yarismalar', id, depth: 0, overrideAccess: true }).catch(() => null) as any
+    if (!y || y.durum !== 'yayinda') return hata(req, 'Yarışma bulunamadı.', 404)
+    const db = havuz(p)
+    const once = (await db.query('select takip, katildi from payload.uye_yarisma where uye_id=$1 and yarisma_id=$2', [uye!.id, id])).rows[0] || { takip: false, katildi: false }
+    const takip = b.takip === undefined ? once.takip : !!b.takip
+    const katildi = b.katildi === undefined ? once.katildi : !!b.katildi
+    await db.query(`insert into payload.uye_yarisma (uye_id, yarisma_id, takip, katildi) values ($1,$2,$3,$4)
+      on conflict (uye_id, yarisma_id) do update set takip = excluded.takip, katildi = excluded.katildi, at = now()`, [uye!.id, id, takip, katildi])
+    if (katildi && !once.katildi) await puanEkle(p, uye!.id, 'yarisma', `yarisma:${id}`)
+    return yanit(req, { takip, katildi })
+  }),
 ]
