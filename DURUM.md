@@ -95,7 +95,7 @@ Kaynak: https://www.offocus.tr (fotoğraf/video topluluk sitesi). Yol haritası 
 2. ✅ (veri girişi sürüyor) **Künyelerde "kullananlar"**: profilinde ürünü ekleyen Uper'ler + yorumları. Ürünlerin **ayrıntılı teknik özellikleri ve kategorileri** (karşılaştırma motoru bunları kullanır).
 3. ✅ **Yarışmalar takvimi** (/yarismalar, 26 Ekim): liste herkese açık; başvuru bağlantısı, ödül/ücret, hatırlatma, "katıldım" Uper'e (Fatih: "üyelik gereksin… kayıtların tutulması için", A seçeneği). Haftalık otomatik tarama → öneri → ekip onayı.
 4. ✅ **Haftalık fotoğraf görevi** (/gorev, 26 Ekim): pazartesi açılan tema, tek fotoğraf, ekip onayı, 3 gün kör oylama (3 oy), ilk üçe puan + rozet.
-5. Light Lab / Lens Lab (ölçüm sonuçları).
+5. Light Lab / Lens Lab (ölçüm sonuçları). **← Sırada (26 Ekim'de ara verildi).** Fatih'e soruldu, cevap bekliyor: kendi ölçümümüz (ekipman gerekir) mi, üretici değerleriyle kaynaklı karşılaştırma tablosu mu, yoksa atlayıp Forum mu?
 6. Forum.
 7. İkinci el pazarı (ilan; satışın tarafı değiliz).
 8. Kariyer (iş ilanları, yetenek havuzu).
