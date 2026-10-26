@@ -1,12 +1,11 @@
 ---
-/** Ana sayfa (Fatih, 26 Ekim 2026): manşet slider (13) + son 6 haber + dikey afiş → yatay reklam → son haberler → incelemeler → video → modüller → sonsuz akış. */
+/** Ana sayfa (Fatih, 26 Ekim 2026): manşet (13, A biçimi) + son videolar + dikey afiş → yatay reklam → video haberler → son haberler → incelemeler → modüller → sonsuz akış. */
 import Base from '../layouts/Base.astro'
 import Manset from '../components/hero/Manset.astro'
 import CardStd from '../components/CardStd.astro'
 import EnCokOkunan from '../components/EnCokOkunan.astro'
 import Ad from '../components/Ad.astro'
-import YtStrip from '../components/YtStrip.astro'
-import ReelStrip from '../components/ReelStrip.astro'
+import VideoDuvar from '../components/VideoDuvar.astro'
 import Radar from '../components/modules/Radar.astro'
 import KiyasRobotu from '../components/modules/KiyasRobotu.astro'
 import Altmis from '../components/modules/Altmis.astro'
@@ -15,27 +14,30 @@ import InfiniteFeed from '../components/InfiniteFeed.astro'
 import * as api from '../lib/api'
 import type { News } from '../lib/types'
 
-const [home, latest, reviews, videos, reels, ads, radar, products, site] = await Promise.all([
-  api.getHome(), api.getLatest(1, 40), api.getReviews(1, 4), api.getVideos(), api.getReels(), api.getAds(), api.getRadar(), api.getProducts(12), api.getSite(),
+const [home, latest, reviews, videos, reels, ads, radar, products, site, youtube] = await Promise.all([
+  api.getHome(), api.getLatest(1, 40), api.getReviews(1, 4), api.getVideos(), api.getReels(), api.getAds(), api.getRadar(), api.getProducts(12), api.getSite(), api.getYoutube(),
 ])
+// Videolar: kısa olanlar "Son videolar" sütununa (Instagram Reels yoksa), uzunlar "Video haberler" duvarına; paneldeki videolar önce
+const shorts = youtube.filter((v) => v.short)
+const uzun = [...videos, ...youtube.filter((v) => !v.short && !videos.some((p) => p.youtubeId === v.youtubeId))]
 const m = { radar: true, kiyasRobotu: true, altmisSaniye: true, kunyeRafi: true, videolar: true, reels: true, cokOkunan: true, ...home.modules }
-// Slider: editörün seçtikleri (en çok 13), eksik kalan yerler en yeni haberlerle; sağdaki 6 haber slider'da olmayanlar
+// Manşet: editörün seçtikleri (en çok 13), eksik kalan yerler en yeni haberlerle
 const secilen = home.hero.slice(0, 13)
 const anahtar = (x: { kind: string; id: string }) => x.kind + x.id
 const kullanilan = new Set(secilen.map(anahtar))
 const slides = [...secilen, ...latest.filter((n) => !kullanilan.has(anahtar(n)))].slice(0, 13)
 slides.forEach((s) => kullanilan.add(anahtar(s)))
-const yan = latest.filter((n) => !kullanilan.has(anahtar(n))).slice(0, 6)
-yan.forEach((s) => kullanilan.add(anahtar(s)))
 const rest = latest.filter((n) => !kullanilan.has(anahtar(n)))
 const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşılaştırmalar', description: site.tagline, path: '/' }
 ---
 <Base meta={meta}>
   <h1 class="sr">UPDATED · Teknoloji haberleri, incelemeler ve karşılaştırmalar</h1>
   <section class="sec" style="padding-top:24px">
-    <div class="wrap"><Manset slides={slides} list={yan} ad={api.pickAd(ads, 'hp')} /></div>
+    <div class="wrap"><Manset slides={slides} reels={reels} shorts={shorts} ad={api.pickAd(ads, 'hp')} instagram={site.instagram} youtube={site.youtube} /></div>
   </section>
   <Ad slot="lb" ad={api.pickAd(ads, 'lb')} />
+
+  {m.videolar && uzun.length > 0 && <section class="sec"><div class="wrap"><VideoDuvar videos={uzun} channel={site.youtube} /></div></section>}
 
   <section class="sec"><div class="wrap">
     <div class="sh"><h2><span class="no">01</span>Son haberler</h2><a class="btn-t btn" href="/haberler">Tümü</a></div>
@@ -47,12 +49,6 @@ const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşıla�
   {reviews.length > 0 && <section class="sec"><div class="wrap">
     <div class="sh"><h2><span class="no">02</span>İncelemeler</h2><a class="btn-t btn" href="/inceleme">Tümü</a></div>
     <div class="grid4">{reviews.slice(0, 4).map((r) => <CardStd item={r} />)}</div>
-  </div></section>}
-
-  {(m.videolar || m.reels) && <section class="sec"><div class="wrap">
-    {m.videolar && <YtStrip videos={videos} channel={site.youtube} />}
-    {m.videolar && m.reels && <div style="height:48px"></div>}
-    {m.reels && <ReelStrip reels={reels} profile={site.instagram} />}
   </div></section>}
 
   <section class="sec"><div class="wrap with-rail">

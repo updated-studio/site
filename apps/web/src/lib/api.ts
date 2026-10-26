@@ -158,6 +158,46 @@ export const getRadar = () => safe(async () => (await get('products', { where: {
 
 /* ---------- kanallar, reklam ---------- */
 export const getVideos = (n = 8) => safe(async () => (await get('videos', { sort: '-publishedAt', limit: n, depth: 1 })).docs.map(mVideo), () => S.VIDEOS.slice(0, n))
+/**
+ * YouTube kanalının son videoları (Nerdesin Fatih): kanalın herkese açık RSS akışı, anahtar gerekmez (26 Ekim 2026).
+ * Kısa videolar (Shorts) ayrı işaretlenir: ana sayfada "Son videolar" sütunu (Instagram Reels yoksa), uzunlar "Video haberler" duvarı.
+ * YouTube akışı sık sık 500/404 döner (Ekim 2026'da üç istekten biri açılıyor): 10 deneme; başarılı son sonuç geçici klasörde
+ * saklanır, akış hiç açılmazsa o kullanılır.
+ */
+export const YT_KANAL = 'UCyu5x_31gEcTedSD-3im9eg'
+let ytCache: Video[] | null = null
+export async function getYoutube(): Promise<Video[]> {
+  if (ytCache) return ytCache
+  const yedek = (await import('node:path')).join((await import('node:os')).tmpdir(), 'updated-youtube.json')
+  const fs = await import('node:fs')
+  const al = async () => {
+    for (let i = 0; i < 10; i++) {
+      try {
+        const r = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${YT_KANAL}`, { headers: { 'User-Agent': 'Mozilla/5.0 (UPDATED site derlemesi)' } })
+        if (r.ok) return await r.text()
+      } catch {}
+      await new Promise((ok) => setTimeout(ok, 700))
+    }
+    return null
+  }
+  const xml = await al()
+  const coz = (x: string) => x.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+  let v: Video[] = []
+  if (xml) {
+    v = [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)].map(([, e]) => {
+      const id = /<yt:videoId>([^<]+)</.exec(e)?.[1] || ''
+      const short = /href="[^"]*\/shorts\//.test(e)
+      const title = coz(/<title>([^<]*)</.exec(e)?.[1] || '')
+      const thumb: Img = short ? { url: `https://i.ytimg.com/vi/${id}/oar2.jpg`, alt: '', w: 720, h: 1280 } : { url: `https://i.ytimg.com/vi/${id}/hq720.jpg`, alt: '', w: 1280, h: 720 }
+      return { title, youtubeId: id, kind: short ? 'Shorts' : 'Video', thumb, publishedAt: /<published>([^<]+)</.exec(e)?.[1], short }
+    }).filter((x) => x.youtubeId)
+    if (v.length) try { fs.writeFileSync(yedek, JSON.stringify(v)) } catch {}
+  }
+  if (!v.length) try { v = JSON.parse(fs.readFileSync(yedek, 'utf8')) } catch {}
+  console.log(`youtube: ${v.length} video${xml ? '' : ' (akış açılmadı, saklanan kullanıldı)'}`)
+  ytCache = v
+  return v
+}
 export const getReels = (n = 10) => safe(async () => (await get('reels', { sort: '-publishedAt', limit: n, depth: 1 })).docs.map(mReel), () => S.REELS.slice(0, n))
 let adCache: { at: number; v: Ad[] } | null = null
 export async function getAds(): Promise<Ad[]> {

@@ -1,0 +1,31 @@
+---
+/**
+ * Ana sayfa "Video haberler" duvarı (Fatih, 26 Ekim 2026): solda en yeni video büyük, sağda sonraki dört video 2×2.
+ * Kaynak YouTube kanalı (RSS, kendiliğinden) + paneldeki videolar. Tıklayınca yerinde oynar (scripts/site.ts youtube()).
+ */
+import Img from './Img.astro'
+import type { Video } from '../lib/types'
+import { date } from '../lib/format'
+import { ico } from '../lib/ui'
+interface Props { videos: Video[]; channel: string }
+const { videos, channel } = Astro.props
+const [bas, ...diger] = videos
+const yt = (v: Video) => v.youtubeId ? `https://www.youtube.com/watch?v=${v.youtubeId}` : channel
+---
+{bas && (
+  <section class="vd" aria-label="Video haberler">
+    <div class="sh"><h2>Video haberler</h2><a class="btn-t btn" href={channel} target="_blank" rel="noopener">Kanala git</a></div>
+    <div class="vd-iz">
+      <a class="vd-k vd-bas" href={yt(bas)} target="_blank" rel="noopener" data-yt={bas.youtubeId || undefined}>
+        <span class="c-img"><Img img={bas.thumb} alt="" eager={false} sizes="(max-width: 900px) 100vw, 760px" /><span class="vd-oy" set:html={ico('play', 30)} /></span>
+        <span class="vd-m"><span class="cat">{bas.kind}{bas.publishedAt ? ` · ${date(bas.publishedAt)}` : ''}</span><b>{bas.title}</b></span>
+      </a>
+      {diger.slice(0, 4).map((v) => (
+        <a class="vd-k" href={yt(v)} target="_blank" rel="noopener" data-yt={v.youtubeId || undefined}>
+          <span class="c-img"><Img img={v.thumb} alt="" sizes="(max-width: 900px) 50vw, 300px" /><span class="vd-oy" set:html={ico('play', 20)} /></span>
+          <span class="vd-m"><span class="cat">{v.kind}{v.publishedAt ? ` · ${date(v.publishedAt)}` : ''}</span><b>{v.title}</b></span>
+        </a>
+      ))}
+    </div>
+  </section>
+)}
