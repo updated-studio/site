@@ -536,3 +536,46 @@ main{overflow-x:clip}
 .yr-arsiv{margin-top:32px}.yr-arsiv summary{cursor:pointer;font:600 15px var(--f-body);padding:8px 0}.yr-arsiv .yr-liste{margin-top:12px}
 .yr-not{margin:32px 0 48px;color:var(--text-3);font-size:14px}
 @media (max-width:600px){.yr-ayrac{display:none}.yr-kart{grid-template-columns:56px 1fr;gap:14px;padding:16px}.yr-tarih b{font-size:32px}.yr-kalan{margin-left:0;width:100%}.yr-dugmeler .btn{flex:1 1 auto}}
+
+/* ---------- Haftalık fotoğraf görevi (/gorev) ---------- */
+.gv .h1{font-size:clamp(40px,7vw,72px)}
+.gv-sure{margin:12px 0 0;text-transform:none;letter-spacing:0;font-size:14px}
+.gv-katil{margin:24px 0 40px}
+.gv-davet,.gv-benim,.gv-form{display:flex;flex-wrap:wrap;gap:16px 24px;align-items:center;justify-content:space-between;padding:20px 24px;border:1px solid var(--line);background:var(--surface)}
+.gv-davet p{margin:0;max-width:640px;font-size:16px;line-height:1.5;color:var(--text-2)}.gv-davet b{color:var(--text)}
+.gv-benim{justify-content:flex-start;align-items:flex-start}.gv-benim img{width:min(280px,100%);height:auto;display:block}
+.gv-benim p{margin:0 0 6px}.gv-durum{font-weight:700}.gv-bekliyor{color:var(--text-2)}.gv-onaylandi{color:#15803D}.gv-reddedildi{color:#B91C1C}
+.gv-form{align-items:stretch}
+.gv-dosya{flex:0 1 320px;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:1.5px dashed var(--line);cursor:pointer;padding:12px;text-align:center;font-weight:600;position:relative}
+.gv-dosya input{position:absolute;inset:0;opacity:0;cursor:pointer}.gv-dosya img{max-width:100%;max-height:240px}
+.gv-alanlar{flex:1 1 320px;display:flex;flex-direction:column;gap:12px}
+.gv-alanlar label{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:600}
+.gv-alanlar input[type=text]{height:44px;padding:0 12px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:16px var(--f-body)}
+.gv-onay{flex-direction:row!important;align-items:flex-start;gap:10px!important;font-weight:400!important;line-height:1.45}.gv-onay input{margin-top:3px;width:18px;height:18px;flex:none}
+.gv-ipucu{margin:0;color:var(--text-3);font-size:14px;line-height:1.5}
+.gv-dugmeler{display:flex;flex-wrap:wrap;gap:8px}
+.gv-bos{padding:24px 0;color:var(--text-2);font-size:17px}
+.gv-bolum{margin:0 0 48px}
+.gv-bas h2,.gv-h{font-size:30px;margin:0 0 6px}.gv-bas .meta{text-transform:none;letter-spacing:0;font-size:14px;margin:0 0 4px}
+.gv-izgara{list-style:none;margin:20px 0 0;padding:0;columns:3 260px;column-gap:16px}
+.gv-izgara.kucuk{columns:5 150px;column-gap:10px}
+.gv-foto{break-inside:avoid;margin:0 0 16px;display:flex;flex-direction:column;gap:6px}
+.gv-izgara.kucuk .gv-foto{margin-bottom:10px}
+.gv-ac{display:block;padding:0;border:0;background:var(--img);cursor:zoom-in;width:100%}.gv-ac img{display:block;width:100%;height:auto}
+.gv-foto.oylu .gv-ac{outline:3px solid var(--orange);outline-offset:-3px}
+.gv-oy{height:40px;border:1px solid var(--line);background:var(--surface);color:var(--text);font:600 14px var(--f-body);cursor:pointer}
+.gv-oy[aria-pressed="true"]{background:var(--orange);border-color:var(--orange);color:#111}
+.gv-senin{font:600 12px var(--f-mono);text-transform:uppercase;color:var(--text-3)}
+.gv-foto p{margin:0;font-size:14px;color:var(--text-2)}
+.gv-sonuc{margin:24px 0 40px}.gv-sonuc h3{font-size:24px;margin:0 0 14px}.gv-sonuc h3 .meta{font-size:12px;margin-left:8px}
+.gv-kursu{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px;align-items:start}
+.gv-kursu li{display:flex;flex-direction:column;gap:8px}
+.gv-alt{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.gv-alt b{font-family:var(--f-head);font-size:28px}
+.gv-d1 .gv-alt b{color:var(--orange)}
+.gv-kim{display:inline-flex;align-items:center;gap:8px;color:var(--text);text-decoration:none;font-weight:600;font-size:14px}
+.gv-nasil{margin:8px 0 56px;padding:16px 20px;border:1px solid var(--line);background:var(--surface)}.gv-nasil summary{cursor:pointer;font-weight:600}
+.gv-nasil ol{margin:12px 0 0;padding-left:20px;line-height:1.6;color:var(--text-2)}
+.gv-buyuk{max-width:min(96vw,1400px);max-height:94vh;padding:0;border:0;background:#000;color:#fff}
+.gv-buyuk::backdrop{background:rgb(0 0 0 / .85)}.gv-buyuk img{display:block;max-width:100%;max-height:86vh;margin:auto}
+.gv-buyuk form{position:absolute;top:8px;right:8px}.gv-buyuk p{margin:0;padding:10px 16px;font-size:14px}
+@media (max-width:700px){.gv-kursu{grid-template-columns:1fr 1fr}.gv-kursu .gv-d1{grid-column:1 / -1}.gv-izgara{columns:2;column-gap:10px}.gv-izgara.kucuk{columns:3}.gv-foto{margin-bottom:10px}}

@@ -1,0 +1,37 @@
+---
+import Base from '../layouts/Base.astro'
+import { getGorevler } from '../lib/api'
+
+// Derlemede: katılımdaki tema (arama motorları ve ilk görünüş için); fotoğraflar, oylama ve sonuçlar tarayıcıda yüklenir
+const simdi = Date.now()
+const liste = await getGorevler()
+const aktif = liste.find((g) => +new Date(g.baslangic) <= simdi && simdi < +new Date(g.bitis))
+---
+<Base meta={{ title: aktif ? `Haftalık fotoğraf görevi: ${aktif.baslik} | UPDATED` : 'Haftalık fotoğraf görevi | UPDATED', description: 'Her pazartesi yeni bir tema: fotoğrafını yükle, hafta sonunda Uper\'ler kör oylamayla haftanın fotoğrafını seçsin.', path: '/gorev' }}>
+  <div class="wrap gv">
+    <div class="art-head" style="max-width:none;padding-bottom:8px">
+      <span class="cat">UPDATED · Haftalık görev</span>
+      <h1 class="h1" data-gv-baslik>{aktif ? aktif.baslik : 'Haftalık fotoğraf görevi'}</h1>
+      <p class="lead" style="margin:0" data-gv-aciklama>{aktif?.aciklama || 'Her pazartesi yeni bir tema. Fotoğrafını yükle, hafta sonunda Uper\'ler haftanın fotoğrafını seçsin.'}</p>
+      <p class="meta gv-sure" data-gv-sure></p>
+    </div>
+
+    <section class="gv-katil" data-gv-katil aria-live="polite"><p class="meta">Yükleniyor…</p></section>
+
+    <section class="gv-bolum" data-gv-oylama hidden></section>
+    <section class="gv-bolum" data-gv-sonuclar hidden></section>
+
+    <details class="gv-nasil">
+      <summary>Nasıl işler?</summary>
+      <ol>
+        <li>Her pazartesi 00.00'da yeni tema açılır; pazar 23.59'a kadar tek fotoğraf yüklersin (değiştirebilirsin).</li>
+        <li>Fotoğraf senin çektiğin olmalı. Ekip kontrol eder; uygunsuz, başkasına ait ya da temaya hiç uymayan fotoğraf alınmaz.</li>
+        <li>Hafta bitince 3 gün oylama: fotoğraflar sahibinin adı gizli ve karışık sırayla gösterilir. Her Uper en çok 3 fotoğrafa oy verir, kendi fotoğrafına veremez.</li>
+        <li>Oylama bitince ilk üç açıklanır: birinciye 100, ikinciye 60, üçüncüye 40 puan ve rozet. Katılım 15 puan.</li>
+        <li>Yüklediğin fotoğrafın konum ve cihaz bilgisi silinir; fotoğraf adınla sitede ve UPDATED'ın sosyal medyasında gösterilebilir.</li>
+      </ol>
+    </details>
+  </div>
+  <dialog class="gv-buyuk" data-gv-buyuk><form method="dialog"><button class="ibtn" aria-label="Kapat">✕</button></form><img alt="" data-gv-buyuk-img><p data-gv-buyuk-not></p></dialog>
+  <script>import '../scripts/gorev.ts'</script>
+</Base>

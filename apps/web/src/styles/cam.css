@@ -46,7 +46,7 @@
 .cam .sd .nv button{border-radius:10px}
 
 /* Kartlar ve kutular: yuvarlak, yarı saydam, yumuşak gölge */
-.cam .c-std,.cam .c-man,.cam .c-list,.cam .sdk,.cam .ys-oneri,.cam .arac,.cam .arac-l,.cam .arac-uper,.cam .arac-kart,.cam .yr-kart,.cam .yr-uye,.cam .c-spo,.cam .s60,.cam .kd,.cam .tbl,.cam .kv > div{
+.cam .c-std,.cam .c-man,.cam .c-list,.cam .sdk,.cam .ys-oneri,.cam .arac,.cam .arac-l,.cam .arac-uper,.cam .arac-kart,.cam .yr-kart,.cam .yr-uye,.cam .gv-davet,.cam .gv-benim,.cam .gv-form,.cam .gv-nasil,.cam .c-spo,.cam .s60,.cam .kd,.cam .tbl,.cam .kv > div{
   border-radius:var(--r-kart);overflow:hidden;border-color:var(--line);box-shadow:inset 0 1px 0 var(--cam-isik),var(--cam-golge)}
 .cam .c-man{border-radius:var(--r-buyuk)}
 .cam .c-std,.cam .c-man{transition:transform var(--t2) var(--ease),box-shadow var(--t2) var(--ease)}
@@ -63,7 +63,7 @@
 .cam .sec + .sec{border-top:0}
 
 /* Düğmeler */
-.cam .btn,.cam .ibtn,.cam .save,.cam .yr-cip{border-radius:var(--r-dugme)}
+.cam .btn,.cam .ibtn,.cam .save,.cam .yr-cip,.cam .gv-oy{border-radius:var(--r-dugme)}
 .cam .ibtn{background:var(--surface-2);border-color:var(--line)}
 .cam .btn-p{box-shadow:inset 0 1px 0 rgb(255 255 255 / .25),0 4px 14px rgb(37 99 235 / .28)}
 .cam .btn-p:hover{background:#1D4FD8;border-color:#1D4FD8}

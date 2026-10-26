@@ -261,3 +261,9 @@ export type Yarisma = { id: number; ad: string; duzenleyen?: string; tur: 'fotog
 export const getYarismalar = () => safe(async () => ((await get('yarismalar', { sort: 'sonTarih', limit: 500, depth: 0 }).catch(() => ({ docs: [] }))).docs as any[]).map((d: any) => ({
   id: d.id, ad: d.ad, duzenleyen: d.duzenleyen || undefined, tur: d.tur, kapsam: d.kapsam || undefined, sonTarih: d.sonTarih, sonucTarihi: d.sonucTarihi || undefined, ucretsiz: !!d.ucretsiz, konu: d.konu || undefined,
 })) as Yarisma[], () => S.YARISMALAR as Yarisma[])
+
+/* ---------- haftalık fotoğraf görevi (tema herkese açık; fotoğraflar ve oylama /api/uye/gorev'den, tarayıcıda) ---------- */
+export type Gorev = { id: number; baslik: string; aciklama?: string; baslangic: string; bitis: string; oylamaBitis: string }
+export const getGorevler = () => safe(async () => ((await get('gorevler', { sort: '-baslangic', limit: 8, depth: 0 }).catch(() => ({ docs: [] }))).docs as any[]).map((d: any) => ({
+  id: d.id, baslik: d.baslik, aciklama: d.aciklama || undefined, baslangic: d.baslangic, bitis: d.bitis, oylamaBitis: d.oylamaBitis,
+})) as Gorev[], () => [] as Gorev[])

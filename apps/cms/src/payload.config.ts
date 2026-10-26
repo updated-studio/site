@@ -19,6 +19,8 @@ import { Products } from './collections/Products'
 import { Videos, Reels, Ads } from './collections/Social'
 import { KulupTracks, KulupQuizzes } from './collections/Kulup'
 import { Yarismalar } from './collections/Yarismalar'
+import { Gorevler, GorevFotolari, GorevGorselleri } from './collections/Gorev'
+import { gorevZamanlayici } from './lib/gorev'
 import { Pages } from './collections/Pages'
 import { Uyeler, Yorumlar, UyeGiris } from './collections/Topluluk'
 import { Site, Home } from './globals'
@@ -49,7 +51,7 @@ export default buildConfig({
   },
   // Panel dili Türkçe (isteyen kullanıcı hesap ayarından İngilizceye geçebilir)
   i18n: { supportedLanguages: { tr, en }, fallbackLanguage: 'tr' },
-  collections: [News, Reviews, Comparisons, Products, Categories, Authors, Media, Videos, Reels, Ads, KulupTracks, KulupQuizzes, Pages, Uyeler, Yorumlar, Yarismalar, Users].map(zamanlamaTemizligi).map(toplulukTemizligi).map(icerikGelenKancasi),
+  collections: [News, Reviews, Comparisons, Products, Categories, Authors, Media, Videos, Reels, Ads, KulupTracks, KulupQuizzes, Pages, Uyeler, Yorumlar, Yarismalar, Gorevler, GorevFotolari, GorevGorselleri, Users].map(zamanlamaTemizligi).map(toplulukTemizligi).map(icerikGelenKancasi),
   globals: [Home, Site, UyeGiris],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
@@ -63,11 +65,14 @@ export default buildConfig({
   // Zamanlanmış yayın (schedulePublish) için iş kuyruğu dakikada bir çalışır. Panel kalıcı Node sunucusunda çalışmalı.
   jobs: { autoRun: [{ cron: '* * * * *', queue: 'default', limit: 20 }], tasks: [] },
   endpoints: [triyajImport, triyajDurum, triyajKapak, triyajTemizle, previewEndpoint, canliEndpoint, studyoSema, studyoOnizleme, studyoAlanlar, studyoDurum, studyoGiris, studyoZamanla, studyoZamanlaEkle, studyoZamanlaSil, ...okunmaEndpoints, ...uyeEndpoints, yarismaOneri],
-  onInit: async (p) => { await okunmaInit(p); yarismaZamanlayici(p) },
+  onInit: async (p) => { await okunmaInit(p); yarismaZamanlayici(p); gorevZamanlayici(p) },
   plugins: [
     s3Storage({
       enabled: !!process.env.S3_BUCKET,
-      collections: { media: { prefix: 'media', disablePayloadAccessControl: true, generateFileURL: ({ filename, prefix }) => `${process.env.MEDIA_PUBLIC_URL}/${prefix}/${filename}` } },
+      collections: {
+        media: { prefix: 'media', disablePayloadAccessControl: true, generateFileURL: ({ filename, prefix }) => `${process.env.MEDIA_PUBLIC_URL}/${prefix}/${filename}` },
+        'gorev-gorselleri': { prefix: 'gorev', disablePayloadAccessControl: true, generateFileURL: ({ filename, prefix }) => `${process.env.MEDIA_PUBLIC_URL}/${prefix}/${filename}` },
+      },
       bucket: process.env.S3_BUCKET || '',
       config: {
         forcePathStyle: true,

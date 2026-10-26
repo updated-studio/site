@@ -75,6 +75,11 @@ export const PUAN = {
   okuma: { puan: 3, gunluk: 30, ad: 'Bir yazıyı sonuna kadar okudun' },
   kulup: { puan: 10, gunluk: 100, ad: "Kulüp'te bir adımı bitirdin" },
   yarisma: { puan: 10, gunluk: 20, ad: 'Bir yarışmaya katıldığını işaretledin' },
+  gorev_katilim: { puan: 15, gunluk: 15, ad: 'Haftalık göreve katıldın' },
+  gorev_oy: { puan: 1, gunluk: 3, ad: 'Haftalık görevde oy verdin' },
+  gorev_birinci: { puan: 100, gunluk: 100, ad: 'Haftalık görevde birinci oldun' },
+  gorev_ikinci: { puan: 60, gunluk: 60, ad: 'Haftalık görevde ikinci oldun' },
+  gorev_ucuncu: { puan: 40, gunluk: 40, ad: 'Haftalık görevde üçüncü oldun' },
 } as const
 export type PuanTur = keyof typeof PUAN
 

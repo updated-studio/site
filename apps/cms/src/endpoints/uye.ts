@@ -1,5 +1,7 @@
 import { headersWithCors, type Endpoint, type Payload, type PayloadRequest } from 'payload'
 import { createHash } from 'node:crypto'
+import sharp from 'sharp'
+import { OY_HAKKI, asama } from '../lib/gorev'
 import {
   PUAN, SEVIYELER, anahtarCoz, bildirimEkle, ekibeHaberVer, ekipMi, girisYonetim, havuz, hedefBul, hizSiniri, ipOzet, onayNedeni,
   puanEkle, SAYFA_ON, sayfaTemizle, seviye, yanitBildir, type Kimlik,
@@ -112,7 +114,7 @@ async function adUygunMu(p: Payload, ad: string, haric?: number) {
   return null
 }
 
-function rozetler(u: Uye, s: { yorum: number; begeni: number; kulup: number }) {
+function rozetler(u: Uye, s: { yorum: number; begeni: number; kulup: number; gorev?: number; gorevDerece?: number; gorevBirinci?: number }) {
   const r: { kod: string; ad: string }[] = []
   if (u.unvan) r.push({ kod: 'kurucu', ad: u.unvan === 'kurucu' ? 'Kurucu' : 'Kurucu ortak' })
   if (u.ekip) r.push({ kod: 'ekip', ad: 'Updated ekibi' })
@@ -121,16 +123,21 @@ function rozetler(u: Uye, s: { yorum: number; begeni: number; kulup: number }) {
   if (s.yorum >= 25) r.push({ kod: 'sohbet', ad: 'Sohbetin içinde (25 yorum)' })
   if (s.begeni >= 50) r.push({ kod: 'begenilen', ad: 'Beğenilen (50 beğeni)' })
   if (s.kulup >= 5) r.push({ kod: 'kulup', ad: 'Kulüp öğrencisi (5 adım)' })
+  if ((s.gorev ?? 0) >= 1) r.push({ kod: 'gorev', ad: 'Haftalık görevde' })
+  if ((s.gorevDerece ?? 0) >= 1) r.push({ kod: 'gorev-derece', ad: 'Haftalık görevde derece' })
+  if ((s.gorevBirinci ?? 0) >= 1) r.push({ kod: 'haftanin-fotografi', ad: 'Haftanın fotoğrafı' })
   return r
 }
 async function istatistik(p: Payload, uyeId: number) {
   const db = havuz(p)
-  const [y, b, k] = await Promise.all([
+  const [y, b, k, g] = await Promise.all([
     p.count({ collection: 'yorumlar', where: { and: [{ uye: { equals: uyeId } }, { durum: { equals: 'yayinda' } }] }, overrideAccess: true }),
     db.query(`select coalesce(sum(begeni),0)::int as t from payload.yorumlar where uye_id = $1 and durum = 'yayinda'`, [uyeId]),
     db.query(`select count(*)::int as t from payload.uye_puan where uye_id=$1 and tur='kulup'`, [uyeId]),
+    db.query(`select count(*) filter (where tur = 'gorev_katilim')::int as katilim, count(*) filter (where tur = 'gorev_birinci')::int as birinci,
+      count(*) filter (where tur in ('gorev_birinci','gorev_ikinci','gorev_ucuncu'))::int as derece from payload.uye_puan where uye_id=$1 and tur like 'gorev_%'`, [uyeId]),
   ])
-  return { yorum: y.totalDocs, begeni: b.rows[0].t, kulup: k.rows[0].t }
+  return { yorum: y.totalDocs, begeni: b.rows[0].t, kulup: k.rows[0].t, gorev: g.rows[0].katilim, gorevDerece: g.rows[0].derece, gorevBirinci: g.rows[0].birinci }
 }
 const benimProfil = async (p: Payload, u: Uye, k?: Kimlik | null) => {
   const s = await istatistik(p, u.id), rol = await ekipRol(p, u)
@@ -553,5 +560,106 @@ export const uyeEndpoints: Endpoint[] = [
       on conflict (uye_id, yarisma_id) do update set takip = excluded.takip, katildi = excluded.katildi, at = now()`, [uye!.id, id, takip, katildi])
     if (katildi && !once.katildi) await puanEkle(p, uye!.id, 'yarisma', `yarisma:${id}`)
     return yanit(req, { takip, katildi })
+  }),
+
+  /* ---------------- haftalık fotoğraf görevi (lib/gorev.ts) ---------------- */
+  // Durum: katılımdaki görev (+ kendi fotoğrafın), oylamadaki görev (fotoğraflar sahibi gizli, kişiye özel karışık sırada), son sonuçlar
+  uc('/uye/gorev', 'get', 'yok', async ({ req, p, uye }) => {
+    const g = (await p.find({ collection: 'gorevler', where: { durum: { equals: 'yayinda' } }, sort: '-baslangic', limit: 10, depth: 0, overrideAccess: true })).docs as any[]
+    const db = havuz(p)
+    const gorsel = (x: any) => { const v = typeof x === 'object' && x ? x : {}; return { kucuk: v.sizes?.kucuk?.url || v.url, buyuk: v.sizes?.buyuk?.url || v.url, en: v.width ?? null, boy: v.height ?? null } }
+    const fotolar = async (gorevId: number) => (await p.find({ collection: 'gorev-fotolari', where: { and: [{ gorev: { equals: gorevId } }, { durum: { equals: 'onaylandi' } }] }, limit: 500, depth: 1, overrideAccess: true })).docs as any[]
+    const ozet = (x: any) => ({ id: x.id, baslik: x.baslik, aciklama: x.aciklama ?? '', baslangic: x.baslangic, bitis: x.bitis, oylamaBitis: x.oylamaBitis })
+    const katilim = g.find((x) => asama(x) === 'katilim'), oylama = g.find((x) => asama(x) === 'oylama')
+    const yanitG: any = { oyHakki: OY_HAKKI, katilim: null, oylama: null, sonuclar: [] }
+    if (katilim) {
+      const n = await db.query(`select count(*)::int as n from payload.gorev_fotolari where gorev_id=$1 and durum='onaylandi'`, [katilim.id])
+      let benim = null
+      if (uye) {
+        const b = (await p.find({ collection: 'gorev-fotolari', where: { and: [{ gorev: { equals: katilim.id } }, { uye: { equals: uye.id } }] }, sort: '-createdAt', limit: 1, depth: 1, overrideAccess: true })).docs[0] as any
+        if (b) benim = { id: b.id, durum: b.durum, aciklama: b.aciklama ?? '', ...gorsel(b.gorsel) }
+      }
+      yanitG.katilim = { ...ozet(katilim), katilimci: n.rows[0].n, benim }
+    }
+    if (oylama) {
+      const f = await fotolar(oylama.id)
+      const oylarim = uye ? new Set((await db.query('select foto_id from payload.gorev_oy where uye_id=$1 and gorev_id=$2', [uye.id, oylama.id])).rows.map((r: any) => r.foto_id)) : new Set()
+      // Kişiye özel karışık sıra (her açılışta aynı): fotoğraf no + kişi
+      const tohum = uye?.id ?? 0
+      const sira = (id: number) => createHash('md5').update(`${id}:${tohum}:${oylama.id}`).digest().readUInt32BE(0)
+      yanitG.oylama = { ...ozet(oylama), fotolar: f.sort((a, b) => sira(a.id) - sira(b.id)).map((x) => ({ id: x.id, aciklama: x.aciklama ?? '', ...gorsel(x.gorsel),
+        benim: !!uye && (typeof x.uye === 'object' ? x.uye?.id : x.uye) === uye.id, oyum: oylarim.has(x.id) })), oyKalan: OY_HAKKI - oylarim.size }
+    }
+    for (const x of g.filter((x) => asama(x) === 'bitti' && x.sonucAciklandi).slice(0, 4)) {
+      const f = (await fotolar(x.id)).sort((a, b) => (a.sira ?? 99) - (b.sira ?? 99) || (b.oy ?? 0) - (a.oy ?? 0))
+      const sahipler = await Promise.all(f.map(async (y) => { const u = typeof y.uye === 'object' ? y.uye : null; return u && u.durum !== 'engelli' ? herkeseAcik(u, await ekipRol(p, u)) : null }))
+      yanitG.sonuclar.push({ ...ozet(x), fotolar: f.map((y, i) => ({ id: y.id, aciklama: y.aciklama ?? '', oy: y.oy ?? 0, sira: y.sira ?? null, ...gorsel(y.gorsel), uye: sahipler[i] })) })
+    }
+    return yanit(req, yanitG)
+  }),
+
+  // Katılım: tek fotoğraf (yeniden yüklenirse öncekinin yerine geçer). Konum ve diğer bilgiler silinir, en fazla 2400 px.
+  uc('/uye/gorev/katil', 'post', 'yazabilir', async ({ req, p, uye }) => {
+    if (!hizSiniri(`gorev:${uye!.id}`, 6, 3600_000)) return hata(req, 'Çok sık denedin; biraz sonra yeniden dene.', 429)
+    const g = (await p.find({ collection: 'gorevler', where: { durum: { equals: 'yayinda' } }, sort: '-baslangic', limit: 3, depth: 0, overrideAccess: true })).docs.find((x: any) => asama(x) === 'katilim') as any
+    if (!g) return hata(req, 'Şu an katılıma açık görev yok.')
+    const form = await (req as any).formData?.().catch(() => null) as FormData | null
+    const dosya = form?.get('dosya') as File | null
+    if (!dosya || typeof dosya === 'string') return hata(req, 'Fotoğraf seçilmedi.')
+    if (dosya.size > 25 * 1024 * 1024) return hata(req, 'Fotoğraf 25 MB\'tan büyük olamaz.')
+    if (form?.get('sahip') !== '1') return hata(req, 'Fotoğrafın sana ait olduğunu onaylaman gerekiyor.')
+    const aciklama = String(form?.get('aciklama') || '').trim().slice(0, 140)
+    if (aciklama && onayNedeni(aciklama, true) === 'Uygunsuz kelime') return hata(req, 'Açıklamada topluluk kurallarına uymayan bir ifade var.')
+    let veri: Buffer
+    try {
+      const giris = Buffer.from(await dosya.arrayBuffer())
+      const m = await sharp(giris).metadata()
+      if (!m.width || !m.height || m.width < 800 && m.height < 800) return hata(req, 'Fotoğraf çok küçük (en az 800 piksel olmalı).')
+      // rotate(): telefonun yön bilgisini uygular; metadata eklenmediği için konum (GPS) ve cihaz bilgisi silinir
+      veri = await sharp(giris).rotate().resize(2400, 2400, { fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 90, mozjpeg: true }).toBuffer()
+    } catch { return hata(req, 'Fotoğraf okunamadı. JPEG ya da PNG olarak yeniden dene.') }
+    // Önceki katılım (aynı görev) silinir
+    const once = (await p.find({ collection: 'gorev-fotolari', where: { and: [{ gorev: { equals: g.id } }, { uye: { equals: uye!.id } }] }, limit: 5, depth: 0, overrideAccess: true })).docs as any[]
+    const gorselDoc = await p.create({ collection: 'gorev-gorselleri', overrideAccess: true, data: {} as any, file: { data: veri, mimetype: 'image/jpeg', name: `gorev-${g.id}-${uye!.id}-${Date.now()}.jpg`, size: veri.length } })
+    const kayit = await p.create({ collection: 'gorev-fotolari', overrideAccess: true, data: { gorev: g.id, uye: uye!.id, gorsel: gorselDoc.id, aciklama, durum: 'bekliyor' } as any })
+    for (const x of once) {
+      await p.delete({ collection: 'gorev-fotolari', id: x.id, overrideAccess: true }).catch(() => {})
+      if (x.gorsel) await p.delete({ collection: 'gorev-gorselleri', id: typeof x.gorsel === 'object' ? x.gorsel.id : x.gorsel, overrideAccess: true }).catch(() => {})
+    }
+    await ekibeHaberVer(p, `Haftalık göreve yeni fotoğraf: onay bekliyor (${g.baslik})`)
+    return yanit(req, { id: kayit.id, durum: 'bekliyor' })
+  }),
+
+  uc('/uye/gorev/geri-cek', 'post', 'uye', async ({ req, p, uye }) => {
+    const g = (await p.find({ collection: 'gorevler', sort: '-baslangic', limit: 3, depth: 0, overrideAccess: true })).docs.find((x: any) => asama(x) === 'katilim') as any
+    if (!g) return hata(req, 'Katılım süresi bitti; fotoğraf artık geri çekilemez.')
+    const once = (await p.find({ collection: 'gorev-fotolari', where: { and: [{ gorev: { equals: g.id } }, { uye: { equals: uye!.id } }] }, limit: 5, depth: 0, overrideAccess: true })).docs as any[]
+    for (const x of once) {
+      await p.delete({ collection: 'gorev-fotolari', id: x.id, overrideAccess: true }).catch(() => {})
+      if (x.gorsel) await p.delete({ collection: 'gorev-gorselleri', id: typeof x.gorsel === 'object' ? x.gorsel.id : x.gorsel, overrideAccess: true }).catch(() => {})
+    }
+    return yanit(req, { tamam: true })
+  }),
+
+  // Kör oy: görev başına en çok OY_HAKKI, kendi fotoğrafına yok; oy geri alınabilir
+  uc('/uye/gorev/oy', 'post', 'yazabilir', async ({ req, p, uye }) => {
+    const b = await govde(req)
+    const fotoId = Number(b.foto)
+    if (!Number.isInteger(fotoId)) return hata(req, 'Fotoğraf belirtilmedi.')
+    const f = await p.findByID({ collection: 'gorev-fotolari', id: fotoId, depth: 1, overrideAccess: true }).catch(() => null) as any
+    if (!f || f.durum !== 'onaylandi') return hata(req, 'Fotoğraf bulunamadı.', 404)
+    const g = typeof f.gorev === 'object' ? f.gorev : null
+    if (!g || asama(g) !== 'oylama') return hata(req, 'Bu görevin oylaması açık değil.')
+    if ((typeof f.uye === 'object' ? f.uye?.id : f.uye) === uye!.id) return hata(req, 'Kendi fotoğrafına oy veremezsin.')
+    const db = havuz(p)
+    if (b.oy === false) { await db.query('delete from payload.gorev_oy where uye_id=$1 and foto_id=$2', [uye!.id, fotoId]) }
+    else {
+      const n = (await db.query('select count(*)::int as n from payload.gorev_oy where uye_id=$1 and gorev_id=$2', [uye!.id, g.id])).rows[0].n
+      if (n >= OY_HAKKI) return hata(req, `En çok ${OY_HAKKI} fotoğrafa oy verebilirsin. Değiştirmek için önce bir oyunu geri al.`)
+      await db.query('insert into payload.gorev_oy (uye_id, foto_id, gorev_id) values ($1,$2,$3) on conflict do nothing', [uye!.id, fotoId, g.id])
+      await puanEkle(p, uye!.id, 'gorev_oy', `gorev-oy:${fotoId}`)
+    }
+    const kalan = OY_HAKKI - (await db.query('select count(*)::int as n from payload.gorev_oy where uye_id=$1 and gorev_id=$2', [uye!.id, g.id])).rows[0].n
+    return yanit(req, { oyum: b.oy !== false, oyKalan: kalan })
   }),
 ]

@@ -11,7 +11,7 @@ export const GET: APIRoute = async ({ params }) => {
   let urls: { loc: string; lastmod?: string; image?: string }[] = []
   if (tur === 'sayfalar') {
     const cats = await getCategories()
-    urls = ['/', '/haberler', '/inceleme', '/karsilastirma', '/urun', '/kulup', ...cats.map((c) => `/${c.slug}`), ...(await allPages()).map((s) => `/${s}`), '/topluluk-kurallari', '/uyelik-sozlesmesi', '/uyelik-aydinlatma-metni', '/araclar', ...ARACLAR.map((a) => a.yol), '/yarismalar'].map((p) => ({ loc: SITE + (p === '/' ? '' : p) }))
+    urls = ['/', '/haberler', '/inceleme', '/karsilastirma', '/urun', '/kulup', ...cats.map((c) => `/${c.slug}`), ...(await allPages()).map((s) => `/${s}`), '/topluluk-kurallari', '/uyelik-sozlesmesi', '/uyelik-aydinlatma-metni', '/araclar', ...ARACLAR.map((a) => a.yol), '/yarismalar', '/gorev'].map((p) => ({ loc: SITE + (p === '/' ? '' : p) }))
   } else if (tur === 'urunler') {
     // Yalnız dolu künyeler (en az 5 özellik değeri): boş künye arama motoruna "ince içerik" olarak gitmesin (sayfası da noindex)
     const r = await getProducts(5000)
