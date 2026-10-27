@@ -18,6 +18,7 @@
 @media (max-width:767px){:root{--edge:16px;--gut:16px}}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
+a,button,input,select,summary,label{touch-action:manipulation}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--f-body);font-size:18px;line-height:1.65;-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--bg)}
 @media (max-width:767px){body{font-size:17px}}

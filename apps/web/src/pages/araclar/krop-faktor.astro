@@ -6,8 +6,8 @@ const SENSOR: [string, number][] = [['Full frame (35 mm)', 1], ['APS-C · Sony, 
   aciklama="Krop faktör hesaplayıcı: APS-C, Micro 4/3, 1 inç ve orta format için odak uzaklığı ve diyafram full frame karşılığı. Ücretsiz.">
   <form class="arac-form" data-krop onsubmit="return false">
     <label for="kr-sensor">Sensör<select id="kr-sensor">{SENSOR.map(([a, k]) => <option value={k} selected={k === 1.5}>{a}</option>)}</select></label>
-    <label for="kr-odak">Odak uzaklığı (mm)<input id="kr-odak" type="number" inputmode="decimal" min="1" max="2000" value="35" /></label>
-    <label for="kr-f">Diyafram (f/)<input id="kr-f" type="number" inputmode="decimal" min="0.7" max="64" step="0.1" value="1.8" /></label>
+    <label for="kr-odak">Odak uzaklığı (mm)<input id="kr-odak" type="number" autocomplete="off" inputmode="decimal" min="1" max="2000" value="35" /></label>
+    <label for="kr-f">Diyafram (f/)<input id="kr-f" type="number" autocomplete="off" inputmode="decimal" min="0.7" max="64" step="0.1" value="1.8" /></label>
   </form>
   <svg class="kr-sahne" data-sahne viewBox="0 0 360 240" role="img" aria-label="Seçilen sensörün kadrajı full frame kadrajın içinde">
     <defs><linearGradient id="kr-gok" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5B8FD6" /><stop offset="1" stop-color="#F3C08A" /></linearGradient>

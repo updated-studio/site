@@ -4,7 +4,7 @@ import AracSayfa from '../../components/AracSayfa.astro'
 <AracSayfa yol="/araclar/baski-boyutu" baslik="Baskı boyutu hesaplayıcı" lead="Fotoğrafının çözünürlüğünü yaz; kaliteli baskıda en fazla kaç santime çıkabileceğini gör."
   aciklama="Fotoğraf baskı boyutu hesaplayıcı: megapiksel ya da piksel ölçüsünden 300, 240 ve 150 DPI ile en büyük baskı ölçüsü, standart ebatlar. Ücretsiz.">
   <form class="arac-form" data-baski onsubmit="return false">
-    <label for="bk-mp">Megapiksel<input id="bk-mp" type="number" inputmode="decimal" min="1" max="400" value="24" /></label>
+    <label for="bk-mp">Megapiksel<input id="bk-mp" type="number" autocomplete="off" inputmode="decimal" min="1" max="400" value="24" /></label>
     <label for="bk-oran">En-boy oranı<select id="bk-oran"><option value="1.5">3:2 (çoğu fotoğraf makinesi)</option><option value="1.3333">4:3 (telefon, Micro 4/3)</option><option value="1.7778">16:9</option><option value="1">1:1</option><option value="1.25">5:4</option></select></label>
     <label for="bk-dpi">Kullanım<select id="bk-dpi"><option value="300">Elde bakılan baskı, albüm (300 DPI)</option><option value="240">Duvar baskısı, yakından (240 DPI)</option><option value="150">Poster, 1-2 metreden (150 DPI)</option><option value="100">Büyük poster, uzaktan (100 DPI)</option></select></label>
   </form>

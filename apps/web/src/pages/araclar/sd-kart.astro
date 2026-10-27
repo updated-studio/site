@@ -7,7 +7,7 @@ const KAPASITE = [32, 64, 128, 256, 512, 1000, 2000]
   aciklama="SD kart ve CFexpress kayıt süresi hesaplayıcı: 4K, 8K, ProRes ve RAW için dakika hesabı, V30/V60/V90 hız sınıfı önerisi. Ücretsiz.">
   <form class="arac-form" data-sd onsubmit="return false">
     <label for="sd-kodek">Kayıt kalitesi<select id="sd-kodek">{KODEK.map(([a, m]) => <option value={m} selected={m === 150}>{a}</option>)}<option value="ozel">Kendim yazacağım…</option></select></label>
-    <label for="sd-mbps" data-ozel hidden>Bit hızı (Mbps)<input id="sd-mbps" type="number" inputmode="numeric" min="1" value="150" /></label>
+    <label for="sd-mbps" data-ozel hidden>Bit hızı (Mbps)<input id="sd-mbps" type="number" autocomplete="off" inputmode="numeric" min="1" value="150" /></label>
     <label for="sd-gb">Kart kapasitesi<select id="sd-gb">{KAPASITE.map((g) => <option value={g} selected={g === 128}>{g >= 1000 ? `${g / 1000} TB` : `${g} GB`}</option>)}</select></label>
   </form>
   <div class="sd-gorsel" aria-hidden="true">
