@@ -110,6 +110,7 @@ Kaynak: https://www.offocus.tr (fotoğraf/video topluluk sitesi). Yol haritası 
 Ayrıca: sitede **Beta** ibaresi (25 Ekim).
 
 ## Ertelenenler (kullanıcı, 25 Ekim 2026: "sonraya bırak")
+- **Uper hesap güvenliği (Enes, 27 Ekim fikri; sıraya alındı):** hesaba ikinci giriş yolu / yedek e-posta bağlama (Google hesabı kapanırsa Uper hesabı kaybolmasın), telefonla doğrulama (SMS ücretli: sağlayıcı ve maliyet konuşulacak).
 - Yedek: `YEDEK_SIFRESI` (Fatih belirler) + Natro dışı ikinci kopya (Sıradaki işler 2-3).
 - Cloudflare (ücretsiz; artı/eksi 25 Ekim'de anlatıldı).
 - Stüdyo'nun eski GitHub Pages kopyasını kapatmak (https://github.com/updated-studio/studio/settings/pages → Unpublish).
