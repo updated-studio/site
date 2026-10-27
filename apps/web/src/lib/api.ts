@@ -198,7 +198,21 @@ export async function getYoutube(): Promise<Video[]> {
   ytCache = v
   return v
 }
-export const getReels = (n = 10) => safe(async () => (await get('reels', { sort: '-publishedAt', limit: n, depth: 1 })).docs.map(mReel), () => S.REELS.slice(0, n))
+/**
+ * Reels: panelde elle eklenenler; yoksa Instagram'dan kendiliğinden gelenler (Stüdyo instagram-reels fonksiyonu, 6 saatte bir
+ * çeker; anahtar Stüdyo → Bağlantı anahtarları). Fonksiyon kapalıysa boş liste: ana sayfa YouTube kısa videolarına düşer (27 Ekim 2026).
+ */
+const INSTAGRAM_REELS = 'https://panel.updated.com.tr/functions/v1/instagram-reels'
+export const getReels = (n = 10) => safe(async () => {
+  const panel = (await get('reels', { sort: '-publishedAt', limit: n, depth: 1 })).docs.map(mReel)
+  if (panel.length) return panel
+  try {
+    const r = await fetch(INSTAGRAM_REELS, { signal: AbortSignal.timeout(15000) })
+    if (!r.ok) return []
+    const j = await r.json() as { reels?: { aciklama: string; baglanti: string; kapak: string; zaman: string }[] }
+    return (j.reels ?? []).slice(0, n).map((x): Reel => ({ caption: x.aciklama.split('\n')[0].slice(0, 120), url: x.baglanti, cover: { url: x.kapak, alt: '', w: 720, h: 1280 } }))
+  } catch { return [] }
+}, () => S.REELS.slice(0, n))
 let adCache: { at: number; v: Ad[] } | null = null
 export async function getAds(): Promise<Ad[]> {
   if (adCache && Date.now() - adCache.at < 5 * 60e3) return adCache.v
