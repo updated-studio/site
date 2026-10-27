@@ -1,0 +1,24 @@
+---
+/**
+ * Kıyas aracı (27 Ekim 2026): okur 2–4 ürünü (aynı türden) yan yana koyar; seçim adreste durur (?u=a,b,c), paylaşılabilir.
+ * Derlemede en dolu iki künyeyle basılır; adreste seçim varsa tarayıcı onu çizer. Sayfa dizine eklenmez (her seçim ayrı adres).
+ */
+import Base from '../../layouts/Base.astro'
+import KiyasMasasi from '../../components/KiyasMasasi.astro'
+import { kunyeKatalog } from '../../lib/api'
+import { baslik, type K } from '../../lib/kiyas'
+const katalog = await kunyeKatalog()
+const dolu = (k: K) => k.sp.filter((o) => o[1]).length + (k.g ? 5 : 0)
+const turler = [...new Set(katalog.map((k) => k.t))].map((t) => katalog.filter((k) => k.t === t).sort((a, b) => dolu(b) - dolu(a)))
+const ilk = turler.filter((l) => l.length >= 2).sort((a, b) => dolu(b[0]) + dolu(b[1]) - dolu(a[0]) - dolu(a[1]))[0]?.slice(0, 2) ?? []
+---
+<Base meta={{ title: 'Kıyasla', description: 'İki ila dört ürünü yan yana koy: teknik puan, UPscore, önde olduğu özellikler ve kaynaklı tam özellik tablosu.', path: '/karsilastirma/kiyas', noindex: true }}>
+  <div class="wrap">
+    <div class="art-head" style="max-width:none;padding-bottom:24px">
+      <div class="chips"><span class="lbl l-kiy">Kıyasla</span></div>
+      <h1 class="h2" data-kiyas-baslik>{ilk.length === 2 ? baslik(ilk) : 'Kıyasla'}</h1>
+      <p class="lead" style="margin:0;max-width:62ch">Karşılaştırmaya kendi rakibini ekle ya da çıkar; teknik puan ve farklar anında yeniden hesaplanır. Bu sayfanın adresi seçimini taşır, paylaşabilirsin.</p>
+    </div>
+    {ilk.length === 2 ? <KiyasMasasi ks={ilk} adresli /> : <p class="pc-unk">Kıyaslanacak künye henüz yok.</p>}
+  </div>
+</Base>

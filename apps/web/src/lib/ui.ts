@@ -20,6 +20,12 @@ const G: Record<string, string> = {
   camera: '<rect x="24" y="26" width="52" height="32" rx="4"/><circle cx="50" cy="42" r="10"/><circle cx="50" cy="42" r="5"/><rect x="30" y="20" width="12" height="6"/>',
   cam360: '<rect x="40" y="12" width="20" height="50" rx="9"/><circle cx="50" cy="24" r="6"/><rect x="44" y="38" width="12" height="16" rx="2"/>',
   laptop: '<rect x="28" y="18" width="44" height="30" rx="2"/><path d="M20 56 H80"/>',
+  // 27 Ekim 2026: lens, mikrofon, ışık, gimbal, kulaklık kendi simgesiyle (önceden telefon çiziliyordu)
+  lens: '<rect x="30" y="20" width="40" height="40" rx="6"/><circle cx="50" cy="40" r="13"/><circle cx="50" cy="40" r="5"/><path d="M30 30 H70M30 50 H70" stroke-width="3"/>',
+  mic: '<rect x="40" y="10" width="20" height="34" rx="10"/><path d="M32 36 a18 18 0 0 0 36 0M50 54 V66M40 66 H60"/>',
+  light: '<rect x="24" y="16" width="52" height="36" rx="4"/><path d="M34 26 H66M34 34 H66M34 42 H66" stroke-width="3"/><path d="M50 52 V66M40 66 H60"/>',
+  gimbal: '<rect x="44" y="40" width="12" height="28" rx="5"/><path d="M50 40 V30 H32 V14 M32 14 H58"/><rect x="58" y="8" width="16" height="12" rx="2"/>',
+  headphones: '<path d="M28 50 V38 a22 22 0 0 1 44 0 V50"/><rect x="22" y="46" width="12" height="18" rx="4"/><rect x="66" y="46" width="12" height="18" rx="4"/>',
 }
 export const glyph = (t: string, s = 22) => `<svg class="pk-svg" width="${s}" height="${Math.round(s * 0.78)}" viewBox="0 0 100 78" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="5">${G[t] || G.phone}</svg>`
 export const LVN = ['', 'Söylenti', 'Sızıntı', 'Test / takvim', 'Resmî']

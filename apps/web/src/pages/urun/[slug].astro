@@ -31,7 +31,8 @@ const feed = [
 ].sort((a, b) => +new Date(b.at) - +new Date(a.at))
 const rel = shelf.filter((q) => q.slug !== p.slug).slice(0, 4)
 const status = api.statusText(p.status)
-const kiyas = p.comparisons?.[0] ? p.comparisons[0].path : p.rivals[0] ? `/karsilastirma/${[p.slug, p.rivals[0].slug].sort().join('-vs-')}` : '/karsilastirma'
+// Kıyas aracı (27 Ekim 2026): rakip girilmişse onunla, yoksa araç aynı türün en dolu künyesini rakip yapar
+const kiyas = `/karsilastirma/kiyas?u=${[p.slug, ...p.rivals.slice(0, 1).map((r) => r.slug)].join(',')}`
 ---
 <Base meta={{ ...productMeta(p), noindex: (p.specs || []).filter((s) => s.value).length < 5 && !p.news.length && !p.reviews.length }}>
   <header class="ku-hero"><div class="wrap ku-top">
@@ -69,7 +70,7 @@ const kiyas = p.comparisons?.[0] ? p.comparisons[0].path : p.rivals[0] ? `/karsi
       {feed.length ? <ol class="ku-feed">{feed.map((f) => <li><a href={f.href}><span class={`tag t-${f.cls}`}>{f.tag}</span><b>{f.title}</b><span class="d">{f.d}</span>{f.s && <span class="s">{f.s}</span>}</a></li>)}</ol> : <p class="pc-unk">Bu ürünle ilgili henüz içerik yok.</p>}
     </div>
     <aside class="rail" aria-label="Yan sütun">
-      <div class="ku-box"><h2>Kıyasla</h2>{p.rivals.length ? <Fragment set:html={p.rivals.map((r) => chip(r)).join('')} /> : <p class="pc-unk">Henüz kıyas yok.</p>}<a class="btn" href="/karsilastirma" style="margin-top:10px">Kıyas Robotu ile seç</a></div>
+      <div class="ku-box"><h2>Kıyasla</h2>{p.rivals.length ? <Fragment set:html={p.rivals.map((r) => chip(r)).join('')} /> : <p class="pc-unk">Henüz kıyas yok.</p>}<a class="btn" href={kiyas} style="margin-top:10px">Başka ürünle kıyasla</a></div>
       {p.id && <div class="ku-box ku-kullanan" data-kullananlar={p.id}><h2>Kullananlar</h2><p class="pc-unk" data-ic>Yükleniyor…</p></div>}
       <div class="ku-box"><h2>Çıkış radarı</h2><div class="pc-st"><Fragment set:html={conf(p.certainty)} /><span>{status} · {LVN[p.certainty]}{p.releaseWhen ? ` · ${p.releaseWhen}` : ''}</span></div></div>
       <Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare />

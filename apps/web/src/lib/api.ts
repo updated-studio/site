@@ -70,7 +70,8 @@ const mAuthor = (a: any): Author => (rel(a) ? { name: a.name, slug: a.slug, titl
 const mSpec = (s: any): Spec => ({ key: s.key, value: s.value || null, num: s.num ?? undefined, unit: s.unit, source: s.source, sourceUrl: s.sourceUrl, at: s.at, group: s.group, higherIsBetter: s.higherIsBetter, searchWeight: s.searchWeight })
 export function mRef(p: any): ProductRef | null {
   p = rel(p); if (!p) return null
-  return { slug: p.slug, name: p.name, brand: p.brand, type: p.type, status: p.status, certainty: p.certainty || 4, image: mImg(p.image, 'card'), blurb: p.blurb, specs: (p.specs || []).map(mSpec), score: p.score }
+  return { slug: p.slug, name: p.name, brand: p.brand, type: p.type, status: p.status, certainty: p.certainty || 4, image: mImg(p.image, 'card'), blurb: p.blurb, specs: (p.specs || []).map(mSpec), score: p.score,
+    upscore: typeof p.upscore === 'number' ? p.upscore : undefined, upscoreUrl: rel(p.upscoreReview)?.path || undefined, amazon: p.amazon || undefined }
 }
 const media = (v: any) => { const m = mImg(v, 'hero'); return m ? { url: m.url, alt: m.alt, credit: m.credit, w: m.w, h: m.h } : null }
 const seo = (d: any) => ({ title: d.seo?.title || d.title, description: d.seo?.description || d.spot || '', image: mImg(d.seo?.image || d.cover, 'og'), canonical: d.seo?.canonical, noindex: !!d.seo?.noindex, entities: d.seo?.geo?.entities || [], faq: d.seo?.geo?.faq || [] })
@@ -105,7 +106,7 @@ const page = <T,>(arr: T[], p: number, n = PAGE) => arr.slice((p - 1) * n, p * n
 const cyc = <T,>(arr: T[], p: number, n = PAGE) => Array.from({ length: n }, (_, i) => arr[((p - 1) * n + i) % arr.length]) // örnek veride akış bitmesin
 
 /* ---------- site ---------- */
-export type SiteCfg = { tagline: string; nav: { label: string; href: string }[]; youtube: string; instagram: string; kulupUrl: string; newsletterNote: string }
+export type SiteCfg = { tagline: string; nav: { label: string; href: string }[]; youtube: string; instagram: string; kulupUrl: string; newsletterNote: string; amazonTag?: string }
 /** Üst menü (Fatih, 26 Ekim 2026): ana bölümler, her biri ayrı sayfa; İncelemeler ve Kıyaslamalar ayrı (Fatih, aynı gün). Kulüp başlıkta ayrıca vurgulanır. Panelin menü listesi kullanılmaz. */
 export const ANA_MENU = [['Ana Sayfa', '/'], ['Haberler', '/haberler'], ['İncelemeler', '/inceleme'], ['Kıyaslamalar', '/karsilastirma'], ['Rehber', '/rehber'], ['Araçlar', '/araclar']].map(([label, href]) => ({ label, href }))
 const DEF_NAV = ANA_MENU
@@ -315,3 +316,11 @@ export type Gorev = { id: number; baslik: string; aciklama?: string; baslangic: 
 export const getGorevler = () => safe(async () => ((await get('gorevler', { sort: '-baslangic', limit: 8, depth: 0 }).catch(() => ({ docs: [] }))).docs as any[]).map((d: any) => ({
   id: d.id, baslik: d.baslik, aciklama: d.aciklama || undefined, baslangic: d.baslangic, bitis: d.bitis, oylamaBitis: d.oylamaBitis,
 })) as Gorev[], () => [] as Gorev[])
+
+/** Kıyas kataloğu (27 Ekim 2026): bütün künyeler, tarayıcıya giden sade biçimde (lib/kiyas.ts). /veri/kunyeler.json ve kıyas sayfaları kullanır. */
+let katalogCache: Promise<import('./kiyas').K[]> | null = null
+export const kunyeKatalog = () => (katalogCache ??= safe(async () => (await bulk('products', mRef, {}, 1)).filter(Boolean).map((p: ProductRef) => ({
+  s: p.slug, n: p.name, b: p.brand, t: p.type, g: p.image?.url, up: p.upscore, upr: p.upscoreUrl, a: p.amazon,
+  sp: (p.specs || []).map((o) => [o.key, o.value || null, o.num ?? null, o.unit || '', o.group || ''] as [string, string | null, number | null, string, string]),
+})), () => []))
+

@@ -278,7 +278,7 @@ function robot() {
       $('[data-h1]', box)!.textContent = A.n; $('[data-h2]', box)!.textContent = B.n
       const keys = [...new Set([...Object.keys(A.sp), ...Object.keys(B.sp)])]
       $('[data-rows]', box)!.innerHTML = keys.filter((k) => !o || A.sp[k] !== B.sp[k]).map((k) => `<tr><th scope="row" style="font-family:var(--f-body);font-weight:600">${esc(k)}</th><td>${esc(A.sp[k] || 'Bilinmiyor')}</td><td>${esc(B.sp[k] || 'Bilinmiyor')}</td></tr>`).join('')
-      go.href = `${BASE}/karsilastirma/${[A.s, B.s].sort().join('-vs-')}`; go.hidden = A.s === B.s
+      go.href = `${BASE}/karsilastirma/kiyas?u=${A.s},${B.s}`; go.hidden = A.s === B.s // hazır kıyas yazısı olmasa da kıyas aracı açılır
     }
     a.addEventListener('change', draw); b.addEventListener('change', draw)
     only.addEventListener('click', () => { only.setAttribute('aria-pressed', String(only.getAttribute('aria-pressed') !== 'true')); draw() })

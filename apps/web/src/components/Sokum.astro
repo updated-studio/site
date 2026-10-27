@@ -1,20 +1,50 @@
 ---
-/** Söküm: ürün katmanları düz, marka renklerinde; her katman bir özellik. Bilinmeyen değer "Bilinmiyor" kalır. */
+/**
+ * Söküm: ürün katmanları düz, marka renklerinde; her katman bir özellik. Bilinmeyen değer "Bilinmiyor" kalır.
+ * 27 Ekim 2026 (Fatih: "her modele uydurabilir miyiz, otomatize edebilir miyiz"):
+ * - Lens, mikrofon, ışık, gimbal, kulaklık kendi katmanlarıyla (önceden telefon çiziliyordu).
+ * - Oran ürünün gerçek ölçüsünden: künyedeki "Boyutlar" (G × Y × D mm) okunur; yoksa türün varsayılanı.
+ * - Katman yazıları künyeden kendiliğinden: her katman ilgili özellik(ler)in değerini gösterir; panelde "Söküm katmanları"
+ *   elle girilmişse o öncelikli.
+ * - Ürün görseli varsa (arka planı silinmiş, standart tuval) en üst katman ürünün kendi fotoğrafı olur.
+ */
 import type { Product } from '../lib/types'
 interface Props { p: Product }
 const { p } = Astro.props
-const KINDS: Record<string, string[]> = { drone: ['guard', 'shell', 'cam', 'bat', 'board'], phone: ['back', 'cam', 'board', 'bat', 'screen'], cam360: ['lens', 'shell', 'screen', 'bat', 'board'], pad: ['shell', 'btn', 'board', 'bat'], audio: ['shell', 'driver', 'board', 'bat'], camera: ['shell', 'sensor', 'mount', 'screen'] }
-const DEF: Record<string, string[]> = { drone: ['Pervane koruması', 'Üst kabuk', 'Kamera', 'Pil', 'Ana kart'], phone: ['Arka cam', 'Kamera', 'Ana kart', 'Pil', 'Ekran'], cam360: ['Lensler', 'Gövde', 'Ekran', 'Pil', 'Ana kart'], pad: ['Üst kabuk', 'Tuşlar', 'Ana kart', 'Pil'], audio: ['Kabuk', 'Sürücü', 'Ana kart', 'Pil'], camera: ['Gövde', 'Sensör', 'Lens yuvası', 'Ekran'] }
-const DECO: Record<string, string> = { guard: '<i></i><i></i><i></i><i></i>', cam: '<i></i>', lens: '<i></i><i></i>', bat: '<div><span>BAT</span></div>', board: '<i class="soc"></i><i></i><i></i>', screen: '<em><i></i><i></i><i></i><i></i></em>', btn: '<i></i><i></i><i></i><i></i><b></b>', driver: '<i></i>', sensor: '<i></i>', mount: '<i></i>' }
-const type = KINDS[p.type] ? p.type : 'phone'
-const kinds = KINDS[type], names = DEF[type]
-const parts = kinds.map((_, i) => ({ name: p.parts?.[i]?.name || names[i], value: p.parts?.[i]?.value || 'Bilinmiyor' }))
+// tür → [katman sınıfı, katman adı, gösterilecek özellikler]
+const KAT: Record<string, [string, string, string[]][]> = {
+  camera: [['shell', 'Gövde', ['Ağırlık', 'Hava koşullarına dayanıklılık']], ['sensor', 'Sensör', ['Sensör boyutu', 'Çözünürlük']], ['mount', 'Lens yuvası', ['Lens yuvası', 'Gövde içi sabitleme']], ['screen', 'Ekran', ['Ekran', 'Vizör']]],
+  phone: [['back', 'Arka cam', ['Suya dayanıklılık']], ['cam', 'Kamera', ['Ana kamera', 'Optik zoom']], ['board', 'Ana kart', ['İşlemci', 'RAM']], ['bat', 'Pil', ['Pil', 'Kablolu şarj']], ['screen', 'Ekran', ['Ekran', 'Yenileme hızı']]],
+  drone: [['guard', 'Pervane koruması', ['Engel algılama']], ['shell', 'Üst kabuk', ['Ağırlık', 'Sınıf (Türkiye tescil)']], ['cam', 'Kamera', ['Sensör', 'Maks. video']], ['bat', 'Pil', ['Uçuş süresi']], ['board', 'Ana kart', ['İletim menzili']]],
+  cam360: [['lens', 'Lensler', ['360° video', 'Maks. video']], ['shell', 'Gövde', ['Su geçirmezlik (kasasız)']], ['screen', 'Ekran', ['Görüntü sabitleme']], ['bat', 'Pil', ['Pil', 'Kayıt süresi']], ['board', 'Ana kart', ['Sensör']]],
+  lens: [['hood', 'Ön mercek', ['Odak uzaklığı', 'Maks. diyafram']], ['ring', 'Odak halkası', ['Otomatik odak motoru', 'Min. odak mesafesi']], ['blades', 'Diyafram', ['Diyafram bıçağı', 'Optik yapı']], ['mount', 'Yuva', ['Lens yuvası', 'Sensör kapsama']]],
+  mic: [['grill', 'Izgara', ['Tür', 'Kutup deseni']], ['capsule', 'Kapsül', ['32-bit float', 'Gürültü azaltma']], ['board', 'Verici', ['Kablosuz menzil', 'Dahili kayıt']], ['bat', 'Pil', ['Pil süresi', 'Şarj kutusu']]],
+  light: [['diffuser', 'Ön yüz', ['Güç', 'Aydınlatma (1 m)']], ['leds', 'LED dizisi', ['Renk sıcaklığı', 'CRI']], ['board', 'Kontrol', ['Kontrol', 'RGB']], ['shell', 'Gövde', ['Soğutma', 'Montaj']]],
+  gimbal: [['clamp', 'Bağlantı plakası', ['Taşıma kapasitesi', 'Uyumluluk']], ['motor', 'Motorlar', ['Eksen', 'Takip']], ['board', 'Ana kart', ['Bağlantı', 'Katlanabilir']], ['bat', 'Pil', ['Pil süresi', 'Şarj']]],
+  headphones: [['shell', 'Kabuk', ['Tür', 'Suya dayanıklılık']], ['driver', 'Sürücü', ['Sürücü', 'Kodek']], ['board', 'Ana kart', ['Aktif gürültü engelleme', 'Uzamsal ses']], ['bat', 'Pil', ['Pil süresi', 'Şarj kutusuyla']]],
+  pad: [['shell', 'Üst kabuk', ['Tür']], ['btn', 'Tuşlar', ['Uyumluluk']], ['board', 'Ana kart', ['Bağlantı']], ['bat', 'Pil', ['Pil süresi']]],
+  audio: [['shell', 'Kabuk', ['Tür']], ['driver', 'Sürücü', []], ['board', 'Ana kart', ['Bağlantı']], ['bat', 'Pil', ['Pil süresi']]],
+}
+const DECO: Record<string, string> = { guard: '<i></i><i></i><i></i><i></i>', cam: '<i></i>', lens: '<i></i><i></i>', bat: '<div><span>BAT</span></div>', board: '<i class="soc"></i><i></i><i></i>', screen: '<em><i></i><i></i><i></i><i></i></em>', btn: '<i></i><i></i><i></i><i></i><b></b>', driver: '<i></i>', sensor: '<i></i>', mount: '<i></i>',
+  hood: '<i></i><i></i>', ring: '<i></i>', blades: '<i></i>', grill: '<i></i>', capsule: '<i></i>', diffuser: '<i></i>', leds: '<i></i>', clamp: '<i></i><i></i>', motor: '<i></i><i></i><i></i>' }
+const type = KAT[p.type] ? p.type : 'phone'
+const deger = (k: string) => (p.specs || []).find((s) => s.key === k)?.value || ''
+const parts = KAT[type].map(([, ad, ozler], i) => {
+  const elle = p.parts?.[i]
+  const v = elle?.value || ozler.map(deger).filter(Boolean).slice(0, 2).join(' · ')
+  return { name: elle?.name || ad, value: v || 'Bilinmiyor' }
+})
+// Gerçek oran: "131 × 96 × 80 mm" → 131/96. Lens ve yuvarlak ürünlerde (çap) kare kalır. Aşırı değerler sınırlanır.
+const olcu = deger('Boyutlar').replace(/,/g, '.').match(/(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)/i)
+const OLCULU = ['camera', 'phone', 'light', 'cam360', 'drone', 'pad', 'headphones']
+const ar = olcu && OLCULU.includes(type) && !/Ø/.test(deger('Boyutlar')) ? Math.min(2.2, Math.max(0.4, +olcu[1] / +olcu[2])) : null
+const n = parts.length
 ---
-<div class="sk" data-type={type} data-sokum>
-  <div class="sk-dev">
-    {kinds.map((k, i) => (
-      <div class={`sk-l sk-${k}`} style={`--i:${kinds.length - 1 - i};--n:${kinds.length}`}>
-        <Fragment set:html={DECO[k] || ''} />
+<div class={`sk${p.image ? ' sk-fotolu' : ''}`} data-type={type} data-sokum>
+  <div class="sk-dev" style={ar ? `--ar:${ar.toFixed(3)}` : undefined}>
+    {KAT[type].map(([k], i) => (
+      <div class={`sk-l sk-${k}`} style={`--i:${n - 1 - i};--n:${n}`}>
+        {i === 0 && p.image ? <img class="sk-foto" src={p.image.url} alt="" loading="lazy" decoding="async" /> : <Fragment set:html={DECO[k] || ''} />}
         <span class="sk-lab"><b>{parts[i].name}</b><span class={parts[i].value === 'Bilinmiyor' ? 'unk' : ''}>{parts[i].value}</span></span>
       </div>
     ))}

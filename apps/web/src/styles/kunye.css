@@ -59,13 +59,40 @@
 .sk-driver i{left:20%;top:12%;width:60%;aspect-ratio:1;background:var(--surface-2)}
 .sk-sensor i{position:absolute;left:34%;top:30%;width:32%;height:40%;background:var(--blue)}
 .sk-mount i{left:28%;top:16%;width:44%;aspect-ratio:1;background:transparent;border-width:6px}
+/* 27 Ekim 2026: lens, mikrofon, ışık, gimbal, kulaklık katmanları; üst katmanda ürün fotoğrafı */
+.sk[data-type="lens"] .sk-dev{--w:200px;--ar:1/1}
+.sk[data-type="mic"] .sk-dev{--w:150px;--ar:1/1.5}
+.sk[data-type="light"] .sk-dev{--w:270px;--ar:1.4/1}
+.sk[data-type="gimbal"] .sk-dev{--w:170px;--ar:1/1.5}
+.sk[data-type="headphones"] .sk-dev{--w:230px;--ar:1.2/1}
+.sk-hood,.sk-ring,.sk-blades{border-radius:50%;border:2px solid var(--text);background:var(--surface)}
+.sk-hood i{position:absolute;inset:10%;border-radius:50%;background:radial-gradient(circle at 38% 35%,var(--blue) 0 8%,#1b2a4a 30%,var(--black) 70%);border:2px solid var(--text)}
+.sk-hood i+i{inset:34%;background:transparent;border-color:rgb(255 255 255 / .35)}
+.sk-ring{background:repeating-conic-gradient(var(--surface) 0 4deg,var(--surface-2) 4deg 8deg)}
+.sk-ring i{position:absolute;inset:22%;border-radius:50%;background:var(--bg);border:2px solid var(--text)}
+.sk-blades{background:var(--surface-2)}
+.sk-blades i{position:absolute;inset:18%;border-radius:50%;background:conic-gradient(from 10deg,var(--text) 0 40deg,var(--surface) 40deg 45deg,var(--text) 45deg 85deg,var(--surface) 85deg 90deg,var(--text) 90deg 130deg,var(--surface) 130deg 135deg,var(--text) 135deg 175deg,var(--surface) 175deg 180deg,var(--text) 180deg 220deg,var(--surface) 220deg 225deg,var(--text) 225deg 265deg,var(--surface) 265deg 270deg,var(--text) 270deg 310deg,var(--surface) 310deg 315deg,var(--text) 315deg 355deg,var(--surface) 355deg);-webkit-mask:radial-gradient(circle,transparent 0 22%,#000 23%);mask:radial-gradient(circle,transparent 0 22%,#000 23%)}
+.sk[data-type="lens"] .sk-mount{border-radius:50%;border:2px solid var(--text);background:var(--surface)}
+.sk[data-type="lens"] .sk-mount i{left:12%;top:12%;width:76%;border-width:8px;border-style:dashed}
+.sk-grill{border-radius:40% 40% 18% 18%;border:2px solid var(--text);background:var(--surface);background-image:radial-gradient(var(--text) 1.4px,transparent 1.6px);background-size:10px 10px}
+.sk-capsule i{position:absolute;left:22%;top:12%;width:56%;aspect-ratio:1;border-radius:50%;border:2px solid var(--text);background:var(--surface-2)}
+.sk-diffuser{border:2px solid var(--text);background:linear-gradient(160deg,var(--surface) 0%,var(--surface-2) 100%)}
+.sk-diffuser i{position:absolute;inset:8%;border:2px dashed var(--line)}
+.sk-leds{border:2px solid var(--text);background:var(--surface);background-image:radial-gradient(circle,#FFC46B 0 3px,transparent 3.5px),radial-gradient(circle,#BFD8FF 0 3px,transparent 3.5px);background-size:16px 16px,16px 16px;background-position:0 0,8px 8px}
+.sk-clamp{border:2px solid var(--text);background:var(--surface)}
+.sk-clamp i{position:absolute;left:10%;right:10%;height:12%;background:var(--surface-2);border:2px solid var(--text)}.sk-clamp i:first-child{top:16%}.sk-clamp i+i{bottom:16%}
+.sk-motor i{position:absolute;width:34%;aspect-ratio:1;border-radius:50%;border:2px solid var(--text);background:var(--surface-2)}
+.sk-motor i:nth-child(1){left:6%;top:6%}.sk-motor i:nth-child(2){right:6%;top:34%;background:var(--blue);border-color:var(--blue)}.sk-motor i:nth-child(3){left:20%;bottom:6%}
+.sk-fotolu .sk-l:first-child{background:transparent;border:0;box-shadow:none}
+/* Fotoğraf katmanın üstünde izleyiciye dönük, dik durur (etiketlerle aynı ters dönüş); gölgesi katmana düşer */
+.sk-foto{position:absolute;left:-15%;bottom:50%;width:130%;height:auto;max-height:none;object-fit:contain;transform-origin:50% 100%;transform:rotateZ(38deg) rotateX(-58deg);filter:drop-shadow(0 22px 16px rgb(0 0 0 / .25));pointer-events:none}
 .sk-lab{position:absolute;left:108%;top:40%;white-space:nowrap;transform-origin:0 50%;transform:rotateZ(38deg) rotateX(-58deg);opacity:0;transition:opacity var(--t2) var(--ease);display:flex;flex-direction:column;gap:1px;padding-left:54px;font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;color:var(--text-2);pointer-events:none;background:transparent}
 .sk-lab::before{content:"";position:absolute;left:0;top:9px;width:46px;height:2px;background:var(--text)}
 .sk-lab b{color:var(--text);font-size:14px;font-weight:600;font-family:var(--f-body);letter-spacing:0}
 .sk-lab .unk{color:var(--text-3)}
 .sk.open .sk-lab{opacity:1;transition-delay:calc(var(--i) * 60ms + 240ms)}
 .sk.nolab .sk-lab{display:none}
-@media (max-width:700px){.sk{min-height:360px}.sk-dev{--w:140px}.sk[data-type="drone"] .sk-dev{--w:170px}.sk[data-type="pad"] .sk-dev,.sk[data-type="camera"] .sk-dev{--w:200px}.sk[data-type="audio"] .sk-dev{--w:160px}.sk[data-type="cam360"] .sk-dev{--w:84px}.sk.open .sk-l{transform:translateZ(calc((var(--i) - (var(--n) - 1) / 2) * 44px))}.sk-lab{font-size:10px;padding-left:30px}.sk-lab::before{width:24px}.sk-lab b{font-size:12px}}
+@media (max-width:700px){.sk{min-height:360px}.sk-dev{--w:140px}.sk[data-type="lens"] .sk-dev{--w:150px}.sk[data-type="light"] .sk-dev{--w:190px}.sk[data-type="headphones"] .sk-dev{--w:160px}.sk[data-type="drone"] .sk-dev{--w:170px}.sk[data-type="pad"] .sk-dev,.sk[data-type="camera"] .sk-dev{--w:200px}.sk[data-type="audio"] .sk-dev{--w:160px}.sk[data-type="cam360"] .sk-dev{--w:84px}.sk.open .sk-l{transform:translateZ(calc((var(--i) - (var(--n) - 1) / 2) * 44px))}.sk-lab{font-size:10px;padding-left:30px}.sk-lab::before{width:24px}.sk-lab b{font-size:12px}}
 /* product page */
 .ku-hero{border-bottom:1px solid var(--line);padding-top:32px}
 .ku-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:var(--gut);align-items:center;padding-bottom:32px}

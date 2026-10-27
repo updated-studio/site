@@ -1,0 +1,46 @@
+---
+/**
+ * Kıyas masası (27 Ekim 2026): ürün kartları (teknik puan + UPscore + Amazon), yapışkan çubuk, "Neden daha iyi?", tüm özellikler.
+ * İlk görünüm derlemede basılır (lib/kiyas.ts); "Ürün ekle" / çıkar tarayıcıda aynı kodla yeniden çizer (scripts/kiyas.ts).
+ * adresli=true (kıyas aracı sayfası): seçim adres çubuğuna yazılır (?u=a,b,c) ve paylaşılabilir; değilse ekleme kıyas aracına götürür.
+ */
+import '../styles/kiyas.css'
+import { araliklar, cubukHtml, kartlarHtml, nedenHtml, tabloHtml, type K } from '../lib/kiyas'
+import { kunyeKatalog, getSite } from '../lib/api'
+interface Props { ks: K[]; adresli?: boolean }
+const { ks, adresli = false } = Astro.props
+const [katalog, site] = await Promise.all([kunyeKatalog(), getSite()])
+const ar = araliklar(katalog), tag = site.amazonTag || ''
+---
+<div class="km" data-kiyas={ks.map((k) => k.s).join(',')} data-adresli={adresli ? '1' : undefined} data-tag={tag} style={`--n:${ks.length}`}>
+  <div class="km-kartlar" data-km="kartlar"><Fragment set:html={kartlarHtml(ks, ar, tag)} /></div>
+  <dialog class="km-secici" data-km="secici" aria-label="Kıyasa ürün ekle">
+    <form method="dialog">
+      <div class="ust"><span class="eyebrow">Kıyasa ekle · en çok 4 ürün · aynı türden</span><button class="btn" value="kapat" aria-label="Kapat">✕</button></div>
+      <label class="sr" for="km-ara">Model ara</label>
+      <input id="km-ara" type="search" placeholder="Model ara… (ör. Z6III)" autocomplete="off" spellcheck="false" data-km="ara" />
+      <ul data-km="liste"><li class="pc-unk">Künyeler yükleniyor…</li></ul>
+    </form>
+  </dialog>
+
+  <div class="km-cubuk"><div class="wrap km-cubuk-ic">
+    <div class="sol"><button class="btn" type="button" data-km="fark" aria-pressed="false">Sadece farklar</button></div>
+    <Fragment set:html={cubukHtml(ks, ar)} />
+  </div></div>
+
+  <section aria-labelledby="km-neden-b"><div class="sh"><h2 id="km-neden-b">Neden daha iyi?</h2></div>
+    <div class="km-neden" data-km="neden"><Fragment set:html={nedenHtml(ks)} /></div></section>
+
+  <slot />
+
+  <section aria-labelledby="km-tablo-b"><div class="sh"><h2 id="km-tablo-b">Tüm özellikler</h2></div>
+    <div class="tbl km-tablo" tabindex="0" role="region" aria-label="Tüm özellikler tablosu"><table data-km="tablo"><Fragment set:html={tabloHtml(ks)} /></table></div>
+    <p class="km-not">● önde olan · her değerin kaynağı künye sayfasında</p></section>
+
+  <section aria-labelledby="km-puan-b"><div class="sh"><h2 id="km-puan-b">İki puan, iki ayrı iş</h2></div>
+    <div class="km-ikili">
+      <div><h3>Teknik puan</h3><p>Künyedeki sayısal değerlerden kendiliğinden hesaplanır, kimse elle değiştirmez. Her özellik aynı türdeki ürünlerin en düşük ve en yüksek değerine göre ölçeklenir, aranma önemine göre ağırlıklanır. Künyenin üçte birinden azı doluysa puan verilmez.</p></div>
+      <div><h3>UPscore</h3><p>Cihazı elimize alan editörün notu: kullanım hissi, renk, gerçek dünyadaki pil, fiyatına göre değer. 10 üzerinden; gerekçesi incelemede yazar.</p></div>
+    </div></section>
+</div>
+<script>import '../scripts/kiyas.ts'</script>
