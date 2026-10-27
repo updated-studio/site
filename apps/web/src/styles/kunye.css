@@ -116,7 +116,7 @@
 .ku-feed .d{font-family:var(--f-mono);font-size:12px;color:var(--text-3);white-space:nowrap}
 .ku-feed .s{font-family:var(--f-mono);font-weight:600;font-size:16px;background:var(--blue);color:var(--white);padding:2px 8px}
 .ku-box{border:1px solid var(--line);background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
-.ku-box h4,.rail h4{font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3);margin:0;font-weight:600}
+.ku-box h2,.rail h2,.ku-box h4,.rail h4{font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3);margin:0;font-weight:600}
 .shelfk{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--gut)}
 .kcard{position:relative;border:1px solid var(--line);background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:8px;text-decoration:none;min-height:200px;transition:border-color var(--t1) var(--ease)}
 .kcard:hover{border-color:var(--text)}

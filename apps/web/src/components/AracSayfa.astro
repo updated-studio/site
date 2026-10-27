@@ -17,7 +17,7 @@ const jsonld = [{ '@context': 'https://schema.org', '@type': 'WebApplication', n
         <div class="prose arac-nasil"><slot name="nasil" /></div>
       </div>
       <aside class="rail rail-yan">
-        <div><h4 class="label ys-baslik">Diğer araçlar</h4>
+        <div><h2 class="label ys-baslik">Diğer araçlar</h2>
           <ul class="arac-l">{ARACLAR.filter((a) => a.yol !== yol).map((a) => <li><a href={a.yol}><b>{a.ad}</b><span>{a.aciklama}</span></a></li>)}</ul>
         </div>
         <div class="arac-uper" data-uper-oneri>

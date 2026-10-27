@@ -55,8 +55,8 @@ const cat = r.product.type === 'drone' || r.product.type === 'camera' || r.produ
       <Topluluk hedef={`reviews:${r.id}`} />
     </article>
     <YanSutun haric={r.path} ads={ads}>
-      <div><h4 class="label" style="color:var(--text-3);margin:0 0 8px">Ürün künyesi</h4><KunyeMini p={{ ...r.product, score: r.score }} /></div>
-      <div><h4 class="label" style="color:var(--text-3);margin:0 0 8px">Puan tablosu</h4><CardList items={top.filter((x) => x.id !== r.id).slice(0, 4)} score /></div>
+      <div><h2 class="label" style="color:var(--text-3);margin:0 0 8px">Ürün künyesi</h2><KunyeMini p={{ ...r.product, score: r.score }} /></div>
+      <div><h2 class="label" style="color:var(--text-3);margin:0 0 8px">Puan tablosu</h2><CardList items={top.filter((x) => x.id !== r.id).slice(0, 4)} score /></div>
     </YanSutun>
   </div>
   <div class="wrap" style="padding-top:48px">

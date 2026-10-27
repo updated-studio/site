@@ -20,9 +20,9 @@ const y = new Date().getFullYear()
       </form>
       <p class="mono" id="nlmsg" style="font-size:14px;color:#B4B7BB;min-height:20px;margin:8px 0 0" aria-live="polite">{site.newsletterNote}</p>
     </div>
-    <div><h4>Bölümler</h4><ul><li><a href="/haberler">Haberler</a></li><li><a href="/inceleme">İncelemeler</a></li><li><a href="/karsilastirma">Karşılaştırma</a></li><li><a href="/urun">Künyeler</a></li><li><a href="/rehber">Rehber</a></li><li><a href="/araclar">Araçlar</a></li><li><a href="/yarismalar">Yarışmalar</a></li><li><a href="/gorev">Haftalık görev</a></li><li><a href={site.kulupUrl}>Kulüp</a></li></ul></div>
-    <div><h4>Kanallar</h4><ul><li><a href={site.youtube} target="_blank" rel="noopener">YouTube</a></li><li><a href={site.instagram} target="_blank" rel="noopener">Instagram</a></li><li><a href="#bulten">Bülten</a></li><li><a href="/rss.xml">RSS</a></li></ul></div>
-    <div><h4>Kurumsal</h4><ul>{KURUMSAL.filter(([s]) => sayfalar.includes(s)).map(([s, ad]) => <li><a href={`/${s}`}>{ad}</a></li>)}<li><a href="/topluluk-kurallari">Topluluk kuralları</a></li><li><a href="/uyelik-sozlesmesi">Üyelik sözleşmesi</a></li><li><a href="/uyelik-aydinlatma-metni">Üyelik aydınlatma metni</a></li></ul></div>
+    <div><h2>Bölümler</h2><ul><li><a href="/haberler">Haberler</a></li><li><a href="/inceleme">İncelemeler</a></li><li><a href="/karsilastirma">Kıyaslamalar</a></li><li><a href="/urun">Künyeler</a></li><li><a href="/rehber">Rehber</a></li><li><a href="/araclar">Araçlar</a></li><li><a href="/yarismalar">Yarışmalar</a></li><li><a href="/gorev">Haftalık görev</a></li><li><a href={site.kulupUrl}>Kulüp</a></li></ul></div>
+    <div><h2>Kanallar</h2><ul><li><a href={site.youtube} target="_blank" rel="noopener">YouTube</a></li><li><a href={site.instagram} target="_blank" rel="noopener">Instagram</a></li><li><a href="#bulten">Bülten</a></li><li><a href="/rss.xml">RSS</a></li></ul></div>
+    <div><h2>Kurumsal</h2><ul>{KURUMSAL.filter(([s]) => sayfalar.includes(s)).map(([s, ad]) => <li><a href={`/${s}`}>{ad}</a></li>)}<li><a href="/topluluk-kurallari">Topluluk kuralları</a></li><li><a href="/uyelik-sozlesmesi">Üyelik sözleşmesi</a></li><li><a href="/uyelik-aydinlatma-metni">Üyelik aydınlatma metni</a></li></ul></div>
     <div class="bt"><span>© {y} UPDATED · updated.com.tr · Beta sürüm</span><span>Görsel künyeleri her görselin altında</span></div>
   </div>
 </footer>

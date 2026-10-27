@@ -3,7 +3,7 @@
 :root{
   --black:#000000; --white:#FFFFFF; --blue:#2563EB; --orange:#FF6B1A; --gray:#F2F2F2;
   --bg:#FFFFFF; --surface:#FFFFFF; --surface-2:#F2F2F2; --text:#171717; --text-2:#55585C; --text-3:#6B6F74; --line:#E2E2E2; --rule:#000000;
-  --link:#2563EB; --cat:#2563EB; --logo:#000000; --input:#9A9EA3; --img:#E2E2E2;
+  --link:#2563EB; --cat:#2563EB; --orange-tx:#C2410C; --logo:#000000; --input:#9A9EA3; --img:#E2E2E2;
   --f-head:"Big Shoulders Display","Impact","Arial Narrow",sans-serif;
   --f-body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
@@ -12,8 +12,8 @@
   --edge:80px; --gut:24px; --max:1280px;
   color-scheme:light;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1E2023;--surface:#25282C;--surface-2:#2E3236;--text:#F2F2F2;--text-2:#B4B7BB;--text-3:#8E9297;--line:#3A3E44;--rule:#F2F2F2;--link:#F2F2F2;--cat:#B4B7BB;--input:#8E9297;--img:#2E3236;--logo:#FFFFFF;color-scheme:dark}}
-:root[data-theme="dark"]{--logo:#FFFFFF;--bg:#1E2023;--surface:#25282C;--surface-2:#2E3236;--text:#F2F2F2;--text-2:#B4B7BB;--text-3:#8E9297;--line:#3A3E44;--rule:#F2F2F2;--link:#F2F2F2;--cat:#B4B7BB;--input:#8E9297;--img:#2E3236;color-scheme:dark}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1E2023;--surface:#25282C;--surface-2:#2E3236;--text:#F2F2F2;--text-2:#B4B7BB;--text-3:#8E9297;--line:#3A3E44;--rule:#F2F2F2;--link:#F2F2F2;--cat:#B4B7BB;--input:#8E9297;--img:#2E3236;--logo:#FFFFFF;--orange-tx:#FF6B1A;color-scheme:dark}}
+:root[data-theme="dark"]{--logo:#FFFFFF;--bg:#1E2023;--surface:#25282C;--surface-2:#2E3236;--text:#F2F2F2;--text-2:#B4B7BB;--text-3:#8E9297;--line:#3A3E44;--rule:#F2F2F2;--link:#F2F2F2;--cat:#B4B7BB;--input:#8E9297;--img:#2E3236;--orange-tx:#FF6B1A;color-scheme:dark}
 @media (max-width:1199px){:root{--edge:32px;--gut:16px}}
 @media (max-width:767px){:root{--edge:16px;--gut:16px}}
 *{box-sizing:border-box}
@@ -67,7 +67,7 @@ h3{font-weight:700}
 .logo svg{height:24px;width:auto;fill:currentColor;display:block}
 /* Beta ibaresi (25 Ekim 2026): logonun yanında, tıklayınca kısa açıklama */
 .beta{position:relative;flex:none;margin-left:-16px}
-.beta summary{list-style:none;cursor:pointer;font-family:var(--f-mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--orange);border:1px solid var(--orange);padding:2px 7px;line-height:1.3;border-radius:99px;min-height:22px;display:inline-flex;align-items:center}
+.beta summary{list-style:none;cursor:pointer;font-family:var(--f-mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--orange-tx);border:1px solid var(--orange);padding:2px 7px;line-height:1.3;border-radius:99px;min-height:22px;display:inline-flex;align-items:center}
 .beta summary::-webkit-details-marker{display:none}
 .beta-not{position:absolute;left:0;top:calc(100% + 10px);width:min(300px,80vw);z-index:60;padding:14px 16px;font-size:14px;line-height:1.5;background:var(--surface);color:var(--text);border:1px solid var(--line);box-shadow:0 12px 30px rgb(0 0 0 / .18);border-radius:14px}
 .beta-not a{color:var(--link)}
@@ -353,9 +353,9 @@ h3{font-weight:700}
 .ftr .wrap{padding-block:48px;display:grid;grid-template-columns:minmax(0,1.2fr) repeat(3,minmax(0,1fr));gap:var(--gut)}
 .ftr .logo{color:var(--white)}
 .ftr .logo svg{height:28px}
-.ftr h4{font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#B4B7BB;margin:0 0 12px;font-weight:600}
-.ftr ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;font-size:15px}
-.ftr a{color:#FFFFFF;text-decoration:none}.ftr a:hover{text-decoration:underline}
+.ftr h2,.ftr h4{font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#B4B7BB;margin:0 0 12px;font-weight:600}
+.ftr ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;font-size:15px}
+.ftr a{color:#FFFFFF;text-decoration:none}.ftr ul a{display:inline-block;padding-block:3px}.ftr a:hover{text-decoration:underline}
 .ftr .bt{grid-column:1/-1;border-top:1px solid #333333;padding-top:16px;font-family:var(--f-mono);font-size:14px;color:#B4B7BB;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .nl{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
 .nl input{flex:1 1 200px;height:44px;border:1px solid #8E9297;background:#000000;color:#FFFFFF;padding:0 12px;font:inherit;font-size:15px;min-width:0}
@@ -596,8 +596,8 @@ main{overflow-x:clip}
 .mn-b h2 a{color:inherit;text-decoration:none}
 .mn-b h2 a:hover{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
 .mn-meta{font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:rgb(255 255 255 / .72)}
-.mn-cb{position:absolute;left:32px;right:32px;bottom:18px;display:flex;gap:5px}
-.mn-cb button{flex:1;height:16px;padding:6px 0;border:0;background:none;cursor:pointer}
+.mn-cb{position:absolute;left:32px;right:32px;bottom:14px;display:flex;gap:5px}
+.mn-cb button{flex:1;height:24px;padding:10px 0;border:0;background:none;cursor:pointer}
 .mn-cb i{display:block;height:4px;border-radius:2px;background:rgb(255 255 255 / .3);overflow:hidden;position:relative}
 .mn-cb i::after{content:"";position:absolute;inset:0;background:#fff;transform:scaleX(var(--d,0));transform-origin:left}
 .mn-cb button:focus-visible{outline:2px solid #fff;outline-offset:2px}
@@ -624,7 +624,7 @@ main{overflow-x:clip}
 .ad-hp img{width:300px;height:600px;object-fit:cover}
 @media (max-width:1279px){.mn:not(.mn-afissiz){grid-template-columns:minmax(0,1fr)}.mn-af{justify-content:center}.ad-hp .slot{height:250px}.ad-hp img{height:auto;aspect-ratio:300/250}}
 @media (max-width:1000px){.mn-ic{grid-template-columns:minmax(0,1fr)}.mv-iz{grid-auto-columns:150px;padding-bottom:4px}.mv-k .c-img{flex:none;aspect-ratio:9/16;min-height:0}}
-@media (max-width:767px){.mn-sl{aspect-ratio:4/3;min-height:0}.mn-b{padding:0 18px 40px}.mn-b h2{font-size:24px}.mn-cb{left:18px;right:18px;bottom:14px;gap:3px}.mn-meta{display:none}}
+@media (max-width:767px){.mn-sl{aspect-ratio:4/3;min-height:0}.mn-b{padding:0 18px 40px}.mn-b h2{font-size:24px}.mn-cb{left:18px;right:18px;bottom:10px;gap:3px}.mn-meta{display:none}}
 /* Video haberler duvarı: solda büyük, sağda 2×2 */
 .vd-iz{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto;gap:var(--gut)}
 .vd-bas{grid-row:1 / span 2}

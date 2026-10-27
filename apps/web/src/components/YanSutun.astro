@@ -34,10 +34,10 @@ const enCok = okunan.filter((n) => n.path !== haric).slice(0, 5)
     </a>
   )}
   <Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare />
-  {enCok.length > 0 && <div><h4 class="label ys-baslik">En çok okunanlar</h4><CardList items={enCok} /></div>}
+  {enCok.length > 0 && <div><h2 class="label ys-baslik">En çok okunanlar</h2><CardList items={enCok} /></div>}
   {reels.length > 0 && (
     <div class="ys-reels">
-      <h4 class="label ys-baslik">Reels · @updated.tr</h4>
+      <h2 class="label ys-baslik">Reels · @updated.tr</h2>
       <div class="ys-reel-l">
         {reels.slice(0, 2).map((r) => <a class="reel" href={r.url} target="_blank" rel="noopener"><span class="c-img"><Img img={r.cover} alt="" sizes="150px" /><span class="cap">{r.caption}</span></span></a>)}
       </div>

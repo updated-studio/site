@@ -22,7 +22,7 @@ const on = (h: string) => ((h === '/' ? current === '/' : (BOLUM[h] || [h]).some
       <a class="kulup" href={site.kulupUrl} aria-current={current.startsWith(site.kulupUrl) || current.startsWith('/gorev') || current.startsWith('/yarismalar') ? 'page' : undefined}>Kulüp</a>
     </nav>
     <div class="hdr-r">
-      <button class="srch" type="button" data-open-search><Fragment set:html={ico('search')} /><span>Ara</span></button>
+      <button class="srch" type="button" data-open-search aria-label="Ara"><Fragment set:html={ico('search')} /><span>Ara</span></button>
       <button class="ibtn" type="button" data-theme-btn aria-label="Görünüm"><Fragment set:html={ico('auto')} /></button>
       <a class="btn btn-p" href="#bulten">Bülten</a>
       <a class="ibtn uye-b" href="/hesap" data-uye-btn aria-label="Uper ol / giriş yap" title="Uper ol / giriş yap"><Fragment set:html={ico('user')} /></a>

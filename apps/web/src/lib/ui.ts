@@ -23,7 +23,7 @@ const G: Record<string, string> = {
 }
 export const glyph = (t: string, s = 22) => `<svg class="pk-svg" width="${s}" height="${Math.round(s * 0.78)}" viewBox="0 0 100 78" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="5">${G[t] || G.phone}</svg>`
 export const LVN = ['', 'Söylenti', 'Sızıntı', 'Test / takvim', 'Resmî']
-export const conf = (lv: number) => `<span class="conf" aria-label="Kesinlik ${lv}/4">${[1, 2, 3, 4].map((q) => `<i class="${q <= lv ? 'on' : ''}"></i>`).join('')}</span>`
+export const conf = (lv: number) => `<span class="conf" role="img" aria-label="Kesinlik ${lv}/4">${[1, 2, 3, 4].map((q) => `<i class="${q <= lv ? 'on' : ''}"></i>`).join('')}</span>`
 /** Künye etiketi: metinde ve kartlarda ürüne bağlantı; masaüstünde üzerine gelince kart açılır. */
 export const chip = (p: Pick<ProductRef, 'slug' | 'name' | 'type'>, label?: string) => `<a class="pk" href="/urun/${esc(p.slug)}" data-p="${esc(p.slug)}">${glyph(p.type, 16)}<span>${esc(label || p.name)}</span></a>`
 export const label = (l?: string) => { const x = l && LABEL_TEXT[l]; return x ? `<span class="lbl ${x[1]}">${x[0]}</span>` : '' }

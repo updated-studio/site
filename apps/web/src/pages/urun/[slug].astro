@@ -60,7 +60,7 @@ const kiyas = p.comparisons?.[0] ? p.comparisons[0].path : p.rivals[0] ? `/karsi
     <div>
       <div class="sec-head" style="margin-bottom:12px"><div><span class="eyebrow">Ürün veritabanından · her değer kaynağıyla</span><h2 class="sec-title ku-h2">Teknik künye</h2></div></div>
       {specs.length ? (
-        <div class="tbl-box"><table class="ku-tbl"><thead><tr><th scope="col">Özellik</th><th scope="col">Değer</th><th scope="col">Kaynak</th></tr></thead><tbody>
+        <div class="tbl-box" tabindex="0" role="region" aria-label="Teknik özellikler"><table class="ku-tbl"><thead><tr><th scope="col">Özellik</th><th scope="col">Değer</th><th scope="col">Kaynak</th></tr></thead><tbody>
           {specs.map((s) => <tr><th scope="row">{s.key}</th><td class={s.value ? '' : 'unk'}>{s.value || 'Bilinmiyor'}</td><td set:html={tier(s)} /></tr>)}
         </tbody></table></div>
       ) : <p class="pc-unk">Teknik veriler henüz girilmedi.</p>}
@@ -69,9 +69,9 @@ const kiyas = p.comparisons?.[0] ? p.comparisons[0].path : p.rivals[0] ? `/karsi
       {feed.length ? <ol class="ku-feed">{feed.map((f) => <li><a href={f.href}><span class={`tag t-${f.cls}`}>{f.tag}</span><b>{f.title}</b><span class="d">{f.d}</span>{f.s && <span class="s">{f.s}</span>}</a></li>)}</ol> : <p class="pc-unk">Bu ürünle ilgili henüz içerik yok.</p>}
     </div>
     <aside class="rail" aria-label="Yan sütun">
-      <div class="ku-box"><h4>Kıyasla</h4>{p.rivals.length ? <Fragment set:html={p.rivals.map((r) => chip(r)).join('')} /> : <p class="pc-unk">Henüz kıyas yok.</p>}<a class="btn" href="/karsilastirma" style="margin-top:10px">Kıyas Robotu ile seç</a></div>
-      {p.id && <div class="ku-box ku-kullanan" data-kullananlar={p.id}><h4>Kullananlar</h4><p class="pc-unk" data-ic>Yükleniyor…</p></div>}
-      <div class="ku-box"><h4>Çıkış radarı</h4><div class="pc-st"><Fragment set:html={conf(p.certainty)} /><span>{status} · {LVN[p.certainty]}{p.releaseWhen ? ` · ${p.releaseWhen}` : ''}</span></div></div>
+      <div class="ku-box"><h2>Kıyasla</h2>{p.rivals.length ? <Fragment set:html={p.rivals.map((r) => chip(r)).join('')} /> : <p class="pc-unk">Henüz kıyas yok.</p>}<a class="btn" href="/karsilastirma" style="margin-top:10px">Kıyas Robotu ile seç</a></div>
+      {p.id && <div class="ku-box ku-kullanan" data-kullananlar={p.id}><h2>Kullananlar</h2><p class="pc-unk" data-ic>Yükleniyor…</p></div>}
+      <div class="ku-box"><h2>Çıkış radarı</h2><div class="pc-st"><Fragment set:html={conf(p.certainty)} /><span>{status} · {LVN[p.certainty]}{p.releaseWhen ? ` · ${p.releaseWhen}` : ''}</span></div></div>
       <Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare />
     </aside>
   </section>

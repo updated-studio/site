@@ -99,7 +99,7 @@
 @media (max-width:900px){.cam .skel{grid-template-columns:1fr}.cam .skel i:nth-child(n+2){display:none}}
 @media (prefers-reduced-motion:reduce){.cam .skel i{animation:none}}
 /* Küçük bölüm etiketleri (alt bilgi, kutu başlıkları) başlık değil, etiket: mono büyük harf kalır */
-.cam .ftr h4,.cam h4.label,.cam .label{font-family:var(--f-mono);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;line-height:1.4}
+.cam .ftr h2,.cam h2.label,.cam .ftr h4,.cam h4.label,.cam .label{font-family:var(--f-mono);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;line-height:1.4}
 
 /* Araçlar: iç kutular ve form alanları yuvarlak */
 .cam .arac-buyuk,.cam .as-kutu{border-radius:12px}.cam .as-sat{border-radius:8px}.cam .bk-ebat span{border-radius:99px}

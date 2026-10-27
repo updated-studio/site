@@ -17,7 +17,7 @@ const [related, ads, videos, reels, site] = await Promise.all([api.getRelated(n)
   <div class="wrap with-rail">
     <ArticleBody n={n} related={related} ads={ads} />
     <YanSutun haric={n.path} ads={ads}>
-      {n.products.length > 0 && <div><h4 class="label" style="color:var(--text-3);margin:0 0 8px">Bu haberdeki ürünler · künye</h4><div class="kstack">{n.products.map((p) => <KunyeMini p={p} />)}</div></div>}
+      {n.products.length > 0 && <div><h2 class="label" style="color:var(--text-3);margin:0 0 8px">Bu haberdeki ürünler · künye</h2><div class="kstack">{n.products.map((p) => <KunyeMini p={p} />)}</div></div>}
     </YanSutun>
   </div>
   <div class="wrap" style="padding-top:48px">
