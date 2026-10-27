@@ -7,7 +7,7 @@
  */
 type S = [string, string, string, boolean | null, number]
 
-const ORTAK_SON: S[] = [['Ağırlık', 'Gövde', 'g', false, 3], ['Türkiye fiyatı', 'Fiyat', 'TL', false, 5], ['Çıkış tarihi', 'Genel', '', null, 2]]
+const ORTAK_SON: S[] = [['Boyutlar', 'Gövde', 'mm', null, 2], ['Ağırlık', 'Gövde', 'g', false, 3], ['Türkiye fiyatı', 'Fiyat', 'TL', false, 5], ['Çıkış tarihi', 'Genel', '', null, 2]]
 
 export const URUN_SABLONLARI: Record<string, S[]> = {
   camera: [
@@ -32,7 +32,7 @@ export const URUN_SABLONLARI: Record<string, S[]> = {
   phone: [
     ['Ekran', 'Ekran', '', null, 4], ['Yenileme hızı', 'Ekran', 'Hz', true, 3], ['Parlaklık (tepe)', 'Ekran', 'nit', true, 2], ['İşlemci', 'Performans', '', null, 5], ['RAM', 'Performans', 'GB', true, 3], ['Depolama', 'Performans', 'GB', true, 3],
     ['Ana kamera', 'Kamera', 'MP', true, 5], ['Ultra geniş', 'Kamera', 'MP', true, 3], ['Telefoto', 'Kamera', '', null, 4], ['Optik zoom', 'Kamera', 'x', true, 4], ['Ön kamera', 'Kamera', 'MP', true, 2], ['Video', 'Kamera', '', null, 3],
-    ['Pil', 'Güç', 'mAh', true, 5], ['Kablolu şarj', 'Güç', 'W', true, 3], ['Kablosuz şarj', 'Güç', 'W', true, 2], ['Suya dayanıklılık', 'Gövde', '', null, 2], ['İşletim sistemi', 'Yazılım', '', null, 2], ['Güncelleme desteği', 'Yazılım', 'yıl', true, 3], ['Boyutlar', 'Gövde', 'mm', null, 1],
+    ['Pil', 'Güç', 'mAh', true, 5], ['Kablolu şarj', 'Güç', 'W', true, 3], ['Kablosuz şarj', 'Güç', 'W', true, 2], ['Suya dayanıklılık', 'Gövde', '', null, 2], ['İşletim sistemi', 'Yazılım', '', null, 2], ['Güncelleme desteği', 'Yazılım', 'yıl', true, 3],
     ...ORTAK_SON,
   ],
   cam360: [

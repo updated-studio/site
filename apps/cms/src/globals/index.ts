@@ -19,6 +19,7 @@ export const Site: GlobalConfig = {
     { name: 'youtube', type: 'text', defaultValue: 'https://www.youtube.com/@nerdesinfatih' },
     { name: 'instagram', type: 'text', defaultValue: 'https://www.instagram.com/updated.tr/' },
     { name: 'kulupUrl', type: 'text', label: 'Kulüp adresi', defaultValue: '/kulup' },
+    { name: 'amazonTag', type: 'text', label: 'Amazon ortaklık kodu', admin: { description: 'Amazon Ortaklık Programı izleme kimliği (ör. updated-21). Kıyas ve künye sayfalarındaki "Amazon\'da gör" bağlantılarına eklenir; boşsa düz bağlantı.' } },
     { name: 'newsletterNote', type: 'text', defaultValue: 'Haftalık bülten pazartesi 08.30.' },
   ],
   hooks: { afterChange: reval },

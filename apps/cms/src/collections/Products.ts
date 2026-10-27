@@ -44,6 +44,14 @@ export const Products: CollectionConfig = {
     },
     { name: 'image', type: 'upload', relationTo: 'media', label: 'Ürün görseli' },
     { name: 'blurb', type: 'textarea', label: 'Tek cümle tanım' },
+    // Kıyaslamalar (27 Ekim 2026): iki ayrı puan. Teknik puan sitede künye değerlerinden kendiliğinden hesaplanır; UPscore editörün notu.
+    {
+      type: 'row', fields: [
+        { name: 'upscore', type: 'number', label: 'UPscore (0–10)', min: 0, max: 10, admin: { step: 0.1, description: 'Cihazı kullanan editörün notu, tek ondalık. Teknik puan ayrıca kendiliğinden hesaplanır.' } },
+        { name: 'upscoreReview', type: 'relationship', relationTo: 'reviews', label: 'UPscore incelemesi', admin: { description: 'Notun gerekçesi olan inceleme' } },
+        { name: 'amazon', type: 'text', label: 'Amazon ürün kodu (ASIN) ya da bağlantısı', admin: { description: 'Ör. B09JZT6YK5. Boşsa "Amazon\'da gör" ürün adıyla arama açar.' } },
+      ],
+    },
     {
       name: 'specs', type: 'array', label: 'Teknik özellikler (kaynaklı)',
       admin: { description: 'Bilinmeyen değer boş bırakılır; uydurulmaz. Çakışan değerler Stüdyo’da QC onayına düşer.', initCollapsed: false },
@@ -77,7 +85,15 @@ export const Products: CollectionConfig = {
   hooks: {
     beforeChange: [autoSeo({ title: (d) => `${tamAd(d)} künyesi: özellikler ve haberler`, desc: (d) => d.blurb || `${tamAd(d)} teknik özellikleri: kaynaklı veriler, ilgili haberler, incelemeler ve karşılaştırmalar.`, entities: (d) => [d.brand, d.name] }), ({ data }) => { if (data.slug) data.path = `/urun/${data.slug}`; return data },
       // Özellik listesi boşsa (yeni ürün ya da tür ilk kez seçildi) türün şablonu dolar; dolu listeye dokunulmaz
-      ({ data, originalDoc }) => { const mevcut = data.specs ?? originalDoc?.specs; if (data.type && (!mevcut || !mevcut.length)) data.specs = sablonSatirlari(data.type); return data }],
+      ({ data, originalDoc }) => { const mevcut = data.specs ?? originalDoc?.specs; if (data.type && (!mevcut || !mevcut.length)) data.specs = sablonSatirlari(data.type); return data },
+      // Şablona sonradan eklenen özellik (ör. "Boyutlar", 27 Ekim 2026) mevcut ürüne de eklenir; var olan satırlara dokunulmaz
+      ({ data, originalDoc }) => {
+        const tur = data.type ?? originalDoc?.type, mevcut = data.specs ?? originalDoc?.specs
+        if (!tur || !mevcut?.length) return data
+        const var_ = new Set(mevcut.map((s: { key: string }) => s.key)), eksik = sablonSatirlari(tur).filter((s) => !var_.has(s.key))
+        if (eksik.length) data.specs = [...mevcut, ...eksik]
+        return data
+      }],
     afterChange: [revalidate((d) => [d.path].filter(Boolean))],
   },
 }
