@@ -8,6 +8,14 @@ import { LIMIT } from '../lib/kit'
  * gözle fark edilir kayıp olmadan küçük kalır. Her yüklemede kendiliğinden uygulanır.
  * Künye zorunlu (kit §8): "Görsel: Apple" / "Fotoğraf: Ad Soyad / UPDATED" / "Temsili görsel".
  */
+const TR: Record<string, string> = { ç: 'c', ğ: 'g', ı: 'i', i̇: 'i', ö: 'o', ş: 's', ü: 'u', â: 'a', î: 'i', û: 'u' }
+export function sadeAd(ad: string) {
+  const n = ad.lastIndexOf('.'), kok = n > 0 ? ad.slice(0, n) : ad, uz = n > 0 ? ad.slice(n + 1).toLowerCase().replace(/[^a-z0-9]/g, '') : ''
+  const s = kok.toLocaleLowerCase('tr-TR').replace(/[çğıöşüâîû]|i̇/g, (c) => TR[c] || c).normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80) || 'gorsel'
+  return uz ? `${s}.${uz}` : s
+}
+
 export const Media: CollectionConfig = {
   slug: 'media',
   labels: { singular: 'Görsel', plural: 'Görseller' },
@@ -36,6 +44,11 @@ export const Media: CollectionConfig = {
     { name: 'sourceUrl', type: 'text', label: 'Kaynak bağlantısı' },
   ],
   hooks: {
+    // Dosya adı adreste sorun çıkarmasın (27 Ekim 2026): "İnsta Merkez New york.JPG" → "insta-merkez-new-york.jpg"
+    beforeOperation: [({ operation, req }) => {
+      const f = req.file
+      if ((operation === 'create' || operation === 'update') && f?.name) f.name = sadeAd(f.name)
+    }],
     beforeChange: [({ data }) => { if (data.aiGenerated) { data.representative = true; data.credit = 'Temsili görsel · Yapay zekâ ile üretildi' } return data }],
   },
 }

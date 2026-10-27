@@ -3,6 +3,12 @@
  * Kit hareket kuralları: 120/200/320 ms, cubic-bezier(.2,0,0,1); otomatik dönen slayt yok; azaltılmış harekete saygı.
  */
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches
+
+/* Kırık görsel güvenliği (27 Ekim 2026): görsel yüklenemezse alt metin ve kırık simge görünmez. Haber kapağıysa kapak bölümü
+   tamamen gizlenir; kartlarda yer korunur, gri zemin kalır. Betik yüklenmeden önce kırılanlar da taranır. */
+const kirik = (i: HTMLImageElement) => { const f = i.closest('figure.cover') as HTMLElement | null; if (f) f.hidden = true; else i.style.visibility = 'hidden' }
+document.addEventListener('error', (e) => { if (e.target instanceof HTMLImageElement) kirik(e.target) }, true)
+for (const i of Array.from(document.images)) if (i.complete && i.currentSrc && i.naturalWidth === 0) kirik(i)
 const FINE = matchMedia('(hover: hover)').matches
 const $ = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => r.querySelector(s) as T | null
 const $$ = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => [...r.querySelectorAll(s)] as T[]

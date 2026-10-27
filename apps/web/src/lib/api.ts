@@ -54,7 +54,9 @@ const MEDIA = env('MEDIA_PUBLIC_URL').replace(/\/$/, '')
 export const localMedia = (u?: string) => {
   if (!u) return u
   if (u.startsWith('/api/media/file/')) u = CMS + u
-  return MEDIA && u.startsWith(MEDIA + '/') ? '/medya/' + u.slice(MEDIA.length + 1) : u
+  if (!(MEDIA && u.startsWith(MEDIA + '/'))) return u
+  // Yol parçaları kodlanır: "Instagram merkez.webp" → "Instagram%20merkez.webp" (27 Ekim 2026: boşluklu adlı görsel siteye hiç kopyalanmamıştı)
+  return '/medya/' + u.slice(MEDIA.length + 1).split('/').map((p) => { try { return encodeURIComponent(decodeURIComponent(p)) } catch { return encodeURIComponent(p) } }).join('/')
 }
 export function mImg(m: any, size: 'card' | 'hero' | 'thumb' | 'reel' | 'og' = 'card'): Img | undefined {
   m = rel(m); if (!m?.url) return undefined
