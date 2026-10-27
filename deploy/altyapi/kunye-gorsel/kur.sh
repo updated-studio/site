@@ -16,7 +16,8 @@ Description=Künye görselleri: arka plan silme ve standart tuval (Stüdyo → K
 After=docker.service
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/node /opt/updated-kunye-gorsel/isci.mjs
+# Ağır işler (site ve panel derlemesi) aynı kilidi kullanır: 3,8 GB bellekte ikisi aynı anda çalışmaz, sırayla bekler
+ExecStart=/usr/bin/flock /run/updated-agir.lock /usr/bin/node /opt/updated-kunye-gorsel/isci.mjs
 Nice=15
 TimeoutStartSec=45min
 UNIT
