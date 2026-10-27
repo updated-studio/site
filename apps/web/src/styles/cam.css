@@ -7,17 +7,19 @@
   --cam-golge:0 1px 2px rgb(16 24 40 / .04), 0 8px 24px rgb(16 24 40 / .06);
   --cam-leke-1:rgb(37 99 235 / .20); --cam-leke-2:rgb(255 107 26 / .14); --cam-leke-3:rgb(37 99 235 / .10);
   --r-kart:18px; --r-buyuk:26px; --r-dugme:12px; --r-etiket:8px;
+  /* Gri zeminde küçük yazı okunur kalsın (WCAG 4.5:1; site taraması 27 Ekim 2026): soluk gri ve mavi bir ton koyu */
+  --text-3:#5D6166; --cat:#1D4ED8; --link:#1D4ED8;
 }
 @media (prefers-color-scheme: dark){:root.cam:not([data-theme="light"]){
   --bg:#1B1E23; --surface:rgb(46 50 57 / .66); --surface-2:rgb(58 63 71 / .55); --line:rgb(255 255 255 / .09); --img:#2C3037;
   --cam-bar:rgb(38 42 48 / .6); --cam-koyu:rgb(20 22 26 / .74); --cam-isik:rgb(255 255 255 / .07);
   --cam-golge:0 1px 2px rgb(0 0 0 / .2), 0 10px 30px rgb(0 0 0 / .28);
-  --cam-leke-1:rgb(37 99 235 / .26); --cam-leke-2:rgb(255 107 26 / .12); --cam-leke-3:rgb(106 152 248 / .10)}}
+  --cam-leke-1:rgb(37 99 235 / .26); --cam-leke-2:rgb(255 107 26 / .12); --cam-leke-3:rgb(106 152 248 / .10); --text-3:#8E9297; --cat:#B4B7BB; --link:#F2F2F2}}
 :root.cam[data-theme="dark"]{
   --bg:#1B1E23; --surface:rgb(46 50 57 / .66); --surface-2:rgb(58 63 71 / .55); --line:rgb(255 255 255 / .09); --img:#2C3037;
   --cam-bar:rgb(38 42 48 / .6); --cam-koyu:rgb(20 22 26 / .74); --cam-isik:rgb(255 255 255 / .07);
   --cam-golge:0 1px 2px rgb(0 0 0 / .2), 0 10px 30px rgb(0 0 0 / .28);
-  --cam-leke-1:rgb(37 99 235 / .26); --cam-leke-2:rgb(255 107 26 / .12); --cam-leke-3:rgb(106 152 248 / .10)}
+  --cam-leke-1:rgb(37 99 235 / .26); --cam-leke-2:rgb(255 107 26 / .12); --cam-leke-3:rgb(106 152 248 / .10); --text-3:#8E9297; --cat:#B4B7BB; --link:#F2F2F2}
 
 /* Koyu tema 25 Ekim 2026'da yumuşatıldı (#0E1013 → #1B1E23; kullanıcı: "çok koyu", 24 Ekim'deki isteğin devamı) */
 /* Zemin: sabit, bulanık renk lekeleri (yalnız degrade; bulanıklık filtresi yok, hızlı) */
