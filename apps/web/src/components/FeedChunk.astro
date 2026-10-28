@@ -1,7 +1,7 @@
 ---
 /**
  * Sonsuz akışın bir sayfası: 20 haber → YouTube şeridi → (tek sayfalarda) video reklam → Reels şeridi.
- * 12. karttan sonra akış içi reklam; 8. sıraya sponsorlu kart (kampanya varsa).
+ * 12. karttan sonra akış içi reklam; 8. sıraya sponsorlu kart (kampanya varsa). Telefonda 6. karttan sonra kutu reklam (28 Ekim 2026).
  */
 import CardStd from './CardStd.astro'
 import CardSponsored from './CardSponsored.astro'
@@ -21,7 +21,9 @@ const rot = <T,>(x: T[]) => (x.length ? [...x.slice(page % x.length), ...x.slice
 <div class="inf-chunk" data-page={page} style={first ? 'border-top:0;margin-top:0;padding-top:0' : undefined}>
   {!first && <div class="inf-h"><span class="label" style="color:var(--text-3)">Sayfa {page} · {items.length} haber</span></div>}
   <div class="grid4">
-    {a.slice(0, 7).map((n) => <CardStd item={n} />)}
+    {a.slice(0, 6).map((n) => <CardStd item={n} />)}
+    {a.length > 6 && pickAd(ads, 'mr', page) && <div class="ad-tel"><Ad slot="mr" ad={pickAd(ads, 'mr', page)} bare /></div>}
+    {a.slice(6, 7).map((n) => <CardStd item={n} />)}
     {spo && <CardSponsored ad={spo} />}
     {a.slice(7).map((n) => <CardStd item={n} />)}
   </div>

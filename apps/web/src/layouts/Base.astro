@@ -6,14 +6,21 @@ import '../styles/cam.css'
 import Header from '../components/Header.astro'
 import BreakingStrip from '../components/BreakingStrip.astro'
 import Footer from '../components/Footer.astro'
-import { allPages, getBreaking, getSite } from '../lib/api'
+import { allPages, getAds, getBreaking, getSite, pickAd } from '../lib/api'
+import Ad from '../components/Ad.astro'
+import { showAdSlots } from '../lib/env'
 import { SITE, siteLd, type Meta } from '../lib/seo'
 import { ico } from '../lib/ui'
 import { env } from '../lib/env'
 interface Props { meta: Meta; breaking?: boolean; bodyClass?: string }
 const { meta, breaking = true, bodyClass } = Astro.props
 const staging = env('STAGING') === '1' // hazırlık sitesi arama motorlarına kapalı
-const [site, hot, sayfalar] = await Promise.all([getSite(), breaking ? getBreaking() : Promise.resolve([]), allPages()])
+const [site, hot, sayfalar, ads] = await Promise.all([getSite(), breaking ? getBreaking() : Promise.resolve([]), allPages(), getAds()])
+// Yan dikey reklam (28 Ekim 2026, kullanıcı onayı): yalnız 1600 px ve üstü ekranda, içeriğin iki yanında, kayarken yerinde kalır.
+// Tek kampanya varsa yalnız sağda; iki kampanya varsa biri solda biri sağda. Kampanya yoksa hiç basılmaz (boşluk kalmaz).
+const yanlar = ads.filter((a) => a.slot === 'sky')
+const yanSag = pickAd(ads, 'sky', 0), yanSol = yanlar.length > 1 ? pickAd(ads, 'sky', 1) : null
+const yanOrnek = showAdSlots()
 const url = SITE + (meta.path === '/' ? '' : meta.path)
 const canonical = meta.canonical || url
 // Sayfa başlığında site adı bir kez: "Rehber | UPDATED" gibi gelen başlığın sonundaki ad atılır (28 Ekim 2026: "… | UPDATED · UPDATED" tekrarı)
@@ -60,7 +67,11 @@ const ld = { '@context': 'https://schema.org', '@graph': [...siteLd(sayfalar), .
   <Header site={site} current={Astro.url.pathname} />
   <BreakingStrip items={hot} />
   <slot name="top" />
-  <main id="main"><slot /></main>
+  <div class="govde">
+    <main id="main"><slot /></main>
+    {(yanSol || yanOrnek) && <div class="yan-rek yan-sol"><Ad slot="sky" ad={yanSol} bare /></div>}
+    {(yanSag || yanOrnek) && <div class="yan-rek yan-sag"><Ad slot="sky" ad={yanSag} bare /></div>}
+  </div>
   <Footer site={site} sayfalar={sayfalar} />
   <div class="search" id="search" role="dialog" aria-modal="true" aria-label="Arama" hidden>
     <div class="wrap">

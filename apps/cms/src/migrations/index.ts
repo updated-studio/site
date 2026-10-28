@@ -9,6 +9,7 @@ import * as migration_20261026_122038_haftalik_gorev from './20261026_122038_haf
 import * as migration_20261026_154634_manset_afis from './20261026_154634_manset_afis';
 import * as migration_20261027_174952_kiyas_upscore from './20261027_174952_kiyas_upscore';
 import * as migration_20261028_122252_yazar_avatar from './20261028_122252_yazar_avatar';
+import * as migration_20261028_142805_reklam_yan from './20261028_142805_reklam_yan';
 import * as migration_20261028_150000_yazar_baglari from './20261028_150000_yazar_baglari';
 
 export const migrations = [
@@ -65,7 +66,12 @@ export const migrations = [
   {
     up: migration_20261028_122252_yazar_avatar.up,
     down: migration_20261028_122252_yazar_avatar.down,
-    name: '20261028_122252_yazar_avatar'
+    name: '20261028_122252_yazar_avatar',
+  },
+  {
+    up: migration_20261028_142805_reklam_yan.up,
+    down: migration_20261028_142805_reklam_yan.down,
+    name: '20261028_142805_reklam_yan',
   },
   {
     up: migration_20261028_150000_yazar_baglari.up,

@@ -47,6 +47,7 @@ export const Ads: CollectionConfig = {
     { name: 'advertiser', type: 'text', label: 'Reklam veren', required: true },
     { name: 'slot', type: 'select', label: 'Alan', required: true, options: [
       { label: 'Bant 970×250 (mobil 320×100)', value: 'lb' }, { label: 'Kutu 300×250', value: 'mr' }, { label: 'Dikey afiş 300×600 (ana sayfa ilk bölüm; telefonda mobil görsel 300×250)', value: 'hp' }, { label: 'Akış içi (20 haberde 1)', value: 'in' },
+      { label: 'Yan dikey 160×600 (yalnız 1600 px ve üstü ekranda, sayfanın iki yanında; iki kampanya varsa biri solda biri sağda)', value: 'sky' },
       { label: 'Video (sessiz, 5 sn sonra geç)', value: 'video' }, { label: 'Sponsorlu kart', value: 'sponsored' } ] },
     { name: 'image', type: 'upload', relationTo: 'media', label: 'Görsel' },
     { name: 'mobileImage', type: 'upload', relationTo: 'media', label: 'Mobil görsel (bant 320×100, dikey afiş 300×250)' },

@@ -9,7 +9,7 @@
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
   --f-quote:"Newsreader",Georgia,serif;
   --ease:cubic-bezier(.2,0,0,1); --t1:120ms; --t2:200ms; --t3:320ms;
-  --edge:80px; --gut:24px; --max:1280px;
+  --edge:80px; --gut:24px; --max:1200px; /* 28 Ekim 2026: 1280 → 1200, geniş ekranda iki yana 160 px reklam yeri */
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1E2023;--surface:#25282C;--surface-2:#2E3236;--text:#F2F2F2;--text-2:#B4B7BB;--text-3:#8E9297;--line:#3A3E44;--rule:#F2F2F2;--link:#F2F2F2;--cat:#B4B7BB;--input:#8E9297;--img:#2E3236;--logo:#FFFFFF;--orange-tx:#FF6B1A;color-scheme:dark}}
@@ -261,8 +261,21 @@ h3{font-weight:700}
 .ad .slot{display:grid;place-items:center;text-align:center;background:var(--surface-2);border:1px dashed var(--input);color:var(--text-3);font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;padding:12px}
 .ad-lb .slot{width:970px;max-width:100%;aspect-ratio:970/250}
 .ad-mr .slot{width:300px;max-width:100%;aspect-ratio:300/250}
+/* Yan dikey (28 Ekim 2026): içerik kutusunun 24 px dışında; yalnız ≥1600 px. Üst menünün altında yapışık, alt bilgiye girmez (gövde boyunca). */
+.govde{position:relative}
+.yan-rek{display:none}
+@media (min-width:1600px){
+  .yan-rek{display:block;position:absolute;top:24px;bottom:48px;width:160px}
+  .yan-sol{right:calc(50% + var(--max) / 2 + 24px)}
+  .yan-sag{left:calc(50% + var(--max) / 2 + 24px)}
+  .yan-rek .ad{position:sticky;top:120px}
+}
+.ad-sky .slot{width:160px;aspect-ratio:160/600}
+/* Telefonda akış içi kutu (6. karttan sonra); masaüstünde yok */
+.ad-tel{display:none}
+@media (max-width:767px){.ad-tel{display:block}}
 .ad-in .slot{width:100%;aspect-ratio:auto;min-height:120px}
-.ad-wrap{padding-block:24px;display:flex;justify-content:center}
+.ad-wrap{padding-block:24px;padding-inline:max(var(--edge),env(safe-area-inset-left,0px));display:flex;justify-content:center}
 @media (max-width:767px){.ad-lb .slot{aspect-ratio:320/100}}
 .ad-vid .slot{width:100%;max-width:640px;aspect-ratio:16/9;position:relative;border-style:solid}
 .ad-vid .ctl{position:absolute;right:0;bottom:0;display:flex}
