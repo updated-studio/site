@@ -29,8 +29,15 @@ export const yazarFoto: Endpoint = {
     const headers = headersWithCors({ headers: new Headers({ 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=60' }), req })
     if (!cache || Date.now() - cache.at > 60_000) {
       const out: Record<string, string> = {}
+      // Stüdyo profilini okuma izni (Stüdyo göçü 0047) yoksa Uper ve Gravatar ile devam edilir
+      const yedek = sql`
+          select a.slug, u.email, null as studyo, nullif(y.foto, '') as uper
+            from payload.authors a
+            join payload.users u on u.author_id = a.id
+            left join payload.uyeler y on lower(y.email) = lower(u.email)`
       try {
-        const r: any = await (req.payload.db as any).drizzle.execute(sql`
+        const db = (req.payload.db as any).drizzle
+        const r: any = await db.execute(sql`
           select a.slug, u.email, nullif(p.avatar_url, '') as studyo, nullif(y.foto, '') as uper
             from payload.authors a
             join payload.users u on u.author_id = a.id
@@ -41,7 +48,7 @@ export const yazarFoto: Endpoint = {
             from payload.authors a
             join public.profiles p on lower(btrim(p.name)) = lower(btrim(a.name))
             left join payload.uyeler y on lower(y.email) = lower(p.email)
-          where not exists (select 1 from payload.users u where u.author_id = a.id)`)
+          where not exists (select 1 from payload.users u where u.author_id = a.id)`).catch(() => db.execute(yedek))
         for (const row of (r.rows ?? r) as { slug: string; email: string; studyo: string | null; uper: string | null }[]) {
           if (!row.slug || out[row.slug]) continue
           const foto = row.studyo || row.uper || (await gravatar(row.email || ''))
