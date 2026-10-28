@@ -11,6 +11,7 @@ import * as migration_20261027_174952_kiyas_upscore from './20261027_174952_kiya
 import * as migration_20261028_122252_yazar_avatar from './20261028_122252_yazar_avatar';
 import * as migration_20261028_142805_reklam_yan from './20261028_142805_reklam_yan';
 import * as migration_20261028_150000_yazar_baglari from './20261028_150000_yazar_baglari';
+import * as migration_20261028_160000_kesik_basliklar from './20261028_160000_kesik_basliklar';
 
 export const migrations = [
   {
@@ -77,5 +78,10 @@ export const migrations = [
     up: migration_20261028_150000_yazar_baglari.up,
     down: migration_20261028_150000_yazar_baglari.down,
     name: '20261028_150000_yazar_baglari'
+  },
+  {
+    up: migration_20261028_160000_kesik_basliklar.up,
+    down: migration_20261028_160000_kesik_basliklar.down,
+    name: '20261028_160000_kesik_basliklar'
   },
 ];
