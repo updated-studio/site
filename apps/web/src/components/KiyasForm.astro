@@ -1,0 +1,43 @@
+---
+/**
+ * "Kıyasa başla" formu (27 Ekim 2026; 28 Ekim'de ana sayfayla paylaşılmak üzere ayrı bileşen): tür seç, iki ürün seç → /karsilastirma/kiyas?u=a,b.
+ * Künye kataloğundan türüne göre en az iki künyesi olan türler; her türde en dolu künye önce.
+ */
+import type { K } from '../lib/kiyas'
+import { kiyasGruplari } from '../lib/turler'
+interface Props { katalog: K[]; class?: string }
+const { katalog, class: cls } = Astro.props
+const gruplar = kiyasGruplari(katalog)
+const veri = gruplar.map((g) => ({ t: g.t, l: g.l.map((k) => [k.s, `${k.b} ${k.n}`]) }))
+---
+{gruplar.length > 0 && <form class:list={['kb kk', cls]} action="/karsilastirma/kiyas" method="get" data-kb={JSON.stringify(veri)}>
+  <span class="eyebrow">Kıyasa başla</span>
+  <div class="kb-sat">
+    <label>Tür<select class="sel" data-kb-tur>{gruplar.map((g) => <option value={g.t}>{g.ad}</option>)}</select></label>
+    <label>1. ürün<select class="sel" data-kb-a>{gruplar[0].l.map((k, i) => <option value={k.s} selected={i === 0}>{`${k.b} ${k.n}`}</option>)}</select></label>
+    <span class="vsx" aria-hidden="true">VS</span>
+    <label>2. ürün<select class="sel" data-kb-b>{gruplar[0].l.map((k, i) => <option value={k.s} selected={i === 1}>{`${k.b} ${k.n}`}</option>)}</select></label>
+    <input type="hidden" name="u" value={`${gruplar[0].l[0].s},${gruplar[0].l[1].s}`} data-kb-u />
+    <button class="btn btn-p" type="submit">Kıyasla</button>
+  </div>
+</form>}
+<style is:global>
+  .kb{gap:12px}.kb-sat{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+  .kb-sat label{display:flex;flex-direction:column;gap:4px;font-family:var(--f-mono);font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3);flex:1 1 200px;min-width:0}
+  .kb-sat .sel{width:100%}.kb-sat .vsx{flex:none}
+</style>
+<script>
+  // Tür değişince iki seçim o türün künyeleriyle dolar; seçim gizli "u" alanına yazılır (/karsilastirma/kiyas?u=a,b)
+  for (const f of Array.from(document.querySelectorAll<HTMLFormElement>('form[data-kb]'))) {
+    const V = JSON.parse(f.dataset.kb || '[]') as { t: string; l: [string, string][] }[]
+    const tur = f.querySelector<HTMLSelectElement>('[data-kb-tur]')!, a = f.querySelector<HTMLSelectElement>('[data-kb-a]')!, b = f.querySelector<HTMLSelectElement>('[data-kb-b]')!, u = f.querySelector<HTMLInputElement>('[data-kb-u]')!
+    const yaz = () => { u.value = `${a.value},${b.value}` }
+    tur.addEventListener('change', () => {
+      const l = V.find((x) => x.t === tur.value)?.l ?? []
+      for (const [s, i] of [[a, 0], [b, 1]] as const) { s.replaceChildren(...l.map(([v, ad], j) => new Option(ad, v, j === i, j === i))) }
+      yaz()
+    })
+    a.addEventListener('change', yaz); b.addEventListener('change', yaz)
+    f.addEventListener('submit', (e) => { if (a.value === b.value) { e.preventDefault(); b.focus() } })
+  }
+</script>

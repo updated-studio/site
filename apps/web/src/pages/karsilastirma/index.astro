@@ -1,60 +1,29 @@
 ---
-/** Kıyaslamalar (27 Ekim 2026): kıyas aracına giriş (tür + iki ürün), türlere göre hazır başlangıçlar, editör kıyas yazıları. */
+/** Kıyaslamalar (27 Ekim 2026): kıyas aracına giriş (tür + iki ürün), türlere göre hazır başlangıçlar, editör kıyas yazıları. Form ana sayfayla ortak (KiyasForm). */
 import Base from '../../layouts/Base.astro'
 import '../../styles/kiyas.css'
 import CardStd from '../../components/CardStd.astro'
+import KiyasForm from '../../components/KiyasForm.astro'
 import * as api from '../../lib/api'
 import { listMeta } from '../../lib/seo'
 import { glyph } from '../../lib/ui'
-import type { K } from '../../lib/kiyas'
+import { kiyasGruplari } from '../../lib/turler'
 const [items, katalog] = await Promise.all([api.getComparisons(), api.kunyeKatalog()])
-const TUR: Record<string, string> = { camera: 'Fotoğraf makinesi', lens: 'Lens', drone: 'Dron', cam360: '360/aksiyon kamera', phone: 'Telefon', gimbal: 'Gimbal', light: 'Işık', mic: 'Mikrofon', headphones: 'Kulaklık', laptop: 'Bilgisayar', tablet: 'Tablet', watch: 'Akıllı saat', pad: 'Kumanda/konsol', audio: 'Ses', accessory: 'Aksesuar', other: 'Diğer' }
-const dolu = (k: K) => k.sp.filter((o) => o[1]).length + (k.g ? 5 : 0)
-const gruplar = Object.keys(TUR).map((t) => ({ t, l: katalog.filter((k) => k.t === t).sort((a, b) => dolu(b) - dolu(a)) })).filter((g) => g.l.length >= 2)
-const veri = gruplar.map((g) => ({ t: g.t, ad: TUR[g.t], l: g.l.map((k) => [k.s, `${k.b} ${k.n}`]) }))
+const gruplar = kiyasGruplari(katalog)
 ---
 <Base meta={listMeta('Kıyaslamalar', 'Ürünleri yan yana koy: teknik puan, UPscore, önde olduğu özellikler ve kaynaklı tam özellik tablosu.', '/karsilastirma', items.map((c) => ({ path: c.path, title: c.title })))}>
   <div class="wrap">
     <div class="art-head" style="max-width:none;padding-bottom:24px"><div class="chips"><span class="lbl l-kiy">Kıyasla</span></div><h1 class="h1">Kıyaslamalar</h1><p class="lead" style="margin:0;max-width:62ch">İki ila dört ürünü yan yana koy. Teknik puanı künyedeki değerler belirler, UPscore'u cihazı kullanan editör verir.</p></div>
 
-    {gruplar.length > 0 && <form class="kb kk" action="/karsilastirma/kiyas" method="get" data-kb={JSON.stringify(veri)}>
-      <span class="eyebrow">Kıyasa başla</span>
-      <div class="kb-sat">
-        <label>Tür<select class="sel" data-kb-tur>{gruplar.map((g) => <option value={g.t}>{TUR[g.t]}</option>)}</select></label>
-        <label>1. ürün<select class="sel" data-kb-a>{gruplar[0].l.map((k, i) => <option value={k.s} selected={i === 0}>{k.b} {k.n}</option>)}</select></label>
-        <span class="vsx" aria-hidden="true">VS</span>
-        <label>2. ürün<select class="sel" data-kb-b>{gruplar[0].l.map((k, i) => <option value={k.s} selected={i === 1}>{k.b} {k.n}</option>)}</select></label>
-        <input type="hidden" name="u" value={`${gruplar[0].l[0].s},${gruplar[0].l[1].s}`} data-kb-u />
-        <button class="btn btn-p" type="submit">Kıyasla</button>
-      </div>
-    </form>}
+    <KiyasForm katalog={katalog} />
 
     {gruplar.length > 0 && <section style="margin-top:48px"><div class="sh"><h2>Hazır başlangıçlar</h2><span class="meta">Her türün en dolu iki künyesi</span></div>
-      <div class="kb-hazir">{gruplar.map((g) => <a class="kk" href={`/karsilastirma/kiyas?u=${g.l[0].s},${g.l[1].s}`}><Fragment set:html={glyph(g.t, 40)} /><span class="eyebrow">{TUR[g.t]}</span><b><span translate="no">{g.l[0].n}</span> mi, <span translate="no">{g.l[1].n}</span> mi?</b></a>)}</div></section>}
+      <div class="kb-hazir">{gruplar.map((g) => <a class="kk" href={`/karsilastirma/kiyas?u=${g.l[0].s},${g.l[1].s}`}><Fragment set:html={glyph(g.t, 40)} /><span class="eyebrow">{g.ad}</span><b><span translate="no">{g.l[0].n}</span> mi, <span translate="no">{g.l[1].n}</span> mi?</b></a>)}</div></section>}
 
     {items.length > 0 && <section style="margin-top:48px"><div class="sh"><h2>Editör kıyasları</h2></div><div class="grid3">{items.map((c, i) => <CardStd item={c} eager={i < 3} />)}</div></section>}
   </div>
 </Base>
 <style>
-  .kb{gap:12px}.kb-sat{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
-  .kb-sat label{display:flex;flex-direction:column;gap:4px;font-family:var(--f-mono);font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3);flex:1 1 200px;min-width:0}
-  .kb-sat .sel{width:100%}.kb-sat .vsx{flex:none}
   .kb-hazir{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
   .kb-hazir a{text-decoration:none;color:var(--text);gap:8px}.kb-hazir a:hover{border-color:var(--text)}.kb-hazir svg{color:var(--text-3)}
 </style>
-<script>
-  // Tür değişince iki seçim o türün künyeleriyle dolar; seçim gizli "u" alanına yazılır (/karsilastirma/kiyas?u=a,b)
-  const f = document.querySelector<HTMLFormElement>('[data-kb]')
-  if (f) {
-    const V = JSON.parse(f.dataset.kb || '[]') as { t: string; l: [string, string][] }[]
-    const tur = f.querySelector<HTMLSelectElement>('[data-kb-tur]')!, a = f.querySelector<HTMLSelectElement>('[data-kb-a]')!, b = f.querySelector<HTMLSelectElement>('[data-kb-b]')!, u = f.querySelector<HTMLInputElement>('[data-kb-u]')!
-    const yaz = () => { u.value = `${a.value},${b.value}` }
-    tur.addEventListener('change', () => {
-      const l = V.find((x) => x.t === tur.value)?.l ?? []
-      for (const [s, i] of [[a, 0], [b, 1]] as const) { s.replaceChildren(...l.map(([v, ad], j) => new Option(ad, v, j === i, j === i))) }
-      yaz()
-    })
-    a.addEventListener('change', yaz); b.addEventListener('change', yaz)
-    f.addEventListener('submit', (e) => { if (a.value === b.value) { e.preventDefault(); b.focus() } })
-  }
-</script>

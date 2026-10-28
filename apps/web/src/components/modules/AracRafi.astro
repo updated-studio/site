@@ -1,0 +1,18 @@
+---
+/** Ana sayfa Araçlar rafı (28 Ekim 2026): beş hesaplayıcı tek sırada; liste lib/araclar.ts'ten (Araçlar sayfasıyla aynı). */
+import { ARACLAR } from '../../lib/araclar'
+import { ico } from '../../lib/ui'
+interface Props { no?: string }
+const { no = '' } = Astro.props
+---
+<div class="sh"><h2>{no && <span class="no">{no}</span>}Araçlar</h2><a class="btn-t btn" href="/araclar">Tümü</a></div>
+<div class="ar-raf">
+  {ARACLAR.map((a) => <a class="arac-kart" href={a.yol}><h3>{a.kisa}</h3><p>{a.aciklama}</p><span class="ar-ac">Aç <Fragment set:html={ico('right', 14)} /></span></a>)}
+</div>
+<style is:global>
+  .ar-raf{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--gut)}
+  .ar-raf .arac-kart{padding:20px;gap:6px}.ar-raf h3{font-size:20px}.ar-raf p{font-size:14px;line-height:1.45}
+  .ar-ac{display:inline-flex;align-items:center;gap:4px;margin-top:auto;padding-top:6px;font-size:14px;font-weight:600;color:var(--link)}
+  @media (max-width:1100px){.ar-raf{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  @media (max-width:640px){.ar-raf{grid-template-columns:1fr 1fr;gap:12px}.ar-raf .arac-kart{padding:16px}.ar-raf p{display:none}}
+</style>

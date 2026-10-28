@@ -16,7 +16,8 @@ const staging = env('STAGING') === '1' // hazırlık sitesi arama motorlarına k
 const [site, hot, sayfalar] = await Promise.all([getSite(), breaking ? getBreaking() : Promise.resolve([]), allPages()])
 const url = SITE + (meta.path === '/' ? '' : meta.path)
 const canonical = meta.canonical || url
-const title = meta.path === '/' ? meta.title : `${meta.title} · UPDATED`
+// Sayfa başlığında site adı bir kez: "Rehber | UPDATED" gibi gelen başlığın sonundaki ad atılır (28 Ekim 2026: "… | UPDATED · UPDATED" tekrarı)
+const title = meta.path === '/' ? meta.title : `${meta.title.replace(/\s*[|·–-]\s*UPDATED\s*$/i, '')} · UPDATED`
 const ld = { '@context': 'https://schema.org', '@graph': [...siteLd(sayfalar), ...(meta.jsonld || [])] }
 ---
 <!doctype html>

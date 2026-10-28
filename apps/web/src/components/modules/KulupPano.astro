@@ -1,0 +1,26 @@
+---
+/** Ana sayfa Kulüp panosu (28 Ekim 2026): dersler ve simülatörler, haftalık görev, yarışmalar takvimi; koyu cam pano. */
+import { ico } from '../../lib/ui'
+interface Props { kulupUrl: string; no?: string }
+const { kulupUrl, no = '' } = Astro.props
+---
+<div class="sh"><h2>{no && <span class="no">{no}</span>}Kulüp</h2><span class="meta">Öğren, çek, katıl</span></div>
+<div class="kp">
+  <div class="kp-ana">
+    <span class="label" style="color:#B4B7BB">UPDATED Kulüp</span>
+    <h3>Oynayarak öğren, çekerek ilerle</h3>
+    <p>Fotoğraf, video ve dron için kısa dersler, gerçek ayarlarla çalışan simülatörler ve alıştırmalar. İlerlemen Uper hesabında saklanır.</p>
+    <a class="btn btn-p" href={kulupUrl}>Kulübe gir <Fragment set:html={ico('right', 16)} /></a>
+  </div>
+  <a class="kp-k" href={`${kulupUrl}#pratik`}><b>Simülatörler</b><span>Pozlama, 180° kuralı, dron uçuş planı</span></a>
+  <a class="kp-k" href="/gorev"><b>Haftalık görev</b><span>Her pazartesi yeni tema, kör oylama</span></a>
+  <a class="kp-k" href="/yarismalar"><b>Yarışmalar takvimi</b><span>Fotoğraf ve kısa film yarışmaları, son tarihe göre</span></a>
+</div>
+<style is:global>
+  .kp{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(3,minmax(0,1fr));gap:12px}
+  .kp-ana{grid-row:1 / span 3;display:flex;flex-direction:column;gap:10px;padding:28px;border-radius:var(--r-buyuk,0);background:var(--cam-koyu,#000);color:#fff;box-shadow:var(--cam-golge,none)}
+  .kp-ana h3{font-size:34px;line-height:1.1;color:#fff}.kp-ana p{margin:0;color:#E2E2E2;font-size:16px;max-width:44ch}.kp-ana .btn{align-self:flex-start;margin-top:auto}
+  .kp-k{grid-column:2 / -1;display:flex;flex-direction:column;gap:2px;padding:16px 20px;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-kart,0);box-shadow:var(--cam-golge,none);text-decoration:none;color:var(--text)}
+  .kp-k b{font-size:17px}.kp-k span{font-size:14px;color:var(--text-2)}.kp-k:hover{border-color:var(--text)}
+  @media (max-width:800px){.kp{grid-template-columns:minmax(0,1fr)}.kp-ana{grid-row:auto;padding:22px}.kp-ana h3{font-size:28px}.kp-k{grid-column:auto}}
+</style>

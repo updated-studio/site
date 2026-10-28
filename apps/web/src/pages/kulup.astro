@@ -1,41 +1,30 @@
 ---
 /**
- * UPDATED Kulüp — fotoğraf / video / dron dersleri, simülatörler, alıştırmalar ve haftalık görevler.
- * Aynı tasarım dili, ayrı alan. Şimdilik istemci uygulaması (public/kulup/*.js); ilerleme tarayıcıda tutulur.
- * Sonraki adım: dersler Payload'daki KulupTracks/KulupQuizzes'tan, ilerleme Supabase'den (docs/kulup.md).
+ * UPDATED Kulüp — fotoğraf / video / dron dersleri, simülatörler, alıştırmalar; haftalık görev ve yarışmalara köprü.
+ * 28 Ekim 2026 (kullanıcı: "bambaşka bir sayfaymış gibi açılmasına gerek yok, mobilde geri gitme yok"): sitenin kendi üst barı ve alt bilgisiyle
+ * (Base), Kulüp bölümleri üst barın altında sekme şeridi. İçerik istemci uygulaması (public/kulup/*.js); ilerleme tarayıcıda, Uper'de hesapta.
  */
-import '../styles/brand.css'
+import Base from '../layouts/Base.astro'
 import '../styles/kulup.css'
 import { SITE } from '../lib/seo'
-import { env } from '../lib/env'
-const meta = { title: 'UPDATED Kulüp · Fotoğraf, video ve dron dersleri', description: 'Fotoğraf, video ve dron için dersler, simülatörler, alıştırmalar ve haftalık görevler.' }
-const ld = { '@context': 'https://schema.org', '@type': 'Course', name: 'UPDATED Kulüp', description: meta.description, provider: { '@type': 'Organization', name: 'UPDATED', sameAs: SITE }, inLanguage: 'tr-TR' }
+import { getGorevler } from '../lib/api'
+import { date } from '../lib/format'
+const meta = { title: 'Kulüp · Fotoğraf, video ve dron dersleri', description: 'Fotoğraf, video ve dron için dersler, simülatörler, alıştırmalar ve haftalık görevler.', path: '/kulup', jsonld: [{ '@type': 'Course', name: 'UPDATED Kulüp', description: 'Fotoğraf, video ve dron için dersler, simülatörler, alıştırmalar ve haftalık görevler.', provider: { '@type': 'Organization', name: 'UPDATED', sameAs: SITE }, inLanguage: 'tr-TR' }] }
+// Bu haftanın gerçek görevi (panel): Kulüp "Görevler" sekmesi ve ana sayfası gösterir, katılım /gorev'de
+const simdi = Date.now(), liste = await getGorevler()
+const aktif = liste.find((g) => +new Date(g.baslangic) <= simdi && simdi < +new Date(g.bitis))
+const oyda = aktif ? null : liste.find((g) => +new Date(g.bitis) <= simdi && simdi < +new Date(g.oylamaBitis))
+const g = aktif || oyda
+const gorev = g ? { baslik: g.baslik, aciklama: g.aciklama || '', oylama: !aktif, son: date(aktif ? g.bitis : g.oylamaBitis) } : null
 ---
-<!doctype html>
-<html lang="tr" data-cms={env('CMS_URL').replace(/\/$/, '') || undefined}>
-<head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{meta.title}</title><meta name="description" content={meta.description} />
-  <link rel="canonical" href={`${SITE}/kulup`} />
-  <meta property="og:title" content={meta.title} /><meta property="og:description" content={meta.description} /><meta property="og:url" content={`${SITE}/kulup`} />
-  <link rel="icon" href="/marka/updated-up-black.svg" type="image/svg+xml" />
-  <link rel="preload" href="/yazi-tipleri/ibm-plex-sans-400-latin.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="/yazi-tipleri/yazi-tipleri.css?v=20261023" />
-  <script is:inline>try{var t=localStorage.getItem('up-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
-  <script type="application/ld+json" set:html={JSON.stringify(ld)} />
-</head>
-<body>
-  <a class="sr" href="#kmain">İçeriğe geç</a>
-  <header class="hdr kh" id="hdr"></header>
-  <nav class="ktabs wrap" id="ktabs" aria-label="Kulüp bölümleri"></nav>
-  <main id="kmain"><noscript><div class="wrap" style="padding:48px 0"><h1>UPDATED Kulüp</h1><p>Dersler ve simülatörler için JavaScript gerekir.</p></div></noscript></main>
-  <footer class="ftr"><div class="wrap" style="grid-template-columns:minmax(0,1fr) auto"><div><span class="label" style="color:#B4B7BB">UPDATED Kulüp</span><p style="color:#B4B7BB;font-size:15px;margin:8px 0 0;max-width:52ch">Fotoğraf, video ve dron için dersler, simülatörler ve haftalık görevler. Sitenin parçası, ayrı bir alan.</p></div><a class="btn btn-p" href="/" style="align-self:center">updated.com.tr</a><div class="bt"><span>© {new Date().getFullYear()} UPDATED</span><span>İlerleme bu tarayıcıda saklanır · <a href="/hesap#kayit" style="color:inherit">Uper ol</a>, her cihazda kalsın</span></div></div></footer>
+<Base meta={meta} breaking={false} bodyClass="kulup-sayfa">
+  <nav class="ktabs" id="ktabs" aria-label="Kulüp bölümleri"><div class="wrap"></div></nav>
+  <div id="kmain"><noscript><div class="wrap" style="padding:48px 0"><h1>UPDATED Kulüp</h1><p>Dersler ve simülatörler için JavaScript gerekir.</p></div></noscript></div>
   <script is:inline src="/kulup/media.js"></script>
   <script is:inline src="/kulup/logo.js"></script>
   <script is:inline src="/kulup/core.js"></script>
-  <script is:inline>UP.SITE_URL = '/';</script>
+  <script is:inline set:html={`UP.SITE_URL='/';UP.GOREV=${JSON.stringify(gorev).replace(/</g, '\\u003c')};`} />
   <script is:inline src="/kulup/kulup.js"></script>
   <script is:inline>UP.kulup();</script>
   <script>import '../scripts/kulup-uye.ts'</script>
-</body>
-</html>
+</Base>

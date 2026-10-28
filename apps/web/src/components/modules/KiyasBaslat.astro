@@ -1,0 +1,27 @@
+---
+/** Ana sayfa "Kıyasla" bölümü (28 Ekim 2026): tür + iki ürünle kıyasa başla; yanında türlerin hazır başlangıçları. Kıyaslamalar sayfasıyla aynı form. */
+import KiyasForm from '../KiyasForm.astro'
+import type { K } from '../../lib/kiyas'
+import { glyph } from '../../lib/ui'
+import { kiyasGruplari } from '../../lib/turler'
+interface Props { katalog: K[]; no?: string }
+const { katalog, no = '' } = Astro.props
+const gruplar = kiyasGruplari(katalog)
+---
+{gruplar.length > 0 && <>
+  <div class="sh"><h2>{no && <span class="no">{no}</span>}Kıyasla</h2><a class="btn-t btn" href="/karsilastirma">Tümü</a></div>
+  <div class="ky">
+    <KiyasForm katalog={katalog} />
+    <div class="ky-hazir">
+      {gruplar.slice(0, 4).map((g) => <a class="kk ky-k" href={`/karsilastirma/kiyas?u=${g.l[0].s},${g.l[1].s}`}><Fragment set:html={glyph(g.t, 36)} /><span class="eyebrow">{g.ad}</span><b><span translate="no">{g.l[0].n}</span> mi, <span translate="no">{g.l[1].n}</span> mi?</b></a>)}
+    </div>
+  </div>
+</>}
+<style is:global>
+  .ky{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:var(--gut);align-items:start}
+  .ky .kb{align-self:stretch;justify-content:center}
+  .ky-hazir{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .ky-k{text-decoration:none;color:var(--text);gap:6px;padding:14px}.ky-k:hover{border-color:var(--text)}.ky-k svg{color:var(--text-3)}.ky-k b{font-size:16px;line-height:1.3}
+  @media (max-width:900px){.ky{grid-template-columns:minmax(0,1fr)}}
+  @media (max-width:420px){.ky-hazir{grid-template-columns:1fr}}
+</style>

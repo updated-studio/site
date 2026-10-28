@@ -4,14 +4,16 @@ import Img from '../Img.astro'
 import type { ProductRef } from '../../lib/types'
 import { conf, glyph, s20 } from '../../lib/ui'
 import { statusText } from '../../lib/api'
+import { turAdi } from '../../lib/turler'
 interface Props { products: ProductRef[] }
 const { products } = Astro.props
+// Görseli olmayan künyede (görseller Cloudflare'den gelene kadar çoğu) kart boş durmasın: büyük tür simgesi ve tür adı (28 Ekim 2026)
 ---
 {products.length > 0 && (
   <Strip title="Künyeler" sub="Ürün veritabanı · her ürünün tüm haberleri" moreHref="/urun" moreLabel="Tümü">
     {products.map((q) => (
       <a class="kcard" style="width:260px" href={`/urun/${q.slug}`}>
-        {q.image ? <span class="c-img" style="margin:-16px -16px 8px"><Img img={q.image} alt="" sizes="260px" /></span> : <Fragment set:html={glyph(q.type, 40)} />}
+        {q.image ? <span class="c-img" style="margin:-16px -16px 8px"><Img img={q.image} alt="" sizes="260px" /></span> : <span class="kc-sim"><Fragment set:html={glyph(q.type, 64)} /><span class="eyebrow">{turAdi(q.type)}</span></span>}
         <span class="eyebrow">{q.brand}</span><b>{q.name}</b>
         <span class="pc-st"><Fragment set:html={conf(q.certainty)} /><span>{statusText(q.status)}</span></span>
         {q.score && <span class="kc-sc">{s20(q.score)}</span>}
@@ -19,3 +21,10 @@ const { products } = Astro.props
     ))}
   </Strip>
 )}
+<style is:global>
+  .kc-sim{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;aspect-ratio:16/9;margin:-16px -16px 8px;color:var(--text-3);
+    background:radial-gradient(120% 90% at 50% 18%,var(--surface) 0%,var(--surface-2) 58%,var(--img) 100%)}
+  .kc-sim .pk-svg{stroke-width:4}
+  .cam .kcard{border-radius:var(--r-kart);box-shadow:inset 0 1px 0 var(--cam-isik),var(--cam-golge);overflow:hidden}
+  .cam .kcard .kc-sc{border-radius:0 0 0 10px}
+</style>

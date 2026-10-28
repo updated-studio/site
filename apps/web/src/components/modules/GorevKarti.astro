@@ -1,0 +1,24 @@
+---
+/** Yan sütun: bu haftanın fotoğraf görevi (28 Ekim 2026). Tema derlemede panelden; katılım ve oylama /gorev sayfasında. */
+import type { Gorev } from '../../lib/api'
+import { date } from '../../lib/format'
+interface Props { gorevler: Gorev[] }
+const { gorevler } = Astro.props
+const simdi = Date.now()
+const aktif = gorevler.find((g) => +new Date(g.baslangic) <= simdi && simdi < +new Date(g.bitis))
+const oylama = aktif ? null : gorevler.find((g) => +new Date(g.bitis) <= simdi && simdi < +new Date(g.oylamaBitis))
+const g = aktif || oylama
+---
+{g && <a class="gk" href="/gorev">
+  <span class="label" style="color:var(--text-3)">{aktif ? 'Bu haftanın görevi' : 'Oylama sürüyor'}</span>
+  <b>{g.baslik}</b>
+  {g.aciklama && <span class="gk-a">{g.aciklama}</span>}
+  <span class="meta">{aktif ? `Son gün ${date(g.bitis)}` : `Oylama ${date(g.oylamaBitis)}'e kadar`}</span>
+  <span class="btn btn-p">{aktif ? 'Fotoğrafını yükle' : 'Oy ver'}</span>
+</a>}
+<style is:global>
+  .gk{display:flex;flex-direction:column;gap:8px;padding:16px;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-kart,0);box-shadow:var(--cam-golge,none);text-decoration:none;color:var(--text)}
+  .gk b{font-family:var(--f-baslik,var(--f-head));font-weight:700;font-size:26px;line-height:1.15}
+  .gk-a{font-size:15px;line-height:1.45;color:var(--text-2)}
+  .gk .btn{align-self:flex-start;margin-top:4px}
+</style>

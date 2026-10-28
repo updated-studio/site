@@ -107,8 +107,9 @@ const cyc = <T,>(arr: T[], p: number, n = PAGE) => Array.from({ length: n }, (_,
 
 /* ---------- site ---------- */
 export type SiteCfg = { tagline: string; nav: { label: string; href: string }[]; youtube: string; instagram: string; kulupUrl: string; newsletterNote: string; amazonTag?: string }
-/** Üst menü (Fatih, 26 Ekim 2026): ana bölümler, her biri ayrı sayfa; İncelemeler ve Kıyaslamalar ayrı (Fatih, aynı gün). Kulüp başlıkta ayrıca vurgulanır. Panelin menü listesi kullanılmaz. */
-export const ANA_MENU = [['Ana Sayfa', '/'], ['Haberler', '/haberler'], ['İncelemeler', '/inceleme'], ['Kıyaslamalar', '/karsilastirma'], ['Rehber', '/rehber'], ['Araçlar', '/araclar']].map(([label, href]) => ({ label, href }))
+/** Üst menü (Fatih, 26 Ekim 2026): ana bölümler, her biri ayrı sayfa; İncelemeler ve Kıyaslamalar ayrı (Fatih, aynı gün). Kulüp başlıkta ayrıca vurgulanır. Panelin menü listesi kullanılmaz.
+ *  "Ana Sayfa" maddesi yok (kullanıcı, 28 Ekim 2026: "updated.com.tr zaten ana sayfanın kendisi"); logo ana sayfaya götürür. */
+export const ANA_MENU = [['Haberler', '/haberler'], ['İncelemeler', '/inceleme'], ['Kıyaslamalar', '/karsilastirma'], ['Rehber', '/rehber'], ['Araçlar', '/araclar']].map(([label, href]) => ({ label, href }))
 const DEF_NAV = ANA_MENU
 const DEF_SITE: SiteCfg = { tagline: 'Teknoloji haberleri, incelemeler ve karşılaştırmalar. Önce bilgi, sonra yorum.', nav: DEF_NAV, youtube: 'https://www.youtube.com/@nerdesinfatih', instagram: 'https://www.instagram.com/updated.tr/', kulupUrl: '/kulup', newsletterNote: 'Haftalık bülten pazartesi 08.30.' }
 let siteCache: { at: number; v: SiteCfg } | null = null
@@ -206,15 +207,29 @@ export async function getYoutube(): Promise<Video[]> {
  * çeker; anahtar Stüdyo → Bağlantı anahtarları). Fonksiyon kapalıysa boş liste: ana sayfa YouTube kısa videolarına düşer (27 Ekim 2026).
  */
 const INSTAGRAM_REELS = 'https://panel.updated.com.tr/functions/v1/instagram-reels'
+let reelCache: Promise<Reel[]> | null = null
 export const getReels = (n = 10) => safe(async () => {
   const panel = (await get('reels', { sort: '-publishedAt', limit: n, depth: 1 })).docs.map(mReel)
   if (panel.length) return panel
-  try {
-    const r = await fetch(INSTAGRAM_REELS, { signal: AbortSignal.timeout(15000) })
-    if (!r.ok) return []
-    const j = await r.json() as { reels?: { aciklama: string; baglanti: string; kapak: string; zaman: string }[] }
-    return (j.reels ?? []).slice(0, n).map((x): Reel => ({ caption: x.aciklama.split('\n')[0].slice(0, 120), url: x.baglanti, cover: { url: x.kapak, alt: '', w: 720, h: 1280 } }))
-  } catch { return [] }
+  // Instagram listesi derlemede bir kez çekilir; 3 deneme, geçici hata olursa son başarılı liste (geçici klasör) kullanılır (28 Ekim 2026:
+  // liste hazırken bile ana sayfa YouTube kısa videolarına düşmüştü)
+  reelCache ??= (async () => {
+    const fs = await import('node:fs'), yedek = (await import('node:path')).join((await import('node:os')).tmpdir(), 'updated-reels.json')
+    let v: Reel[] = []
+    for (let i = 0; i < 3 && !v.length; i++) {
+      try {
+        const r = await fetch(INSTAGRAM_REELS, { signal: AbortSignal.timeout(30000) })
+        if (!r.ok) throw new Error(String(r.status))
+        const j = await r.json() as { reels?: { aciklama: string; baglanti: string; kapak: string; zaman: string }[] }
+        v = (j.reels ?? []).map((x): Reel => ({ caption: (x.aciklama || '').split('\n')[0].slice(0, 120), url: x.baglanti, cover: { url: x.kapak, alt: '', w: 1080, h: 1920 } }))
+        if (v.length) try { fs.writeFileSync(yedek, JSON.stringify(v)) } catch {}
+      } catch (e) { console.log(`reels: deneme ${i + 1} başarısız (${(e as Error).message})`); await new Promise((ok) => setTimeout(ok, 1500)) }
+    }
+    if (!v.length) try { v = JSON.parse(fs.readFileSync(yedek, 'utf8')); console.log('reels: liste açılmadı, saklanan kullanıldı') } catch {}
+    console.log(`reels: ${v.length} reel`)
+    return v
+  })()
+  return (await reelCache).slice(0, n)
 }, () => S.REELS.slice(0, n))
 let adCache: { at: number; v: Ad[] } | null = null
 export async function getAds(): Promise<Ad[]> {
