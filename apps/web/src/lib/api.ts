@@ -58,15 +58,16 @@ export const localMedia = (u?: string) => {
   // Yol parçaları kodlanır: "Instagram merkez.webp" → "Instagram%20merkez.webp" (27 Ekim 2026: boşluklu adlı görsel siteye hiç kopyalanmamıştı)
   return '/medya/' + u.slice(MEDIA.length + 1).split('/').map((p) => { try { return encodeURIComponent(decodeURIComponent(p)) } catch { return encodeURIComponent(p) } }).join('/')
 }
-export function mImg(m: any, size: 'card' | 'hero' | 'thumb' | 'reel' | 'og' = 'card'): Img | undefined {
+export function mImg(m: any, size: 'card' | 'hero' | 'thumb' | 'reel' | 'og' | 'avatar' = 'card'): Img | undefined {
   m = rel(m); if (!m?.url) return undefined
   const s = m.sizes || {}
   const pick = localMedia(s[size]?.url || m.url)!
   const srcset = ['thumb', 'card', 'hero'].map((k) => s[k]?.url && `${localMedia(s[k].url)} ${s[k].width}w`).filter(Boolean).join(', ')
-  return { url: pick, alt: m.alt || '', credit: m.credit, w: s[size]?.width || m.width, h: s[size]?.height || m.height, srcset: size === 'reel' ? undefined : srcset || undefined }
+  return { url: pick, alt: m.alt || '', credit: m.credit, w: s[size]?.width || m.width, h: s[size]?.height || m.height, srcset: size === 'reel' || size === 'avatar' ? undefined : srcset || undefined }
 }
 const mCat = (c: any): Cat => (rel(c) ? { name: c.name, slug: c.slug } : { name: 'Haber', slug: 'haber' })
-const mAuthor = (a: any): Author => (rel(a) ? { name: a.name, slug: a.slug, title: a.title, bio: a.bio } : { name: 'UPDATED', slug: 'updated' })
+// Yazar fotoğrafı (28 Ekim 2026, kullanıcı: "editörlerin küçük resmi görünsün"): panelde Yazarlar › Fotoğraf; kare 'avatar' boyutu
+const mAuthor = (a: any): Author => (rel(a) ? { name: a.name, slug: a.slug, title: a.title, bio: a.bio, avatar: mImg(a.avatar, 'avatar') } : { name: 'UPDATED', slug: 'updated' })
 const mSpec = (s: any): Spec => ({ key: s.key, value: s.value || null, num: s.num ?? undefined, unit: s.unit, source: s.source, sourceUrl: s.sourceUrl, at: s.at, group: s.group, higherIsBetter: s.higherIsBetter, searchWeight: s.searchWeight })
 export function mRef(p: any): ProductRef | null {
   p = rel(p); if (!p) return null

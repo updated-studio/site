@@ -1,6 +1,6 @@
 export type Img = { url: string; alt: string; credit?: string; w?: number; h?: number; srcset?: string }
 export type Cat = { name: string; slug: string }
-export type Author = { name: string; slug: string; title?: string; bio?: string }
+export type Author = { name: string; slug: string; title?: string; bio?: string; avatar?: Img }
 export type ProductRef = { slug: string; name: string; brand: string; type: string; status: string; certainty: number; image?: Img; score?: number; specs?: Spec[]; blurb?: string; upscore?: number; upscoreUrl?: string; amazon?: string }
 export type Spec = { key: string; value?: string | null; num?: number; unit?: string; source?: string; sourceUrl?: string; at?: string; group?: string; higherIsBetter?: boolean; searchWeight?: number }
 export type Label = 'yok' | 'son-dakika' | 'sizinti' | 'rehber' | 'sponsorlu'

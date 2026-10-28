@@ -10,6 +10,13 @@ const I: Record<string, string> = {
   ext: '<path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/>', check: '<path d="M4 12l5 5L20 6"/>',
   user: '<path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4 21c0-4 4-6 8-6s8 2 8 6"/>',
 }
+/** Yazar fotoğrafı (28 Ekim 2026): fotoğraf varsa yuvarlak küçük resim; yoksa baş harfler; Updated Stüdyo (otomatik haberler) için boş. */
+export const yazarFoto = (a: { name: string; slug: string; avatar?: { url: string } }, s = 24) => {
+  if (a.avatar?.url) return `<img class="yz-foto" src="${esc(a.avatar.url)}" width="${s}" height="${s}" alt="" loading="lazy" decoding="async" style="--yz:${s}px">`
+  if (a.slug === 'studyo' || a.slug === 'updated') return '' // otomatik haberlerde editör yok; kart temiz kalsın
+  const bas = a.name.trim().split(/\s+/).slice(0, 2).map((p) => p[0] || '').join('').toLocaleUpperCase('tr-TR')
+  return `<span class="yz-foto yz-bas" style="--yz:${s}px" aria-hidden="true">${esc(bas)}</span>`
+}
 export const ico = (k: string, s = 20) => `<svg class="ico" width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true">${I[k] || ''}</svg>`
 
 const G: Record<string, string> = {

@@ -34,6 +34,8 @@ export const Media: CollectionConfig = {
       { name: 'hero', width: 1600, height: 900, position: 'centre', formatOptions: { format: 'webp', options: { quality: 78, effort: 6, smartSubsample: true } } },
       { name: 'og', width: 1200, height: 630, position: 'centre', formatOptions: { format: 'jpeg', options: { quality: 82, mozjpeg: true } } },
       { name: 'reel', width: 540, height: 960, position: 'centre', formatOptions: { format: 'webp', options: { quality: 76, effort: 6, smartSubsample: true } } },
+      // Yazar fotoğrafı için kare küçük boy (28 Ekim 2026); odak noktası seçildiyse ona göre kırpılır
+      { name: 'avatar', width: 160, height: 160, position: 'centre', formatOptions: { format: 'webp', options: { quality: 80, effort: 6, smartSubsample: true } } },
     ],
   },
   fields: [

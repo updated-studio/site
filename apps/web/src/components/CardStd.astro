@@ -2,7 +2,7 @@
 import Img from './Img.astro'
 import type { News, Review, Comparison } from '../lib/types'
 import { short } from '../lib/format'
-import { chip, label, s20 } from '../lib/ui'
+import { chip, label, s20, yazarFoto } from '../lib/ui'
 interface Props { item: News | Review | Comparison; eager?: boolean }
 const { item: n, eager } = Astro.props
 const isRev = n.kind === 'review', isCmp = n.kind === 'comparison'
@@ -17,7 +17,7 @@ const prods = n.kind === 'news' ? n.products : n.kind === 'review' ? [n.product]
     {cat ? <a class="cat" href={`/${cat.slug}`}>{cat.name}</a> : <span class="cat">{isRev ? 'İnceleme' : 'Karşılaştırma'}</span>}
     <h3><a href={n.path}>{n.title}</a></h3>
     <div class="ft">
-      <span class="meta">{isRev && <b style="color:var(--text)">{s20((n as Review).score)} · </b>}{n.author.name} · <time datetime={n.publishedAt}>{short(n.publishedAt)}</time><a class="yr-say" href={`${n.path}#topluluk`} data-yorum-kart={hedef} hidden></a></span>
+      <span class="meta yz-satir"><Fragment set:html={yazarFoto(n.author, 22)} />{isRev && <b style="color:var(--text)">{s20((n as Review).score)} · </b>}{n.author.name} · <time datetime={n.publishedAt}>{short(n.publishedAt)}</time><a class="yr-say" href={`${n.path}#topluluk`} data-yorum-kart={hedef} hidden></a></span>
       {prods.length > 0 && <span class="pks" set:html={prods.filter(Boolean).slice(0, 2).map((p) => chip(p)).join('')} />}
     </div>
   </div>
