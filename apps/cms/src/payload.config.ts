@@ -34,6 +34,7 @@ import { yarismaOneri } from './endpoints/yarisma'
 import { toplulukTemizligi, yarismaZamanlayici } from './lib/uye'
 import { icerikGelenKancasi } from './lib/icerikGelen'
 import { zamanlamaTemizligi } from './hooks/zamanlamaTemizle'
+import { hareketKaydi, hareketKaydiGlobal } from './hooks/hareket'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -51,8 +52,8 @@ export default buildConfig({
   },
   // Panel dili Türkçe (isteyen kullanıcı hesap ayarından İngilizceye geçebilir)
   i18n: { supportedLanguages: { tr, en }, fallbackLanguage: 'tr' },
-  collections: [News, Reviews, Comparisons, Products, Categories, Authors, Media, Videos, Reels, Ads, KulupTracks, KulupQuizzes, Pages, Uyeler, Yorumlar, Yarismalar, Gorevler, GorevFotolari, GorevGorselleri, Users].map(zamanlamaTemizligi).map(toplulukTemizligi).map(icerikGelenKancasi),
-  globals: [Home, Site, UyeGiris],
+  collections: [News, Reviews, Comparisons, Products, Categories, Authors, Media, Videos, Reels, Ads, KulupTracks, KulupQuizzes, Pages, Uyeler, Yorumlar, Yarismalar, Gorevler, GorevFotolari, GorevGorselleri, Users].map(zamanlamaTemizligi).map(toplulukTemizligi).map(icerikGelenKancasi).map(hareketKaydi),
+  globals: [Home, Site, UyeGiris].map(hareketKaydiGlobal),
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
