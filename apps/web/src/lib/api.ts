@@ -63,7 +63,9 @@ export function mImg(m: any, size: 'card' | 'hero' | 'thumb' | 'reel' | 'og' | '
   const s = m.sizes || {}
   const pick = localMedia(s[size]?.url || m.url)!
   const srcset = ['thumb', 'card', 'hero'].map((k) => s[k]?.url && `${localMedia(s[k].url)} ${s[k].width}w`).filter(Boolean).join(', ')
-  return { url: pick, alt: m.alt || '', credit: m.credit, w: s[size]?.width || m.width, h: s[size]?.height || m.height, srcset: size === 'reel' || size === 'avatar' ? undefined : srcset || undefined }
+  // Odak noktası (panel/Stüdyo görsel düzenleyici): sitenin kendi kırpmaları (manşet 16:7, telefon 4:3) da bu noktaya göre (28 Ekim 2026)
+  const fx = typeof m.focalX === 'number' ? m.focalX : undefined, fy = typeof m.focalY === 'number' ? m.focalY : undefined
+  return { url: pick, alt: m.alt || '', credit: m.credit, w: s[size]?.width || m.width, h: s[size]?.height || m.height, srcset: size === 'reel' || size === 'avatar' ? undefined : srcset || undefined, fx: fx !== 50 ? fx : undefined, fy: fy !== 50 ? fy : undefined }
 }
 const mCat = (c: any): Cat => (rel(c) ? { name: c.name, slug: c.slug } : { name: 'Haber', slug: 'haber' })
 // Yazar fotoğrafı (28 Ekim 2026, kullanıcı: "editörlerin küçük resmi görünsün"): panelde Yazarlar › Fotoğraf; kare 'avatar' boyutu
@@ -241,6 +243,10 @@ export async function getAds(): Promise<Ad[]> {
   return v
 }
 export const pickAd = (ads: Ad[], slot: Ad['slot'], seed = 0) => { const a = ads.filter((x) => x.slot === slot); return a.length ? a[seed % a.length] : null }
+
+/** Editörlerin Stüdyo profil fotoğrafları (panel /api/yazar-fotolari: yazar adresi → fotoğraf); derlemede bir kez (28 Ekim 2026) */
+let fotoCache: Promise<Record<string, string>> | null = null
+export const yazarFotolari = () => (fotoCache ??= safe(() => get<Record<string, string>>('yazar-fotolari').catch(() => ({})), () => ({})))
 
 /* ---------- ana sayfa ---------- */
 export async function getHome(): Promise<Home> {

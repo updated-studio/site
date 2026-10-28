@@ -11,7 +11,7 @@ import type { Ad as AdT, News } from '../lib/types'
 import { date, time } from '../lib/format'
 import { label, linkProducts, yazarFoto } from '../lib/ui'
 import { insertAfterParagraph } from '../lib/rich'
-import { pickAd } from '../lib/api'
+import { pickAd, yazarFotolari } from '../lib/api'
 interface Props { n: News; related: News[]; ads: AdT[] }
 const { n, related, ads } = Astro.props
 const MARK = '<!--AD-IN-->'
@@ -27,7 +27,7 @@ const updated = n.updatedAt && +new Date(n.updatedAt) - +new Date(n.publishedAt)
     <h1>{n.title}</h1>
     <p class="lead" style="margin:0">{n.spot}</p>
     <div class="kunye-row">
-      <a class="yz-link" href={`/yazar/${n.author.slug}`} rel="author"><Fragment set:html={yazarFoto(n.author, 32)} />{n.author.name}</a><span>·</span><time datetime={n.publishedAt}>{date(n.publishedAt)}</time><span>·</span><span>{time(n.publishedAt)}</span>
+      <a class="yz-link" href={`/yazar/${n.author.slug}`} rel="author"><Fragment set:html={yazarFoto(n.author, 32, await yazarFotolari())} />{n.author.name}</a><span>·</span><time datetime={n.publishedAt}>{date(n.publishedAt)}</time><span>·</span><span>{time(n.publishedAt)}</span>
       {n.readingTime && <><span>·</span><span>{n.readingTime} dk okuma</span></>}
       {updated && <><span>·</span><span>Güncellendi {time(n.updatedAt!)}</span></>}
       <a href="#topluluk" data-yorum-say hidden></a>

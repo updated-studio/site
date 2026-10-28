@@ -1,4 +1,4 @@
-export type Img = { url: string; alt: string; credit?: string; w?: number; h?: number; srcset?: string }
+export type Img = { url: string; alt: string; credit?: string; w?: number; h?: number; srcset?: string; fx?: number; fy?: number }
 export type Cat = { name: string; slug: string }
 export type Author = { name: string; slug: string; title?: string; bio?: string; avatar?: Img }
 export type ProductRef = { slug: string; name: string; brand: string; type: string; status: string; certainty: number; image?: Img; score?: number; specs?: Spec[]; blurb?: string; upscore?: number; upscoreUrl?: string; amazon?: string }

@@ -11,10 +11,12 @@ import type { Ad as AdT, Comparison, News, Reel, Review, Video } from '../../lib
 import { date, time } from '../../lib/format'
 import { ico, yazarFoto } from '../../lib/ui'
 import { showAdSlots } from '../../lib/env'
+import { yazarFotolari } from '../../lib/api'
 interface Props { slides: (News | Review | Comparison)[]; reels: Reel[]; shorts: Video[]; ad: AdT | null; instagram: string; youtube: string }
 const { slides, reels, shorts, ad, instagram, youtube } = Astro.props
 const afis = !!ad || showAdSlots()
 const kat = (m: News | Review | Comparison) => m.kind === 'news' ? { ad: m.category.name, href: `/${m.category.slug}` } : m.kind === 'review' ? { ad: 'İnceleme', href: '/inceleme' } : { ad: 'Karşılaştırma', href: '/karsilastirma' }
+const foto = await yazarFotolari()
 const ig = reels.length > 0
 const videolar = ig ? reels.slice(0, 10) : shorts.slice(0, 10)
 ---
@@ -27,7 +29,7 @@ const videolar = ig ? reels.slice(0, 10) : shorts.slice(0, 10)
           <div class="mn-b">
             <a class="mn-kat" href={k.href}>{k.ad}</a>
             <h2><a href={m.path}>{m.title}</a></h2>
-            <span class="mn-meta yz-satir"><Fragment set:html={yazarFoto(m.author, 22)} />{m.author.name} · {date(m.publishedAt)} · {time(m.publishedAt)}</span>
+            <span class="mn-meta yz-satir"><Fragment set:html={yazarFoto(m.author, 22, foto)} />{m.author.name} · {date(m.publishedAt)} · {time(m.publishedAt)}</span>
           </div>
         </article>
       ) })}

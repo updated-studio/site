@@ -33,7 +33,7 @@ const nm = (w?: string) => (w === 'a' ? c.a.name : w === 'b' ? c.b.name : '')
         <div class="side r"><span class="c-img" style="width:100%"><Img img={c.b.image} alt={c.b.name} eager /></span><h2>{c.b.name}</h2><Fragment set:html={chip(c.b)} /></div>
       </div>
       <h1 class="h2" style="margin-top:16px">{c.title}</h1>
-      <div class="kunye-row"><a class="yz-link" href={`/yazar/${c.author.slug}`} rel="author"><Fragment set:html={yazarFoto(c.author, 32)} />{c.author.name}</a><span>·</span><time datetime={c.publishedAt}>{date(c.publishedAt)}</time>{c.method && <><span>·</span><span>{c.method}</span></>}<a href="#topluluk" data-yorum-say hidden></a></div>
+      <div class="kunye-row"><a class="yz-link" href={`/yazar/${c.author.slug}`} rel="author"><Fragment set:html={yazarFoto(c.author, 32, await api.yazarFotolari())} />{c.author.name}</a><span>·</span><time datetime={c.publishedAt}>{date(c.publishedAt)}</time>{c.method && <><span>·</span><span>{c.method}</span></>}<a href="#topluluk" data-yorum-say hidden></a></div>
     </div>
     <div class="with-rail" style="margin-top:24px">
       <div>

@@ -13,4 +13,4 @@ export async function getStaticPaths() {
 const { a, p } = Astro.props
 const items = await api.getAuthorNews(a.slug, p)
 ---
-<ListPage eyebrow={a.title || 'Yazar'} title={a.name} lead={a.bio || `${a.name} imzalı haberler.`} path={`/yazar/${a.slug}`} source={`yazar-${a.slug}`} items={items} page={p} fotoHtml={yazarFoto(a, 72)} />
+<ListPage eyebrow={a.title || 'Yazar'} title={a.name} lead={a.bio || `${a.name} imzalı haberler.`} path={`/yazar/${a.slug}`} source={`yazar-${a.slug}`} items={items} page={p} fotoHtml={yazarFoto(a, 72, await api.yazarFotolari())} />
