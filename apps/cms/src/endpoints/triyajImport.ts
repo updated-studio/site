@@ -71,6 +71,13 @@ async function gorselYukle(req: PayloadRequest, image: any, baslik: string): Pro
       data: { alt: cut(image.alt || baslik, LIMIT.alt), credit: image.credit || 'Görsel: kaynak', sourceUrl: image.url, aiGenerated: !!image.ai } as any,
       file: { data: k.buf, mimetype: mime, name: `${trSlug(baslik) || 'haber-gorseli'}.${uzanti}`, size: k.buf.length },
     })
+    // Odak noktası (28 Ekim 2026): yapay zekâ seçerken konunun yerini verdiyse küçük boyutlar ve sitenin kırpmaları o noktaya göre
+    const o = image.odak
+    if (o && typeof o === 'object') {
+      const yz = (v: unknown) => { const n = Number(v); return Number.isFinite(n) ? Math.min(100, Math.max(0, Math.round(n))) : 50 }
+      const fx = yz(o.x), fy = yz(o.y)
+      if (fx !== 50 || fy !== 50) try { await req.payload.update({ collection: 'media', id: m.id, data: { focalX: fx, focalY: fy } as any, overrideAccess: true }) } catch (e) { req.payload.logger.warn(`odak noktası yazılamadı: ${e}`) }
+    }
     return { id: m.id, kapak: { width: m.width, height: m.height, alt: m.alt, credit: m.credit, aiGenerated: m.aiGenerated, representative: m.representative } }
   } catch (e) {
     req.payload.logger.warn(`Triyaj görseli alınamadı: ${e}`)
