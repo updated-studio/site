@@ -135,7 +135,10 @@ export const triyajImport: Endpoint = {
       const u = await payload.find({ collection: 'users', where: { email: { equals: String(body.editorEmail).toLowerCase() } }, limit: 1, depth: 0 })
       owner = u.docs[0]?.id; author = (u.docs[0] as any)?.author
     }
-    if (!author) author = prev?.author ?? (await payload.find({ collection: 'authors', limit: 1, depth: 0, sort: 'createdAt' })).docs[0]?.id
+    // Editörü olmayan otomatik taslak "Updated Stüdyo" imzasıyla açılır (önceden listedeki ilk yazar, "admin" oluyordu);
+    // bir editör yayına alınca imza onun olur (hooks/imza.ts)
+    if (!author) author = prev?.author ?? (await payload.find({ collection: 'authors', where: { slug: { equals: 'studyo' } }, limit: 1, depth: 0 })).docs[0]?.id
+      ?? (await payload.find({ collection: 'authors', limit: 1, depth: 0, sort: 'createdAt' })).docs[0]?.id
 
     // Kapak: aynı görsel adresi daha önce yüklendiyse yeniden yüklenmez
     const label = body.label || 'yok'

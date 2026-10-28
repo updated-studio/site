@@ -4,6 +4,7 @@ import { seoFields } from '../fields/seo'
 import { authorField, coverField, pathField, publishedAt, shortAnswer, workflow } from '../fields/editorial'
 import { autoSeo } from '../hooks/autoSeo'
 import { workflowGuard } from '../hooks/workflow'
+import { imzaYayinlayana } from '../hooks/imza'
 import { revalidate } from '../hooks/revalidate'
 import { trSlug } from '../lib/slug'
 
@@ -36,6 +37,7 @@ export const Comparisons: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [
+      imzaYayinlayana,
       async ({ data, req }) => {
         const get = async (v: any) => (typeof v === 'object' ? v : await req.payload.findByID({ collection: 'products', id: v, depth: 0, req }))
         if (data.a && data.b) {
