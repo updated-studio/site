@@ -12,7 +12,7 @@ import InfiniteFeed from '../../components/InfiniteFeed.astro'
 import * as api from '../../lib/api'
 import { reviewMeta } from '../../lib/seo'
 import { date } from '../../lib/format'
-import { chip, ico, linkProducts, yazarFoto } from '../../lib/ui'
+import { chip, ico, km, linkProducts, yazarFoto } from '../../lib/ui'
 import { insertAfterParagraph } from '../../lib/rich'
 import type { Review } from '../../lib/types'
 export async function getStaticPaths() {
@@ -33,7 +33,7 @@ const cat = r.product.type === 'drone' || r.product.type === 'camera' || r.produ
         <div class="chips"><span class="lbl l-inc">İnceleme</span>{cat && <a class="cat" href={cat[1]}>{cat[0]}</a>}</div>
         <h1>{r.title}</h1>
         <p class="lead" style="margin:0">{r.spot}</p>
-        <div class="kunye-row"><a class="yz-link" href={`/yazar/${r.author.slug}`} rel="author"><Fragment set:html={yazarFoto(r.author, 32, await api.yazarFotolari())} />{r.author.name}</a><span>·</span><time datetime={r.publishedAt}>{date(r.publishedAt)}</time>{r.readingTime && <><span>·</span><span>{r.readingTime} dk okuma</span></>}<a href="#topluluk" data-yorum-say hidden></a><span>·</span><Fragment set:html={chip(r.product)} /></div>
+        <div class="kunye-row"><a class="yz-link" href={`/yazar/${r.author.slug}`} rel="author"><Fragment set:html={yazarFoto(r.author, 32, await api.yazarFotolari())} />{r.author.name}</a><Fragment set:html={km('takvim', date(r.publishedAt), r.publishedAt)} />{r.readingTime && <Fragment set:html={km('okuma', `${r.readingTime} dk okuma`)} />}<a href="#topluluk" data-yorum-say hidden></a><Fragment set:html={chip(r.product)} /></div>
       </div>
       {r.cover && <figure class="cover"><Img img={r.cover} eager sizes="(max-width: 767px) 100vw, 860px" /><figcaption>{r.cover.credit}</figcaption></figure>}
       <div class="prose" style="margin-top:24px">

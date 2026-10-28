@@ -9,7 +9,13 @@ const I: Record<string, string> = {
   moon: '<path d="M20 15A8 8 0 0 1 9 4a8 8 0 1 0 11 11Z"/>', auto: '<path d="M12 3a9 9 0 1 0 0 18V3Z" fill="currentColor"/><path d="M12 3a9 9 0 1 1 0 18"/>',
   ext: '<path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/>', check: '<path d="M4 12l5 5L20 6"/>',
   user: '<path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4 21c0-4 4-6 8-6s8 2 8 6"/>',
+  // Künye satırı (28 Ekim 2026, kit 1.4 §8 İkon: çizgi 2 px, düz uç, dolgu yok). Tek set: Stüdyo src/shared/Ikon.tsx ile aynı çizimler
+  takvim: '<path d="M3 5h18v16H3zM3 10h18M8 3v4M16 3v4"/>', saat: '<path d="M12 21a9 9 0 100-18 9 9 0 000 18zM12 7v5l3 2"/>',
+  okuma: '<path d="M3 5h6a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H3zM21 5h-6a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h7z"/>',
+  guncel: '<path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5"/>', yorum: '<path d="M4 5h16v11H9l-5 4z"/>',
 }
+/** Künye satırı öğesi: ikon + yazı (tarih, saat, okuma süresi, güncelleme). */
+export const km = (k: string, metin: string, dt?: string) => `<span class="km">${ico(k, 16)}${dt ? `<time datetime="${esc(dt)}">${esc(metin)}</time>` : esc(metin)}</span>`
 /** Yazar fotoğrafı (28 Ekim 2026): fotoğraf varsa yuvarlak küçük resim; yoksa baş harfler; Updated Stüdyo (otomatik haberler) için boş. */
 export const yazarFoto = (a: { name: string; slug: string; avatar?: { url: string } }, s = 24, harita: Record<string, string> = {}) => {
   const url = a.avatar?.url || harita[a.slug]

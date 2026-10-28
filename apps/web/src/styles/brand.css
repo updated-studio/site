@@ -287,6 +287,9 @@ h3{font-weight:700}
 .kunye-row a{display:inline-block;padding:12px 0;margin:-12px 0}
 .kunye-row{font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3);padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
 .kunye-row a{color:var(--text);text-decoration:none;font-weight:600}
+/* Künye satırı ikonları (28 Ekim 2026): nokta ayraç yerine her bilginin önünde çizgi ikon; ikon yazıdan bir ton açık */
+.kunye-row{gap:8px 20px}.kunye-row .km,.kunye-row .yr-say:not([hidden]){margin-left:0;display:inline-flex;align-items:center;gap:6px}
+.kunye-row .ico{width:16px;height:16px;flex:none;color:var(--text-3);opacity:.8}.kunye-row .yz-link{margin-right:4px}
 /* Yazar fotoğrafı (28 Ekim 2026): kartta 22 px, yazı başında 32 px, yazar sayfasında 72 px; fotoğraf yoksa baş harf, otomatik haberde UP */
 .yz-foto{--yz:24px;width:var(--yz);height:var(--yz);border-radius:50%;object-fit:cover;flex:none;display:inline-block;vertical-align:middle;background:var(--surface-2)}
 .yz-bas,.yz-up{display:inline-grid;place-items:center;background:var(--text);color:var(--bg);font-family:var(--f-mono);font-weight:600;font-size:max(12px,calc(var(--yz) * .38));letter-spacing:0;line-height:1}

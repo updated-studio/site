@@ -330,7 +330,7 @@ function topluluk(kok: HTMLElement) {
   }
 }
 
-const YORUM_IKON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>'
+const YORUM_IKON = '<svg class="ico" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>' // kit §8: lib/ui.ts "yorum" ile aynı
 
 /* ---------------- kartlardaki yorum sayısı ---------------- */
 // Kartta yorum varsa ikon + sayı görünür (yoksa hiçbir şey); sonsuz akışla gelen kartlar da sayılır
