@@ -14,7 +14,7 @@ const I: Record<string, string> = {
 export const yazarFoto = (a: { name: string; slug: string; avatar?: { url: string } }, s = 24, harita: Record<string, string> = {}) => {
   const url = a.avatar?.url || harita[a.slug]
   if (url) return `<img class="yz-foto" src="${esc(url)}" width="${s}" height="${s}" alt="" loading="lazy" decoding="async" style="--yz:${s}px">`
-  if (a.slug === 'studyo' || a.slug === 'updated') return '' // otomatik haberlerde editör yok; kart temiz kalsın
+  if (a.slug === 'studyo' || a.slug === 'updated') return `<span class="yz-foto yz-up" style="--yz:${s}px" aria-hidden="true"><img src="/marka/updated-up-white.svg" alt="" width="${s}" height="${s}"></span>` // otomatik haberler: marka işareti
   const bas = a.name.trim().split(/\s+/).slice(0, 2).map((p) => p[0] || '').join('').toLocaleUpperCase('tr-TR')
   return `<span class="yz-foto yz-bas" style="--yz:${s}px" aria-hidden="true">${esc(bas)}</span>`
 }

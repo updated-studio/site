@@ -49,4 +49,7 @@ const n = parts.length
       </div>
     ))}
   </div>
+  <ol class="sk-leg" aria-label="Katmanlar">
+    {KAT[type].map((_, i) => <li><b>{parts[i].name}</b><span class={parts[i].value === 'Bilinmiyor' ? 'unk' : ''}>{parts[i].value}</span></li>)}
+  </ol>
 </div>

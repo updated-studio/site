@@ -92,7 +92,13 @@
 .sk-lab .unk{color:var(--text-3)}
 .sk.open .sk-lab{opacity:1;transition-delay:calc(var(--i) * 60ms + 240ms)}
 .sk.nolab .sk-lab{display:none}
-@media (max-width:700px){.sk{min-height:360px}.sk-dev{--w:140px}.sk[data-type="lens"] .sk-dev{--w:150px}.sk[data-type="light"] .sk-dev{--w:190px}.sk[data-type="headphones"] .sk-dev{--w:160px}.sk[data-type="drone"] .sk-dev{--w:170px}.sk[data-type="pad"] .sk-dev,.sk[data-type="camera"] .sk-dev{--w:200px}.sk[data-type="audio"] .sk-dev{--w:160px}.sk[data-type="cam360"] .sk-dev{--w:84px}.sk.open .sk-l{transform:translateZ(calc((var(--i) - (var(--n) - 1) / 2) * 44px))}.sk-lab{font-size:10px;padding-left:30px}.sk-lab::before{width:24px}.sk-lab b{font-size:12px}}
+/* Telefon (28 Ekim 2026): katman yazıları çizimin üstüne biniyordu; telefonda çizimin altında sıralı liste (üstten alta) */
+.sk-leg{display:none;width:100%;margin:0;padding:0;list-style:none;counter-reset:k;border-top:1px solid var(--line)}
+.sk-leg li{display:flex;align-items:baseline;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);counter-increment:k;font-family:var(--f-mono);font-size:12px;color:var(--text-2)}
+.sk-leg li::before{content:counter(k,decimal-leading-zero);color:var(--text-3);width:20px}
+.sk-leg b{font-family:var(--f-body);font-size:14px;font-weight:600;color:var(--text);flex:1}
+.sk-leg .unk{color:var(--text-3)}
+@media (max-width:700px){.sk{min-height:360px}.sk-dev{--w:140px}.sk[data-type="lens"] .sk-dev{--w:150px}.sk[data-type="light"] .sk-dev{--w:190px}.sk[data-type="headphones"] .sk-dev{--w:160px}.sk[data-type="drone"] .sk-dev{--w:170px}.sk[data-type="pad"] .sk-dev,.sk[data-type="camera"] .sk-dev{--w:200px}.sk[data-type="audio"] .sk-dev{--w:160px}.sk[data-type="cam360"] .sk-dev{--w:84px}.sk.open .sk-l{transform:translateZ(calc((var(--i) - (var(--n) - 1) / 2) * 44px))}.sk-lab{display:none}.sk{min-height:0;padding-block:56px 8px;gap:56px}.sk[data-type="mic"] .sk-dev,.sk[data-type="gimbal"] .sk-dev{--w:110px}.sk[data-type="phone"] .sk-dev{--w:120px}.sk-leg{display:grid}}
 /* product page */
 .ku-hero{border-bottom:1px solid var(--line);padding-top:32px}
 .ku-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:var(--gut);align-items:center;padding-bottom:32px}
@@ -143,7 +149,7 @@
 .ku-feed .d{font-family:var(--f-mono);font-size:12px;color:var(--text-3);white-space:nowrap}
 .ku-feed .s{font-family:var(--f-mono);font-weight:600;font-size:16px;background:var(--blue);color:var(--white);padding:2px 8px}
 .ku-box{border:1px solid var(--line);background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
-.ku-box h2,.rail h2,.ku-box h4,.rail h4{font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3);margin:0;font-weight:600}
+.ku-box h2,.rail h2,.ku-box h4,.rail h4,.cam .ku-box h2,.cam .rail h2,.cam .ku-box h4,.cam .rail h4{font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.04em;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3);margin:0;font-weight:600}
 .shelfk{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--gut)}
 .kcard{position:relative;border:1px solid var(--line);background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:8px;text-decoration:none;min-height:200px;transition:border-color var(--t1) var(--ease)}
 .kcard:hover{border-color:var(--text)}
@@ -156,4 +162,4 @@
 .prodline{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3)}
 .prodline .pk{font-family:var(--f-body);letter-spacing:0;text-transform:none}
 @media (max-width:1000px){.ku-top{grid-template-columns:minmax(0,1fr)}.ku-stage{min-height:420px;padding-right:120px}.ku-grid{grid-template-columns:minmax(0,1fr)}.shelfk{grid-template-columns:1fr 1fr}}
-@media (max-width:560px){.ku-stage{padding-right:96px;min-height:380px}.shelfk{grid-template-columns:1fr}.ku-feed a{grid-template-columns:minmax(0,1fr) auto}.ku-feed .tag{grid-column:1/-1}}
+@media (max-width:560px){.ku-stage{padding:0 16px 72px;min-height:0}.shelfk{grid-template-columns:1fr}.ku-feed a{grid-template-columns:minmax(0,1fr) auto}.ku-feed .tag{grid-column:1/-1}}
