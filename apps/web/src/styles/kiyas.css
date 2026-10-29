@@ -20,6 +20,7 @@
 .kk-ups b{font-family:var(--f-head);font-weight:900;font-size:34px;line-height:.9}
 .kk-ups span{font-family:var(--f-mono);font-weight:600;font-size:9px;letter-spacing:.08em;color:var(--orange)}
 .kk-ups.bos{background:transparent;color:var(--text-3);border:2px dashed var(--line);transform:none}
+.kk-ups.bos span{color:var(--orange-tx)}
 .kk-alt{display:grid;gap:6px}
 .kk-alt div{display:grid;grid-template-columns:96px 1fr 28px;gap:8px;align-items:center;font-family:var(--f-mono);font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-2)}
 .kk-alt i{height:6px;border-radius:3px;background:var(--line);overflow:hidden}.kk-alt i b{display:block;height:100%;background:var(--text)}

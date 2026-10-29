@@ -21,7 +21,7 @@ const rot = <T,>(x: T[]) => (x.length ? [...x.slice(page % x.length), ...x.slice
 <div class="inf-chunk" data-page={page} style={first ? 'border-top:0;margin-top:0;padding-top:0' : undefined}>
   {!first && <div class="inf-h"><span class="label" style="color:var(--text-3)">Sayfa {page} · {items.length} haber</span></div>}
   <div class="grid4">
-    {a.slice(0, 6).map((n) => <CardStd item={n} />)}
+    {a.slice(0, 6).map((n, i) => <CardStd item={n} eager={first && i < 4} />)}
     {a.length > 6 && pickAd(ads, 'mr', page) && <div class="ad-tel"><Ad slot="mr" ad={pickAd(ads, 'mr', page)} bare /></div>}
     {a.slice(6, 7).map((n) => <CardStd item={n} />)}
     {spo && <CardSponsored ad={spo} />}

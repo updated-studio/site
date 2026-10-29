@@ -4,6 +4,7 @@ import { api, avatar, esc, isaretler, zamanOnce } from './uye'
 const kok = document.getElementById('uper')!
 const ad = new URLSearchParams(location.search).get('ad') || ''
 ;(async () => {
+  if (!ad) { kok.innerHTML = `<h1 class="h2">Uper profili</h1><p>Profil adresi eksik. Bir Uper'ın profilini görmek için adına dokunun.</p><a class="btn" href="/">Ana sayfaya dön</a>`; return }
   const [y, a] = await Promise.all([api(`/uye/profil?ad=${encodeURIComponent(ad)}`), api('/uye/ayar')])
   if (y.s !== 200) { kok.innerHTML = `<h1 class="h2">Uper bulunamadı</h1><p>Bu kullanıcı adıyla bir Uper yok ya da hesabını kapatmış.</p><a class="btn" href="/">Ana sayfaya dön</a>`; return }
   const u = y.j, sv = a.j?.seviyeler || []

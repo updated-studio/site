@@ -23,6 +23,8 @@ const yanSag = pickAd(ads, 'sky', 0), yanSol = yanlar.length > 1 ? pickAd(ads, '
 const yanOrnek = showAdSlots()
 const url = SITE + (meta.path === '/' ? '' : meta.path)
 const canonical = meta.canonical || url
+// Paylaşım görseli: sayfanın kendi görseli yoksa marka görseli (29 Ekim 2026 taraması: liste sayfaları önizlemesiz paylaşılıyordu)
+const ogImage = meta.image || `${SITE}/marka/og-varsayilan.jpg`
 // Sayfa başlığında site adı bir kez: "Rehber | UPDATED" gibi gelen başlığın sonundaki ad atılır (28 Ekim 2026: "… | UPDATED · UPDATED" tekrarı)
 const title = meta.path === '/' ? meta.title : `${meta.title.replace(/\s*[|·–-]\s*UPDATED\s*$/i, '')} · UPDATED`
 const ld = { '@context': 'https://schema.org', '@graph': [...siteLd(sayfalar), ...(meta.jsonld || [])] }
@@ -34,7 +36,7 @@ const ld = { '@context': 'https://schema.org', '@graph': [...siteLd(sayfalar), .
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title}</title>
   <meta name="description" content={meta.description} />
-  <link rel="canonical" href={canonical} />
+  {meta.path !== '/404' && <link rel="canonical" href={canonical} />}
   {meta.noindex || staging ? <meta name="robots" content="noindex, follow" /> : <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />}
   <meta name="google-site-verification" content="ZY6xlb747KCmDWqxHylyzvzbFd5MEIJgQNS-wdIIeUI" />
   <meta property="og:site_name" content="UPDATED" />
@@ -43,9 +45,9 @@ const ld = { '@context': 'https://schema.org', '@graph': [...siteLd(sayfalar), .
   <meta property="og:title" content={meta.title} />
   <meta property="og:description" content={meta.description} />
   <meta property="og:url" content={canonical} />
-  {meta.image && <meta property="og:image" content={meta.image} />}
-  {meta.image && <meta property="og:image:width" content="1200" />}
-  {meta.image && <meta property="og:image:height" content="630" />}
+  <meta property="og:image" content={ogImage} />
+  {!meta.image && <meta property="og:image:width" content="1200" />}
+  {!meta.image && <meta property="og:image:height" content="630" />}
   <meta name="twitter:card" content="summary_large_image" />
   {meta.published && <meta property="article:published_time" content={meta.published} />}
   {meta.modified && <meta property="article:modified_time" content={meta.modified} />}
