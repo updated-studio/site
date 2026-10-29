@@ -12,6 +12,7 @@ import * as migration_20261028_122252_yazar_avatar from './20261028_122252_yazar
 import * as migration_20261028_142805_reklam_yan from './20261028_142805_reklam_yan';
 import * as migration_20261028_150000_yazar_baglari from './20261028_150000_yazar_baglari';
 import * as migration_20261028_160000_kesik_basliklar from './20261028_160000_kesik_basliklar';
+import * as migration_20261029_071812_uye_studyo_foto from './20261029_071812_uye_studyo_foto';
 
 export const migrations = [
   {
@@ -77,11 +78,16 @@ export const migrations = [
   {
     up: migration_20261028_150000_yazar_baglari.up,
     down: migration_20261028_150000_yazar_baglari.down,
-    name: '20261028_150000_yazar_baglari'
+    name: '20261028_150000_yazar_baglari',
   },
   {
     up: migration_20261028_160000_kesik_basliklar.up,
     down: migration_20261028_160000_kesik_basliklar.down,
-    name: '20261028_160000_kesik_basliklar'
+    name: '20261028_160000_kesik_basliklar',
+  },
+  {
+    up: migration_20261029_071812_uye_studyo_foto.up,
+    down: migration_20261029_071812_uye_studyo_foto.down,
+    name: '20261029_071812_uye_studyo_foto'
   },
 ];

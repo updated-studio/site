@@ -261,6 +261,7 @@ async function hesabim(u: any, sekme: Sekme) {
           <fieldset><legend>Profil resmi</legend><div class="hs-foto">
             <label><input type="radio" name="fotoTur" value="harf"${u.fotoTur === 'harf' || !u.fotoTur ? ' checked' : ''}>${avatar({ ad: u.ad, renk: u.renk }, 44)}<span>Baş harfler</span></label>
             ${u.googleFoto ? `<label><input type="radio" name="fotoTur" value="google"${u.fotoTur === 'google' ? ' checked' : ''}>${avatar({ ad: u.ad, renk: u.renk, foto: u.googleFoto }, 44)}<span>Google fotoğrafım</span></label>` : ''}
+            ${u.studyoFoto ? `<label><input type="radio" name="fotoTur" value="studyo"${u.fotoTur === 'studyo' ? ' checked' : ''}>${avatar({ ad: u.ad, renk: u.renk, foto: u.studyoFoto }, 44)}<span>Stüdyo fotoğrafım</span></label>` : ''}
             <label data-gravatar><input type="radio" name="fotoTur" value="gravatar"${u.fotoTur === 'gravatar' ? ' checked' : ''}>${avatar({ ad: u.ad, renk: u.renk, foto: u.gravatar }, 44)}<span>Gravatar <a href="https://gravatar.com" target="_blank" rel="noopener" class="meta">nedir?</a></span></label>
             <label><input type="radio" name="fotoTur" value="emoji"${u.fotoTur === 'emoji' ? ' checked' : ''}>${avatar({ ad: u.ad, renk: u.renk, emoji: u.emoji || u.emojiler[0] }, 44)}<span>Emoji</span></label>
           </div>

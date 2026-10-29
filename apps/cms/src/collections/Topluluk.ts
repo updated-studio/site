@@ -50,8 +50,8 @@ export const Uyeler: CollectionConfig = {
     },
     {
       type: 'row', fields: [
-        { name: 'fotoTur', type: 'select', label: 'Profil resmi', defaultValue: 'harf', options: [{ label: 'Baş harfler', value: 'harf' }, { label: 'Google fotoğrafı', value: 'google' }, { label: 'Gravatar', value: 'gravatar' }, { label: 'Emoji', value: 'emoji' }] },
-        { name: 'foto', type: 'text', label: 'Profil resmi adresi', admin: { readOnly: true, description: 'Uper kendisi seçer (Google ya da Gravatar).' } },
+        { name: 'fotoTur', type: 'select', label: 'Profil resmi', defaultValue: 'harf', options: [{ label: 'Baş harfler', value: 'harf' }, { label: 'Google fotoğrafı', value: 'google' }, { label: 'Gravatar', value: 'gravatar' }, { label: 'Emoji', value: 'emoji' }, { label: 'Stüdyo fotoğrafı (ekip)', value: 'studyo' }] },
+        { name: 'foto', type: 'text', label: 'Profil resmi adresi', admin: { readOnly: true, description: "Uper kendisi seçer (Google, Gravatar ya da ekipse Stüdyo fotoğrafı). Ekip üyesinde Stüdyo profiliyle kendiliğinden eşitlenir." } },
         { name: 'emoji', type: 'text', label: 'Emoji', maxLength: 16 },
       ],
     },

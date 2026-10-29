@@ -51,7 +51,7 @@ export const yazarFoto: Endpoint = {
           where not exists (select 1 from payload.users u where u.author_id = a.id)`).catch(() => db.execute(yedek))
         for (const row of (r.rows ?? r) as { slug: string; email: string; studyo: string | null; uper: string | null }[]) {
           if (!row.slug || out[row.slug]) continue
-          const foto = row.studyo || row.uper || (await gravatar(row.email || ''))
+          const foto = row.uper || row.studyo || (await gravatar(row.email || '')) // tek kişi: Uper kaydı önce (Stüdyo ile eşit tutulur, karar 36)
           if (foto) out[row.slug] = foto
         }
       } catch (e) { req.payload.logger.warn(`yazar fotoğrafları okunamadı: ${(e as Error).message}`) }

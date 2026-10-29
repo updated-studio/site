@@ -90,11 +90,16 @@ async function ekipRol(p: Payload, u: Pick<Uye, 'email' | 'ekip'>): Promise<Ekip
   return r
 }
 const herkeseAcik = (u: Pick<Uye, 'kullaniciAdi' | 'ad' | 'renk' | 'puan' | 'unvan' | 'fotoTur' | 'foto' | 'emoji'>, rol: EkipRol) => ({ kullaniciAdi: u.kullaniciAdi, ad: u.ad, renk: u.renk || 'turuncu', seviye: seviye(Number(u.puan) || 0), ekip: rol, unvan: u.unvan || null,
-  foto: (u.fotoTur === 'google' || u.fotoTur === 'gravatar') && u.foto ? u.foto : null, emoji: u.fotoTur === 'emoji' && u.emoji ? u.emoji : null })
+  foto: (u.fotoTur === 'google' || u.fotoTur === 'gravatar' || u.fotoTur === 'studyo') && u.foto ? u.foto : null, emoji: u.fotoTur === 'emoji' && u.emoji ? u.emoji : null })
 /** Profil resmi seçenekleri (25 Ekim 2026): baş harf, Google fotoğrafı (Google ile girenler), Gravatar (e-postaya bağlı), emoji */
 export const PROFIL_EMOJI = ['📷', '🎥', '🎬', '🚁', '🎧', '🎮', '💻', '📱', '🔭', '🌄', '🌃', '⚡', '🔥', '🦊', '🐙', '🐼', '🦁', '🐺', '🦉', '🚀', '🎯', '🎨', '🧠', '👾']
 const googleFoto = (k?: Kimlik | null) => { const u = String(k?.meta?.avatar_url || k?.meta?.picture || ''); try { return /^https:$/.test(new URL(u).protocol) && /(^|\.)googleusercontent\.com$/.test(new URL(u).hostname) ? u : null } catch { return null } }
 const gravatar = (email: string) => `https://www.gravatar.com/avatar/${createHash('md5').update(email.trim().toLowerCase()).digest('hex')}?s=200&d=404`
+/** Tek kişi (29 Ekim 2026, karar 36): ekip üyesinin Stüdyo'da yüklediği fotoğraf Uper'de de seçilebilir ("Stüdyo fotoğrafım") */
+const studyoFoto = async (p: Payload, email: string): Promise<string | null> => {
+  const r = await havuz(p).query("select nullif(avatar_url, '') as f from public.profiles where lower(email) = lower($1) limit 1", [email]).catch(() => null)
+  return (r?.rows?.[0] as { f?: string } | undefined)?.f || null
+}
 
 async function adOner(p: Payload, email: string) {
   let kok = email.split('@')[0].toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ı/g, 'i').replace(/[^a-z0-9_.]/g, '').slice(0, 16)
@@ -144,7 +149,7 @@ const benimProfil = async (p: Payload, u: Uye, k?: Kimlik | null) => {
   return {
     kayitli: true, id: u.id, kullaniciAdi: u.kullaniciAdi, ad: u.ad, bio: u.bio || '', renk: u.renk || 'turuncu', email: u.email, giris: u.giris,
     ekipman: (u.ekipman || []).map((e) => ({ tur: e.tur, ad: e.ad, urun: typeof e.urun === 'object' ? e.urun?.id : e.urun })),
-    fotoTur: u.fotoTur || 'harf', foto: u.foto || null, emoji: u.emoji || null, googleFoto: googleFoto(k), gravatar: gravatar(u.email), emojiler: PROFIL_EMOJI,
+    fotoTur: u.fotoTur || 'harf', foto: u.foto || null, emoji: u.emoji || null, googleFoto: googleFoto(k), gravatar: gravatar(u.email), studyoFoto: await studyoFoto(p, u.email), emojiler: PROFIL_EMOJI,
     bildirimEposta: u.bildirimEposta !== false, durum: u.durum, ekip: rol, unvan: u.unvan || null, seviye: seviye(Number(u.puan) || 0), istatistik: s, rozetler: rozetler(u, s), uyelik: u.createdAt,
   }
 }
@@ -202,6 +207,7 @@ export const uyeEndpoints: Endpoint[] = [
     if (b.fotoTur !== undefined) {
       if (b.fotoTur === 'google') { const g = googleFoto(kimlik); if (!g) return hata(req, 'Google fotoğrafı yalnız Google ile giriş yapanlarda var.'); Object.assign(data, { fotoTur: 'google', foto: g }) }
       else if (b.fotoTur === 'gravatar') Object.assign(data, { fotoTur: 'gravatar', foto: gravatar(uye!.email) })
+      else if (b.fotoTur === 'studyo') { const s = await studyoFoto(p, uye!.email); if (!s) return hata(req, "Stüdyo fotoğrafı yalnız Stüdyo'da fotoğraf yükleyen ekip üyelerinde var."); Object.assign(data, { fotoTur: 'studyo', foto: s }) }
       else if (b.fotoTur === 'emoji') { if (!PROFIL_EMOJI.includes(b.emoji)) return hata(req, 'Listeden bir emoji seç.'); Object.assign(data, { fotoTur: 'emoji', emoji: b.emoji, foto: null }) }
       else Object.assign(data, { fotoTur: 'harf', foto: null })
     }
