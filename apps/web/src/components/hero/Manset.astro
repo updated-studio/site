@@ -9,7 +9,7 @@ import Img from '../Img.astro'
 import Ad from '../Ad.astro'
 import type { Ad as AdT, Comparison, News, Reel, Review, Video } from '../../lib/types'
 import { date, time } from '../../lib/format'
-import { ico, yazarFoto } from '../../lib/ui'
+import { baslik, ico, yazarFoto } from '../../lib/ui'
 import { showAdSlots } from '../../lib/env'
 import { yazarFotolari } from '../../lib/api'
 interface Props { slides: (News | Review | Comparison)[]; reels: Reel[]; shorts: Video[]; ad: AdT | null; instagram: string; youtube: string }
@@ -28,7 +28,7 @@ const videolar = ig ? reels.slice(0, 10) : shorts.slice(0, 10)
           <a class="mn-g" href={m.path} tabindex="-1" aria-hidden="true"><Img img={m.cover} alt="" eager={i === 0} sizes="(max-width: 1100px) 100vw, 920px" /></a>
           <div class="mn-b">
             <a class="mn-kat" href={k.href}>{k.ad}</a>
-            <h2><a href={m.path}>{m.title}</a></h2>
+            <h2><a href={m.path} set:html={baslik(m.title)} /></h2>
             <span class="mn-meta yz-satir"><Fragment set:html={yazarFoto(m.author, 22, foto)} />{m.author.name} · {date(m.publishedAt)} · {time(m.publishedAt)}</span>
           </div>
         </article>

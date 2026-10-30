@@ -24,6 +24,8 @@ export const yazarFoto = (a: { name: string; slug: string; avatar?: { url: strin
   const bas = a.name.trim().split(/\s+/).slice(0, 2).map((p) => p[0] || '').join('').toLocaleUpperCase('tr-TR')
   return `<span class="yz-foto yz-bas" style="--yz:${s}px" aria-hidden="true">${esc(bas)}</span>`
 }
+/** Başlık (30 Ekim 2026, kullanıcı: "genişteyken başlıklar sığmıyor"): "Double-X", "Wi-Fi" gibi tireli kelimeler satır sonunda tireden bölünmez. */
+export const baslik = (t: string) => esc(t).replace(/[^\s-]+(?:-[^\s-]+)+/g, (k) => `<span class="nb">${k}</span>`)
 export const ico = (k: string, s = 20) => `<svg class="ico" width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true">${I[k] || ''}</svg>`
 
 const G: Record<string, string> = {

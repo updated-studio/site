@@ -1,6 +1,6 @@
 ---
 /**
- * Sonsuz akışın bir sayfası: 20 haber → YouTube şeridi → (tek sayfalarda) video reklam → Reels şeridi.
+ * Sonsuz akışın bir sayfası: 20 haber → YouTube şeridi → (tek sayfalarda) video reklam. Reels şeridi 30 Ekim 2026'da kalktı (kullanıcı: "haber kısmında reel olmayacak"; reels yalnız ana sayfada manşet yanında).
  * 12. karttan sonra akış içi reklam; 8. sıraya sponsorlu kart (kampanya varsa). Telefonda 6. karttan sonra kutu reklam (28 Ekim 2026).
  */
 import CardStd from './CardStd.astro'
@@ -8,7 +8,6 @@ import CardSponsored from './CardSponsored.astro'
 import Ad from './Ad.astro'
 import VideoAd from './VideoAd.astro'
 import YtStrip from './YtStrip.astro'
-import ReelStrip from './ReelStrip.astro'
 import type { Ad as AdT, News, Reel, Video } from '../lib/types'
 import { pickAd } from '../lib/api'
 interface Props { items: News[]; page: number; videos: Video[]; reels: Reel[]; ads: AdT[]; channel: string; profile: string; first?: boolean }
@@ -31,5 +30,4 @@ const rot = <T,>(x: T[]) => (x.length ? [...x.slice(page % x.length), ...x.slice
   {b.length > 0 && <div class="grid4">{b.map((n) => <CardStd item={n} />)}</div>}
   <YtStrip videos={rot(videos)} channel={channel} />
   {page % 2 === 1 && <VideoAd ad={pickAd(ads, 'video', page)} />}
-  <ReelStrip reels={rot(reels)} profile={profile} />
 </div>

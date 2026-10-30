@@ -148,6 +148,23 @@ h3{font-weight:700}
 @media (max-width:1100px){.grid4{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:900px){.grid4,.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:560px){.grid4,.grid3{grid-template-columns:minmax(0,1fr)}}
+.nb{white-space:nowrap}
+/* Telefonda haber kartı (30 Ekim 2026, kullanıcı: "kaydırınca görünen haberler neredeyse manşet boyutunda, daha küçük olacak"):
+   tek sütunda kart yatay sıkışık satır olur: solda küçük görsel, sağda kategori + başlık + imza. Manşet ve video kartları etkilenmez. */
+@media (max-width:560px){
+  .grid4,.grid3{gap:10px}
+  .grid4 > .c-std:has(> .c-img),.grid3 > .c-std:has(> .c-img){flex-direction:row;align-items:stretch}
+  .grid4 > .c-std > .c-img,.grid3 > .c-std > .c-img{flex:0 0 36%;max-width:148px;aspect-ratio:auto;min-height:96px}
+  .grid4 > .c-std > .c-img .lbl,.grid3 > .c-std > .c-img .lbl{display:none}
+  .grid4 > .c-std .b,.grid3 > .c-std .b{padding:10px 12px;gap:4px;min-width:0}
+  .grid4 > .c-std .cat,.grid3 > .c-std .cat{font-size:12px;padding:0;margin:0}
+  .cam .grid4 > .c-std h3,.cam .grid3 > .c-std h3,.grid4 > .c-std h3,.grid3 > .c-std h3{font-size:16px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .grid4 > .c-std .pks,.grid3 > .c-std .pks{display:none}
+  .grid4 > .c-std .ft,.grid3 > .c-std .ft{min-width:0}
+  .grid4 > .c-std .ft .meta,.grid3 > .c-std .ft .meta{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+  .grid4 > .c-std .yz-ad,.grid3 > .c-std .yz-ad{display:none}
+  .grid4 > .c-std .cat,.grid3 > .c-std .cat{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
 .save{width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);background:transparent;cursor:pointer;flex:none}
 .save[aria-pressed="true"]{background:var(--text);color:var(--bg);border-color:var(--text)}
 .save svg{width:16px;height:16px}

@@ -1,8 +1,8 @@
 ---
 /**
  * Yazı ve liste sayfalarının sağ sütunu (yol haritası Görsel 4, 25 Ekim 2026): boş kalmasın diye
- * (varsa) bu yazıdaki ürünler → son dakika → günün önerisi (her gün başka bir inceleme) → kutu reklam → en çok okunanlar → reels.
- * Telefonda (≤1100 px) sütun yazının altına iner; orada son dakika ve reels gizlenir (sayfada zaten var / uzamasın).
+ * (varsa) bu yazıdaki ürünler → son dakika → günün önerisi (her gün başka bir inceleme) → kutu reklam → en çok okunanlar.
+ * Telefonda (≤1100 px) sütun yazının altına iner; orada son dakika gizlenir. Reels 30 Ekim 2026'da haber sayfalarından kalktı.
  */
 import SonDakika from './SonDakika.astro'
 import Ad from './Ad.astro'
@@ -12,7 +12,7 @@ import * as api from '../lib/api'
 import { s20 } from '../lib/ui'
 interface Props { haric?: string; ads: import('../lib/types').Ad[]; sonDakika?: boolean }
 const { haric, ads, sonDakika = true } = Astro.props
-const [latest, reviews, okunan, reels, site] = await Promise.all([api.getLatest(1, 8), api.getReviews(1, 12), api.getMostRead(5, '7g'), api.getReels(), api.getSite()])
+const [latest, reviews, okunan] = await Promise.all([api.getLatest(1, 8), api.getReviews(1, 12), api.getMostRead(5, '7g')])
 const son = latest.filter((n) => n.path !== haric).slice(0, 7)
 // Günün önerisi: yayımlanmış incelemelerden her gün sıradaki (derleme günü İstanbul saatiyle)
 const gun = Math.floor((Date.now() + 3 * 3600e3) / 86400e3)
@@ -35,13 +35,4 @@ const enCok = okunan.filter((n) => n.path !== haric).slice(0, 5)
   )}
   <Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare />
   {enCok.length > 0 && <div><h2 class="label ys-baslik">En çok okunanlar</h2><CardList items={enCok} /></div>}
-  {reels.length > 0 && (
-    <div class="ys-reels">
-      <h2 class="label ys-baslik">Reels · @updated.tr</h2>
-      <div class="ys-reel-l">
-        {reels.slice(0, 2).map((r) => <a class="reel" href={r.url} target="_blank" rel="noopener"><span class="c-img"><Img img={r.cover} alt="" sizes="150px" /><span class="cap">{r.caption}</span></span></a>)}
-      </div>
-      <a class="btn-t btn" href={site.instagram} target="_blank" rel="noopener">Instagram'da takip et</a>
-    </div>
-  )}
 </div>

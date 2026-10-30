@@ -10,7 +10,7 @@ const { title, source, basePath = '/haberler', items, videos, reels, ads, channe
 const next = startPage + (renderFirst ? 1 : 0)
 ---
 <div data-feed={source} data-next={next}>
-  <div class="sh"><h2>{title}</h2><span class="meta">Sayfanın sonuna geldikçe 20 haber, ardından videolar ve reels yüklenir</span></div>
+  <div class="sh"><h2>{title}</h2><span class="meta">Sayfanın sonuna geldikçe 20 haber, ardından videolar yüklenir</span></div>
   {renderFirst && items.length > 0 && <FeedChunk items={items} page={startPage} videos={videos} reels={reels} ads={ads} channel={channel} profile={profile} first />}
   <div class="loader" data-sentinel><div class="skel" aria-hidden="true"><i></i><i></i><i></i><i></i></div><a class="btn" href={`${basePath === '/' ? '' : basePath}/sayfa/${next}`} rel="next" data-more>Daha fazla haber</a></div>
 </div>
