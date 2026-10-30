@@ -1,27 +1,67 @@
 ---
+/**
+ * İncelemeler (30 Ekim 2026, kullanıcı: "galeri gibi ve hazır önerilenler olarak bir içerik duvarı"): türe göre süzgeç → öne çıkan üçlü
+ * (en yüksek puan büyük) → öne çıkan kıyaslamalar → galeri duvarı (farklı oranlarda kartlar, puan rozeti). Süzgeç sayfada çalışır.
+ */
 import Base from '../../layouts/Base.astro'
-import CardStd from '../../components/CardStd.astro'
-import CardList from '../../components/CardList.astro'
+import Img from '../../components/Img.astro'
 import Ad from '../../components/Ad.astro'
 import * as api from '../../lib/api'
 import { listMeta } from '../../lib/seo'
+import { turAdi } from '../../lib/turler'
+import { baslik } from '../../lib/ui'
 export async function getStaticPaths() {
   const n = Math.max(1, Math.ceil((await api.allReviews()).length / 24))
   return Array.from({ length: n }, (_, i) => ({ params: { sayfa: i ? `sayfa/${i + 1}` : undefined }, props: { p: i + 1 } }))
 }
 const { p } = Astro.props
-const [items, next, ads] = await Promise.all([api.getReviews(p, 24), api.getReviews(p + 1, 1), api.getAds()])
-const top = [...items].sort((a, b) => b.score - a.score).slice(0, 5)
+const [items, next, ads, kiyaslar] = await Promise.all([api.getReviews(p, 24), api.getReviews(p + 1, 1), api.getAds(), api.getComparisons()])
+const one = p === 1 ? [...items].sort((a, b) => b.score - a.score || +new Date(b.publishedAt) - +new Date(a.publishedAt)).slice(0, 3) : []
+const duvar = items.filter((r) => !one.includes(r))
+const turler = [...new Set(items.map((r) => r.product?.type).filter(Boolean))] as string[]
+const p20 = (s: number) => Math.round(s)
 ---
 <Base meta={listMeta('İncelemeler', 'Kullanarak test ettiğimiz cihazlar: /20 puan, artılar, eksiler ve kime uygun olduğu.', p > 1 ? `/inceleme/sayfa/${p}` : '/inceleme', items.map((r) => ({ path: r.path, title: r.title })))}>
   <div class="wrap">
-    <div class="art-head" style="max-width:none;padding-bottom:24px"><span class="lbl l-inc">İnceleme</span><h1 class="h1">İncelemeler</h1><p class="lead" style="margin:0">Her puan /20; kullanım süresi ve cihazın kaynağı puan kutusunda yazar.</p></div>
-    {items.length === 0 ? <div class="rh-bos" style="padding-bottom:48px"><p class="lead" style="margin:0">İlk incelemeler hazırlanıyor: cihazları kullanarak test ediyoruz, puan /20. O zamana kadar ürünleri <a href="/karsilastirma">Kıyaslamalar</a>'da yan yana koyabilir, <a href="/urun">Künyeler</a>'de teknik verilere bakabilirsin.</p></div> : <div class="with-rail">
-      <div>
-        <div class="grid3">{items.map((r, i) => <CardStd item={r} eager={i < 3} />)}</div>
-        <nav class="chips" style="margin-top:32px" aria-label="Sayfalar">{p > 1 && <a class="btn" href={p === 2 ? '/inceleme' : `/inceleme/sayfa/${p - 1}`} rel="prev">Önceki</a>}{next.length > 0 && <a class="btn" href={`/inceleme/sayfa/${p + 1}`} rel="next">Sonraki</a>}</nav>
-      </div>
-      <div class="rail"><div><h2 class="label" style="color:var(--text-3);margin:0 0 8px">Puan tablosu</h2><CardList items={top} score /></div><Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare /></div>
-    </div>}
+    <div class="icl-bas">
+      <div><span class="ic-tur">UPDATED · elle test, puan /20</span><h1 class="h1">İncelemeler</h1><p class="lead" style="margin:0">Her ürünü günlerce kullanıp videoyla, puanla ve künyeyle anlatıyoruz.</p></div>
+      {turler.length > 1 && <nav class="icl-tur" aria-label="Türe göre" data-icl-tur>
+        <a href="#" data-tur="" aria-current="page">Hepsi</a>
+        {turler.map((t) => <a href={`#${t}`} data-tur={t}>{turAdi(t)}</a>)}
+      </nav>}
+    </div>
+    {items.length === 0 ? <div class="rh-bos" style="padding-bottom:48px"><p class="lead" style="margin:0">İlk incelemeler hazırlanıyor: cihazları kullanarak test ediyoruz, puan /20. O zamana kadar ürünleri <a href="/karsilastirma">Kıyaslamalar</a>'da yan yana koyabilir, <a href="/urun">Künyeler</a>'de teknik verilere bakabilirsin.</p></div> : <>
+      {one.length > 0 && <section class="icl-one" aria-label="Öne çıkan">
+        <a class="icl-k buyuk" href={one[0].path} data-tur={one[0].product?.type}>
+          {one[0].cover && <Img img={one[0].cover} alt="" eager sizes="(max-width: 900px) 100vw, 800px" />}
+          <span class="icl-p">{p20(one[0].score)}<small>/20</small></span>
+          <span class="icl-alt"><span class="lbl l-inc">Editörün seçimi</span><b set:html={baslik(one[0].title)} /></span>
+        </a>
+        {one.length > 1 && <div>{one.slice(1).map((r) => (
+          <a class="icl-k" href={r.path} data-tur={r.product?.type}>
+            {r.cover && <Img img={r.cover} alt="" sizes="(max-width: 900px) 50vw, 400px" />}
+            <span class="icl-p">{p20(r.score)}</span>
+            <span class="icl-alt"><b set:html={baslik(r.title)} /></span>
+          </a>
+        ))}</div>}
+      </section>}
+
+      {kiyaslar.length > 0 && p === 1 && <section class="sec" aria-label="Öne çıkan kıyaslamalar">
+        <div class="sh"><h2>Öne çıkan kıyaslamalar</h2><a class="btn-t btn" href="/karsilastirma">Tümü</a></div>
+        <div class="icl-duvar">{kiyaslar.slice(0, 4).map((c) => (
+          <a href={c.path}><span class="c-img">{c.cover && <Img img={c.cover} alt="" sizes="300px" />}<span class="ic-et ic-et-k">Kıyas</span></span><b set:html={baslik(c.title)} /><span class="ic-neden">{c.a.name} · {c.b.name}</span></a>
+        ))}</div>
+      </section>}
+
+      {duvar.length > 0 && <section class="sec" aria-label="Tüm incelemeler">
+        <div class="sh"><h2>Tüm incelemeler</h2></div>
+        <div class="icl-duvar" data-icl-duvar>{duvar.map((r) => (
+          <a href={r.path} data-tur={r.product?.type}><span class="c-img">{r.cover && <Img img={r.cover} alt="" sizes="300px" />}<span class="icl-p">{p20(r.score)}</span></span><b set:html={baslik(r.title)} /><span class="ic-neden">{turAdi(r.product?.type)} · {r.product?.brand}</span></a>
+        ))}</div>
+      </section>}
+      <Ad slot="lb" ad={api.pickAd(ads, 'lb')} />
+      <nav class="chips" style="margin:32px 0" aria-label="Sayfalar">{p > 1 && <a class="btn" href={p === 2 ? '/inceleme' : `/inceleme/sayfa/${p - 1}`} rel="prev">Önceki</a>}{next.length > 0 && <a class="btn" href={`/inceleme/sayfa/${p + 1}`} rel="next">Sonraki</a>}</nav>
+    </>}
   </div>
+  <script is:inline>(()=>{const n=document.querySelector('[data-icl-tur]');if(!n)return;const sec=(t)=>{n.querySelectorAll('a').forEach((a)=>a.setAttribute('aria-current',a.dataset.tur===t?'page':'false'));document.querySelectorAll('.icl-one [data-tur],[data-icl-duvar] [data-tur]').forEach((k)=>{k.hidden=!!t&&k.dataset.tur!==t})};n.addEventListener('click',(e)=>{const a=e.target.closest('a[data-tur]');if(!a)return;e.preventDefault();sec(a.dataset.tur);history.replaceState(null,'',a.dataset.tur?'#'+a.dataset.tur:location.pathname)});const h=location.hash.slice(1);if(h)sec(h)})()</script>
 </Base>

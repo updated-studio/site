@@ -1,0 +1,118 @@
+---
+/**
+ * İnceleme şablonu (30 Ekim 2026, kullanıcı onayı; tasarım: Claude tuvali "UPDATED İnceleme Şablonu").
+ * Baş (etiket, başlık, spot, künye satırı) → video + bölümler | puan kartı (UPscore /20, alt puanlar, kime göre, Kıyasla/Künye)
+ * → "Bununla birlikte izle" (otomatik: api.incelemeOnerileri) → kısa cevap "Almalı mısın?" → artılar/eksiler → test şeridi
+ * → metin (araya reklam) → yöntem → düzeltmeler → yazar kartı → topluluk | sağ sütun: künye, kıyaslar, reklam, puan tablosu.
+ * Video yoksa kapak görseli. Telefonda puan kartı videonun altına iner.
+ */
+import Img from './Img.astro'
+import KunyeMini from './KunyeMini.astro'
+import CardList from './CardList.astro'
+import Ad from './Ad.astro'
+import Topluluk from './Topluluk.astro'
+import * as api from '../lib/api'
+import { date } from '../lib/format'
+import { baslik, ico, km, linkProducts, yazarFoto } from '../lib/ui'
+import { insertAfterParagraph } from '../lib/rich'
+import { turAdi } from '../lib/turler'
+import type { Ad as AdT, Comparison, Review } from '../lib/types'
+interface Props { r: Review; oneriler: api.Oneri[]; kiyaslar: Comparison[]; ads: AdT[]; top: Review[]; fotolar: Record<string, string>; youtube: string }
+const { r, oneriler, kiyaslar, ads, top, fotolar, youtube } = Astro.props
+const MARK = '<!--AD-IN-->'
+let body = linkProducts(r.html || '', [r.product])
+if ((body.match(/<\/p>/g) || []).length >= 3) body = insertAfterParagraph(body, 2, MARK)
+const [before, after] = body.split(MARK)
+const puan = Math.round(r.score)
+const alt = r.altPuanlar ?? []
+const bolumler = r.bolumler ?? []
+const ytId = r.video?.youtubeId
+const kiyasla = `/karsilastirma/kiyas?u=${r.product.slug}`
+const tur = turAdi(r.product.type)
+const ETIKET = { kiyas: ['Kıyas', 'ic-et-k'], inceleme: ['İnceleme', 'ic-et-i'], video: ['Video', 'ic-et-v'] } as const
+---
+<article class="ic">
+  <header class="ic-bas">
+    <div class="ic-ust-satir"><span class="lbl l-inc">İnceleme</span><span class="ic-tur">{tur} · {r.product.brand}</span></div>
+    <h1 set:html={baslik(r.title)} />
+    <p class="lead">{r.spot}</p>
+    <div class="kunye-row"><a class="yz-link" href={`/yazar/${r.author.slug}`} rel="author"><Fragment set:html={yazarFoto(r.author, 32, fotolar)} />{r.author.name}</a><Fragment set:html={km('takvim', date(r.publishedAt), r.publishedAt)} />{r.readingTime && <Fragment set:html={km('okuma', `${r.readingTime} dk okuma`)} />}<a href="#topluluk" data-yorum-say hidden></a></div>
+  </header>
+
+  <div class="ic-ust">
+    <div class="ic-oynat" data-ic-oynat>
+      {ytId ? (
+        <a class="ic-video" href={`https://www.youtube.com/watch?v=${ytId}`} target="_blank" rel="noopener" data-yt={ytId} aria-label={`Videoyu oynat: ${r.video!.title}`}>
+          <span class="c-img"><Img img={r.video!.thumb || r.cover} alt="" eager sizes="(max-width: 1000px) 100vw, 820px" /><span class="ic-oy" set:html={ico('play', 30)} /></span>
+        </a>
+      ) : r.cover && <figure class="ic-kapak"><Img img={r.cover} eager sizes="(max-width: 1000px) 100vw, 820px" />{r.cover.credit && <figcaption>{r.cover.credit}</figcaption>}</figure>}
+      {ytId && bolumler.length > 0 && (
+        <nav class="ic-bolum" aria-label="Video bölümleri">
+          {bolumler.map((b) => <a href={`https://www.youtube.com/watch?v=${ytId}&t=${b.sn}s`} data-ic-sn={b.sn}><span class="mono">{b.zaman}</span>{b.ad}</a>)}
+        </nav>
+      )}
+    </div>
+
+    <aside class="ic-puan" aria-label="Puan kartı">
+      <span class="ic-kucuk">UPscore</span>
+      <div class="ic-skor"><b>{puan}</b><span>/20</span></div>
+      {alt.length > 0 && <div class="ic-alt">
+        {alt.map((a) => <div class="ic-cubuk"><span>{a.baslik}</span><span class="mono">{Math.round(a.puan)}</span><i style={`--p:${Math.max(0, Math.min(100, (a.puan / 20) * 100))}%`} class={a.puan < 12 ? 'dusuk' : undefined}></i></div>)}
+      </div>}
+      {r.who && (r.who.for.length > 0 || r.who.notFor.length > 0) && <div class="ic-kime">
+        {r.who.for.length > 0 && <div><b>Kimin için:</b> <span>{r.who.for.join(' · ')}</span></div>}
+        {r.who.notFor.length > 0 && <div><b>Kimin için değil:</b> <span>{r.who.notFor.join(' · ')}</span></div>}
+      </div>}
+      <div class="ic-dugme"><a class="btn btn-p" href={kiyasla}>Kıyasla</a><a class="btn" href={`/urun/${r.product.slug}`}>Künye</a></div>
+    </aside>
+  </div>
+
+  {oneriler.length > 0 && <section class="ic-oneri" aria-label="Bununla birlikte izle">
+    <div class="sh"><h2>Bununla birlikte izle</h2><span class="meta">Otomatik · aynı ürün ve aynı tür</span></div>
+    <div class="ic-oneri-l">
+      {oneriler.map((o) => (
+        <a class="ic-ok" href={o.href} {...(o.yt ? { target: '_blank', rel: 'noopener' } : {})}>
+          <span class="c-img">{o.img && <Img img={o.img} alt="" sizes="(max-width: 767px) 70vw, 380px" />}<span class={`ic-et ${ETIKET[o.tur][1]}`}>{ETIKET[o.tur][0]}</span></span>
+          <b>{o.baslik}</b><span class="ic-neden">{o.neden}</span>
+        </a>
+      ))}
+    </div>
+  </section>}
+
+  <div class="ic-govde with-rail">
+    <div class="ic-sol">
+      {r.shortAnswer && <div class="ic-kisa"><span class="ic-kucuk">Kısa cevap · almalı mısın?</span><p>{r.shortAnswer}</p></div>}
+      {(r.pros.length > 0 || r.cons.length > 0) && <div class="ic-ae">
+        <div><h2>Artılar</h2><ul>{r.pros.slice(0, 3).map((x) => <li class="arti">{x}</li>)}</ul></div>
+        <div><h2>Eksiler</h2><ul>{r.cons.slice(0, 3).map((x) => <li class="eksi">{x}</li>)}</ul></div>
+      </div>}
+      <div class="ic-test">
+        <div><span class="ic-kucuk">Kullanım süresi</span><b>{r.usageDays ? `${r.usageDays} gün` : '—'}</b></div>
+        <div><span class="ic-kucuk">Cihazın kaynağı</span><span>{r.deviceSource || 'Belirtilmedi'}</span></div>
+        <div><span class="ic-kucuk">Nasıl test ettik</span>{r.methodHtml ? <a href="#yontem">Yöntemi oku</a> : <span>—</span>}</div>
+      </div>
+      <div class="prose">
+        <Fragment set:html={before} />
+        {after !== undefined && <Ad slot="in" ad={api.pickAd(ads, 'in')} />}
+        {after && <Fragment set:html={after} />}
+        {r.methodHtml && <><h2 id="yontem">Nasıl test ettik</h2><Fragment set:html={r.methodHtml} /></>}
+        {r.corrections?.map((c) => <div class="fix"><b>Düzeltme · {date(c.at)}</b> {c.note}</div>)}
+      </div>
+      <div class="ic-yazar">
+        <Fragment set:html={yazarFoto(r.author, 64, fotolar)} />
+        <div><a href={`/yazar/${r.author.slug}`} rel="author"><b>{r.author.name}</b></a>{r.author.title && <span>{r.author.title}</span>}</div>
+      </div>
+      <Topluluk hedef={`reviews:${r.id}`} />
+    </div>
+    <div class="rail">
+      <div><h2 class="label ys-baslik">Künye</h2><KunyeMini p={{ ...r.product, score: r.score }} /></div>
+      <div class="ic-rakip"><h2 class="label ys-baslik">Kıyasla</h2>
+        {kiyaslar.slice(0, 4).map((c) => <a href={c.path}><span>{c.a.slug === r.product.slug ? c.b.name : c.a.name}</span><span class="mono">Kıyas</span></a>)}
+        <a href={kiyasla}><span>Başka bir ürünle kıyasla</span><Fragment set:html={ico('right', 16)} /></a>
+      </div>
+      <Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare />
+      {top.length > 0 && <div><h2 class="label ys-baslik">Puan tablosu</h2><CardList items={top} score /></div>}
+      {!ytId && youtube && <a class="btn" href={youtube} target="_blank" rel="noopener">YouTube kanalımız</a>}
+    </div>
+  </div>
+</article>

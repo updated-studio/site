@@ -116,10 +116,23 @@ function youtube(root: ParentNode = document) {
     a.addEventListener('click', (e) => {
       if (e.metaKey || e.ctrlKey) return
       e.preventDefault()
-      const box = $('.c-img', a)!; const id = a.dataset.yt!
-      box.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0" title="${a.textContent?.trim() || 'YouTube'}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe>`
+      const box = $('.c-img', a)!; const id = a.dataset.yt!; const bas = Number(a.dataset.ytBas || 0)
+      box.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0${bas ? `&start=${bas}` : ''}" title="${a.textContent?.trim() || 'YouTube'}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe>`
     })
   })
+}
+
+/* ---------- İnceleme videosu bölümleri: tıklayınca video o saniyeden yerinde başlar (30 Ekim 2026) ---------- */
+function videoBolumleri() {
+  $$<HTMLAnchorElement>('[data-ic-sn]').forEach((b) => b.addEventListener('click', (e) => {
+    if (e.metaKey || e.ctrlKey) return
+    const kutu = b.closest('[data-ic-oynat]'); const v = kutu && $<HTMLAnchorElement>('[data-yt]', kutu)
+    if (!v) return
+    e.preventDefault()
+    const sn = Number(b.dataset.icSn || 0), f = $<HTMLIFrameElement>('iframe', v)
+    if (f) { f.src = f.src.replace(/&start=\d+/, '') + `&start=${sn}`; return }
+    v.dataset.ytBas = String(sn); v.click()
+  }))
 }
 
 /* ---------- akordeon manşet ---------- */
@@ -338,5 +351,5 @@ function okunanSekme() {
 /** Sonradan eklenen parçalara (sonsuz akış) davranış bağla. */
 function hydrate(root: ParentNode) { strips(root); youtube(root); videoAds(root) }
 
-theme(); menu(); search(); searchPage(); breaking(); accordion(); newPill(); clocks(); feeds(); kunyeCard(); sixty(); robot(); onlyDiff(); sokum(); newsletter(); okunanSekme()
+theme(); menu(); search(); searchPage(); breaking(); accordion(); newPill(); clocks(); feeds(); kunyeCard(); sixty(); robot(); onlyDiff(); sokum(); newsletter(); okunanSekme(); videoBolumleri()
 hydrate(document)

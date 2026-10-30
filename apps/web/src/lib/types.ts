@@ -10,7 +10,7 @@ export type News = {
   knowns?: string[]; unknowns?: string[]; sources?: { name: string; url?: string; primary?: boolean }[]; corrections?: { at: string; note: string }[]
   seo: { title: string; description: string; image?: Img; canonical?: string; noindex?: boolean; entities?: string[]; faq?: { q: string; a: string }[] }
 }
-export type Review = Omit<News, 'kind' | 'category' | 'label'> & { kind: 'review'; product: ProductRef; score: number; pros: string[]; cons: string[]; usageDays?: number; deviceSource?: string; who?: { for: string[]; notFor: string[] }; methodHtml?: string; video?: Video }
+export type Review = Omit<News, 'kind' | 'category' | 'label'> & { kind: 'review'; product: ProductRef; score: number; pros: string[]; cons: string[]; usageDays?: number; deviceSource?: string; who?: { for: string[]; notFor: string[] }; methodHtml?: string; video?: Video; altPuanlar: { baslik: string; puan: number }[]; bolumler: { zaman: string; ad: string; sn: number }[] }
 export type Comparison = { id: string; kind: 'comparison'; title: string; spot: string; path: string; a: ProductRef; b: ProductRef; shortAnswer?: string; keyDiffs: { big: string; label: string; winner?: 'a' | 'b' }[]; whoFor?: { a?: string; b?: string }; method?: string; cover?: Img; author: Author; publishedAt: string; seo: News['seo'] }
 export type Product = ProductRef & { id?: number; path: string; releaseWhen?: string; parts?: { name: string; value?: string }[]; rivals: ProductRef[]; news: News[]; reviews: Review[]; comparisons?: Comparison[]; seo: News['seo'] }
 export type Video = { title: string; youtubeId: string; kind: string; thumb?: Img; publishedAt?: string; short?: boolean }

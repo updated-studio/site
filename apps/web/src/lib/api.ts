@@ -92,7 +92,31 @@ export function mReview(d: any): Review {
   return {
     ...rest, kind: 'review', product: mRef(d.product)!, score: d.scoreBox?.score ?? 0, pros: d.scoreBox?.pros || [], cons: d.scoreBox?.cons || [], usageDays: d.scoreBox?.usageDays, deviceSource: d.scoreBox?.deviceSource,
     who: { for: d.scoreBox?.who?.for || [], notFor: d.scoreBox?.who?.notFor || [] }, methodHtml: d.method ? lexicalToHtml(d.method, media) : undefined, video: v ? mVideo(v) : undefined,
+    altPuanlar: (d.scoreBox?.altPuanlar || []).filter((x: any) => x?.baslik && x.puan != null).map((x: any) => ({ baslik: x.baslik, puan: Number(x.puan) })),
+    bolumler: (d.videoBolumleri || []).filter((x: any) => x?.zaman && x?.ad).map((x: any) => ({ zaman: x.zaman, ad: x.ad, sn: String(x.zaman).split(':').reduce((t: number, p: string) => t * 60 + Number(p), 0) })),
   }
+}
+/** İnceleme videosunun altında öneriler (30 Ekim 2026, kullanıcı: "girdiğimiz içeriklerden kıyaslamaları ve incelemeleri otomatik videonun altında
+ *  önersin"). Sıra: aynı ürünün kıyaslamaları → aynı ürünün kanal videoları → aynı türün incelemeleri → aynı türün kıyaslamaları → aynı markanın videoları. */
+export type Oneri = { tur: 'kiyas' | 'inceleme' | 'video'; baslik: string; href: string; img?: Img; neden: string; yt?: string }
+export async function incelemeOnerileri(r: Review, n = 3): Promise<Oneri[]> {
+  const [kiyaslar, incelemeler, yt] = await Promise.all([allComparisons(), allReviews(), getYoutube().catch(() => [] as Video[])])
+  const p = r.product, model = p.name.toLocaleLowerCase('tr-TR'), marka = p.brand.toLocaleLowerCase('tr-TR')
+  const icinde = (t: string, k: string) => !!k && t.toLocaleLowerCase('tr-TR').includes(k)
+  const kAyni = kiyaslar.filter((c) => c.a?.slug === p.slug || c.b?.slug === p.slug)
+  const kTur = kiyaslar.filter((c) => !kAyni.includes(c) && (c.a?.type === p.type || c.b?.type === p.type))
+  const vAyni = yt.filter((v) => v.youtubeId !== r.video?.youtubeId && icinde(v.title, model))
+  const vMarka = yt.filter((v) => v.youtubeId !== r.video?.youtubeId && !vAyni.includes(v) && icinde(v.title, marka))
+  const iTur = incelemeler.filter((x) => x.id !== r.id && x.product?.type === p.type)
+  const k = (c: Comparison, neden: string): Oneri => ({ tur: 'kiyas', baslik: c.title, href: c.path, img: c.cover, neden })
+  const v = (x: Video, neden: string): Oneri => ({ tur: /\bvs\b|kıyas/i.test(x.title) ? 'kiyas' : 'video', baslik: x.title, href: `https://www.youtube.com/watch?v=${x.youtubeId}`, img: x.thumb, neden, yt: x.youtubeId })
+  const hepsi: Oneri[] = [
+    ...kAyni.map((c) => k(c, 'Aynı ürün · kıyaslama')), ...vAyni.map((x) => v(x, 'Aynı ürün · video')),
+    ...iTur.map((x) => ({ tur: 'inceleme' as const, baslik: x.title, href: x.path, img: x.cover, neden: 'Aynı tür · inceleme' })),
+    ...kTur.map((c) => k(c, 'Aynı tür · kıyaslama')), ...vMarka.map((x) => v(x, 'Aynı marka · video')),
+  ]
+  const gor = new Set<string>()
+  return hepsi.filter((o) => (gor.has(o.href) ? false : (gor.add(o.href), true))).slice(0, n)
 }
 export function mComparison(d: any): Comparison {
   return { id: String(d.id), kind: 'comparison', title: d.title, spot: d.spot, path: d.path, a: mRef(d.a)!, b: mRef(d.b)!, shortAnswer: d.shortAnswer, keyDiffs: d.keyDiffs || [], whoFor: d.whoFor, method: d.method, cover: mImg(d.cover, 'hero'), author: mAuthor(d.author), publishedAt: d.publishedAt, seo: seo(d) }
