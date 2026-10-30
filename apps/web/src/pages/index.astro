@@ -70,11 +70,12 @@ const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşıla�
 
   <section class="sec"><div class="wrap with-rail">
     <div class="ana-sol">
-      {radarVar && <div><Radar items={radar} no={no()} /></div>}
       {robotVar && <div><KiyasRobotu products={products} no={no()} /></div>}
       {m.altmisSaniye && <div><Altmis items={latest} no={no()} /></div>}
     </div>
     <div class="rail">
+      {/* Çıkış radarı sağ sütunun başında (30 Ekim 2026, toplantı notu) */}
+      {radarVar && <Radar items={radar} />}
       {m.cokOkunan && <EnCokOkunan fallback={latest} />}
       <GorevKarti gorevler={gorevler} />
       <Ad slot="mr" ad={api.pickAd(ads, 'mr', 1)} bare />

@@ -15,6 +15,7 @@ import * as migration_20261028_160000_kesik_basliklar from './20261028_160000_ke
 import * as migration_20261029_071812_uye_studyo_foto from './20261029_071812_uye_studyo_foto';
 import * as migration_20261029_090000_tek_kisi from './20261029_090000_tek_kisi';
 import * as migration_20261030_014451_inceleme_alt_puan from './20261030_014451_inceleme_alt_puan';
+import * as migration_20261030_021746_radar_tarih from './20261030_021746_radar_tarih';
 
 export const migrations = [
   {
@@ -100,6 +101,11 @@ export const migrations = [
   {
     up: migration_20261030_014451_inceleme_alt_puan.up,
     down: migration_20261030_014451_inceleme_alt_puan.down,
-    name: '20261030_014451_inceleme_alt_puan'
+    name: '20261030_014451_inceleme_alt_puan',
+  },
+  {
+    up: migration_20261030_021746_radar_tarih.up,
+    down: migration_20261030_021746_radar_tarih.down,
+    name: '20261030_021746_radar_tarih'
   },
 ];

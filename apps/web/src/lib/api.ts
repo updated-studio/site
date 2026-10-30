@@ -185,7 +185,10 @@ export async function getProduct(slug: string): Promise<Product | null> {
   }, () => (S.PRODUCTS[slug] ? { ...S.PRODUCTS[slug], comparisons: S.COMPARISONS.filter((c) => c.a.slug === slug || c.b.slug === slug) } : null))
 }
 export const getProducts = (limit = 12) => safe(async () => (await get('products', { sort: '-updatedAt', limit, depth: 1 })).docs.map(mRef).filter(Boolean) as ProductRef[], () => Object.values(S.PRODUCTS).slice(0, limit))
-export const getRadar = () => safe(async () => (await get('products', { where: { onRadar: { equals: true } }, sort: 'certainty', limit: 6, depth: 1 })).docs.map((d: any) => ({ ...mRef(d)!, releaseWhen: d.releaseWhen })), () => S.RADAR.map((p) => ({ ...p })))
+/** Çıkış radarı: "radarda" işaretli ve henüz satışa çıkmamış ürünler; tahmini tarihi en yakın olan üstte (tarihsiz en alta), eşitse kesinliği yüksek olan */
+export const getRadar = () => safe(async () => (await get('products', { where: { and: [{ onRadar: { equals: true } }, { status: { not_in: ['satista', 'eol'] } }] }, limit: 30, depth: 1 })).docs
+  .map((d: any) => ({ ...mRef(d)!, releaseWhen: d.releaseWhen as string | undefined, releaseDate: d.releaseDate as string | undefined }))
+  .sort((a: any, b: any) => (a.releaseDate ? Date.parse(a.releaseDate) : Infinity) - (b.releaseDate ? Date.parse(b.releaseDate) : Infinity) || (b.certainty || 0) - (a.certainty || 0)), () => S.RADAR.map((p) => ({ ...p })))
 
 /* ---------- kanallar, reklam ---------- */
 export const getVideos = (n = 8) => safe(async () => (await get('videos', { sort: '-publishedAt', limit: n, depth: 1 })).docs.map(mVideo), () => S.VIDEOS.slice(0, n))

@@ -38,8 +38,18 @@ export const Products: CollectionConfig = {
           { label: 'Söylenti', value: 'soylenti' }, { label: 'Sızıntı', value: 'sizinti' }, { label: 'Test kaydı', value: 'test' }, { label: 'Takvimde', value: 'takvim' },
           { label: 'Duyuruldu', value: 'duyuruldu' }, { label: 'Satışta', value: 'satista' }, { label: 'Satıştan kalktı', value: 'eol' } ] },
         { name: 'certainty', type: 'number', label: 'Kesinlik (1–4)', min: 1, max: 4, defaultValue: 4 },
-        { name: 'releaseWhen', type: 'text', label: 'Çıkış (radar)', admin: { description: 'Ör. Ekim ortası · 2027' } },
+      ],
+    },
+    // Çıkış radarı (30 Ekim 2026): ana sayfa sağ sütun kutusu. Çıkışı en yakın olan üstte; ürün "Satışta" olunca radardan kendiliğinden düşer.
+    {
+      type: 'collapsible', label: 'Çıkış radarı', admin: { description: 'Henüz çıkmamış ürün için: kutuyu işaretle, tahmini tarihi gir, Durum alanında söylenti / sızıntı / test / duyuruldu seç.' }, fields: [
         { name: 'onRadar', type: 'checkbox', label: 'Çıkış radarında', defaultValue: false },
+        {
+          type: 'row', fields: [
+            { name: 'releaseDate', type: 'date', label: 'Tahmini çıkış tarihi', admin: { date: { pickerAppearance: 'monthOnly', displayFormat: 'MMMM yyyy' }, description: 'Radar bu tarihe göre sıralanır; ay ve yıl yeterli. Boşsa en alta gider.' } },
+            { name: 'releaseWhen', type: 'text', label: 'Çıkış notu', admin: { description: 'İsteğe bağlı, ör. "Ekim ortası", "CES 2027"' } },
+          ],
+        },
       ],
     },
     { name: 'image', type: 'upload', relationTo: 'media', label: 'Ürün görseli' },

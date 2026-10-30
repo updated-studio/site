@@ -3,12 +3,12 @@ import Base from '../../layouts/Base.astro'
 import Img from '../../components/Img.astro'
 import * as api from '../../lib/api'
 import { listMeta } from '../../lib/seo'
-import { conf, glyph, s20 } from '../../lib/ui'
+import { durum, glyph, s20 } from '../../lib/ui'
 const items = await api.getProducts(200)
 ---
 <Base meta={listMeta('Künyeler', 'Ürün veritabanı: her ürünün kaynaklı teknik verileri, haberleri, incelemeleri ve kıyasları.', '/urun', items.map((p) => ({ path: `/urun/${p.slug}`, title: p.name })))}>
   <div class="wrap">
     <div class="art-head" style="max-width:none;padding-bottom:24px"><span class="cat">Ürün veritabanı</span><h1 class="h1">Künyeler</h1><p class="lead" style="margin:0">Bir ürünün tüm haberleri, incelemeleri ve teknik verisi tek sayfada.</p></div>
-    <div class="shelfk">{items.map((q) => <a class="kcard" href={`/urun/${q.slug}`}>{q.image ? <span class="c-img" style="margin:-16px -16px 8px"><Img img={q.image} alt="" /></span> : <Fragment set:html={glyph(q.type, 46)} />}<span class="eyebrow">{q.brand}</span><b>{q.name}</b><span class="pc-st"><Fragment set:html={conf(q.certainty)} /><span>{api.statusText(q.status)}</span></span>{q.score && <span class="kc-sc">{s20(q.score)}</span>}</a>)}</div>
+    <div class="shelfk">{items.map((q) => <a class="kcard" href={`/urun/${q.slug}`}>{q.image ? <span class="c-img" style="margin:-16px -16px 8px"><Img img={q.image} alt="" /></span> : <Fragment set:html={glyph(q.type, 46)} />}<span class="eyebrow">{q.brand}</span><b>{q.name}</b><Fragment set:html={durum(q.status)} />{q.score && <span class="kc-sc">{s20(q.score)}</span>}</a>)}</div>
   </div>
 </Base>

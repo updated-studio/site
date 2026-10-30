@@ -1,21 +1,49 @@
 ---
-/** Çıkış radarı: künyede "radarda" işaretli ürünler, kesinlik çubuğu (▮ söylenti … ▮▮▮▮ resmî). */
+/**
+ * Çıkış radarı (30 Ekim 2026, kullanıcı seçimi "C"): ana sayfa sağ sütununda dikdörtgen kutu.
+ * Satır: tahmini çıkış (ay / yıl) · ürün · marka ve çıkış notu · kesinlik etiketi. En fazla 5 satır, yakın tarih üstte (api.getRadar).
+ */
 import type { ProductRef } from '../../lib/types'
-import { conf } from '../../lib/ui'
-import { statusText } from '../../lib/api'
-interface Props { items: (ProductRef & { releaseWhen?: string })[]; no?: string }
-const { items, no = '03' } = Astro.props
+import { durum } from '../../lib/ui'
+interface Props { items: (ProductRef & { releaseWhen?: string; releaseDate?: string })[] }
+const { items } = Astro.props
+const AY = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara']
+const ne = (r: Props['items'][number]) => {
+  const d = r.releaseDate ? new Date(r.releaseDate) : null
+  return d && !isNaN(+d) ? { b: AY[d.getUTCMonth()], k: String(d.getUTCFullYear()) } : { b: '?', k: '' }
+}
+const satir = items.slice(0, 5)
 ---
-{items.length > 0 && <>
-  <div class="sh"><h2><span class="no">{no}</span>Çıkış radarı</h2><span class="meta">Kesinlik: ▮ söylenti · ▮▮ sızıntı · ▮▮▮ test/takvim · ▮▮▮▮ resmî</span></div>
-  <div class="grid3" style="margin-bottom:48px">
-    {items.slice(0, 3).map((r) => (
-      <article class="c-std"><div class="b">
-        <span class="cat">{r.brand}</span>
-        <h3 style="font-size:30px">{r.releaseWhen || 'Açıklanmadı'}</h3>
-        <b style="font-size:16px">{r.name}</b>
-        <div class="ft"><span class="pc-st"><Fragment set:html={conf(r.certainty)} /><span>{statusText(r.status)}</span></span><a class="btn-t btn" href={`/urun/${r.slug}`}>Künye</a></div>
-      </div></article>
-    ))}
-  </div>
-</>}
+{satir.length > 0 && (
+  <section class="rd" aria-labelledby="rd-bas">
+    <div class="rd-bas"><h2 id="rd-bas">Çıkış radarı</h2><span class="label">{satir.length} ürün</span></div>
+    <ol>
+      {satir.map((r) => { const t = ne(r); return (
+        <li><a href={`/urun/${r.slug}`}>
+          <span class="rd-ne">{t.b}{t.k && <small>{t.k}</small>}</span>
+          <span class="rd-ad">{r.name}</span>
+          <Fragment set:html={durum(r.status)} />
+          <span class="rd-mk">{[r.brand, r.releaseWhen].filter(Boolean).join(' · ')}</span>
+        </a></li>
+      ) })}
+    </ol>
+    <div class="rd-alt"><span class="label">Yakın tarih üstte</span><a href="/urun">Künyeler</a></div>
+  </section>
+)}
+<style>
+  .rd{border:1px solid var(--line);border-radius:var(--r-kart,18px);background:var(--surface);overflow:hidden}
+  .rd-bas{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 18px 12px;border-bottom:1px solid var(--line)}
+  .rd .rd-bas h2{margin:0;font-family:var(--f-baslik,var(--f-body));font-weight:700;font-size:20px;line-height:1;text-transform:none;letter-spacing:-.01em;color:var(--text)}
+  .rd .label{color:var(--text-3)}
+  .rd ol{list-style:none;margin:0;padding:0}
+  .rd li + li{border-top:1px solid var(--line)}
+  .rd li a{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:4px 12px;align-items:center;min-height:44px;padding:12px 18px;color:var(--text);text-decoration:none}
+  .rd li a:hover{background:var(--surface-2)}
+  .rd-ne{grid-column:1;grid-row:1 / 3;font-family:var(--f-head);font-weight:900;font-size:22px;line-height:1;text-transform:uppercase}
+  .rd-ne small{display:block;font-size:14px;color:var(--text-3)}
+  .rd-ad{grid-column:2;font-weight:600;line-height:1.25;min-width:0}
+  .rd :global(.kes){grid-column:3;grid-row:1 / 3;align-self:center}
+  .rd-mk{grid-column:2;grid-row:2;font-size:13px;color:var(--text-3);min-width:0}
+  .rd-alt{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 18px;border-top:1px solid var(--line);font-size:13px}
+  .rd-alt a{color:var(--text);font-weight:600}
+</style>

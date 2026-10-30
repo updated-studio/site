@@ -17,7 +17,12 @@
 .pcard dt{color:var(--text-2)}.pcard dd{margin:0;font-family:var(--f-mono);font-size:14px}
 .pc-unk{color:var(--text-3);font-size:14px;margin:0}
 .pcard .btn{justify-content:center}
-.conf{display:inline-flex;gap:3px}.conf i{width:12px;height:6px;background:var(--line)}.conf i.on{background:var(--text)}
+/* Kesinlik etiketi (ui.ts kes/durum; 30 Ekim 2026 pil çubuğunun yerine) */
+.kes{display:inline-flex;align-items:center;flex:none;align-self:flex-start;padding:2px 8px;border:1px solid;border-radius:var(--r-etiket,8px);font-family:var(--f-mono);font-size:11px;font-weight:600;line-height:1.4;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.kes.k1{color:var(--text-3);border-color:var(--line);border-style:dashed}
+.kes.k2{color:var(--orange-tx);border-color:color-mix(in srgb,var(--orange) 55%,transparent)}
+.kes.k3{color:var(--text);border-color:var(--text-3)}
+.kes.k4{color:#fff;background:var(--blue);border-color:var(--blue)}
 .eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3)}
 .btn.pri{background:var(--blue);border-color:var(--blue);color:var(--white)}
 .tag{display:inline-flex;align-items:center;height:24px;padding:0 8px;font-family:var(--f-head);font-weight:900;font-size:15px;text-transform:uppercase;background:var(--gray);color:var(--black)}

@@ -1,6 +1,6 @@
 /** Sunucu tarafı küçük HTML parçaları (ikon, kesinlik çubuğu, künye etiketi). Partial uçlarında da kullanılır. */
 import type { ProductRef } from './types'
-import { esc, LABEL_TEXT } from './format'
+import { esc, LABEL_TEXT, STATUS_TEXT } from './format'
 
 const I: Record<string, string> = {
   search: '<path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-4-4"/>', menu: '<path d="M3 6h18M3 12h18M3 18h18"/>', x: '<path d="M5 5l14 14M19 5L5 19"/>',
@@ -45,7 +45,11 @@ const G: Record<string, string> = {
 }
 export const glyph = (t: string, s = 22) => `<svg class="pk-svg" width="${s}" height="${Math.round(s * 0.78)}" viewBox="0 0 100 78" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="5">${G[t] || G.phone}</svg>`
 export const LVN = ['', 'Söylenti', 'Sızıntı', 'Test / takvim', 'Resmî']
-export const conf = (lv: number) => `<span class="conf" role="img" aria-label="Kesinlik ${lv}/4">${[1, 2, 3, 4].map((q) => `<i class="${q <= lv ? 'on' : ''}"></i>`).join('')}</span>`
+/** Kesinlik etiketi (30 Ekim 2026, kullanıcı seçimi "C"): pil çubuğu yerine tek kelime + renk. Kesik çizgi söylenti, turuncu sızıntı, çizgili test/takvim, dolu mavi resmî. */
+export const kes = (lv: number, metin = LVN[lv] || '') => `<span class="kes k${Math.max(1, Math.min(4, lv || 4))}">${esc(metin)}</span>`
+const DURUM_SEVIYE: Record<string, number> = { soylenti: 1, sizinti: 2, test: 3, takvim: 3, duyuruldu: 4, satista: 3, eol: 1 }
+/** Ürün durumu etiketi: kartlarda ve künyede "Satışta", "Sızıntı" gibi */
+export const durum = (s: string) => kes(DURUM_SEVIYE[s] ?? 3, STATUS_TEXT[s] || s)
 /** Künye etiketi: metinde ve kartlarda ürüne bağlantı; masaüstünde üzerine gelince kart açılır. */
 export const chip = (p: Pick<ProductRef, 'slug' | 'name' | 'type'>, label?: string) => `<a class="pk" href="/urun/${esc(p.slug)}" data-p="${esc(p.slug)}">${glyph(p.type, 16)}<span>${esc(label || p.name)}</span></a>`
 export const label = (l?: string) => { const x = l && LABEL_TEXT[l]; return x ? `<span class="lbl ${x[1]}">${x[0]}</span>` : '' }
