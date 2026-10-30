@@ -35,10 +35,28 @@ export const Reviews: CollectionConfig = {
         { name: 'usageDays', type: 'number', label: 'Kullanım süresi (gün)', min: 1, validate: legacyOk },
         { name: 'deviceSource', type: 'text', label: 'Cihazın kaynağı', validate: legacyOk, admin: { description: 'Ör. Cihaz Google Türkiye’den · Kendi satın alımımız' } },
         { name: 'who', type: 'group', label: 'Kime göre', fields: [{ name: 'for', type: 'text', hasMany: true, label: 'Uygun' }, { name: 'notFor', type: 'text', hasMany: true, label: 'Uygun değil' }] },
+        // Alt puanlar (30 Ekim 2026, kullanıcı onayı, inceleme şablonu): puan kartında çubuk olarak; toplam puan yine elle girilir
+        {
+          name: 'altPuanlar', type: 'array', label: 'Alt puanlar (/20, en fazla 6)', maxRows: 6, labels: { singular: 'Alt puan', plural: 'Alt puanlar' },
+          admin: { description: 'Puan kartında çubuk olarak görünür. Ör. Görüntü 17, Pil 12.' },
+          fields: [{ type: 'row', fields: [
+            { name: 'baslik', type: 'select', label: 'Başlık', required: true, options: ['Görüntü', 'Video', 'Ses', 'Pil', 'Ekran', 'Performans', 'Kullanım', 'Taşınabilirlik', 'Yapı kalitesi', 'Yazılım', 'Fiyat / performans'].map((v) => ({ label: v, value: v })) },
+            { name: 'puan', type: 'number', label: 'Puan /20', required: true, min: 0, max: 20, admin: { step: 1 } },
+          ] }],
+        },
       ],
     },
     { name: 'method', type: 'richText', label: 'Yöntem (puan kutusundan sonra)' },
     { name: 'video', type: 'relationship', relationTo: 'videos', label: 'Videolu inceleme' },
+    // Video bölümleri (30 Ekim 2026): oynatıcının altında atlama düğmeleri ("03:10 Görüntü")
+    {
+      name: 'videoBolumleri', type: 'array', label: 'Video bölümleri', maxRows: 12, labels: { singular: 'Bölüm', plural: 'Bölümler' },
+      admin: { description: 'Videoda atlanacak yerler. Zaman dakika:saniye (ör. 03:10).', condition: (d) => !!d?.video },
+      fields: [{ type: 'row', fields: [
+        { name: 'zaman', type: 'text', label: 'Zaman', required: true, validate: (v: unknown) => /^(\d{1,2}:)?\d{1,2}:\d{2}$/.test(String(v ?? '')) || 'dakika:saniye (ör. 03:10)' },
+        { name: 'ad', type: 'text', label: 'Bölüm', required: true, maxLength: 40 },
+      ] }],
+    },
     sources,
     corrections,
     seoFields,
