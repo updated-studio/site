@@ -72,6 +72,8 @@ const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşıla�
     <div class="ana-sol">
       {robotVar && <div><KiyasRobotu products={products} no={no()} /></div>}
       {m.altmisSaniye && <div><Altmis items={latest} no={no()} /></div>}
+      {/* Gündemden: sağ sütun uzun kaldığında solda boşluk açılmasın; "Son haberler"in devamı, sonsuz akış 21. haberden başlıyor */}
+      {rest.length > 4 && <div><div class="sh"><h2><span class="no">{no()}</span>Gündemden</h2><a class="btn-t btn" href="/haberler">Tümü</a></div><div class="grid-yatay">{rest.slice(4, 10).map((n) => <CardStd item={n} />)}</div></div>}
     </div>
     <div class="rail">
       {/* Çıkış radarı sağ sütunun başında (30 Ekim 2026, toplantı notu) */}

@@ -158,7 +158,7 @@ export const getNews = (catSlug: string, slug: string) => safe(async () => { con
 export const getRelated = (n: News, k = 4) => safe(async () => (await list('news', { id: { not_equals: n.id }, or: [{ 'category.slug': { equals: n.category.slug } }, ...(n.products.length ? [{ 'products.slug': { in: n.products.map((p) => p.slug) } }] : [])] } as any, { limit: k, depth: 1 })).docs.map(mNews), () => S.NEWS.filter((x) => x.id !== n.id && (x.category.slug === n.category.slug || x.products.some((p) => n.products.some((q) => q.slug === p.slug)))).slice(0, k))
 /** En çok okunanlar: panelde elle seçildiyse (yalnız 48 saat sekmesi) o; yoksa kendi okunma sayacımızdan. */
 export type Donem = '48s' | '7g' | '30g' | 'tum'
-export const DONEMLER: [Donem, string][] = [['48s', '48 saat'], ['7g', '7 gün'], ['30g', '30 gün'], ['tum', 'Tüm zamanlar']]
+export const DONEMLER: [Donem, string][] = [['48s', '48 saat'], ['7g', '7 gün'], ['30g', '30 gün'], ['tum', 'Tümü']]
 export const getMostRead = (n = 5, donem: Donem = '48s') => safe(async () => {
   const h = await get('globals/home', { depth: 2 })
   if (donem === '48s' && h.mostRead?.length) return (h.mostRead as any[]).map(mNews)

@@ -23,5 +23,6 @@ const gruplar = kiyasGruplari(katalog)
   .ky-hazir{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .ky-k{text-decoration:none;color:var(--text);gap:6px;padding:14px}.ky-k:hover{border-color:var(--text)}.ky-k svg{color:var(--text-3)}.ky-k b{font-size:16px;line-height:1.3}
   @media (max-width:900px){.ky{grid-template-columns:minmax(0,1fr)}}
-  @media (max-width:420px){.ky-hazir{grid-template-columns:1fr}}
+  /* Telefonda hazır kıyaslar alt alta uzamasın: yan yana kaydırılır (30 Ekim 2026) */
+  @media (max-width:560px){.ky-hazir{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin-inline:calc(-1 * var(--edge,16px));padding-inline:var(--edge,16px)}.ky-hazir::-webkit-scrollbar{display:none}.ky-hazir > a{flex:0 0 72%;scroll-snap-align:start}}
 </style>
