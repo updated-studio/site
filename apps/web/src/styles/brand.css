@@ -118,6 +118,11 @@ h3{font-weight:700}
 .c-img{position:relative;display:block;aspect-ratio:16/9;overflow:hidden;background:var(--img)}
 .c-img img{width:100%;height:100%;object-fit:cover}
 .c-img .lbl{position:absolute;left:0;top:0}
+/* Kartın üstüne gelince görsel çok yavaş yakınlaşır, çıkınca aynı yavaşlıkla geri döner (30 Ekim 2026, kullanıcı) */
+@media (hover:hover) and (prefers-reduced-motion:no-preference){
+  :is(.c-img,.icl-k,.ic-kapak) img{transition:transform 2.8s cubic-bezier(.2,.6,.2,1)}
+  :is(article,a,li):hover > .c-img img,a:hover > .c-img img,.icl-k:hover img,.ic-kapak:hover img{transform:scale(1.07)}
+}
 .c-std{display:flex;flex-direction:column;border:1px solid var(--line);background:var(--surface);min-width:0}
 .c-std .b{padding:16px;display:flex;flex-direction:column;gap:8px;flex:1}
 .c-std h3{font-size:24px;line-height:1.2}
