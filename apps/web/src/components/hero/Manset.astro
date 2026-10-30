@@ -42,17 +42,16 @@ const videolar = ig ? reels.slice(0, 10) : shorts.slice(0, 10)
 
     {videolar.length > 0 && <aside class="mv" aria-label="Son videolar">
       <div class="mv-h">
-        <div><h2>Son videolar</h2><span class="cat">{ig ? 'Instagram · @updated.tr' : 'YouTube · Nerdesin Fatih'}</span></div>
+        <div><h2>Son videolar</h2><a class="cat mv-hesap" href={ig ? instagram : `${youtube}/shorts`} target="_blank" rel="noopener">{ig ? 'Instagram · @updated.tr' : 'YouTube · Nerdesin Fatih'}</a></div>
         <div class="mv-ok"><button class="ibtn" type="button" data-mv="-1" aria-label="Son videolar: geri"><Fragment set:html={ico('left', 16)} /></button><button class="ibtn" type="button" data-mv="1" aria-label="Son videolar: ileri"><Fragment set:html={ico('right', 16)} /></button></div>
       </div>
       <div class="mv-iz" data-mv-iz tabindex="0" aria-label="Son videolar şeridi">
         {ig ? (reels.slice(0, 10).map((r) => (
-          <a class="mv-k" href={r.url} target="_blank" rel="noopener"><span class="c-img"><Img img={r.cover} alt="" sizes="170px" /><span class="mv-oy" set:html={ico('play', 18)} /></span><span class="mv-t">{r.caption}</span></a>
+          <a class="mv-k" href={r.url} target="_blank" rel="noopener" aria-label={r.caption || 'Reels'}><span class="c-img"><Img img={r.cover} alt="" sizes="170px" /><span class="mv-oy" set:html={ico('play', 18)} /></span></a>
         ))) : (shorts.slice(0, 10).map((v) => (
-          <a class="mv-k" href={`https://www.youtube.com/shorts/${v.youtubeId}`} target="_blank" rel="noopener" data-yt={v.youtubeId}><span class="c-img"><Img img={v.thumb} alt="" sizes="170px" /><span class="mv-oy" set:html={ico('play', 18)} /></span><span class="mv-t">{v.title}</span></a>
+          <a class="mv-k" href={`https://www.youtube.com/shorts/${v.youtubeId}`} target="_blank" rel="noopener" data-yt={v.youtubeId} aria-label={v.title}><span class="c-img"><Img img={v.thumb} alt="" sizes="170px" /><span class="mv-oy" set:html={ico('play', 18)} /></span></a>
         )))}
       </div>
-      <a class="mv-hep" href={ig ? instagram : `${youtube}/shorts`} target="_blank" rel="noopener">{ig ? 'Instagram’da takip et' : 'Tüm kısa videolar'} <Fragment set:html={ico('right', 14)} /></a>
     </aside>}
   </div>
 

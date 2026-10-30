@@ -107,12 +107,12 @@ h3{font-weight:700}
 @keyframes fd{from{opacity:0}}
 
 /* sections */
-.sec{padding-block:48px}
+.sec{padding-block:40px} /* 30 Ekim 2026: bölümler arası biraz daraldı (48 → 40, telefonda 32 → 26) */
 .sec + .sec{border-top:1px solid var(--line)}
 .sh{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
 .sh h2{font-size:40px}
 .sh .no{font-family:var(--f-mono);font-size:14px;color:var(--cat);margin-right:8px}
-@media (max-width:767px){.sh h2{font-size:30px}.sec{padding-block:32px}}
+@media (max-width:767px){.sh h2{font-size:30px}.sec{padding-block:26px}}
 
 /* cards (kit §10b) */
 .c-img{position:relative;display:block;aspect-ratio:16/9;overflow:hidden;background:var(--img)}
@@ -651,6 +651,9 @@ main{overflow-x:clip}
 .mv-h{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px 10px}
 .mv-h h2{font-size:22px}
 .mv-h .cat{padding:0;margin:0;font-size:12px}
+/* Reels (30 Ekim 2026): kapakta yazı zaten var; altyazı ve "takip et" kalktı, hesap adı bağlantı */
+.mv-hesap{text-decoration:none;color:var(--cat)}.mv-hesap:hover{text-decoration:underline;text-underline-offset:3px}
+.mv-iz{margin-bottom:14px!important}
 .mv-ok{display:flex;gap:6px}.mv-ok .ibtn{width:34px;height:34px}
 /* Reels kartları tam boy (28 Ekim 2026, kullanıcı: "reelsler tam boyut doğru görünsün"): her kapak 9:16, kırpılmaz; her görünümde
    iki kart tam sığar, kaydırınca ikişer ikişer ilerler. Manşet sütunla aynı boya uzar. */
