@@ -110,3 +110,12 @@
 /* Telefonda Bülten düğmesi yok (yer ileride başka şeylere; bülten alt bilgide), Beta etiketi sığsın */
 @media (max-width:767px){.cam .hdr .btn-p{display:none}}
 @media (max-width:374px){.cam .logo svg{height:18px}.cam .beta summary{font-size:11px;padding:1px 6px;min-height:20px}.cam .hdr .wrap{gap:8px}.cam .hdr-r{gap:4px}.cam .beta{margin-left:-4px}}
+
+/* Kategori şeridi (30 Ekim 2026): üst menünün ikinci satırı, menüyle birlikte yapışık; yatay kayar. Dokunma alanı 44 px, görünen hap küçük. */
+.kat-serit{border-top:1px solid var(--line)}
+.hdr .kat-serit .wrap{height:auto;gap:2px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 32px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 32px),transparent)}
+.kat-serit .wrap::-webkit-scrollbar{display:none}
+.kat-serit a{flex:none;display:inline-flex;align-items:center;min-height:44px;text-decoration:none}
+.kat-serit a span{display:inline-block;padding:5px 10px;border-radius:var(--r-etiket,999px);font-family:var(--f-mono);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text-2);white-space:nowrap;transition:background var(--t1,120ms) var(--ease,ease),color var(--t1,120ms) var(--ease,ease)}
+.kat-serit a:hover span{color:var(--text);background:var(--surface-2)}
+.kat-serit a[aria-current=page] span{background:var(--text);color:var(--bg)}

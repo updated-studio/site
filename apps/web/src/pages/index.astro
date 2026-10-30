@@ -16,7 +16,6 @@ import KiyasRobotu from '../components/modules/KiyasRobotu.astro'
 import Altmis from '../components/modules/Altmis.astro'
 import KunyeRafi from '../components/modules/KunyeRafi.astro'
 import KiyasBaslat from '../components/modules/KiyasBaslat.astro'
-import Kategoriler from '../components/modules/Kategoriler.astro'
 import GorevKarti from '../components/modules/GorevKarti.astro'
 import AracRafi from '../components/modules/AracRafi.astro'
 import KulupPano from '../components/modules/KulupPano.astro'
@@ -57,7 +56,7 @@ const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşıla�
 
   <section class="sec"><div class="wrap">
     <div class="sh"><h2><span class="no">{no()}</span>Son haberler</h2><a class="btn-t btn" href="/haberler">Tümü</a></div>
-    <div class="grid4">{rest.slice(0, 8).map((n) => <CardStd item={n} />)}</div>
+    <div class="grid4">{rest.slice(0, 4).map((n) => <CardStd item={n} />)}</div>
   </div></section>
 
   <Ad slot="lb" ad={api.pickAd(ads, 'lb', 1)} />
@@ -74,7 +73,6 @@ const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşıla�
       {radarVar && <div><Radar items={radar} no={no()} /></div>}
       {robotVar && <div><KiyasRobotu products={products} no={no()} /></div>}
       {m.altmisSaniye && <div><Altmis items={latest} no={no()} /></div>}
-      <div><Kategoriler items={kategoriler} no={no()} /></div>
     </div>
     <div class="rail">
       {m.cokOkunan && <EnCokOkunan fallback={latest} />}
@@ -83,11 +81,12 @@ const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşıla�
     </div>
   </div></section>
 
-  {m.kunyeRafi && products.length > 0 && <section class="sec"><div class="wrap"><KunyeRafi products={products} /></div></section>}
-
   <section class="sec"><div class="wrap"><AracRafi no={no()} /></div></section>
 
   <section class="sec"><div class="wrap"><KulupPano kulupUrl={site.kulupUrl} no={no()} /></div></section>
+
+  {/* Künyeler en altta (30 Ekim 2026, kullanıcı) */}
+  {m.kunyeRafi && products.length > 0 && <section class="sec"><div class="wrap"><KunyeRafi products={products} /></div></section>}
 
   <section class="sec"><div class="wrap">
     <InfiniteFeed title="Daha fazla haber" source="son" items={[]} startPage={2} videos={videos} reels={reels} ads={ads} channel={site.youtube} profile={site.instagram} renderFirst={false} />

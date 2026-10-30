@@ -17,7 +17,7 @@ const on = (h: string) => ((h === '/' ? current === '/' : (BOLUM[h] || [h]).some
       <summary title="Beta sürüm">Beta</summary>
       <div class="beta-not"><b>Yeni UPDATED beta sürümünde.</b> Site yayında ama bazı bölümler hâlâ geliştiriliyor. Bir hata ya da eksik görürsen <a href="mailto:iletisim@updated.com.tr">iletisim@updated.com.tr</a> adresine yaz.</div>
     </details>
-    <nav class="nav" aria-label="Kategoriler">
+    <nav class="nav" aria-label="Bölümler">
       {nav.map((n) => <a href={n.href} aria-current={on(n.href)}>{n.label}</a>)}
       <a class="kulup" href={site.kulupUrl} aria-current={current.startsWith(site.kulupUrl) || current.startsWith('/gorev') || current.startsWith('/yarismalar') ? 'page' : undefined}>Kulüp</a>
     </nav>
@@ -29,7 +29,13 @@ const on = (h: string) => ((h === '/' ? current === '/' : (BOLUM[h] || [h]).some
       <button class="ibtn menu-b" type="button" data-menu aria-expanded="false" aria-controls="sheet" aria-label="Menü"><Fragment set:html={ico('menu')} /></button>
     </div>
   </div>
+  {/* Kategori şeridi (30 Ekim 2026, kullanıcı: "üst barın altında kategoriler her zaman, mobilde de bilgisayarda da"): üst menüyle birlikte yapışık */}
+  {kategoriler.length > 0 && <nav class="kat-serit" aria-label="Kategoriler"><div class="wrap">
+    <a href="/haberler" aria-current={current.startsWith('/haberler') ? 'page' : undefined}><span>Tümü</span></a>
+    {kategoriler.map((c) => <a href={`/${c.slug}`} aria-current={current === `/${c.slug}` || current.startsWith(`/${c.slug}/`) ? 'page' : undefined}><span>{c.name}</span></a>)}
+  </div></nav>}
 </header>
+<script is:inline>(()=>{const a=document.querySelector('.kat-serit [aria-current=page]');if(!a)return;const w=a.parentElement;w.scrollLeft=a.offsetLeft-(w.clientWidth-a.offsetWidth)/2})()</script>
 <nav class="sheet" id="sheet" aria-label="Mobil menü" hidden>
   {nav.map((n) => <a href={n.href}>{n.label}</a>)}
   <a href={site.kulupUrl}>Kulüp</a>
