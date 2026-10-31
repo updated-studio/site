@@ -733,3 +733,8 @@ main{overflow-x:clip}
 .sheet-dil{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
 .sheet-dil .label{width:100%;color:var(--text-3)}
 @media (max-width:767px){.hdr-r .dil{display:none}}
+/* Araç kaydının yeri (scripts/araclar/hesap.ts) */
+.arac-hesap{margin:0;font-size:13px;color:var(--text-3)}
+.arac-hesap[data-durum=kaydedildi]{color:var(--text-2)}
+.arac-hesap[data-durum=hata]{color:var(--orange-tx)}
+.arac-hesap a{color:var(--link)}

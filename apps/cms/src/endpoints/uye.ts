@@ -59,6 +59,9 @@ const uc = (path: string, method: Endpoint['method'], gerek: 'yok' | 'kimlik' | 
   },
 })
 
+/** Hesaba kaydedilebilen araçlar (site: scripts/araclar/hesap.ts) */
+const ARACLAR = new Set(['storyboard', 'maliyet', 'ekipman-listesi'])
+
 /* ---------------- yardımcılar ---------------- */
 const ADI = /^[a-z0-9_.]{3,20}$/
 const SAYI_ON = new Map<string, { t: number; n: number }>()
@@ -251,18 +254,19 @@ export const uyeEndpoints: Endpoint[] = [
   // Verilerimi indir (KVKK): profil, yorumlar, tepkiler, kayıtlar, bildirimler, puan geçmişi, Kulüp ilerlemesi
   uc('/uye/ben/veri', 'get', 'uye', async ({ req, p, uye }) => {
     const db = havuz(p), id = uye!.id
-    const [y, t, k, bl, pu, ku] = await Promise.all([
+    const [y, t, k, bl, pu, ku, ar] = await Promise.all([
       p.find({ collection: 'yorumlar', where: { uye: { equals: id } }, limit: 5000, depth: 0, overrideAccess: true }),
       db.query('select hedef, tur, at from payload.uye_tepki where uye_id=$1', [id]),
       db.query('select hedef, at from payload.uye_kayit where uye_id=$1', [id]),
       db.query('select tur, metin, yol, okundu, at from payload.uye_bildirim where uye_id=$1 order by at desc', [id]),
       db.query('select tur, puan, ref, at from payload.uye_puan where uye_id=$1 order by at', [id]),
       db.query('select durum, at from payload.uye_kulup where uye_id=$1', [id]),
+      db.query('select arac, veri, guncel from payload.uye_arac where uye_id=$1', [id]).catch(() => ({ rows: [] })),
     ])
     const { authId: _a, ...profil } = uye as Uye & Record<string, unknown>
     return yanit(req, {
       aciklama: 'UPDATED hesabındaki bütün veriler (KVKK md. 11).', tarih: new Date().toISOString(), profil,
-      yorumlar: y.docs.map((x: any) => ({ metin: x.metin, durum: x.durum, yol: x.yol, at: x.createdAt })), tepkiler: t.rows, kaydedilenler: k.rows, bildirimler: bl.rows, puan: pu.rows, kulup: ku.rows[0] ?? null,
+      yorumlar: y.docs.map((x: any) => ({ metin: x.metin, durum: x.durum, yol: x.yol, at: x.createdAt })), tepkiler: t.rows, kaydedilenler: k.rows, bildirimler: bl.rows, puan: pu.rows, kulup: ku.rows[0] ?? null, araclar: ar.rows,
     })
   }),
 
@@ -484,6 +488,23 @@ export const uyeEndpoints: Endpoint[] = [
   }),
 
   // Kaydet / kaydı kaldır
+  // Araç kayıtları (31 Ekim 2026, toplantı notu: maliyet, storyboard, ekipman listesi Uper hesabında): araç başına tek JSON, 2 MB'a kadar
+  uc('/uye/arac/:arac', 'get', 'uye', async ({ req, p, uye }) => {
+    const arac = String(req.routeParams?.arac ?? '')
+    if (!ARACLAR.has(arac)) return hata(req, 'Bilinmeyen araç.', 404)
+    const r = await havuz(p).query('select veri, guncel from payload.uye_arac where uye_id=$1 and arac=$2', [uye!.id, arac])
+    return yanit(req, r.rows[0] ?? { veri: null, guncel: null })
+  }),
+  uc('/uye/arac/:arac', 'put', 'uye', async ({ req, p, uye }) => {
+    const arac = String(req.routeParams?.arac ?? '')
+    if (!ARACLAR.has(arac)) return hata(req, 'Bilinmeyen araç.', 404)
+    const metin = JSON.stringify((await govde(req)).veri ?? null)
+    if (metin.length > 2_000_000) return hata(req, 'Kayıt çok büyük (en çok 2 MB). Birkaç görseli silip yeniden dene.', 413)
+    const r = await havuz(p).query(`insert into payload.uye_arac (uye_id, arac, veri, guncel) values ($1,$2,$3::jsonb, now())
+      on conflict (uye_id, arac) do update set veri = excluded.veri, guncel = now() returning guncel`, [uye!.id, arac, metin])
+    return yanit(req, { guncel: r.rows[0].guncel })
+  }),
+
   uc('/uye/kaydet', 'post', 'uye', async ({ req, p, uye }) => {
     const h = await hedefBul(p, String((await govde(req)).hedef || ''))
     if (!h) return hata(req, 'Yazı bulunamadı.', 404)

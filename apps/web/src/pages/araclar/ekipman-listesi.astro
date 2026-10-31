@@ -25,6 +25,7 @@ const LISTE: Record<string, { ad: string; m: [string, string][] }> = {
     <button type="button" class="btn" data-el-sifirla>İşaretleri temizle</button>
   </div>
   <div data-el-liste class="el-liste"></div>
+  <p class="arac-hesap" data-arac-hesap aria-live="polite"></p>
   <form class="el-ekle" data-el-ekle>
     <label for="el-yeni" class="sr">Yeni madde</label><input id="el-yeni" maxlength="80" placeholder="Listeye ekle: ör. Yedek lens kapağı" />
     <button class="btn" type="submit">Ekle</button>
@@ -33,7 +34,7 @@ const LISTE: Record<string, { ad: string; m: [string, string][] }> = {
   <Fragment slot="nasil">
     <h2>Neden kontrol listesi?</h2>
     <p>Çekimlerin çoğu büyük bir hatadan değil, unutulan küçük bir şeyden zarar görür: dolmamış bir pil, evde kalmış bir kart, rüzgâr köpüğü olmadan kaydedilmiş ses. Pilotların uçuş öncesi listesi gibi, çıkmadan önce her maddeyi elle işaretlemek bu riski neredeyse sıfırlar.</p>
-    <p>Hazır listeler başlangıç içindir; kendi ekipmanına göre madde ekle ya da çıkar. Listen ve işaretlerin bu tarayıcıda saklanır, sayfayı kapatıp açınca kaldığın yerden devam edersin.</p>
+    <p>Hazır listeler başlangıç içindir; kendi ekipmanına göre madde ekle ya da çıkar. Listen ve işaretlerin bu tarayıcıda saklanır; Uper hesabınla giriş yaptıysan hesabına da kaydedilir, telefonda da aynı listeyi görürsün.</p>
   </Fragment>
 </AracSayfa>
 <style is:global>
@@ -57,6 +58,7 @@ const LISTE: Record<string, { ad: string; m: [string, string][] }> = {
   .el-tamam{padding:14px 16px;border-radius:var(--r-kart,0);background:var(--surface-2);font-weight:600}
 </style>
 <script>
+  import { aracHesabi } from '../../scripts/araclar/hesap'
   type Madde = { g: string; ad: string; ok: boolean; ek?: boolean }
   const VERI = JSON.parse(document.querySelector('[data-el-veri]')!.textContent!) as Record<string, { ad: string; m: [string, string][] }>
   const $ = <T extends Element>(s: string) => document.querySelector<T>(s)!
@@ -64,7 +66,8 @@ const LISTE: Record<string, { ad: string; m: [string, string][] }> = {
   let tur = Object.keys(VERI)[0]
   try { const s = localStorage.getItem('up-ekipman-tur'); if (s && VERI[s]) tur = s } catch { /* depolama kapalı */ }
   const oku = (t: string): Madde[] => { try { const s = localStorage.getItem(anahtar(t)); if (s) return JSON.parse(s) } catch { /* */ } return VERI[t].m.map(([g, ad]) => ({ g, ad, ok: false })) }
-  const yaz = (t: string, l: Madde[]) => { try { localStorage.setItem(anahtar(t), JSON.stringify(l)) } catch { /* */ } }
+  let hesap: { kaydet: () => void } | null = null
+  const yaz = (t: string, l: Madde[]) => { try { localStorage.setItem(anahtar(t), JSON.stringify(l)) } catch { /* */ } hesap?.kaydet() }
   let liste = oku(tur)
   const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!)
   function ciz() {
@@ -85,4 +88,8 @@ const LISTE: Record<string, { ad: string; m: [string, string][] }> = {
   $('[data-el-sifirla]').addEventListener('click', () => { liste.forEach((m) => (m.ok = false)); yaz(tur, liste); ciz() })
   $('[data-el-ekle]').addEventListener('submit', (e) => { e.preventDefault(); const i = $<HTMLInputElement>('#el-yeni'), ad = i.value.trim(); if (!ad) return; liste.push({ g: 'Benim eklediklerim', ad, ok: false, ek: true }); i.value = ''; yaz(tur, liste); ciz() })
   ciz()
+  // Hesapta bütün türlerin listeleri tek kayıtta: { tur, listeler: { roportaj: [...], ... } }
+  hesap = aracHesabi<{ tur: string; listeler: Record<string, Madde[]> }>('ekipman-listesi',
+    () => ({ tur, listeler: Object.fromEntries(Object.keys(VERI).map((t) => [t, t === tur ? liste : oku(t)])) }),
+    (v) => { if (!v?.listeler) return; for (const [t, l] of Object.entries(v.listeler)) if (VERI[t]) try { localStorage.setItem(anahtar(t), JSON.stringify(l)) } catch { /* */ } if (VERI[v.tur]) tur = v.tur; liste = oku(tur); ciz() })
 </script>

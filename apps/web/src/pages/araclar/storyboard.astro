@@ -16,6 +16,7 @@ const HAREKET = ['Sabit', 'Pan', 'Tilt', 'Dolly / ileri-geri', 'Kaydırma (slide
     <button type="button" class="btn" data-sb-indir>Görsel olarak indir</button>
   </div>
   <ol class="sb-kareler" data-sb-kareler></ol>
+  <p class="arac-hesap" data-arac-hesap aria-live="polite"></p>
   <template data-sb-kalip>
     <li class="sb-kare">
       <div class="sb-tuval"><canvas width="640" height="360"></canvas><span class="sb-no"></span>
@@ -33,7 +34,7 @@ const HAREKET = ['Sabit', 'Pan', 'Tilt', 'Dolly / ileri-geri', 'Kaydırma (slide
     <h2>Storyboard nasıl hazırlanır?</h2>
     <p>Storyboard, çekimin çizgi roman gibi kare kare planıdır. Her kare bir çekimi (plan) anlatır: ne görünüyor, kamera nerede ve nasıl hareket ediyor, ne kadar sürüyor. Çizim iyi olmak zorunda değil; çöp adam ve oklar ekip için yeterlidir. Önemli olan plan ölçeğinin (geniş, orta, yakın) ve hareketin net olmasıdır.</p>
     <p>Planlarını sırayla dizdikten sonra toplam süreye bak: 30 saniyelik bir reklam için 8-12 plan yaygındır. Sahada aynı mekânda geçen planları art arda çekmek zaman kazandırır; storyboard çekim sırasını ayrıca planlamana da yardım eder.</p>
-    <p>Planın bu tarayıcıda saklanır. Çizimler cihazında kalır, hiçbir yere yüklenmez.</p>
+    <p>Planın bu tarayıcıda saklanır; Uper hesabınla giriş yaptıysan hesabına da kaydedilir, başka cihazdan açınca kaldığın yerden devam edersin.</p>
   </Fragment>
 </AracSayfa>
 <style is:global>
@@ -57,6 +58,7 @@ const HAREKET = ['Sabit', 'Pan', 'Tilt', 'Dolly / ileri-geri', 'Kaydırma (slide
   @media (max-width:760px){.sb-kare{grid-template-columns:minmax(0,1fr)}.sb-iki{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.sb-iki label:last-child{grid-column:1/-1}}
 </style>
 <script>
+  import { aracHesabi } from '../../scripts/araclar/hesap'
   type Kare = { cizim: string; olcek: string; hareket: string; sure: number; not: string; ses: string }
   const $ = <T extends Element>(s: string, k: ParentNode = document) => k.querySelector<T>(s)!
   const liste = $<HTMLOListElement>('[data-sb-kareler]'), kalip = $<HTMLTemplateElement>('[data-sb-kalip]'), adIn = $<HTMLInputElement>('[data-sb-ad]')
@@ -64,7 +66,8 @@ const HAREKET = ['Sabit', 'Pan', 'Tilt', 'Dolly / ileri-geri', 'Kaydırma (slide
   let veri: { ad: string; kareler: Kare[] } = { ad: '', kareler: [bos(), bos(), bos()] }
   try { const s = localStorage.getItem('up-storyboard'); if (s) veri = JSON.parse(s) } catch { /* depolama kapalı */ }
   let zaman = 0
-  const kaydet = () => { clearTimeout(zaman); zaman = window.setTimeout(() => { try { localStorage.setItem('up-storyboard', JSON.stringify(veri)) } catch { /* dolu olabilir: büyük görseller */ } }, 300) }
+  const kaydet = () => { clearTimeout(zaman); zaman = window.setTimeout(() => { try { localStorage.setItem('up-storyboard', JSON.stringify(veri)) } catch { /* dolu olabilir: büyük görseller */ } hesap?.kaydet() }, 300) }
+  let hesap: { kaydet: () => void } | null = null
   const toplam = () => { const t = veri.kareler.reduce((s, k) => s + (Number(k.sure) || 0), 0); $('[data-sb-toplam]').textContent = `${veri.kareler.length} kare · ${t.toLocaleString('tr-TR')} sn` }
   function kareCiz(li: HTMLElement, k: Kare, i: number) {
     $('.sb-no', li).textContent = String(i + 1)
@@ -128,4 +131,5 @@ const HAREKET = ['Sabit', 'Pan', 'Tilt', 'Dolly / ileri-geri', 'Kaydırma (slide
     const a = document.createElement('a'); a.download = `${(veri.ad || 'storyboard').replace(/[^\p{L}\p{N}-]+/gu, '-')}.png`; a.href = c.toDataURL('image/png'); a.click()
   })
   ciz()
+  hesap = aracHesabi('storyboard', () => veri, (v) => { veri = v; ciz() })
 </script>

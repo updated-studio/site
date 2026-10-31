@@ -32,12 +32,13 @@ const SABLON: Record<string, { ad: string; k: [string, string, string][] }> = {
     <label for="ml-kdv">KDV<select id="ml-kdv"><option value="0">Dahil değil / yok</option><option value="0.2" selected>%20</option><option value="0.1">%10</option></select></label>
   </form>
   <div class="arac-sonuc" data-sonuc aria-live="polite"></div>
+  <p class="arac-hesap" data-arac-hesap aria-live="polite"></p>
   <script type="application/json" id="ml-sablon" set:html={JSON.stringify(SABLON)} />
   <Fragment slot="nasil">
     <h2>Bütçe nasıl çıkarılır?</h2>
     <p>Önce gün sayısını belirle: hazırlık, çekim ve kurgu günleri ayrı kalemlerdir. Ekip ve ekipman çoğunlukla gün üzerinden, kurgu gün ya da saat üzerinden, ulaşım ve yemek adet ya da kişi üzerinden fiyatlanır. Bu araç piyasa fiyatı önermez; fiyatlar şehre, deneyime ve işin kapsamına göre çok değişir. Kendi teklifini ya da aldığın teklifleri gir.</p>
     <p>Bütçeye %10 civarı <b>beklenmeyen gider payı</b> eklemek yaygın bir uygulamadır: hava yüzünden kayan bir gün, bozulan bir ekipman ya da uzayan kurgu bu paydan karşılanır. Fatura kesiliyorsa KDV'yi ayrıca ekle.</p>
-    <p>Bütçen bu tarayıcıda saklanır; sayfayı kapatıp açınca kaldığın yerden devam edersin.</p>
+    <p>Bütçen bu tarayıcıda saklanır; Uper hesabınla giriş yaptıysan hesabına da kaydedilir, başka cihazdan da açabilirsin.</p>
   </Fragment>
 </AracSayfa>
 <style is:global>
@@ -57,6 +58,7 @@ const SABLON: Record<string, { ad: string; k: [string, string, string][] }> = {
   [data-sonuc] .arac-buyuk b{font-size:clamp(22px,2.6vw,30px)}
 </style>
 <script>
+  import { aracHesabi } from '../../scripts/araclar/hesap'
   type Kalem = { g: string; ad: string; birim: string; fiyat: number; adet: number }
   const SABLON = JSON.parse(document.getElementById('ml-sablon')!.textContent!) as Record<string, { ad: string; k: [string, string, string][] }>
   const $ = <T extends Element>(s: string) => document.querySelector<T>(s)!
@@ -65,7 +67,8 @@ const SABLON: Record<string, { ad: string; k: [string, string, string][] }> = {
   const sablondan = (k: string): Kalem[] => (SABLON[k]?.k ?? []).map(([g, ad, birim]) => ({ g, ad, birim, fiyat: 0, adet: 1 }))
   let liste: Kalem[] = sablondan('reklam')
   try { const s = localStorage.getItem('up-maliyet'); if (s) liste = JSON.parse(s) } catch { /* depolama kapalı */ }
-  const yaz = () => { try { localStorage.setItem('up-maliyet', JSON.stringify(liste)) } catch { /* */ } }
+  let hesap: { kaydet: () => void } | null = null
+  const yaz = () => { try { localStorage.setItem('up-maliyet', JSON.stringify(liste)) } catch { /* */ } hesap?.kaydet() }
   function tablo() {
     let son = ''
     $('[data-ml-govde]').innerHTML = liste.map((k, i) => {
@@ -94,4 +97,5 @@ const SABLON: Record<string, { ad: string; k: [string, string, string][] }> = {
   $('[data-ml-ekle]').addEventListener('submit', (e) => { e.preventDefault(); const i = $<HTMLInputElement>('#ml-yeni'), ad = i.value.trim(); if (!ad) return; liste.push({ g: 'Diğer', ad, birim: 'adet', fiyat: 0, adet: 1 }); i.value = ''; yaz(); tablo() })
   $('[data-ml-ayar]').addEventListener('change', toplam)
   tablo()
+  hesap = aracHesabi<Kalem[]>('maliyet', () => liste, (v) => { if (Array.isArray(v)) { liste = v; tablo() } })
 </script>
