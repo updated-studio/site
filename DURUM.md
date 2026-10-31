@@ -53,6 +53,8 @@
 
 ## Günlük (en yeni üstte)
 
+- **31 Ekim 2026 · Çıkış radarı otomatik.** Stüdyo radar-otomatik (göç 0059) + panel lib/radar.ts (göç 20261031_164459_radar_oto). Her sabah haber masası → Brave → ücretsiz Gemini; panel 15 dk'da bir künyeye işler. Ana sayfa radar kutusu dolu (4 ürün). Stüdyo arayüzü deneme görünümüyle elden geçti (Stüdyo deposu 43f316d).
+
 - **31 Ekim 2026 · WordPress Rehber tamamlandı.** phpMyAdmin incelemesi (kullanıcı): WordPress'teki "Rehber ve İpuçları" sayfası (15721) yalnız "Rehberler" etiketli (post_tag 65) 2 yazıyı listeleyen tasarım sayfasıydı; yazılar zaten taşınmıştı (WP 21590, 19674). Panel göçü 20261031_150000_rehber_etiketi ikisini "rehber" etiketledi; /rehber artık dolu. Diğer WP sayfaları tema demosu/üyelik eklentisi/mağaza; içerikli kurumsal sayfalar önceden taşınmıştı. WordPress tarafında açık iş kalmadı (silinmeyecek).
 
 - **31 Ekim 2026 · Rehber listesi + rakip analizi.** `docs/rakip-analizi-2026-10-31.md`. Öneri 1 yapıldı: "Rehber" etiketli yazıda "Rehber listesi (en iyi …)" alanı (News.liste; göç 20261031_120636_rehber_liste uygulandı), sitede `components/RehberListe.astro` (sıra, editörün seçimi, künye/kıyas, ilk 4'ü kıyasla, ItemList). Stüdyo formunda etiket "Rehber" seçilince görünür. Stüdyo tarafında onay bekleyen göçler: 0053 künye saatleri, 0054 notify-email döngüsü, 0055 Gemini sayacı. Haber Masası Site'nin ilk sekmesi oldu.
