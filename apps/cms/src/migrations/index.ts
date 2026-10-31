@@ -17,6 +17,7 @@ import * as migration_20261029_090000_tek_kisi from './20261029_090000_tek_kisi'
 import * as migration_20261030_014451_inceleme_alt_puan from './20261030_014451_inceleme_alt_puan';
 import * as migration_20261030_021746_radar_tarih from './20261030_021746_radar_tarih';
 import * as migration_20261031_120636_rehber_liste from './20261031_120636_rehber_liste';
+import * as migration_20261031_150000_rehber_etiketi from './20261031_150000_rehber_etiketi';
 
 export const migrations = [
   {
@@ -113,5 +114,10 @@ export const migrations = [
     up: migration_20261031_120636_rehber_liste.up,
     down: migration_20261031_120636_rehber_liste.down,
     name: '20261031_120636_rehber_liste'
+  },
+  {
+    up: migration_20261031_150000_rehber_etiketi.up,
+    down: migration_20261031_150000_rehber_etiketi.down,
+    name: '20261031_150000_rehber_etiketi',
   },
 ];
