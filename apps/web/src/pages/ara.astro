@@ -8,7 +8,7 @@ const kategoriler = await api.getCategories()
   <div class="wrap">
     <div class="art-head" style="max-width:none;padding-bottom:24px">
       <h1 class="h1">Ara</h1>
-      <form action="/ara" method="get" role="search" class="chips" data-search-page><label class="sr" for="aq">Arama</label><input id="aq" class="sel" style="min-width:min(100%,420px)" name="q" placeholder="Ürün, haber, kategori…" autocomplete="off" /><button class="btn btn-p" type="submit">Ara</button></form>
+      <form action="/ara" method="get" role="search" class="ara-form" data-search-page><label class="sr" for="aq">Arama</label><input id="aq" class="sel" name="q" placeholder="Ürün, haber, kategori…" autocomplete="off" /><button class="btn btn-p" type="submit">Ara</button></form>
     </div>
     {/* Arama boşken sayfa boş kalmasın: kategoriler ve sık bakılan bölümler (31 Ekim 2026); sonuç gelince betik gizler */}
     <div class="ara-oneri" data-ara-oneri>

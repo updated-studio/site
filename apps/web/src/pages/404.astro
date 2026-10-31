@@ -8,7 +8,7 @@ const latest = await getLatest(1, 4)
   <div class="wrap" data-canli-haber hidden></div>
   <div class="wrap" data-404>
     <div class="art-head" style="max-width:none"><span class="cat">404</span><h1 class="h1">Sayfa bulunamadı</h1><p class="lead">Adres değişmiş ya da içerik kaldırılmış olabilir. Aramayı deneyin ya da son haberlere bakın.</p>
-      <form action="/ara" method="get" role="search" class="chips"><label class="sr" for="q404">Ara</label><input id="q404" class="sel" name="q" placeholder="Ürün, haber…" autocomplete="off" /><button class="btn btn-p" type="submit">Ara</button></form></div>
+      <form action="/ara" method="get" role="search" class="ara-form"><label class="sr" for="q404">Ara</label><input id="q404" class="sel" name="q" placeholder="Ürün, haber…" autocomplete="off" /><button class="btn btn-p" type="submit">Ara</button></form></div>
     <h2 class="sr">Son haberler</h2>
     <div class="grid4" style="margin-top:32px">{latest.map((n) => <CardStd item={n} />)}</div>
   </div>

@@ -53,6 +53,8 @@
 
 ## Günlük (en yeni üstte)
 
+- **31 Ekim 2026 19:30 · Site arayüzü yayın taraması (kullanıcı: "acil sitenin arayüzü tasarımını bitirip yayına hazır hale getir").** 32 sayfa × telefon/masaüstü × açık/koyu tarandı (JS hatası, taşma, kırık görsel yok). Düzeltilenler: sonsuz akışta sayfada zaten duran haber ve okunan yazının kendisi tekrar çıkmıyor (`site.ts`); ana sayfada Gündemden sağ sütun uzadıkça ikişer haber açar (boşluk kapandı); kıyas kartları telefonda kenar boşluğuyla kayar; son dakikada bir günden eski haberde saat yerine tarih; künyede "Bilinmiyor" satırları yerine yalnız bilinen değerler + "N özellik doğrulanmayı bekliyor", sıfır sayaçlar gizli; incelemeler boşken video duvarı tam genişlik; maliyet tablosu telefonda kalem kartları (hücre sınıfı `ad` reklam kuralıyla çakışıyordu, reklam engelleyici gizleyebilirdi → `ml-ad`); telefon menüsü üst barın altından başlar ve opak; arama/404 kutusu tek satır; Kulüp "Fotoğraf" yolunda dron yerine fotoğraf makinesi görseli (`public/ornek/camera.webp`).
+
 - **31 Ekim 2026 · Dil menüsü, araç kaydı, resmî ad.** Üst barda dil menüsü: sayfa Google Çeviri sayfa çevirisinde (translate.goog) açılır; gerçek çok dilli site kullanıcı kararıyla durduruldu. Storyboard/maliyet/ekipman listesi Uper hesabına kaydedilir (panel /uye/arac/:arac, tablo payload.uye_arac, KVKK dökümüne eklendi). Künye ve radar resmî tam model adını önerir (Stüdyo göç 0060, onayda "Adı da düzelt").
 
 - **31 Ekim 2026 · Çıkış radarı otomatik.** Stüdyo radar-otomatik (göç 0059) + panel lib/radar.ts (göç 20261031_164459_radar_oto). Her sabah haber masası → Brave → ücretsiz Gemini; panel 15 dk'da bir künyeye işler. Ana sayfa radar kutusu dolu (4 ürün). Stüdyo arayüzü deneme görünümüyle elden geçti (Stüdyo deposu 43f316d).

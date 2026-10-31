@@ -59,7 +59,7 @@ const SABLON: Record<string, { ad: string; k: [string, string, string][] }> = {
     .ml-tablo thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
     .ml-tablo tbody tr:not(.grup){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:6px 10px;padding:10px 0;border-top:1px solid var(--line)}
     .ml-tablo tbody tr:not(.grup) td{padding:0;border:0}
-    .ml-tablo td.ad{grid-column:1/3;align-self:center;text-align:left;font-weight:600}
+    .ml-tablo td.ml-ad{grid-column:1/3;align-self:center;text-align:left;font-weight:600}
     .ml-tablo td.sil{grid-column:3;grid-row:1}
     .ml-tablo td.tutar{grid-column:1/-1;text-align:left}
     .ml-tablo td[data-e]::before{content:attr(data-e);display:block;margin-bottom:4px;font-family:var(--f-mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3)}
@@ -87,7 +87,7 @@ const SABLON: Record<string, { ad: string; k: [string, string, string][] }> = {
     let son = ''
     $('[data-ml-govde]').innerHTML = liste.map((k, i) => {
       const bas = k.g !== son ? `<tr class="grup"><td colspan="5">${esc(k.g)}</td></tr>` : ''; son = k.g
-      return `${bas}<tr><td class="ad">${esc(k.ad)}</td><td data-e="Birim fiyat (TL)"><input type="number" min="0" step="50" inputmode="decimal" value="${k.fiyat || ''}" data-i="${i}" data-a="fiyat" aria-label="${esc(k.ad)} birim fiyat" placeholder="0"/></td><td data-e="Miktar"><input type="number" min="0" step="1" inputmode="decimal" value="${k.adet}" data-i="${i}" data-a="adet" aria-label="${esc(k.ad)} miktar (${esc(k.birim)})"/></td><td class="tutar" data-e="Tutar" data-t="${i}">${TL(k.fiyat * k.adet)}</td><td class="sil"><button type="button" data-sil="${i}" aria-label="${esc(k.ad)} kalemini sil">×</button></td></tr>`
+      return `${bas}<tr><td class="ml-ad">${esc(k.ad)}</td><td data-e="Birim fiyat (TL)"><input type="number" min="0" step="50" inputmode="decimal" value="${k.fiyat || ''}" data-i="${i}" data-a="fiyat" aria-label="${esc(k.ad)} birim fiyat" placeholder="0"/></td><td data-e="Miktar"><input type="number" min="0" step="1" inputmode="decimal" value="${k.adet}" data-i="${i}" data-a="adet" aria-label="${esc(k.ad)} miktar (${esc(k.birim)})"/></td><td class="tutar" data-e="Tutar" data-t="${i}">${TL(k.fiyat * k.adet)}</td><td class="sil"><button type="button" data-sil="${i}" aria-label="${esc(k.ad)} kalemini sil">×</button></td></tr>`
     }).join('')
     toplam()
   }

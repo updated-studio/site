@@ -738,3 +738,7 @@ main{overflow-x:clip}
 .arac-hesap[data-durum=kaydedildi]{color:var(--text-2)}
 .arac-hesap[data-durum=hata]{color:var(--orange-tx)}
 .arac-hesap a{color:var(--link)}
+/* Arama sayfası ve 404 arama kutusu: alan ve düğme tek satır, telefonda da (31 Ekim 2026) */
+.ara-form{display:flex;gap:8px;max-width:560px}
+.ara-form .sel{flex:1 1 auto;min-width:0}
+.ara-form .btn{flex:0 0 auto}

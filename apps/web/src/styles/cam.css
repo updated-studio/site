@@ -38,8 +38,8 @@
 .cam .hdr .wrap{padding-left:max(calc(var(--edge) - 12px),12px);padding-right:max(calc(var(--edge) - 12px),12px)}
 .cam .nav a{border-radius:10px}
 .cam .nav a:hover,.cam .nav a[aria-current="page"]{background:var(--surface-2);color:var(--text)}
-.cam .sheet{top:calc(86px + env(safe-area-inset-top,0px));margin:0 12px 12px;border-radius:var(--r-buyuk);border:1px solid var(--line);
-  background:var(--cam-bar);-webkit-backdrop-filter:blur(26px) saturate(1.7);backdrop-filter:blur(26px) saturate(1.7)}
+.cam .sheet{top:calc(var(--hdr-alt) + 8px + env(safe-area-inset-top,0px));margin:0 12px 12px;border-radius:var(--r-buyuk);border:1px solid var(--line);
+  background:color-mix(in srgb,var(--bg) 97%,transparent);-webkit-backdrop-filter:blur(26px) saturate(1.7);backdrop-filter:blur(26px) saturate(1.7)}
 
 /* Son dakika şeridi: koyu cam hap */
 .cam .sd{margin:10px max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px));border-radius:16px;overflow:hidden;
