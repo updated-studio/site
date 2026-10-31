@@ -1,0 +1,103 @@
+---
+/**
+ * Timelapse hesaplayıcı (toplantı notu 30 Ekim 2026, araç 2): çekim süresi + aralık → kare sayısı, klip süresi, kart alanı, en uzun enstantane.
+ * Ya da istenen klip süresinden geriye: kaç saniyede bir çekmeli. Örnek senaryolar hazır ayar olarak tek dokunuşla gelir.
+ */
+import AracSayfa from '../../components/AracSayfa.astro'
+// [ad, aralık sn, çekim dk, not]
+const SENARYO: [string, number, number, string][] = [
+  ['Akan bulutlar', 2, 30, 'Rüzgârlı günde 1-3 sn; yavaş bulutta 5 sn.'],
+  ['Gün batımı', 4, 60, 'Batıştan 40 dk önce başla, 20 dk sonra bitir. Pozlamayı A ya da M + Auto ISO ile takip et.'],
+  ['Şehir trafiği', 1, 20, 'Araç ışıkları iz bıraksın diye enstantaneyi 1/2 - 1 sn yap (ND gerekebilir).'],
+  ['Kalabalık / meydan', 1, 15, 'İnsan akışı için 0,5-1 sn; daha uzun aralık hareketi kesik gösterir.'],
+  ['Yıldızlar ve Samanyolu', 30, 180, '20-25 sn pozlama + 5 sn boşluk. Geniş açı, f/2.8, ISO 3200 civarı.'],
+  ['Gündüzden geceye', 8, 120, '"Kutsal kâse": ışık 10 stop değişir; LRTimelapse ile titreme gider.'],
+  ['Çiçek açması', 300, 720, 'İç mekânda sabit ışıkla; 5 dakikada bir kare.'],
+  ['İnşaat / proje', 900, 4320, 'Günlerce sürer: harici güç ve hava koşullarına dayanıklı kutu gerekir.'],
+]
+---
+<AracSayfa yol="/araclar/timelapse" baslik="Timelapse hesaplayıcı" lead="Ne kadar çekeceğini ve kaç saniyede bir kare alacağını gir; videonun süresini, kare sayısını ve kart alanını gör. Ya da istediğin video süresinden geriye hesapla."
+  aciklama="Timelapse hesaplayıcı: çekim aralığı, kare sayısı, video süresi, kart alanı ve en uzun enstantane. Bulut, gün batımı, yıldız ve şehir için hazır ayarlar. Ücretsiz.">
+  <div class="tl-senaryo" role="group" aria-label="Hazır senaryolar">
+    {SENARYO.map(([ad, ara, sure, not]) => <button type="button" class="btn" data-ara={ara} data-sure={sure} data-not={not}>{ad}</button>)}
+  </div>
+  <div class="tl-mod" role="tablist" aria-label="Hesap yönü">
+    <button type="button" role="tab" aria-selected="true" data-mod="ileri">Çekimden videoya</button>
+    <button type="button" role="tab" aria-selected="false" data-mod="geri">Videodan aralığa</button>
+  </div>
+  <form class="arac-form" data-tl onsubmit="return false">
+    <label for="tl-sure">Çekim süresi (dakika)<input id="tl-sure" type="number" min="1" step="1" value="60" inputmode="numeric" /></label>
+    <label for="tl-ara" data-ileri>Aralık (saniyede bir kare)<input id="tl-ara" type="number" min="0.5" step="0.5" value="4" inputmode="decimal" /></label>
+    <label for="tl-klip" data-geri hidden>İstenen video süresi (saniye)<input id="tl-klip" type="number" min="1" step="1" value="15" inputmode="numeric" /></label>
+    <label for="tl-fps">Video kare hızı<select id="tl-fps"><option value="24">24 fps (sinema)</option><option value="25" selected>25 fps (PAL, Türkiye)</option><option value="30">30 fps</option><option value="60">60 fps</option></select></label>
+    <label for="tl-dosya">Kare başına dosya<select id="tl-dosya"><option value="8">JPEG (~8 MB)</option><option value="25" selected>RAW, 24 MP (~25 MB)</option><option value="50">RAW, 45 MP (~50 MB)</option><option value="60">RAW, 61 MP (~60 MB)</option></select></label>
+  </form>
+  <p class="meta tl-not" data-not hidden></p>
+  <div class="tl-cizgi" aria-hidden="true"><div class="tl-gercek"><span>Gerçek süre</span><i data-gercek></i></div><div class="tl-video"><span>Video</span><i data-video></i></div></div>
+  <div class="arac-sonuc" data-sonuc aria-live="polite"></div>
+  <Fragment slot="nasil">
+    <h2>Timelapse nasıl hesaplanır?</h2>
+    <p>Timelapse, belli aralıklarla çekilen fotoğrafların video kare hızında art arda oynatılmasıdır. 60 dakikalık bir gün batımını 4 saniyede bir çekersen 900 kare olur; 25 fps'te bu 36 saniyelik bir video eder. Formül basit: <b>kare sayısı = çekim süresi ÷ aralık</b>, <b>video süresi = kare sayısı ÷ fps</b>.</p>
+    <p>Aralık, konunun hızına göre seçilir: hızlı hareket (trafik, kalabalık) için 1 saniye, bulutlar için 2-5 saniye, gökyüzünde güneş ve yıldızlar için 10-30 saniye. Sosyal medya için 10-15 saniyelik bir klip çoğu zaman yeter.</p>
+    <p>Hareketin akıcı görünmesi için enstantaneyi aralığın yarısı kadar tutmaya çalış (180° kuralının timelapse karşılığı); bunun için gündüz ND filtre gerekir. Pozlamayı ve beyaz dengesini elle sabitle, otomatik odak ve görüntü sabitlemeyi kapat. Uzun çekimlerde kart alanı kadar pil de biter: hesaplanan süre bir pilin dayanacağından uzunsa harici güç kullan.</p>
+  </Fragment>
+</AracSayfa>
+<style is:global>
+  .tl-senaryo{display:flex;flex-wrap:wrap;gap:8px}
+  .tl-senaryo .btn{min-height:40px;font-size:14px}
+  .tl-senaryo .btn[aria-pressed=true]{background:var(--text);color:var(--bg);border-color:var(--text)}
+  .tl-mod{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:var(--r-dugme,0);align-self:flex-start}
+  .tl-mod button{min-height:40px;padding:0 14px;border:0;border-radius:calc(var(--r-dugme,0px) - 4px);background:none;color:var(--text-2);font:600 14px/1 var(--f-body);cursor:pointer}
+  .tl-mod button[aria-selected=true]{background:var(--surface-2);color:var(--text)}
+  [data-sonuc] .arac-ikili{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+  [data-sonuc] .arac-buyuk b{font-size:clamp(24px,3vw,32px)}
+  .tl-not{margin:0;text-transform:none;letter-spacing:0;font-size:14px}
+  .tl-cizgi{display:flex;flex-direction:column;gap:10px}
+  .tl-cizgi > div{display:grid;grid-template-columns:96px minmax(0,1fr);align-items:center;gap:12px;font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3)}
+  .tl-cizgi i{display:block;height:14px;border-radius:7px;min-width:6px;transition:width var(--t2) var(--ease)}
+  .tl-gercek i{width:100%;background:repeating-linear-gradient(90deg,var(--text-3) 0 2px,transparent 2px 8px)}
+  .tl-video i{background:var(--blue)}
+  .arac-sonuc .tl-uyari{color:var(--orange-tx);text-transform:none;letter-spacing:0;font-size:14px}
+  @media (max-width:560px){.tl-cizgi > div{grid-template-columns:72px minmax(0,1fr)}}
+</style>
+<script>
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!
+  const sure = $<HTMLInputElement>('#tl-sure'), ara = $<HTMLInputElement>('#tl-ara'), klip = $<HTMLInputElement>('#tl-klip')
+  const fps = $<HTMLSelectElement>('#tl-fps'), dosya = $<HTMLSelectElement>('#tl-dosya'), out = $('[data-sonuc]'), not = $('[data-not]')
+  let mod: 'ileri' | 'geri' = 'ileri'
+  const say = (n: number, k = 0) => n.toLocaleString('tr-TR', { maximumFractionDigits: k })
+  const sureYaz = (sn: number) => { if (sn < 60) return `${say(sn, 1)} sn`; const s = Math.floor(sn / 3600), d = Math.floor((sn % 3600) / 60), r = Math.round(sn % 60); return [s && `${s} sa`, d && `${d} dk`, r && !s && `${r} sn`].filter(Boolean).join(' ') }
+  const enstantane = (sn: number) => (sn >= 1 ? `${say(sn, 1)} sn` : `1/${Math.round(1 / sn)} sn`)
+  function hesapla() {
+    const dk = Math.max(1, Number(sure.value) || 1), F = Number(fps.value), mb = Number(dosya.value)
+    let aralik: number, kare: number
+    if (mod === 'ileri') { aralik = Math.max(0.5, Number(ara.value) || 1); kare = Math.floor((dk * 60) / aralik) }
+    else { kare = Math.max(1, Math.round((Number(klip.value) || 1) * F)); aralik = (dk * 60) / kare }
+    const video = kare / F, gb = (kare * mb) / 1024, hiz = (dk * 60) / video
+    $('[data-video]').style.width = `${Math.max(0.8, Math.min(100, (video / (dk * 60)) * 100))}%`
+    const uyari: string[] = []
+    if (aralik < 1) uyari.push('Aralık 1 saniyenin altında: çoğu makine RAW yazarken bu hıza yetişemez, JPEG ya da seri çekim kullan.')
+    if (dk > 120) uyari.push('Çekim 2 saati aşıyor: tek pil çoğu aynasız makinede yetmez, USB güç ya da sahte pil (dummy battery) kullan.')
+    if (gb > 120) uyari.push(`Kart alanı ${say(gb)} GB: 128 GB'lık kart dolar.`)
+    out.innerHTML = `<div class="arac-ikili">
+        <div class="arac-buyuk"><span class="label">${mod === 'ileri' ? 'Video süresi' : 'Aralık'}</span><b>${mod === 'ileri' ? sureYaz(video) : `${say(aralik, 1)} sn`}</b><span class="meta">${mod === 'ileri' ? `${F} fps'te` : 'her karede bir'}</span></div>
+        <div class="arac-buyuk"><span class="label">Kare sayısı</span><b>${say(kare)}</b><span class="meta">${sureYaz(dk * 60)} çekim</span></div>
+        <div class="arac-buyuk"><span class="label">Kart alanı</span><b>${gb < 1 ? `${say(gb * 1024)} MB` : `${say(gb, 1)} GB`}</b><span class="meta">kare başına ~${mb} MB</span></div>
+        <div class="arac-buyuk"><span class="label">En uzun enstantane</span><b>${enstantane(Math.max(1 / 4000, aralik / 2))}</b><span class="meta">akıcı hareket için aralığın yarısı</span></div>
+      </div>
+      <p class="meta" style="text-transform:none;letter-spacing:0">Zaman ${say(hiz)} kat hızlanır: gerçekte ${sureYaz(dk * 60)} süren olay ${sureYaz(video)} içinde oynar.</p>
+      ${uyari.map((u) => `<p class="meta tl-uyari">${u}</p>`).join('')}`
+  }
+  document.querySelectorAll<HTMLButtonElement>('[data-mod]').forEach((b) => b.addEventListener('click', () => {
+    mod = b.dataset.mod as typeof mod
+    document.querySelectorAll('[data-mod]').forEach((x) => x.setAttribute('aria-selected', String(x === b)))
+    $('[data-ileri]').hidden = mod !== 'ileri'; $('[data-geri]').hidden = mod !== 'geri'; hesapla()
+  }))
+  document.querySelectorAll<HTMLButtonElement>('[data-ara]').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('[data-ara]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)))
+    ara.value = b.dataset.ara!; sure.value = b.dataset.sure!; not.textContent = b.dataset.not!; not.hidden = false
+    if (mod === 'geri') document.querySelector<HTMLButtonElement>('[data-mod="ileri"]')!.click(); else hesapla()
+  }))
+  document.querySelector('[data-tl]')!.addEventListener('input', hesapla)
+  hesapla()
+</script>

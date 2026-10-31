@@ -44,7 +44,7 @@
 .km-secici li button:hover{border-color:var(--text)}
 .km-secici li small{display:block;font-family:var(--f-mono);font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3)}
 
-.km-cubuk{position:sticky;top:calc(67px + env(safe-area-inset-top,0px));z-index:20;background:var(--cam-bar,var(--bg));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-block:1px solid var(--line);margin-inline:calc(-1 * var(--edge,0px));padding-inline:var(--edge,0px)}
+.km-cubuk{position:sticky;top:calc(var(--hdr-alt) + env(safe-area-inset-top,0px));z-index:20;background:var(--cam-bar,var(--bg));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-block:1px solid var(--line);margin-inline:calc(-1 * var(--edge,0px));padding-inline:var(--edge,0px)}
 .km-cubuk-ic{display:grid;grid-template-columns:minmax(130px,200px) repeat(var(--n),minmax(0,1fr));gap:12px;align-items:center;padding-block:8px}
 .km-cubuk-ic > div{min-width:0;display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline}
 .km-cubuk b{font-family:var(--f-head);font-weight:900;text-transform:uppercase;font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}

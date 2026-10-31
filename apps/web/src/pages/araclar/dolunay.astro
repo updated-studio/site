@@ -1,0 +1,130 @@
+---
+/** Dolunay ve ay evresi (toplantı notu 30 Ekim 2026, araç 1): 81 il ya da konum; bugünkü evre, ay doğuş/batış, sonraki dolunay ve yeni ay, 30 günlük şerit, 12 dolunaylık takvim. */
+import AracSayfa from '../../components/AracSayfa.astro'
+import { ILLER } from '../../scripts/araclar/gunes'
+const sirali = [...ILLER].sort((a, b) => a[0].localeCompare(b[0], 'tr'))
+---
+<AracSayfa yol="/araclar/dolunay" baslik="Dolunay ve ay evresi" lead="Ayın bugünkü evresi, ilindeki ay doğuşu ve batışı, sonraki dolunay ve yeni ay. Dolunay çekimini gün batımıyla birlikte planla."
+  aciklama="Dolunay takvimi ve ay evresi hesaplayıcı: 81 il için ay doğuşu, ay batışı, sonraki dolunay ve yeni ay saatleri, süper ay. Ücretsiz.">
+  <form class="arac-form" data-ay onsubmit="return false">
+    <label for="ay-il">İl<select id="ay-il">{sirali.map(([ad]) => <option selected={ad === 'İstanbul'}>{ad}</option>)}</select></label>
+    <label for="ay-tarih">Tarih<input id="ay-tarih" type="date" /></label>
+    <button type="button" class="btn" data-konum>Konumumu kullan</button>
+  </form>
+  <div class="ay-sahne">
+    <svg class="ay-disk" viewBox="-4 -4 108 108" role="img" aria-labelledby="ay-ad"><circle cx="50" cy="50" r="50" class="ay-karanlik" /><path data-ay-yol class="ay-isik" d="" /><circle cx="50" cy="50" r="50" class="ay-cerceve" /></svg>
+    <div class="ay-bilgi">
+      <span class="label">Ay evresi</span>
+      <b id="ay-ad" data-ay-ad>—</b>
+      <span data-ay-oran class="ay-oran">—</span>
+      <dl class="ay-dl">
+        <div><dt>Ay doğuşu</dt><dd data-ay-dogus>—</dd></div>
+        <div><dt>Ay batışı</dt><dd data-ay-batis>—</dd></div>
+        <div><dt>Ayın yaşı</dt><dd data-ay-yas>—</dd></div>
+        <div><dt>Uzaklık</dt><dd data-ay-uzak>—</dd></div>
+      </dl>
+    </div>
+  </div>
+  <div class="ay-serit" data-ay-serit aria-label="Önümüzdeki 30 gün"></div>
+  <div class="arac-sonuc" data-sonuc aria-live="polite"></div>
+  <section class="ay-takvim"><h2>Dolunay takvimi</h2><p class="meta" data-takvim-not></p><ol data-takvim></ol></section>
+  <Fragment slot="nasil">
+    <h2>Dolunay nasıl çekilir?</h2>
+    <p>En etkileyici dolunay karesi, ay ufuktan yeni doğarken çekilir: ay büyük ve turuncu görünür, gökyüzünde hâlâ gün batımının ışığı vardır, böylece hem ay hem manzara tek pozlamada okunur. Bunun için ay doğuşunun gün batımına yakın olduğu günü seç; çoğu zaman bu dolunaydan bir gün önceki akşamdır.</p>
+    <p>Ayın kendisi gündüz kadar parlaktır. Başlangıç ayarı olarak "11 kuralı"nı kullan: f/11, ISO 100, enstantane 1/100 sn. Ayın yüzeyindeki ayrıntıyı görmek için en az 300 mm odak uzaklığı gerekir; tripod ve uzaktan deklanşör titremeyi önler.</p>
+    <p><b>Süper ay</b>, dolunayın Dünya'ya en yakın noktaya denk geldiği zamandır: ay yaklaşık %7 daha büyük, %15 daha parlak görünür. Takvimde 361.000 km'den yakın dolunaylar işaretlidir.</p>
+    <p>Saatler il merkezine göredir ve ufkun düz olduğu varsayılır; dağ ya da bina arkasında ay birkaç dakika geç görünür. Yeni ay ve dolunay anları ±1 dakika, doğuş ve batış ±3 dakika doğrulukla hesaplanır.</p>
+  </Fragment>
+</AracSayfa>
+<style is:global>
+  .ay-sahne{display:grid;grid-template-columns:minmax(160px,240px) minmax(0,1fr);gap:28px;align-items:center;padding:24px;border-radius:var(--r-kart,14px);background:radial-gradient(120% 120% at 20% 30%,#1B2340 0%,#0B1026 70%);color:#F2F2F2}
+  .ay-disk{width:100%;height:auto;filter:drop-shadow(0 0 28px rgb(220 225 255 / .25))}
+  .ay-karanlik{fill:#1D2333}
+  .ay-isik{fill:#ECE9DF}
+  .ay-cerceve{fill:none;stroke:rgb(255 255 255 / .18);stroke-width:1}
+  .ay-bilgi{display:flex;flex-direction:column;gap:6px;min-width:0}
+  .ay-bilgi .label{color:#B4B7BB}
+  .ay-bilgi b{font-family:var(--f-baslik,var(--f-head));font-size:clamp(28px,4vw,40px);line-height:1.1}
+  .ay-oran{font-family:var(--f-mono);font-size:14px;color:#B4B7BB}
+  .ay-dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px;margin:12px 0 0}
+  .ay-dl div{display:flex;flex-direction:column;gap:2px}
+  .ay-dl dt{font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#8E9297}
+  .ay-dl dd{margin:0;font-family:var(--f-mono);font-size:22px;font-variant-numeric:tabular-nums}
+  .ay-serit{display:grid;grid-template-columns:repeat(30,minmax(0,1fr));gap:2px;overflow:hidden}
+  .ay-serit button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;border:0;border-radius:6px;background:none;color:var(--text-3);font:600 11px/1 var(--f-mono);cursor:pointer;min-width:0}
+  .ay-serit button:hover,.ay-serit button[aria-current=date]{background:var(--surface-2);color:var(--text)}
+  .ay-serit svg{width:100%;max-width:22px;height:auto}
+  .ay-serit .dl{color:var(--orange-tx)}
+  .ay-ikili .arac-buyuk b{font-size:clamp(22px,2.6vw,30px)}
+  .ay-ikili{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+  .ay-takvim{display:flex;flex-direction:column;gap:8px}
+  .ay-takvim h2{font-size:28px;margin:0}
+  .ay-takvim ol{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+  .ay-takvim li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+  .ay-takvim li b{font-weight:600}
+  .ay-takvim li .meta{display:block;text-transform:none;letter-spacing:0}
+  .ay-takvim .kes{align-self:center}
+  @media (max-width:760px){.ay-serit{grid-template-columns:repeat(15,minmax(0,1fr));row-gap:6px}}
+  @media (max-width:560px){.ay-sahne{grid-template-columns:minmax(0,1fr);justify-items:center;text-align:center;padding:20px 16px}.ay-disk{max-width:180px}.ay-bilgi{align-items:center}.ay-dl{text-align:left;width:100%}.ay-ikili{grid-template-columns:minmax(0,1fr)}}
+</style>
+<script>
+  import { ILLER, gunesSaatleri } from '../../scripts/araclar/gunes'
+  import { ayDogusBatis, ayEvresi, ayYolu, evreAdi, sonrakiEvre } from '../../scripts/araclar/ay'
+  const f = document.querySelector<HTMLFormElement>('[data-ay]')!, il = f.querySelector<HTMLSelectElement>('#ay-il')!, tarih = f.querySelector<HTMLInputElement>('#ay-tarih')!
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!
+  const TZ = 'Europe/Istanbul'
+  const saat = (d: Date | null) => (!d || isNaN(+d) ? 'Yok' : d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', timeZone: TZ }))
+  const gun = (d: Date, uzun = true) => d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', ...(uzun ? { weekday: 'long' } : {}), timeZone: TZ })
+  const yerelGun = (d: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(d)
+  const geceYarisi = (iso: string) => new Date(iso + 'T00:00:00+03:00')
+  const kucukAy = (evre: number) => `<svg viewBox="-2 -2 104 104" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="var(--surface-2)" stroke="var(--line)" stroke-width="3"/><path d="${ayYolu(evre)}" fill="var(--text)"/></svg>`
+  try { il.value = localStorage.getItem('up-arac-il') || il.value } catch { /* depolama kapalı */ }
+  tarih.value = yerelGun(new Date())
+  let ozel: [number, number] | null = null
+  const konum = (): [string, number, number] => (ozel ? ['Konumun', ozel[0], ozel[1]] : ILLER.find((x) => x[0] === il.value)!)
+
+  function ciz() {
+    const [ad, lat, lng] = konum(), gy = geceYarisi(tarih.value)
+    // Seçilen gün: o günün 21.00'indeki görünüm (akşam çekimi); bugünse şimdiki an
+    const bugun = tarih.value === yerelGun(new Date()), an = bugun ? new Date() : new Date(+gy + 21 * 36e5)
+    const e = ayEvresi(an), db = ayDogusBatis(gy, lat, lng)
+    $('[data-ay-yol]').setAttribute('d', ayYolu(e.evre))
+    $('[data-ay-ad]').textContent = evreAdi(e.evre)
+    $('[data-ay-oran]').textContent = `%${Math.round(e.oran * 100)} aydınlık · ${ad}, ${gun(an)}${bugun ? ' (şu an)' : ', 21.00'}`
+    $('[data-ay-dogus]').textContent = saat(db.dogus)
+    $('[data-ay-batis]').textContent = saat(db.batis)
+    $('[data-ay-yas]').textContent = `${(e.evre * 29.53).toFixed(1).replace('.', ',')} gün`
+    $('[data-ay-uzak]').textContent = `${Math.round(e.uzaklik / 1000).toLocaleString('tr-TR')} bin km`
+
+    // Sonraki dolunay ve yeni ay: o akşam gün batımı ile ay doğuşu yan yana (çekim penceresi)
+    const kutu = (baslik: string, t: Date) => {
+      const g = gunesSaatleri(new Date(+geceYarisi(yerelGun(t)) + 12 * 36e5), lat, lng), d2 = ayDogusBatis(geceYarisi(yerelGun(t)), lat, lng)
+      const kalan = Math.max(0, +t - Date.now()), gunKaldi = Math.floor(kalan / 864e5), saatKaldi = Math.floor((kalan % 864e5) / 36e5)
+      return `<div class="arac-buyuk"><span class="label">${baslik}</span><b>${gun(t, false)} ${saat(t)}</b><span class="meta">${kalan ? `${gunKaldi} gün ${saatKaldi} saat sonra · ` : ''}O gün gün batımı ${saat(g.batis)}, ay doğuşu ${saat(d2.dogus)}</span></div>`
+    }
+    const dl = sonrakiEvre(an, 0.5), ya = sonrakiEvre(an, 0)
+    $('[data-sonuc]').innerHTML = `<div class="ay-ikili">${kutu('Sonraki dolunay', dl)}${kutu('Sonraki yeni ay', ya)}</div>`
+
+    // 30 günlük şerit: her gün 21.00'deki evre; dolunay günü turuncu
+    const dlGunleri = new Set<string>(); { let t = new Date(+gy - 864e5); for (let i = 0; i < 2; i++) { t = sonrakiEvre(t, 0.5); dlGunleri.add(yerelGun(t)); t = new Date(+t + 864e5) } }
+    $('[data-ay-serit]').innerHTML = Array.from({ length: 30 }, (_, i) => {
+      const g = new Date(+gy + i * 864e5), iso = yerelGun(new Date(+g + 12 * 36e5)), ev = ayEvresi(new Date(+g + 21 * 36e5)).evre
+      return `<button type="button" data-gun="${iso}" ${i === 0 ? 'aria-current="date"' : ''} title="${gun(new Date(+g + 12 * 36e5))}: ${evreAdi(ev)}">${kucukAy(ev)}<span class="${dlGunleri.has(iso) ? 'dl' : ''}">${new Date(+g + 12 * 36e5).toLocaleDateString('tr-TR', { day: 'numeric', timeZone: TZ })}</span></button>`
+    }).join('')
+
+    // Dolunay takvimi: önümüzdeki 12 dolunay, o akşamki ay doğuşu, süper ay işareti
+    let t = new Date(+gy - 864e5); const satir: string[] = []
+    for (let i = 0; i < 12; i++) {
+      t = sonrakiEvre(t, 0.5); const ev = ayEvresi(t), d2 = ayDogusBatis(geceYarisi(yerelGun(t)), lat, lng)
+      satir.push(`<li>${kucukAy(0.5)}<span><b>${gun(t)}</b><span class="meta">Dolunay anı ${saat(t)} · ${ad} ay doğuşu ${saat(d2.dogus)} · ${Math.round(ev.uzaklik / 1000).toLocaleString('tr-TR')} bin km</span></span>${ev.uzaklik < 361000 ? '<span class="kes k4">Süper ay</span>' : ''}</li>`)
+      t = new Date(+t + 864e5)
+    }
+    $('[data-takvim]').innerHTML = satir.join('')
+    $('[data-takvim-not]').textContent = `${ad} için, ${gun(gy, false)} tarihinden itibaren`
+  }
+  il.addEventListener('change', () => { ozel = null; try { localStorage.setItem('up-arac-il', il.value) } catch { /* */ } ciz() })
+  tarih.addEventListener('change', ciz)
+  $('[data-ay-serit]').addEventListener('click', (ev) => { const b = (ev.target as HTMLElement).closest<HTMLElement>('[data-gun]'); if (b) { tarih.value = b.dataset.gun!; ciz() } })
+  f.querySelector('[data-konum]')!.addEventListener('click', () => navigator.geolocation?.getCurrentPosition((p) => { ozel = [p.coords.latitude, p.coords.longitude]; ciz() }, () => { $('[data-sonuc]').insertAdjacentHTML('afterbegin', '<p class="meta">Konum alınamadı; listeden il seç.</p>') }))
+  ciz()
+</script>

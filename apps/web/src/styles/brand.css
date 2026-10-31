@@ -9,7 +9,7 @@
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
   --f-quote:"Newsreader",Georgia,serif;
   --ease:cubic-bezier(.2,0,0,1); --t1:120ms; --t2:200ms; --t3:320ms;
-  --edge:80px; --gut:24px; --max:1200px; /* 28 Ekim 2026: 1280 → 1200, geniş ekranda iki yana 160 px reklam yeri */
+  --hdr-alt:121px; /* yapışkan başlığın alt kenarı (kategori şeridi dahil); yapışkan öğeler bunun altına oturur */ --edge:80px; --gut:24px; --max:1200px; /* 28 Ekim 2026: 1280 → 1200, geniş ekranda iki yana 160 px reklam yeri */
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1E2023;--surface:#25282C;--surface-2:#2E3236;--text:#F2F2F2;--text-2:#B4B7BB;--text-3:#8E9297;--line:#3A3E44;--rule:#F2F2F2;--link:#F2F2F2;--cat:#B4B7BB;--input:#8E9297;--img:#2E3236;--logo:#FFFFFF;--orange-tx:#FF6B1A;color-scheme:dark}}
@@ -17,7 +17,7 @@
 @media (max-width:1199px){:root{--edge:32px;--gut:16px}}
 @media (max-width:767px){:root{--edge:16px;--gut:16px}}
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;scroll-padding-top:calc(88px + env(safe-area-inset-top,0px))}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:calc(var(--hdr-alt) + 16px + env(safe-area-inset-top,0px))}
 a,button,input,select,summary,label{touch-action:manipulation}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--f-body);font-size:18px;line-height:1.65;-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--bg)}
@@ -195,11 +195,11 @@ h3{font-weight:700}
 
 /* home layout with side column */
 .with-rail{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:var(--gut);align-items:start}
-.rail{display:flex;flex-direction:column;gap:var(--gut);position:sticky;top:calc(67px + env(safe-area-inset-top,0px) + 16px)}
+.rail{display:flex;flex-direction:column;gap:var(--gut);position:sticky;top:calc(var(--hdr-alt) + env(safe-area-inset-top,0px) + 16px)}
 @media (max-width:1100px){.with-rail{grid-template-columns:minmax(0,1fr)}.rail{position:static}}
 /* Yan sütun (YanSutun.astro): uzun olduğu için yapışkan değil; yazı sayfasında başlıkla aynı hizadan başlar */
 .rail-yan{position:static;align-self:stretch}
-.rail-yan > :last-child{position:sticky;top:calc(86px + env(safe-area-inset-top,0px) + 16px)}
+.rail-yan > :last-child{position:sticky;top:calc(var(--hdr-alt) + env(safe-area-inset-top,0px) + 16px)}
 .with-rail > .art + .rail-yan,.with-rail > article + .rail-yan{padding-top:48px}
 .ys-baslik{color:var(--text-3);margin:0 0 8px;display:block}
 .ys-oneri{display:flex;flex-direction:column;text-decoration:none;border:1px solid var(--line);background:var(--surface)}
@@ -309,7 +309,7 @@ h3{font-weight:700}
   .yan-rek{display:block;position:absolute;top:24px;bottom:48px;width:160px}
   .yan-sol{right:calc(50% + var(--max) / 2 + 24px)}
   .yan-sag{left:calc(50% + var(--max) / 2 + 24px)}
-  .yan-rek .ad{position:sticky;top:120px}
+  .yan-rek .ad{position:sticky;top:calc(var(--hdr-alt) + 16px)}
 }
 .ad-sky .slot{width:160px;aspect-ratio:160/600}
 /* Telefonda akış içi kutu (6. karttan sonra); masaüstünde yok */
@@ -586,7 +586,7 @@ main{overflow-x:clip}
 .yr-cip:hover{border-color:var(--text)}.yr-cip.on{background:var(--text);border-color:var(--text);color:var(--bg)}
 .yr-ayrac{width:1px;height:24px;background:var(--line);margin:0 4px}
 .yr-liste{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
-.yr-kart{display:grid;grid-template-columns:76px 1fr;gap:20px;padding:20px 24px;border:1px solid var(--line);background:var(--surface);scroll-margin-top:120px}
+.yr-kart{display:grid;grid-template-columns:76px 1fr;gap:20px;padding:20px 24px;border:1px solid var(--line);background:var(--surface);scroll-margin-top:calc(var(--hdr-alt) + 16px)}
 .yr-kart.vurgu{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue)}
 .yr-kart.gecti{opacity:.6}
 .yr-tarih{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:2px;text-align:center;line-height:1}

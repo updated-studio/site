@@ -1,5 +1,5 @@
 ---
-/** Ana sayfa Araçlar rafı (28 Ekim 2026): beş hesaplayıcı tek sırada; liste lib/araclar.ts'ten (Araçlar sayfasıyla aynı). */
+/** Ana sayfa Araçlar rafı (28 Ekim 2026; 31 Ekim'de sekiz araç, dörtlü iki sıra); liste lib/araclar.ts'ten (Araçlar sayfasıyla aynı). */
 import { ARACLAR } from '../../lib/araclar'
 import { ico } from '../../lib/ui'
 interface Props { no?: string }
@@ -10,7 +10,7 @@ const { no = '' } = Astro.props
   {ARACLAR.map((a) => <a class="arac-kart" href={a.yol}><h3>{a.kisa}</h3><p>{a.aciklama}</p><span class="ar-ac">Aç <Fragment set:html={ico('right', 14)} /></span></a>)}
 </div>
 <style is:global>
-  .ar-raf{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--gut)}
+  .ar-raf{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--gut)}
   .ar-raf .arac-kart{padding:20px;gap:6px}.ar-raf h3{font-size:20px}.ar-raf p{font-size:14px;line-height:1.45}
   @media (max-width:1100px){.ar-raf{grid-template-columns:repeat(3,minmax(0,1fr))}}
   @media (max-width:640px){.ar-raf{grid-template-columns:1fr 1fr;gap:12px}.ar-raf .arac-kart{padding:16px}.ar-raf p{display:none}}

@@ -9,7 +9,7 @@
 .xp{display:flex;align-items:center;gap:8px;height:36px;padding:0 10px;border:1px solid var(--line);font-family:var(--f-mono);font-size:14px;font-weight:600}
 .xp i{width:60px;height:4px;background:var(--line);position:relative}.xp i b{position:absolute;inset:0 auto 0 0;background:var(--blue)}
 /* Bölüm sekmeleri (28 Ekim 2026): sitenin üst barının altında, her genişlikte; telefonda yana kayar. Sağda XP. */
-.ktabs{position:sticky;top:calc(84px + env(safe-area-inset-top,0px));z-index:40;background:var(--bg)}
+.ktabs{position:sticky;top:calc(var(--hdr-alt) + env(safe-area-inset-top,0px));z-index:40;background:var(--bg)}
 .ktabs .wrap{display:flex;gap:4px;align-items:center;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line)}
 .ktabs .wrap::-webkit-scrollbar{display:none}
 .ktabs button{flex:none;height:48px;padding:0 12px;border:0;background:transparent;font-weight:600;font-size:15px;cursor:pointer;border-bottom:3px solid transparent;color:var(--text);white-space:nowrap}
