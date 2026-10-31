@@ -34,6 +34,7 @@ import { uyeEndpoints } from './endpoints/uye'
 import { yarismaOneri } from './endpoints/yarisma'
 import { toplulukTemizligi, yarismaZamanlayici } from './lib/uye'
 import { icerikGelenKancasi } from './lib/icerikGelen'
+import { radarZamanlayici } from './lib/radar'
 import { zamanlamaTemizligi } from './hooks/zamanlamaTemizle'
 import { hareketKaydi, hareketKaydiGlobal } from './hooks/hareket'
 
@@ -67,7 +68,7 @@ export default buildConfig({
   // Zamanlanmış yayın (schedulePublish) için iş kuyruğu dakikada bir çalışır. Panel kalıcı Node sunucusunda çalışmalı.
   jobs: { autoRun: [{ cron: '* * * * *', queue: 'default', limit: 20 }], tasks: [] },
   endpoints: [triyajImport, triyajDurum, triyajKapak, triyajTemizle, previewEndpoint, canliEndpoint, studyoSema, studyoOnizleme, studyoAlanlar, studyoDurum, studyoGiris, studyoZamanla, studyoZamanlaEkle, studyoZamanlaSil, ...okunmaEndpoints, ...uyeEndpoints, yarismaOneri, yazarFoto],
-  onInit: async (p) => { await okunmaInit(p); yarismaZamanlayici(p); gorevZamanlayici(p) },
+  onInit: async (p) => { await okunmaInit(p); yarismaZamanlayici(p); gorevZamanlayici(p); radarZamanlayici(p) },
   plugins: [
     s3Storage({
       enabled: !!process.env.S3_BUCKET,

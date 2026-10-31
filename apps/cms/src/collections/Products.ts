@@ -44,6 +44,7 @@ export const Products: CollectionConfig = {
     {
       type: 'collapsible', label: 'Çıkış radarı', admin: { description: 'Henüz çıkmamış ürün için: kutuyu işaretle, tahmini tarihi gir, Durum alanında söylenti / sızıntı / test / duyuruldu seç.' }, fields: [
         { name: 'onRadar', type: 'checkbox', label: 'Çıkış radarında', defaultValue: false },
+        { name: 'radarOto', type: 'checkbox', label: 'Radara sistem ekledi', defaultValue: false, admin: { readOnly: true, description: 'Çıkış radarı otomasyonu açtı. Kutuyu kapatırsan sistem bu ürünü bir daha radara koymaz.' } },
         {
           type: 'row', fields: [
             { name: 'releaseDate', type: 'date', label: 'Tahmini çıkış tarihi', admin: { date: { pickerAppearance: 'monthOnly', displayFormat: 'MMMM yyyy' }, description: 'Radar bu tarihe göre sıralanır; ay ve yıl yeterli. Boşsa en alta gider.' } },
