@@ -188,6 +188,11 @@ function feeds() {
         if (!r.ok || !html || !html.includes('inf-chunk')) { end = true; sentinel.innerHTML = '<p class="meta" style="text-align:center">Akışın sonuna geldiniz.</p>'; return }
         const box = document.createElement('div'); box.innerHTML = html
         const chunk = box.firstElementChild as HTMLElement
+        // Sayfada zaten kart olarak duran haber akışta ikinci kez çıkmasın (ana sayfada Gündemden ile 2. sayfa kesişiyordu)
+        const var_ = new Set($$<HTMLAnchorElement>('article :is(h2,h3) a[href]').filter((a) => !a.closest('.gy-ek[hidden]')).map((a) => a.getAttribute('href')))
+        var_.add(location.pathname.replace(/\/$/, '')) // okunan yazının kendisi de akışta çıkmasın
+        $$<HTMLAnchorElement>('article.c-std h3 a[href]', chunk).forEach((a) => { if (var_.has(a.getAttribute('href'))) a.closest('article')?.remove() })
+        const say = $('.inf-h .label', chunk); if (say) say.textContent = say.textContent!.replace(/\d+ haber/, $$('article.c-std', chunk).length + ' haber')
         f.insertBefore(chunk, sentinel)
         f.dataset.next = String(page + 1)
         hydrate(chunk)

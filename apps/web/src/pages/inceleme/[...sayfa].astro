@@ -34,7 +34,7 @@ const videolar = youtube.filter((v) => !v.short)
         {turler.map((t) => <a href={`#${t}`} data-tur={t}>{turAdi(t)}</a>)}
       </nav>}
     </div>
-    {items.length === 0 ? <div class="rh-bos" style="padding-bottom:48px"><p class="lead" style="margin:0">İlk incelemeler hazırlanıyor: cihazları kullanarak test ediyoruz, puan /20. O zamana kadar ürünleri <a href="/karsilastirma">Kıyaslamalar</a>'da yan yana koyabilir, <a href="/urun">Künyeler</a>'de teknik verilere bakabilirsin.</p>{videolar.length > 0 && site && <div style="margin-top:40px"><VideoDuvar videos={videolar} channel={site.youtube} baslik="Video incelemeler" /></div>}</div> : <>
+    {items.length === 0 ? <div style="padding-bottom:48px"><p class="lead rh-bos" style="margin:0;padding:24px 0 0">İlk incelemeler hazırlanıyor: cihazları kullanarak test ediyoruz, puan /20. O zamana kadar ürünleri <a href="/karsilastirma">Kıyaslamalar</a>'da yan yana koyabilir, <a href="/urun">Künyeler</a>'de teknik verilere bakabilirsin.</p>{videolar.length > 0 && site && <div style="margin-top:40px"><VideoDuvar videos={videolar} channel={site.youtube} baslik="Video incelemeler" /></div>}</div> : <>
       {one.length > 0 && <section class="icl-one" aria-label="Öne çıkan">
         <a class="icl-k buyuk" href={one[0].path} data-tur={one[0].product?.type}>
           {one[0].cover && <Img img={one[0].cover} alt="" eager sizes="(max-width: 900px) 100vw, 800px" />}

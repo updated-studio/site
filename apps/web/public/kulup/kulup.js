@@ -4,7 +4,7 @@
 (() => {
   const { $, $$, esc, ico, logo, img, toast, RM } = UP;
   const TRACKS = [
-    { id: 'foto', n: 'Fotoğraf', img: 'drone', d: 'Pozlama üçgeni, kompozisyon, ışık ve düzenleme.', mods: [
+    { id: 'foto', n: 'Fotoğraf', img: 'camera', d: 'Pozlama üçgeni, kompozisyon, ışık ve düzenleme.', mods: [
       { n: 'Pozlamanın temeli', l: [['Diyafram ne işe yarar?', 'Okuma', 4], ['Enstantane ve hareket', 'Okuma', 4], ['ISO ve gürültü', 'Okuma', 3], ['Pozlama simülatörü', 'Simülatör', 6, 'expo'], ['Pozlama alıştırması', 'Alıştırma', 3, 'quiz']] },
       { n: 'Kompozisyon', l: [['Üçler kuralı ve ötesi', 'Okuma', 5], ['Öncü çizgiler', 'Okuma', 4], ['Haftalık görev: öncü çizgi', 'Görev', 0, 'task']] },
       { n: 'Gece ve uzun pozlama', l: [['Tripod ve sabitleme', 'Okuma', 4], ['Işık izi çekimi', 'Simülatör', 6, 'expo'], ['Gece alıştırması', 'Alıştırma', 3, 'quiz']] } ] },

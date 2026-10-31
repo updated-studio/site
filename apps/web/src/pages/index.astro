@@ -73,7 +73,7 @@ const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşıla�
       {robotVar && <div><KiyasRobotu products={products} no={no()} /></div>}
       {m.altmisSaniye && <div><Altmis items={latest} no={no()} /></div>}
       {/* Gündemden: sağ sütun uzun kaldığında solda boşluk açılmasın; "Son haberler"in devamı, sonsuz akış 21. haberden başlıyor */}
-      {rest.length > 4 && <div><div class="sh"><h2><span class="no">{no()}</span>Gündemden</h2><a class="btn-t btn" href="/haberler">Tümü</a></div><div class="grid-yatay">{rest.slice(4, 10).map((n) => <CardStd item={n} />)}</div></div>}
+      {rest.length > 4 && <div><div class="sh"><h2><span class="no">{no()}</span>Gündemden</h2><a class="btn-t btn" href="/haberler">Tümü</a></div><div class="grid-yatay" data-dolgu>{rest.slice(4, 20).map((n, i) => i < 6 ? <CardStd item={n} /> : <div class="gy-ek" hidden><CardStd item={n} /></div>)}</div></div>}
     </div>
     <div class="rail">
       {/* Çıkış radarı sağ sütunun başında (30 Ekim 2026, toplantı notu) */}
@@ -95,7 +95,19 @@ const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşıla�
     <InfiniteFeed title="Daha fazla haber" source="son" items={[]} startPage={2} videos={videos} reels={reels} ads={ads} channel={site.youtube} profile={site.instagram} renderFirst={false} />
   </div></section>
 </Base>
+<script>
+  // Geniş ekranda sağ sütun (radar, en çok okunanlar, görev) soldan uzun kalırsa Gündemden'e ikişer haber eklenir; boşluk kapanır
+  const dolgu = () => {
+    const g = document.querySelector<HTMLElement>('[data-dolgu]'), sol = g?.closest('.ana-sol') as HTMLElement | null, rail = sol?.nextElementSibling as HTMLElement | null
+    if (!g || !sol || !rail || !matchMedia('(min-width:1101px)').matches) return
+    const ek = [...g.querySelectorAll<HTMLElement>('.gy-ek[hidden]')]
+    while (ek.length >= 2 && rail.offsetHeight - sol.offsetHeight > 150) { ek.shift()!.hidden = false; ek.shift()!.hidden = false }
+  }
+  addEventListener('load', dolgu); setTimeout(dolgu, 1500)
+</script>
 <style is:global>
+  .grid-yatay > .gy-ek{display:contents}
+  .grid-yatay > .gy-ek[hidden]{display:none}
   /* Sol sütundaki modüller arası boşluk tek yerden (Altmis kendi üst boşluğunu da taşıyordu) */
   .ana-sol{display:flex;flex-direction:column;gap:48px;min-width:0}
   .ana-sol > div{min-width:0}

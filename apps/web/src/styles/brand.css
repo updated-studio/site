@@ -165,14 +165,14 @@ h3{font-weight:700}
 .eco-sekme .btn{flex:1 1 0;min-width:0;padding:0 6px;font-size:14px;justify-content:center;white-space:nowrap}
 /* Yatay haber kartı ızgarası (ana sayfa "Gündemden", 30 Ekim 2026): solda küçük görsel, sağda kategori + başlık + tarih */
 .grid-yatay{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px var(--gut)}
-.grid-yatay > .c-std{flex-direction:row;align-items:stretch}
-.grid-yatay > .c-std > .c-img{flex:0 0 38%;aspect-ratio:auto;min-height:116px}
-.grid-yatay > .c-std > .c-img .lbl,.grid-yatay > .c-std .pks,.grid-yatay > .c-std .yz-ad{display:none}
-.grid-yatay > .c-std .b{padding:12px 14px;gap:6px;min-width:0}
-.grid-yatay > .c-std .cat{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cam .grid-yatay > .c-std h3,.grid-yatay > .c-std h3{font-size:17px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.grid-yatay > .c-std .ft .meta{font-size:12px}
-@media (max-width:560px){.grid-yatay{grid-template-columns:minmax(0,1fr);gap:10px}.grid-yatay > .c-std > .c-img{flex-basis:36%;max-width:148px;min-height:96px}.cam .grid-yatay > .c-std h3,.grid-yatay > .c-std h3{font-size:16px}}
+.grid-yatay .c-std{flex-direction:row;align-items:stretch}
+.grid-yatay .c-std > .c-img{flex:0 0 38%;aspect-ratio:auto;min-height:116px}
+.grid-yatay .c-std > .c-img .lbl,.grid-yatay .c-std .pks,.grid-yatay .c-std .yz-ad{display:none}
+.grid-yatay .c-std .b{padding:12px 14px;gap:6px;min-width:0}
+.grid-yatay .c-std .cat{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cam .grid-yatay .c-std h3,.grid-yatay .c-std h3{font-size:17px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.grid-yatay .c-std .ft .meta{font-size:12px}
+@media (max-width:560px){.grid-yatay{grid-template-columns:minmax(0,1fr);gap:10px}.grid-yatay .c-std > .c-img{flex-basis:36%;max-width:148px;min-height:96px}.cam .grid-yatay .c-std h3,.grid-yatay .c-std h3{font-size:16px}}
 /* Telefonda haber kartı (30 Ekim 2026, kullanıcı: "kaydırınca görünen haberler neredeyse manşet boyutunda, daha küçük olacak"):
    tek sütunda kart yatay sıkışık satır olur: solda küçük görsel, sağda kategori + başlık + imza. Manşet ve video kartları etkilenmez. */
 @media (max-width:560px){

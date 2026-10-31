@@ -29,6 +29,8 @@ const feed = [
   ...(p.comparisons || []).map((c) => ({ tag: 'KIYAS', cls: 'KIYAS', title: c.title, d: date(c.publishedAt), href: c.path, s: '', at: c.publishedAt })),
   ...p.news.map((n) => ({ tag: n.label === 'sizinti' ? 'SIZINTI' : 'HABER', cls: 'TANITIM', title: n.title, d: date(n.publishedAt), href: n.path, s: '', at: n.publishedAt })),
 ].sort((a, b) => +new Date(b.at) - +new Date(a.at))
+// Bilinmeyen özellikler tabloyu "Bilinmiyor" satırlarıyla doldurmasın (31 Ekim 2026): bilinenler tabloda, kalanlar altta tek satır
+const bilinen = specs.filter((s) => s.value), eksik = specs.filter((s) => !s.value)
 const rel = shelf.filter((q) => q.slug !== p.slug).slice(0, 4)
 const status = api.statusText(p.status)
 // Kıyas aracı (27 Ekim 2026): rakip girilmişse onunla, yoksa araç aynı türün en dolu künyesini rakip yapar
@@ -47,7 +49,7 @@ const kiyas = `/karsilastirma/kiyas?u=${[p.slug, ...p.rivals.slice(0, 1).map((r)
         {p.score && p.reviews[0] && <a class="ku-score" href={p.reviews[0].path}><b>{s20(p.score)}</b><span>Updated<br />puanı</span></a>}
       </div>
       <div class="ku-actions"><a class="btn pri" href={`/rss/urun/${p.slug}.xml`}>Takip et (RSS)</a><a class="btn" href={kiyas}>Kıyasla</a></div>
-      <div class="ku-stats"><span><b>{feed.length}</b> içerik</span><span><b>{p.news.length}</b> haber</span><span><b>{p.reviews.length}</b> inceleme</span><span><b>{specs.filter((s) => s.value).length}/{specs.length}</b> doğrulanmış özellik</span></div>
+      <div class="ku-stats">{[[feed.length, 'içerik'], [p.news.length, 'haber'], [p.reviews.length, 'inceleme']].filter(([n]) => n).map(([n, t]) => <span><b>{n}</b> {t}</span>)}{specs.length > 0 && <span><b>{bilinen.length}/{specs.length}</b> doğrulanmış özellik</span>}</div>
     </div>
     <div class="ku-stage">
       {p.image && <><div class="ku-tabs" role="group" aria-label="Görünüm"><button type="button" aria-pressed="true" data-m="sok">Söküm</button><button type="button" aria-pressed="false" data-m="foto">Fotoğraf</button></div><div class="ku-photo" hidden><Img img={p.image} alt={p.name} /></div></>}
@@ -60,11 +62,12 @@ const kiyas = `/karsilastirma/kiyas?u=${[p.slug, ...p.rivals.slice(0, 1).map((r)
   <section class="wrap ku-grid">
     <div>
       <div class="sec-head" style="margin-bottom:12px"><div><span class="eyebrow">Ürün veritabanından · her değer kaynağıyla</span><h2 class="sec-title ku-h2">Teknik künye</h2></div></div>
-      {specs.length ? (
+      {bilinen.length > 0 ? (
         <div class="tbl-box" tabindex="0" role="region" aria-label="Teknik özellikler"><table class="ku-tbl"><thead><tr><th scope="col">Özellik</th><th scope="col">Değer</th><th scope="col">Kaynak</th></tr></thead><tbody>
-          {specs.map((s) => <tr><th scope="row">{s.key}</th><td class={s.value ? '' : 'unk'}>{s.value || 'Bilinmiyor'}</td><td set:html={tier(s)} /></tr>)}
+          {bilinen.map((s) => <tr><th scope="row">{s.key}</th><td>{s.value}</td><td set:html={tier(s)} /></tr>)}
         </tbody></table></div>
-      ) : <p class="pc-unk">Teknik veriler henüz girilmedi.</p>}
+      ) : <p class="pc-unk">Teknik veriler henüz doğrulanmadı. Değerler kaynağıyla girildikçe burada görünür.</p>}
+      {eksik.length > 0 && <details class="ku-eksik"><summary>{bilinen.length ? `${eksik.length} özellik daha doğrulanmayı bekliyor` : `Beklenen ${eksik.length} özellik`}</summary><p>{eksik.map((s) => s.key).join(' · ')}</p></details>}
       <p class="ku-note">Değerler üretici beyanı, Updated ölçümü ve diğer kaynaklar olarak ayrı saklanır. Çakışan değerler QC onayına düşer; onaylanınca bu künyeye bağlı tüm haber, inceleme ve kıyaslar birlikte güncellenir.</p>
       <div class="sec-head" style="margin:48px 0 12px"><div><span class="eyebrow">Bu ürünle ilgili her şey</span><h2 class="sec-title ku-h2">Akış</h2></div></div>
       {feed.length ? <ol class="ku-feed">{feed.map((f) => <li><a href={f.href}><span class={`tag t-${f.cls}`}>{f.tag}</span><b>{f.title}</b><span class="d">{f.d}</span>{f.s && <span class="s">{f.s}</span>}</a></li>)}</ol> : <p class="pc-unk">Bu ürünle ilgili henüz içerik yok.</p>}

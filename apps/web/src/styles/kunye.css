@@ -146,6 +146,9 @@
 .src{font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;padding:2px 6px;border:1px solid var(--line);white-space:nowrap}
 .src.s4{border-color:var(--blue)}.src.s2{background:var(--black);color:var(--white);border-color:var(--black)}.src.s0{color:var(--text-3);border-style:dashed}
 .ku-note{font-size:14px;color:var(--text-2);max-width:68ch;margin:12px 0 0}
+.ku-eksik{margin:12px 0 0;padding:12px 16px;border:1px dashed var(--line);border-radius:var(--r-kart,0);font-size:14px;color:var(--text-2)}
+.ku-eksik summary{cursor:pointer;font-weight:600;color:var(--text)}
+.ku-eksik p{margin:8px 0 0;line-height:1.6}
 .ku-feed{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .ku-feed a{display:grid;grid-template-columns:110px minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);text-decoration:none}
 .ku-feed a:hover b{text-decoration:underline}

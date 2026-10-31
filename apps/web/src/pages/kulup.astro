@@ -20,11 +20,11 @@ const gorev = g ? { baslik: g.baslik, aciklama: g.aciklama || '', oylama: !aktif
 <Base meta={meta} breaking={false} bodyClass="kulup-sayfa">
   <nav class="ktabs" id="ktabs" aria-label="Kulüp bölümleri"><div class="wrap"></div></nav>
   <div id="kmain"><noscript><div class="wrap" style="padding:48px 0"><h1>UPDATED Kulüp</h1><p>Dersler ve simülatörler için JavaScript gerekir.</p></div></noscript></div>
-  <script is:inline src="/kulup/media.js"></script>
+  <script is:inline src="/kulup/media.js?v=2"></script>
   <script is:inline src="/kulup/logo.js"></script>
   <script is:inline src="/kulup/core.js"></script>
   <script is:inline set:html={`UP.SITE_URL='/';UP.GOREV=${JSON.stringify(gorev).replace(/</g, '\\u003c')};`} />
-  <script is:inline src="/kulup/kulup.js"></script>
+  <script is:inline src="/kulup/kulup.js?v=2"></script>
   <script is:inline>UP.kulup();</script>
   <script>import '../scripts/kulup-uye.ts'</script>
 </Base>
