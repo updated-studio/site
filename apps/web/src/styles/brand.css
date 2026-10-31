@@ -310,16 +310,16 @@ h3{font-weight:700}
   .yan-rek{display:block;position:absolute;top:24px;bottom:48px;width:120px}
   .yan-sol{left:max(16px,env(safe-area-inset-left,0px))}
   .yan-sag{right:max(16px,env(safe-area-inset-right,0px))}
-  .yan-rek .ad{position:sticky;top:calc(var(--hdr-alt) + 16px)}
-  .yan-rek .ad-sky .slot{width:120px;aspect-ratio:120/600}
+  .yan-rek .ad,.yan-tanit{position:sticky;top:calc(var(--hdr-alt) + 16px)}
+  .yan-rek .ad-sky .slot,.yan-ev{width:120px;aspect-ratio:120/600}
 }
-@media (min-width:1600px){.yan-rek{width:160px}.yan-rek .ad-sky .slot{width:160px;aspect-ratio:160/600}.yan-sol{left:24px}.yan-sag{right:24px}}
+@media (min-width:1600px){.yan-rek{width:160px}.yan-rek .ad-sky .slot,.yan-ev{width:160px;aspect-ratio:160/600}.yan-sol{left:24px}.yan-sag{right:24px}}
 .ad-sky .slot{width:160px;aspect-ratio:160/600}
-.ad-sky .yan-ev{display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:10px;padding:16px 14px;text-align:left;text-transform:none;letter-spacing:0;font-family:var(--f-body);font-size:14px;color:var(--text-2);text-decoration:none;border:1px solid var(--line);border-radius:var(--r-kart,0);background:linear-gradient(180deg,var(--surface-2),var(--surface))}
-.ad-sky .yan-ev b{font-family:var(--f-head);font-weight:900;font-size:24px;line-height:1.05;color:var(--text);text-wrap:balance}
-.ad-sky .yan-ev .yan-ev-m{line-height:1.45}
-.ad-sky .yan-ev .btn{padding:0 12px;font-size:13px}
-.ad-sky .yan-ev:hover b{text-decoration:underline}
+.yan-ev{display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:10px;padding:16px 14px;text-align:left;text-transform:none;letter-spacing:0;font-family:var(--f-body);font-size:14px;color:var(--text-2);text-decoration:none;border:1px solid var(--line);border-radius:var(--r-kart,0);background:linear-gradient(180deg,var(--surface-2),var(--surface))}
+.yan-ev b{font-family:var(--f-head);font-weight:900;font-size:24px;line-height:1.05;color:var(--text);text-wrap:balance}
+.yan-ev .yan-ev-m{line-height:1.45}
+.yan-ev .btn{padding:0 12px;font-size:13px}
+.yan-ev:hover b{text-decoration:underline}
 /* Telefonda akış içi kutu (6. karttan sonra); masaüstünde yok */
 .ad-tel{display:none}
 @media (max-width:767px){.ad-tel{display:block}}
@@ -750,4 +750,4 @@ main{overflow-x:clip}
 .ara-form{display:flex;gap:8px;max-width:560px}
 .ara-form .sel{flex:1 1 auto;min-width:0}
 .ara-form .btn{flex:0 0 auto}
-.pl-bas{display:inline-flex;align-items:center;gap:10px}.pl-bas .pl-logo{flex:none;display:block}
+.pl-bas{display:flex;align-items:center;gap:10px}.pl-bas .pl-logo{flex:none;display:block}

@@ -11,3 +11,8 @@ Kullanım: `PLAYWRIGHT_BROWSERS_PATH=/opt/updated/calisma/araclar/tarayici node 
 Ekran görüntüsü: `node deploy/denetim/ekran.mjs <adres> <çıktı.png> [genişlik] [acik|koyu]`
 
 Bilinen, bilerek kalan: son dakika şeridindeki bağlantı ve oklar 40 px (kit §10b şerit 40 px).
+
+## Ölçek denetimi (`cakisma.mjs`, 31 Ekim 2026)
+`node deploy/denetim/cakisma.mjs http://127.0.0.1:4402 [yol ...]`: her sayfayı 320, 360, 390, 414, 768, 1024, 1440, 1920 px'te açar; yazıların gerçek satır kutularını ölçer.
+ÇAKIŞMA (iki yazı üst üste), YAPIŞIK (aynı satırda iki ayrı kutunun yazısı arada boşluk olmadan değiyor), TAŞAN YAZI, YANA KAYMA bildirir; sorun varsa çıkış kodu 1.
+Kapalı açılır menüler, kaydırılan şeritlerde ekran dışında kalan yazılar ve yapışık üst barın altından geçen içerik sayılmaz. Genişlikler `GENISLIK=320,390` ile daraltılabilir.

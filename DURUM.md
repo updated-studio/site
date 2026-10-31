@@ -53,6 +53,8 @@
 
 ## Günlük (en yeni üstte)
 
+- **31 Ekim 2026 22:10 · Ölçek denetimi + yan reklamın kaybolması (kullanıcı: "reklam kısmı görünüp gidiyor", "mobilde Reels yazısı birbirine giriyor, kalıcı çözmemiz gerekiyor").** Yan "Reklam ver" kutusu `ad ad-sky` sınıfı taşıyordu; EasyList `##.ad-sky` kuralıyla reklam engelleyicili tarayıcıda açılışta görünüp kayboluyordu. Kendi tanıtımımız artık `yan-tanit`/`yan-ev` (EasyList + uBlock 27.311 gizleme kuralına karşı denendi, hiçbiri gizlemiyor). Reels başlığı `inline-flex` olduğu için 414 ve 768 px'te alt yazıya yapışıyordu → `flex`. Yeni **`deploy/denetim/cakisma.mjs`**: 8 genişlikte üst üste binen/yapışık/taşan yazı ve yana kayma; ilk taramada ayrıca ürün sayfası 320 px "Topla" × açıklama, dolunay şeridi 320 px gün sayıları bulundu, düzeltildi. CLAUDE.md kural 11-12.
+
 - **31 Ekim 2026 22:00 · Kategori şeridindeki İncelemeler/Rehber geri alındı** (kullanıcı: istenen ana sayfada bölümdü, şerit değil). İkisi ana sayfada 05/06 bölüm olarak duruyor.
 
 - **31 Ekim 2026 21:45 · Platform logoları (kullanıcı önerisi).** Manşet yanındaki bölüm "Son videolar" → Instagram logosuyla "Reels" (Reels yoksa YouTube logosuyla "Shorts"); video duvarı "Video haberler" → YouTube logosuyla "Videolar" (`lib/ui.ts` `logoInstagram`, `logoYoutube`).

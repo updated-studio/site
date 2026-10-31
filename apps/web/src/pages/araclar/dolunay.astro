@@ -65,6 +65,8 @@ const sirali = [...ILLER].sort((a, b) => a[0].localeCompare(b[0], 'tr'))
   .ay-takvim li .meta{display:block;text-transform:none;letter-spacing:0}
   .ay-takvim .kes{align-self:center}
   @media (max-width:760px){.ay-serit{grid-template-columns:repeat(15,minmax(0,1fr));row-gap:6px}}
+  /* Dar telefonda 15 sütun sığmıyor, gün sayıları birbirine değiyordu: 10 sütun, 3 satır (31 Ekim 2026, ölçek denetimi) */
+  @media (max-width:480px){.ay-serit{grid-template-columns:repeat(10,minmax(0,1fr))}}
   @media (max-width:560px){.ay-sahne{grid-template-columns:minmax(0,1fr);justify-items:center;text-align:center;padding:20px 16px}.ay-disk{max-width:180px}.ay-bilgi{align-items:center}.ay-dl{text-align:left;width:100%}.ay-ikili{grid-template-columns:minmax(0,1fr)}}
 </style>
 <script>
