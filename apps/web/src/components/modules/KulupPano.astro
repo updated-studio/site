@@ -1,8 +1,14 @@
 ---
 /** Ana sayfa Kulüp panosu (28 Ekim 2026): dersler ve simülatörler, haftalık görev, yarışmalar takvimi; koyu cam pano. */
 import { ico } from '../../lib/ui'
-interface Props { kulupUrl: string; no?: string }
-const { kulupUrl, no = '' } = Astro.props
+import type { Gorev } from '../../lib/api'
+import { date } from '../../lib/format'
+interface Props { kulupUrl: string; no?: string; gorevler?: Gorev[] }
+const { kulupUrl, no = '', gorevler = [] } = Astro.props
+// Haftalık görev kartı açık görev varsa temasını ve son günü gösterir (31 Ekim 2026: görev sağ sütundan Kulüp'e taşındı)
+const simdi = Date.now()
+const aktif = gorevler.find((g) => +new Date(g.baslangic) <= simdi && simdi < +new Date(g.bitis))
+const oylama = aktif ? null : gorevler.find((g) => +new Date(g.bitis) <= simdi && simdi < +new Date(g.oylamaBitis))
 ---
 <div class="sh"><h2>{no && <span class="no">{no}</span>}Kulüp</h2><span class="meta">Öğren, çek, katıl</span></div>
 <div class="kp">
@@ -13,7 +19,9 @@ const { kulupUrl, no = '' } = Astro.props
     <a class="btn btn-p" href={kulupUrl}>Kulübe gir <Fragment set:html={ico('right', 16)} /></a>
   </div>
   <a class="kp-k" href={`${kulupUrl}#pratik`}><b>Simülatörler</b><span>Pozlama, 180° kuralı, dron uçuş planı</span></a>
-  <a class="kp-k" href="/gorev"><b>Haftalık görev</b><span>Her pazartesi yeni tema, kör oylama</span></a>
+  {aktif ? <a class="kp-k kp-gorev" href="/gorev"><span class="label">Bu haftanın görevi · son gün {date(aktif.bitis)}</span><b>{aktif.baslik}</b>{aktif.aciklama && <span>{aktif.aciklama}</span>}<span class="kp-git">Fotoğrafını yükle <Fragment set:html={ico('right', 14)} /></span></a>
+    : oylama ? <a class="kp-k kp-gorev" href="/gorev"><span class="label">Oylama sürüyor · {date(oylama.oylamaBitis)}'e kadar</span><b>{oylama.baslik}</b><span class="kp-git">Oy ver <Fragment set:html={ico('right', 14)} /></span></a>
+    : <a class="kp-k" href="/gorev"><b>Haftalık görev</b><span>Her pazartesi yeni tema, kör oylama</span></a>}
   <a class="kp-k" href="/yarismalar"><b>Yarışmalar takvimi</b><span>Fotoğraf ve kısa film yarışmaları, son tarihe göre</span></a>
 </div>
 <style is:global>
@@ -21,6 +29,7 @@ const { kulupUrl, no = '' } = Astro.props
   .kp-ana{grid-row:1 / span 3;display:flex;flex-direction:column;gap:10px;padding:28px;border-radius:var(--r-buyuk,0);background:var(--cam-koyu,#000);color:#fff;box-shadow:var(--cam-golge,none)}
   .kp-ana h3{font-size:34px;line-height:1.1;color:#fff}.kp-ana p{margin:0;color:#E2E2E2;font-size:16px;max-width:44ch}.kp-ana .btn{align-self:flex-start;margin-top:auto}
   .kp-k{grid-column:2 / -1;display:flex;flex-direction:column;gap:2px;padding:16px 20px;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-kart,0);box-shadow:var(--cam-golge,none);text-decoration:none;color:var(--text)}
+  .kp-gorev .label{color:var(--orange-tx,var(--text-3))}.kp-gorev b{font-size:22px}.kp-git{display:inline-flex;align-items:center;gap:4px;margin-top:4px;font-weight:600;color:var(--link,var(--text))!important}
   .kp-k b{font-size:17px}.kp-k span{font-size:14px;color:var(--text-2)}.kp-k:hover{border-color:var(--text)}
   @media (max-width:800px){.kp{grid-template-columns:minmax(0,1fr)}.kp-ana{grid-row:auto;padding:22px}.kp-ana h3{font-size:28px}.kp-k{grid-column:auto}}
 </style>
