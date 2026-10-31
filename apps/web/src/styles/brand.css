@@ -750,3 +750,4 @@ main{overflow-x:clip}
 .ara-form{display:flex;gap:8px;max-width:560px}
 .ara-form .sel{flex:1 1 auto;min-width:0}
 .ara-form .btn{flex:0 0 auto}
+.pl-bas{display:inline-flex;align-items:center;gap:10px}.pl-bas .pl-logo{flex:none;display:block}

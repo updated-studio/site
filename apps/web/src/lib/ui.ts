@@ -67,3 +67,7 @@ export function linkProducts(html: string, products: ProductRef[]) {
   }
   return out
 }
+
+/** Platform logoları (31 Ekim 2026, kullanıcı: Reels başlığına Instagram, video duvarına YouTube logosu). Markanın kendi renkleriyle, başlık yanında. */
+export const logoInstagram = (s = 22) => `<svg class="pl-logo" width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true"><defs><radialGradient id="igg" cx="30%" cy="107%" r="150%"><stop offset="0" stop-color="#FDF497"/><stop offset=".05" stop-color="#FDF497"/><stop offset=".45" stop-color="#FD5949"/><stop offset=".6" stop-color="#D6249F"/><stop offset=".9" stop-color="#285AEB"/></radialGradient></defs><rect width="24" height="24" rx="6" fill="url(#igg)"/><rect x="5" y="5" width="14" height="14" rx="4" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="3.3" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="16.4" cy="7.6" r="1.1" fill="#fff"/></svg>`
+export const logoYoutube = (s = 22) => `<svg class="pl-logo" width="${Math.round(s * 1.4)}" height="${s}" viewBox="0 0 28 20" aria-hidden="true"><rect width="28" height="20" rx="5.5" fill="#FF0000"/><path d="M11.2 5.6v8.8l7.6-4.4z" fill="#fff"/></svg>`

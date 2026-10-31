@@ -53,6 +53,8 @@
 
 ## Günlük (en yeni üstte)
 
+- **31 Ekim 2026 21:45 · Platform logoları (kullanıcı önerisi).** Manşet yanındaki bölüm "Son videolar" → Instagram logosuyla "Reels" (Reels yoksa YouTube logosuyla "Shorts"); video duvarı "Video haberler" → YouTube logosuyla "Videolar" (`lib/ui.ts` `logoInstagram`, `logoYoutube`).
+
 - **31 Ekim 2026 21:30 · Kategori şeridine İncelemeler ve Rehber (kullanıcı: "menüye ekle").** Tümü'nün yanında turuncu yazılı iki bölüm, kategorilerden ince çizgiyle ayrı; açık olan sayfada turuncu dolgu (`Header.astro`, `cam.css` `.ks-bolum`).
 
 - **31 Ekim 2026 21:00 · Ana sayfa: video yukarı, İncelemeler ve Rehber bölümü; yükleme titremesi (kullanıcı: "siteyi bitirmeden başka hiçbir işe geçmeyeceğiz").** Video haberler manşetin hemen altında. Ayrı bölümler: İncelemeler (puanlı inceleme + başlığında "inceleme" geçen yazılar, `api.getIncelemeHaberleri`) ve Rehber (`getRehber`). /inceleme sayfası puanlı inceleme yokken "İnceleme yazıları" ızgarasını gösterir. **Yükleme düzeni** (`deploy/natro-yukle.mjs`): önce varlıklar sonra .html (eskiden tek `mirror`, sıra rastgeleydi); kaldırılan `_astro/` dosyaları 1 saat bekletilir (manifestte `eski:<zaman>`), önbellekteki eski sayfa tasarımsız kalmasın. Kullanıcının gördüğü "yan reklam yeniledikçe gelip gidiyor" yayın sırasındaki bu aradan geliyordu; yayın dışında 12 yenileme + tarayıcı denemesinde sabit.
