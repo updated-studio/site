@@ -16,6 +16,7 @@ import * as migration_20261029_071812_uye_studyo_foto from './20261029_071812_uy
 import * as migration_20261029_090000_tek_kisi from './20261029_090000_tek_kisi';
 import * as migration_20261030_014451_inceleme_alt_puan from './20261030_014451_inceleme_alt_puan';
 import * as migration_20261030_021746_radar_tarih from './20261030_021746_radar_tarih';
+import * as migration_20261031_120636_rehber_liste from './20261031_120636_rehber_liste';
 
 export const migrations = [
   {
@@ -106,6 +107,11 @@ export const migrations = [
   {
     up: migration_20261030_021746_radar_tarih.up,
     down: migration_20261030_021746_radar_tarih.down,
-    name: '20261030_021746_radar_tarih'
+    name: '20261030_021746_radar_tarih',
+  },
+  {
+    up: migration_20261031_120636_rehber_liste.up,
+    down: migration_20261031_120636_rehber_liste.down,
+    name: '20261031_120636_rehber_liste'
   },
 ];

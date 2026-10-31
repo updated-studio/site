@@ -7,6 +7,7 @@ import Img from './Img.astro'
 import CardList from './CardList.astro'
 import Ad from './Ad.astro'
 import Topluluk from './Topluluk.astro'
+import RehberListe from './RehberListe.astro'
 import type { Ad as AdT, News } from '../lib/types'
 import { date, time } from '../lib/format'
 import { km, label, linkProducts, yazarFoto } from '../lib/ui'
@@ -36,6 +37,7 @@ const updated = n.updatedAt && +new Date(n.updatedAt) - +new Date(n.publishedAt)
   {n.cover && <figure class="cover"><Img img={n.cover} eager sizes="(max-width: 767px) 100vw, 860px" /><figcaption>{n.cover.credit}</figcaption></figure>}
   <div class="prose" style="margin-top:24px">
     {n.shortAnswer && <div class="short"><span class="label">Kısa cevap</span><p set:html={linkProducts(`<p>${n.shortAnswer}</p>`, n.products).replace(/^<p>|<\/p>$/g, '')} /></div>}
+    {n.label === 'rehber' && <RehberListe n={n} />}
     <Fragment set:html={before} />
     {after !== undefined && <Ad slot="in" ad={pickAd(ads, 'in')} />}
     {n.label === 'sizinti' && ((n.knowns?.length || 0) + (n.unknowns?.length || 0) > 0) && (

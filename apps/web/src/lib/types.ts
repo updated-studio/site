@@ -7,7 +7,7 @@ export type Label = 'yok' | 'son-dakika' | 'sizinti' | 'rehber' | 'sponsorlu'
 export type News = {
   id: string; kind: 'news'; title: string; spot: string; path: string; category: Cat; label: Label; cover?: Img; author: Author
   publishedAt: string; updatedAt?: string; readingTime?: number; products: ProductRef[]; shortAnswer?: string; html?: string
-  knowns?: string[]; unknowns?: string[]; sources?: { name: string; url?: string; primary?: boolean }[]; corrections?: { at: string; note: string }[]
+  knowns?: string[]; unknowns?: string[]; liste?: { urun: ProductRef; baslik: string; gerekce: string }[]; sources?: { name: string; url?: string; primary?: boolean }[]; corrections?: { at: string; note: string }[]
   seo: { title: string; description: string; image?: Img; canonical?: string; noindex?: boolean; entities?: string[]; faq?: { q: string; a: string }[] }
 }
 export type Review = Omit<News, 'kind' | 'category' | 'label'> & { kind: 'review'; product: ProductRef; score: number; pros: string[]; cons: string[]; usageDays?: number; deviceSource?: string; who?: { for: string[]; notFor: string[] }; methodHtml?: string; video?: Video; altPuanlar: { baslik: string; puan: number }[]; bolumler: { zaman: string; ad: string; sn: number }[] }

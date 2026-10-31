@@ -1,0 +1,60 @@
+---
+/**
+ * "En iyi …" rehber listesi (31 Ekim 2026, rakip analizi öneri 1): rehber etiketli yazının sıralı ürünleri. İlk sıra "Editörün seçimi".
+ * Kart: sıra, ürün görseli ya da tür simgesi, marka + ad, kime/neden, gerekçe, puan, Künye ve Kıyasla. Altta ilk dördü tek tıkla kıyasla.
+ * Arama motorları için ItemList yapısal verisi.
+ */
+import Img from './Img.astro'
+import type { News } from '../lib/types'
+import { durum, glyph, s20 } from '../lib/ui'
+import { SITE } from '../lib/seo'
+interface Props { n: News }
+const { n } = Astro.props
+const l = n.liste ?? []
+const kiyas = `/karsilastirma/kiyas?u=${l.slice(0, 4).map((x) => x.urun.slug).join(',')}`
+const jsonld = { '@context': 'https://schema.org', '@type': 'ItemList', name: n.title, itemListElement: l.map((x, i) => ({ '@type': 'ListItem', position: i + 1, url: `${SITE}/urun/${x.urun.slug}`, name: `${x.urun.brand} ${x.urun.name}` })) }
+---
+{l.length > 0 && (
+  <section class="rl" aria-labelledby="rl-bas">
+    <div class="rl-bas"><h2 id="rl-bas">Kısa liste</h2><span class="label">{l.length} ürün</span></div>
+    <ol>
+      {l.map((x, i) => (
+        <li class:list={['rl-k', { ilk: i === 0 }]}>
+          <span class="rl-no">{i + 1}</span>
+          <span class="rl-g">{x.urun.image ? <Img img={x.urun.image} alt="" sizes="96px" /> : <Fragment set:html={glyph(x.urun.type, 40)} />}</span>
+          <div class="rl-m">
+            {(i === 0 || x.baslik) && <span class="rl-et">{i === 0 ? 'Editörün seçimi' : x.baslik}{i === 0 && x.baslik ? ` · ${x.baslik}` : ''}</span>}
+            <span class="eyebrow rl-mk" lang="en" translate="no">{x.urun.brand}</span><b translate="no">{x.urun.name}</b>
+            {x.gerekce && <p>{x.gerekce}</p>}
+            <div class="rl-alt"><Fragment set:html={durum(x.urun.status)} />{x.urun.score ? <span class="rl-p">{s20(x.urun.score)}</span> : null}<a href={`/urun/${x.urun.slug}`}>Künye</a><a href={`/karsilastirma/kiyas?u=${x.urun.slug}`}>Kıyasla</a></div>
+          </div>
+        </li>
+      ))}
+    </ol>
+    {l.length >= 2 && <a class="btn btn-p rl-hepsi" href={kiyas}>İlk {Math.min(4, l.length)} ürünü yan yana kıyasla</a>}
+    <script type="application/ld+json" set:html={JSON.stringify(jsonld)} />
+  </section>
+)}
+<style>
+  .rl{display:flex;flex-direction:column;gap:14px;margin:8px 0 28px;padding:20px;border:1px solid var(--line);border-radius:var(--r-kart,0);background:var(--surface)}
+  .rl-bas{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+  .rl-bas h2{margin:0;font-size:24px}
+  .rl-bas .label{color:var(--text-3)}
+  .rl ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+  .rl-k{display:grid;grid-template-columns:36px 72px minmax(0,1fr);gap:14px;align-items:start;padding:14px 0;border-top:1px solid var(--line)}
+  .rl-no{font-family:var(--f-head);font-weight:900;font-size:34px;line-height:1;color:var(--text-3)}
+  .rl-k.ilk .rl-no{color:var(--orange-tx)}
+  .rl-g{width:72px;height:72px;display:grid;place-items:center;border-radius:var(--r-etiket,0);background:var(--surface-2);color:var(--text-2);overflow:hidden}
+  .rl-g :global(img){width:100%;height:100%;object-fit:contain}
+  .rl-m{display:flex;flex-direction:column;gap:6px;min-width:0}
+  .rl-et{align-self:flex-start;padding:2px 8px;border-radius:var(--r-etiket,0);background:var(--surface-2);font-family:var(--f-mono);font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text-2)}
+  .rl-k.ilk .rl-et{background:var(--orange);color:#111}
+  .rl-m b{font-size:19px;line-height:1.25}
+  .rl-mk{margin:0;font-size:12px;color:var(--text-3)}
+  .rl-m p{margin:0;font-size:15px;line-height:1.5;color:var(--text-2)}
+  .rl-alt{display:flex;flex-wrap:wrap;align-items:center;gap:12px;font-size:14px;font-weight:600}
+  .rl-alt a{color:var(--text)}
+  .rl-p{font-family:var(--f-head);font-weight:900;font-size:18px}
+  .rl-hepsi{align-self:flex-start}
+  @media (max-width:560px){.rl{padding:14px}.rl-k{grid-template-columns:28px 56px minmax(0,1fr);gap:10px}.rl-g{width:56px;height:56px}.rl-no{font-size:26px}}
+</style>
