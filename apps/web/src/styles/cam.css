@@ -119,3 +119,6 @@
 .kat-serit a span{display:inline-block;padding:5px 10px;border-radius:var(--r-etiket,999px);font-family:var(--f-mono);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text-2);white-space:nowrap;transition:background var(--t1,120ms) var(--ease,ease),color var(--t1,120ms) var(--ease,ease)}
 .kat-serit a:hover span{color:var(--text);background:var(--surface-2)}
 .kat-serit a[aria-current=page] span{background:var(--text);color:var(--bg)}
+.kat-serit .ks-bolum span{color:var(--orange-tx,var(--text))}
+.kat-serit .ks-bolum[aria-current=page] span{background:var(--orange);color:#111}
+.kat-serit .ks-ayrac{flex:none;align-self:center;width:1px;height:18px;margin:0 8px;background:var(--line)}
