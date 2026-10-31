@@ -13,7 +13,7 @@ const { products } = Astro.props
     {products.map((q) => (
       <a class="kcard" style="width:260px" href={`/urun/${q.slug}`}>
         {q.image ? <span class="c-img" style="margin:-16px -16px 8px"><Img img={q.image} alt="" sizes="260px" /></span> : <span class="kc-sim"><Fragment set:html={glyph(q.type, 64)} /><span class="eyebrow">{turAdi(q.type)}</span></span>}
-        <span class="eyebrow">{q.brand}</span><b>{q.name}</b>
+        <span class="eyebrow" lang="en" translate="no">{q.brand}</span><b>{q.name}</b>
         <Fragment set:html={durum(q.status)} />
         {q.score && <span class="kc-sc">{s20(q.score)}</span>}
       </a>

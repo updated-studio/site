@@ -38,7 +38,7 @@ const kiyas = `/karsilastirma/kiyas?u=${[p.slug, ...p.rivals.slice(0, 1).map((r)
   <header class="ku-hero"><div class="wrap ku-top">
     <div class="ku-copy">
       <nav class="crumbs" aria-label="Konum"><a href="/">Ana sayfa</a><span aria-hidden="true">/</span><a href="/urun">Künye</a><span aria-hidden="true">/</span><span>{p.name}</span></nav>
-      <span class="eyebrow ku-eb">Künye · {p.brand}</span>
+      <span class="eyebrow ku-eb">Künye · <span lang="en" translate="no">{p.brand}</span></span>
       <h1 class="ku-h1">{p.name}</h1>
       {p.blurb && <p class="ku-blurb">{p.blurb}</p>}
       <div class="ku-status">
@@ -78,6 +78,6 @@ const kiyas = `/karsilastirma/kiyas?u=${[p.slug, ...p.rivals.slice(0, 1).map((r)
   </section>
 
   {rel.length > 0 && <section class="sec ku-rel"><div class="wrap"><div class="sec-head"><div><span class="eyebrow">Künye rafı</span><h2 class="sec-title">Benzer ürünler</h2></div></div>
-    <div class="shelfk">{rel.map((q) => <a class="kcard" href={`/urun/${q.slug}`}><Fragment set:html={glyph(q.type, 46)} /><span class="eyebrow">{q.brand}</span><b>{q.name}</b><Fragment set:html={durum(q.status)} />{q.score && <span class="kc-sc">{s20(q.score)}</span>}</a>)}</div>
+    <div class="shelfk">{rel.map((q) => <a class="kcard" href={`/urun/${q.slug}`}><Fragment set:html={glyph(q.type, 46)} /><span class="eyebrow" lang="en" translate="no">{q.brand}</span><b>{q.name}</b><Fragment set:html={durum(q.status)} />{q.score && <span class="kc-sc">{s20(q.score)}</span>}</a>)}</div>
   </div></section>}
 </Base>

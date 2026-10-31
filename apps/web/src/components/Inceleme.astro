@@ -33,7 +33,7 @@ const ETIKET = { kiyas: ['Kıyas', 'ic-et-k'], inceleme: ['İnceleme', 'ic-et-i'
 ---
 <article class="ic">
   <header class="ic-bas">
-    <div class="ic-ust-satir"><span class="lbl l-inc">İnceleme</span><span class="ic-tur">{tur} · {r.product.brand}</span></div>
+    <div class="ic-ust-satir"><span class="lbl l-inc">İnceleme</span><span class="ic-tur">{tur} · <span lang="en" translate="no">{r.product.brand}</span></span></div>
     <h1 set:html={baslik(r.title)} />
     <p class="lead">{r.spot}</p>
     <div class="kunye-row"><a class="yz-link" href={`/yazar/${r.author.slug}`} rel="author"><Fragment set:html={yazarFoto(r.author, 32, fotolar)} />{r.author.name}</a><Fragment set:html={km('takvim', date(r.publishedAt), r.publishedAt)} />{r.readingTime && <Fragment set:html={km('okuma', `${r.readingTime} dk okuma`)} />}<a href="#topluluk" data-yorum-say hidden></a></div>

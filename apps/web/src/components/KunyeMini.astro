@@ -6,7 +6,7 @@ const { p } = Astro.props
 ---
 <a class="kcard mini" href={`/urun/${p.slug}`}>
   <Fragment set:html={glyph(p.type, 40)} />
-  <span class="eyebrow">Künye · {p.brand}</span><b>{p.name}</b>
+  <span class="eyebrow">Künye · <span lang="en" translate="no">{p.brand}</span></span><b>{p.name}</b>
   <Fragment set:html={durum(p.status)} />
   {p.score && <span class="kc-sc">{s20(p.score)}</span>}
   <span class="kc-go">Künyeyi aç →</span>
