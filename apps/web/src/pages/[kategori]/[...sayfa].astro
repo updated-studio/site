@@ -2,6 +2,7 @@
 /** /kategori-adi(/sayfa/N) → kategori akışı; kategori olmayan tek parçalı adresler kurumsal sayfa (/hakkimizda …). */
 import ListPage from '../../components/ListPage.astro'
 import { wpTemizle } from '../../lib/rich'
+import KurumsalEk from '../../components/KurumsalEk.astro'
 import Base from '../../layouts/Base.astro'
 import * as api from '../../lib/api'
 export async function getStaticPaths() {
@@ -17,12 +18,13 @@ export async function getStaticPaths() {
 const { kind, slug, p } = Astro.props
 const cat = kind === 'cat' ? await api.getCategory(slug) : null
 const page = kind === 'page' ? await api.getPage(slug) : null
+const site = await api.getSite()
 const items = cat ? await api.getCategoryNews(cat.slug, p) : []
 ---
 {cat ? (
   <ListPage title={cat.name} lead={cat.description || `${cat.name} haberleri, en yenisi üstte.`} path={`/${cat.slug}`} source={`kategori-${cat.slug}`} items={items} page={p} />
 ) : page && (
   <Base meta={{ title: page.seo.title, description: page.seo.description, path: `/${slug}` }}>
-    <div class="wrap"><article class="art"><div class="art-head"><h1>{page.title}</h1>{page.spot && <p class="lead" style="margin:0">{page.spot}</p>}</div><div class="prose" style="margin-top:24px" set:html={wpTemizle(page.html)} /></article></div>
+    <div class="wrap"><article class="art"><div class="art-head"><h1>{page.title}</h1>{page.spot && <p class="lead" style="margin:0">{page.spot}</p>}</div><div class="prose" style="margin-top:24px" set:html={wpTemizle(page.html).replace(/<h6>Bizi daha iyi tanımak için izleyebilirsiniz<\/h6>/, '')} /><KurumsalEk slug={slug} youtube={site.youtube} instagram={site.instagram} /></article></div>
   </Base>
 )}

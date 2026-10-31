@@ -1,0 +1,54 @@
+---
+/**
+ * Kurumsal sayfaların altına kod tarafında eklenen bloklar (31 Ekim 2026). WordPress'ten taşınan İletişim sayfasında e-posta ve kanallar
+ * kaybolmuştu (boş liste + "Gömülü içerik"); Hakkımızda'daki "izleyebilirsiniz" cümlesinin videosu taşınmamıştı.
+ * Metin panelden gelmeye devam eder; burası yalnız iletişim kanallarını ve YouTube kanalını gösterir.
+ */
+import { ico, logoInstagram, logoYoutube } from '../lib/ui'
+interface Props { slug: string; youtube: string; instagram: string }
+const { slug, youtube, instagram } = Astro.props
+const EPOSTA = 'iletisim@updated.com.tr'
+---
+{slug === 'iletisim' && (
+  <section class="ke" aria-label="İletişim kanalları">
+    <div class="ke-ana">
+      <span class="eyebrow">E-posta</span>
+      <a class="ke-eposta" href={`mailto:${EPOSTA}`}>{EPOSTA}</a>
+      <p>Okur sorusu, haber ihbarı, ürün gönderimi: hepsi bu adrese. Genellikle iki iş günü içinde dönüyoruz.</p>
+      <button class="btn" type="button" data-kopyala={EPOSTA}>Adresi kopyala</button>
+    </div>
+    <a class="ke-k" href="/reklam"><b>Reklam ve iş birliği</b><span>Reklam alanları, sponsorlu içerik kuralları</span><Fragment set:html={ico('right', 16)} /></a>
+    <a class="ke-k" href="/duzeltme-politikasi"><b>Hata bildir</b><span>Yanlış bir bilgi gördüysen nasıl düzelttiğimiz</span><Fragment set:html={ico('right', 16)} /></a>
+    <a class="ke-k" href={instagram} target="_blank" rel="noopener"><Fragment set:html={logoInstagram(22)} /><b>Instagram</b><span>@updated.tr · mesaj kutusu açık</span></a>
+    <a class="ke-k" href={youtube} target="_blank" rel="noopener"><Fragment set:html={logoYoutube(20)} /><b>YouTube</b><span>Videolar ve yorumlar</span></a>
+  </section>
+)}
+{slug === 'hakkimizda' && (
+  <a class="ke-yt" href={youtube} target="_blank" rel="noopener">
+    <Fragment set:html={logoYoutube(36)} />
+    <span><b>Bizi YouTube'da izle</b><span>İncelemeler, kıyaslar ve sahne arkası kanalımızda.</span></span>
+    <Fragment set:html={ico('right', 18)} />
+  </a>
+)}
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-kopyala]').forEach((b) => b.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(b.dataset.kopyala!); b.textContent = 'Kopyalandı' } catch { b.textContent = b.dataset.kopyala! }
+    setTimeout(() => (b.textContent = 'Adresi kopyala'), 2500)
+  }))
+</script>
+<style is:global>
+  .ke{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin:32px 0 8px}
+  .ke-ana{grid-column:1/-1;display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:24px;border:1px solid var(--line);border-radius:var(--r-kart,0);background:var(--surface);box-shadow:var(--cam-golge,none)}
+  .ke-eposta{font-family:var(--f-head);font-weight:900;font-size:clamp(22px,3vw,30px);line-height:1.1;color:var(--text);text-decoration:none;overflow-wrap:anywhere}
+  .ke-eposta:hover{text-decoration:underline}
+  .ke-ana p{margin:0;color:var(--text-2);font-size:15px;line-height:1.5}
+  .ke-k{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:10px;align-content:center;padding:16px 18px;border:1px solid var(--line);border-radius:var(--r-kart,0);background:var(--surface);box-shadow:var(--cam-golge,none);color:var(--text);text-decoration:none;min-width:0}
+  .ke-k > :is(svg,.pl-logo){grid-row:1/3;align-self:center}
+  .ke-k b{font-size:17px}.ke-k span{grid-column:2;font-size:14px;color:var(--text-2)}
+  .ke-k:not(:has(.pl-logo)){grid-template-columns:minmax(0,1fr) auto}.ke-k:not(:has(.pl-logo)) b,.ke-k:not(:has(.pl-logo)) span{grid-column:1}.ke-k:not(:has(.pl-logo)) > svg{grid-column:2;grid-row:1/3;color:var(--text-3)}
+  .ke-k:hover{border-color:var(--text)}
+  .ke-yt{display:flex;align-items:center;gap:16px;margin:28px 0 8px;padding:18px 20px;border:1px solid var(--line);border-radius:var(--r-kart,0);background:var(--surface);box-shadow:var(--cam-golge,none);color:var(--text);text-decoration:none}
+  .ke-yt > span{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}.ke-yt b{font-size:18px}.ke-yt > span > span{font-size:14px;color:var(--text-2)}
+  .ke-yt:hover{border-color:var(--text)}
+  @media (max-width:480px){.ke{grid-template-columns:minmax(0,1fr)}}
+</style>

@@ -53,6 +53,8 @@
 
 ## Günlük (en yeni üstte)
 
+- **31 Ekim 2026 23:10 · Kalan sayfalar taraması.** 64 sayfa × 8 genişlik ölçek denetimi temiz; 61 sayfa × telefon/masaüstü JS hatası, kırık görsel, H1 eksiği yok. Düzeltilenler: **İletişim** WordPress'ten bozuk gelmişti (boş liste + "Gömülü içerik" harita bağlantısı, e-posta yok) → `wpTemizle` bunları atar, `components/KurumsalEk.astro` e-posta (kopyala), reklam, hata bildir, Instagram, YouTube kartları ekler; **Hakkımızda**'da videosu taşınmamış "izleyebilirsiniz" satırı yerine YouTube kartı, 3 görsel tek sıra (`.pg-galeri` auto-fit). Kategori/haber akışında akış içi reklam yoksa 20 haber tek ızgarada (iki ızgara arasında boş bant kalmasın, `FeedChunk`). Hakkımızda'daki 3 görsel Unsplash hazır fotoğrafı (ekip değil); metin ve görseller panelden, kullanıcıya soruldu.
+
 - **31 Ekim 2026 22:10 · Ölçek denetimi + yan reklamın kaybolması (kullanıcı: "reklam kısmı görünüp gidiyor", "mobilde Reels yazısı birbirine giriyor, kalıcı çözmemiz gerekiyor").** Yan "Reklam ver" kutusu `ad ad-sky` sınıfı taşıyordu; EasyList `##.ad-sky` kuralıyla reklam engelleyicili tarayıcıda açılışta görünüp kayboluyordu. Kendi tanıtımımız artık `yan-tanit`/`yan-ev` (EasyList + uBlock 27.311 gizleme kuralına karşı denendi, hiçbiri gizlemiyor). Reels başlığı `inline-flex` olduğu için 414 ve 768 px'te alt yazıya yapışıyordu → `flex`. Yeni **`deploy/denetim/cakisma.mjs`**: 8 genişlikte üst üste binen/yapışık/taşan yazı ve yana kayma; ilk taramada ayrıca ürün sayfası 320 px "Topla" × açıklama, dolunay şeridi 320 px gün sayıları bulundu, düzeltildi. CLAUDE.md kural 11-12.
 
 - **31 Ekim 2026 22:00 · Kategori şeridindeki İncelemeler/Rehber geri alındı** (kullanıcı: istenen ana sayfada bölümdü, şerit değil). İkisi ana sayfada 05/06 bölüm olarak duruyor.

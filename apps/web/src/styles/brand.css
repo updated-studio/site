@@ -157,7 +157,7 @@ h3{font-weight:700}
 @media (max-width:560px){.grid4,.grid3{grid-template-columns:minmax(0,1fr)}}
 .nb{white-space:nowrap}
 /* Kurumsal sayfalarda art arda görseller (lib/rich.ts wpTemizle) */
-.pg-galeri{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:12px;margin:24px 0}
+.pg-galeri{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:12px;margin:24px 0} /* auto-fit + 180: 680 px metin sütununda 3 görsel tek sıra, yalnız kalan görsel olmaz */
 .pg-galeri figure{margin:0}
 .pg-galeri img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--r-etiket,0)}
 /* En çok okunanlar dönem sekmeleri: dar sütunda da tek satır (30 Ekim 2026) */

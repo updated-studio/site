@@ -46,6 +46,9 @@ export function wpTemizle(html: string) {
     .replace(/<p>(?:\s|&nbsp;|<br\s*\/?>|​)*<\/p>/g, '')
     .replace(/<p>[^<]*?(?:\S+[^<0-9]*\s0(?:\s|$|<)){2,}[^<]*<\/p>/g, (m) => (/\b0\b/.test(m) && (m.match(/\s0\b/g) || []).length >= 2 ? '' : m))
     .replace(/<figure class="cover"><img src="[^"]+\.svg[^"]*"[^>]*>(?:<figcaption>[^<]*<\/figcaption>)?<\/figure>/g, '')
+    // WordPress eklentilerinden kalanlar (31 Ekim 2026, İletişim sayfası): boş liste, gömülü harita/video yerine kalan "Gömülü içerik" bağlantısı
+    .replace(/<(ul|ol)>\s*<\/\1>/g, '')
+    .replace(/<p><a [^>]*>Gömülü içerik<\/a><\/p>/g, '')
   h = h.replace(/(?:<figure class="cover">(?:(?!<\/figure>).)*<\/figure>){2,}/gs, (grup) => `<div class="pg-galeri">${grup.replace(/<figcaption>Görsel: UPDATED arşivi<\/figcaption>/g, '')}</div>`)
   return h
 }
