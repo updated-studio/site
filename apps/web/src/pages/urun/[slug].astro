@@ -42,8 +42,8 @@ const kiyas = `/karsilastirma/kiyas?u=${[p.slug, ...p.rivals.slice(0, 1).map((r)
       <h1 class="ku-h1">{p.name}</h1>
       {p.blurb && <p class="ku-blurb">{p.blurb}</p>}
       <div class="ku-status">
-        <span class={`ku-st lv${p.certainty}`}>{status}</span>
-        <span class="ku-conf"><Fragment set:html={kes(p.certainty)} /></span>
+        <Fragment set:html={durum(p.status)} />
+        {!['satista', 'eol'].includes(p.status) && <span class="ku-conf">Kesinlik <Fragment set:html={kes(p.certainty)} /></span>}
         {p.score && p.reviews[0] && <a class="ku-score" href={p.reviews[0].path}><b>{s20(p.score)}</b><span>Updated<br />puanı</span></a>}
       </div>
       <div class="ku-actions"><a class="btn pri" href={`/rss/urun/${p.slug}.xml`}>Takip et (RSS)</a><a class="btn" href={kiyas}>Kıyasla</a></div>
@@ -72,7 +72,7 @@ const kiyas = `/karsilastirma/kiyas?u=${[p.slug, ...p.rivals.slice(0, 1).map((r)
     <aside class="rail" aria-label="Yan sütun">
       <div class="ku-box"><h2>Kıyasla</h2>{p.rivals.length ? <Fragment set:html={p.rivals.map((r) => chip(r)).join('')} /> : <p class="pc-unk">Henüz kıyas yok.</p>}<a class="btn" href={kiyas} style="margin-top:10px">Başka ürünle kıyasla</a></div>
       {p.id && <div class="ku-box ku-kullanan" data-kullananlar={p.id}><h2>Kullananlar</h2><p class="pc-unk" data-ic>Yükleniyor…</p></div>}
-      <div class="ku-box"><h2>Çıkış radarı</h2><div class="pc-st"><Fragment set:html={durum(p.status)} />{p.releaseWhen && <span>{p.releaseWhen}</span>}</div></div>
+      {!['satista', 'eol'].includes(p.status) && <div class="ku-box"><h2>Çıkış radarı</h2><div class="pc-st"><Fragment set:html={durum(p.status)} />{p.releaseWhen && <span>{p.releaseWhen}</span>}</div></div>}
       <Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare />
     </aside>
   </section>

@@ -158,6 +158,12 @@
 .shelfk{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--gut)}
 .kcard{position:relative;border:1px solid var(--line);background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:8px;text-decoration:none;min-height:200px;transition:border-color var(--t1) var(--ease)}
 .kcard:hover{border-color:var(--text)}
+.cam .kcard{border-radius:var(--r-kart);box-shadow:inset 0 1px 0 var(--cam-isik),var(--cam-golge);overflow:hidden}
+.cam .kcard .kc-sc{border-radius:0 0 0 10px}
+/* Künye sayfası kutuları da camın yuvarlak köşelerini alır (31 Ekim 2026) */
+.cam .ku-box,.cam .ku-stage{border-radius:var(--r-kart);overflow:hidden}
+.cam .tbl-box{border-radius:var(--r-kart);overflow:auto;border:1px solid var(--line)}
+.cam .ku-status .kes{align-self:center;font-size:12px;padding:4px 10px}
 .kcard b{font-family:var(--f-baslik,var(--f-head));font-weight:700;font-size:22px;line-height:1.2;margin-top:auto} /* ürün adı büyük harfe çevrilmez: "iPhone", "A7 IV" yazıldığı gibi */
 .kcard.mini{min-height:0}
 .kcard.mini b{margin-top:0}

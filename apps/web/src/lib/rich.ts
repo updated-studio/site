@@ -35,3 +35,17 @@ export function insertAfterParagraph(html: string, n: number, marker: string) {
   let i = 0
   return html.replace(/<\/p>/g, (m) => (++i === n ? m + marker : m))
 }
+
+/**
+ * WordPress'ten (Elementor) taşınan kurumsal sayfaların kalıntılarını temizler (31 Ekim 2026): boş paragraflar, sayaç satırları
+ * ("YÜZLERCE İNCELEME 0 Organik Takipçi 0"), süs simgeleri (.svg alıntı işareti). Art arda gelen görseller tek tek tam genişlik yerine
+ * ızgarada durur. İçerik panelde düzeltilince bu süzgeç bir şey bulamaz, zararsızdır.
+ */
+export function wpTemizle(html: string) {
+  let h = html
+    .replace(/<p>(?:\s|&nbsp;|<br\s*\/?>|​)*<\/p>/g, '')
+    .replace(/<p>[^<]*?(?:\S+[^<0-9]*\s0(?:\s|$|<)){2,}[^<]*<\/p>/g, (m) => (/\b0\b/.test(m) && (m.match(/\s0\b/g) || []).length >= 2 ? '' : m))
+    .replace(/<figure class="cover"><img src="[^"]+\.svg[^"]*"[^>]*>(?:<figcaption>[^<]*<\/figcaption>)?<\/figure>/g, '')
+  h = h.replace(/(?:<figure class="cover">(?:(?!<\/figure>).)*<\/figure>){2,}/gs, (grup) => `<div class="pg-galeri">${grup.replace(/<figcaption>Görsel: UPDATED arşivi<\/figcaption>/g, '')}</div>`)
+  return h
+}

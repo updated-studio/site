@@ -113,7 +113,7 @@
 
 /* Kategori şeridi (30 Ekim 2026): üst menünün ikinci satırı, menüyle birlikte yapışık; yatay kayar. Dokunma alanı 44 px, görünen hap küçük. */
 .kat-serit{border-top:1px solid var(--line)}
-.hdr .kat-serit .wrap{height:auto;gap:2px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 72px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 72px),transparent)}
+.hdr .kat-serit .wrap{height:auto;gap:2px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;--kp:max(calc(var(--edge) - 12px),12px);-webkit-mask-image:var(--km);mask-image:var(--km);--km:linear-gradient(to right,transparent calc(var(--kp) - 12px),#000 calc(var(--kp) + 6px),#000 calc(100% - var(--kp) - 48px),transparent calc(100% - var(--kp)))} /* kaydırınca şerit iki yandaki boşluğa taşmasın, iki kenar solar (31 Ekim 2026) */
 .kat-serit .wrap::-webkit-scrollbar{display:none}
 .kat-serit a{flex:none;display:inline-flex;align-items:center;min-height:44px;text-decoration:none}
 .kat-serit a span{display:inline-block;padding:5px 10px;border-radius:var(--r-etiket,999px);font-family:var(--f-mono);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text-2);white-space:nowrap;transition:background var(--t1,120ms) var(--ease,ease),color var(--t1,120ms) var(--ease,ease)}

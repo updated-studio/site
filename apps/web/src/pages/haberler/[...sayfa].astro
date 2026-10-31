@@ -8,4 +8,4 @@ export async function getStaticPaths() {
 const { p } = Astro.props
 const items = await api.getLatest(p)
 ---
-<ListPage title="Haberler" lead="Triyajdan gelen ve editör onayından geçen tüm haberler, en yenisi üstte." path="/haberler" source="son" items={items} page={p} />
+<ListPage eyebrow="Tüm kategoriler" title="Haberler" lead="Teknoloji, kamera ve ekipman dünyasından bütün haberler, en yenisi üstte." path="/haberler" source="son" items={items} page={p} />

@@ -1,14 +1,57 @@
 ---
+/**
+ * Künyeler dizini (31 Ekim 2026): 80'i aşkın künye tek uzun ızgarada kayboluyordu. Türe göre gruplanır, üstte tür süzgeci (JS'siz de
+ * bütün gruplar görünür), kartlar sıkı satır: tür simgesi ya da görsel, marka, ad, durum etiketi, puan.
+ */
 import Base from '../../layouts/Base.astro'
 import Img from '../../components/Img.astro'
 import * as api from '../../lib/api'
 import { listMeta } from '../../lib/seo'
 import { durum, glyph, s20 } from '../../lib/ui'
+import { TUR, turAdi } from '../../lib/turler'
 const items = await api.getProducts(200)
+const gruplar = Object.keys(TUR).map((t) => ({ t, l: items.filter((q) => q.type === t).sort((a, b) => a.brand.localeCompare(b.brand, 'tr') || a.name.localeCompare(b.name, 'tr')) })).filter((g) => g.l.length)
 ---
 <Base meta={listMeta('Künyeler', 'Ürün veritabanı: her ürünün kaynaklı teknik verileri, haberleri, incelemeleri ve kıyasları.', '/urun', items.map((p) => ({ path: `/urun/${p.slug}`, title: p.name })))}>
   <div class="wrap">
-    <div class="art-head" style="max-width:none;padding-bottom:24px"><span class="cat">Ürün veritabanı</span><h1 class="h1">Künyeler</h1><p class="lead" style="margin:0">Bir ürünün tüm haberleri, incelemeleri ve teknik verisi tek sayfada.</p></div>
-    <div class="shelfk">{items.map((q) => <a class="kcard" href={`/urun/${q.slug}`}>{q.image ? <span class="c-img" style="margin:-16px -16px 8px"><Img img={q.image} alt="" /></span> : <Fragment set:html={glyph(q.type, 46)} />}<span class="eyebrow">{q.brand}</span><b>{q.name}</b><Fragment set:html={durum(q.status)} />{q.score && <span class="kc-sc">{s20(q.score)}</span>}</a>)}</div>
+    <div class="art-head" style="max-width:none;padding-bottom:16px"><span class="cat">Ürün veritabanı · {items.length} künye</span><h1 class="h1">Künyeler</h1><p class="lead" style="margin:0">Bir ürünün tüm haberleri, incelemeleri ve teknik verisi tek sayfada.</p></div>
+    {gruplar.length > 1 && <nav class="icl-tur ku-sz" aria-label="Türe göre" data-ku-sz>
+      <a href="#" data-tur="" aria-current="page">Hepsi</a>
+      {gruplar.map((g) => <a href={`#${g.t}`} data-tur={g.t}>{turAdi(g.t)} <span class="ku-sz-n">{g.l.length}</span></a>)}
+    </nav>}
+    {gruplar.map((g) => (
+      <section class="ku-grup" data-tur={g.t} id={g.t} aria-labelledby={`kg-${g.t}`}>
+        <div class="sh"><h2 id={`kg-${g.t}`}>{turAdi(g.t)}</h2><span class="meta">{g.l.length} künye</span></div>
+        <div class="ku-lis">{g.l.map((q) => (
+          <a class="ku-k" href={`/urun/${q.slug}`}>
+            <span class="ku-k-g">{q.image ? <Img img={q.image} alt="" sizes="72px" /> : <Fragment set:html={glyph(q.type, 34)} />}</span>
+            <span class="ku-k-m"><span class="eyebrow">{q.brand}</span><b translate="no">{q.name}</b><Fragment set:html={durum(q.status)} /></span>
+            {q.score && <span class="ku-k-p">{s20(q.score)}</span>}
+          </a>
+        ))}</div>
+      </section>
+    ))}
   </div>
 </Base>
+<style>
+  .ku-sz{margin:8px 0 32px}
+  .ku-sz-n{font-family:var(--f-mono);font-size:12px;color:var(--text-3);margin-left:4px}
+  .ku-sz a[aria-current=page] .ku-sz-n{color:inherit;opacity:.7}
+  .ku-grup{padding-bottom:40px}
+  .ku-grup[hidden]{display:none}
+  .ku-grup .sh{margin-bottom:16px}
+  .ku-grup .sh h2{font-size:30px}
+  .ku-lis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  .ku-k{position:relative;display:grid;grid-template-columns:56px minmax(0,1fr);gap:14px;align-items:center;padding:14px;border:1px solid var(--line);border-radius:var(--r-kart,0);background:var(--surface);color:var(--text);text-decoration:none;transition:border-color var(--t1) var(--ease)}
+  .ku-k:hover{border-color:var(--text)}
+  .ku-k-g{width:56px;height:56px;display:grid;place-items:center;border-radius:var(--r-etiket,0);background:var(--surface-2);color:var(--text-2);overflow:hidden}
+  .ku-k-g :global(img){width:100%;height:100%;object-fit:contain}
+  .ku-k-m{display:flex;flex-direction:column;gap:4px;min-width:0}
+  .ku-k-m b{font-family:var(--f-baslik,var(--f-head));font-weight:700;font-size:18px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ku-k-m .eyebrow{margin:0}
+  .ku-k-p{position:absolute;right:12px;top:12px;font-family:var(--f-head);font-weight:900;font-size:18px}
+  @media (max-width:1100px){.ku-lis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  @media (max-width:800px){.ku-lis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:520px){.ku-lis{grid-template-columns:minmax(0,1fr);gap:8px}.ku-k{padding:10px 12px;grid-template-columns:44px minmax(0,1fr)}.ku-k-g{width:44px;height:44px}.ku-grup .sh h2{font-size:24px}}
+</style>
+<script is:inline>(()=>{const n=document.querySelector('[data-ku-sz]');if(!n)return;const g=[...document.querySelectorAll('.ku-grup')];const sec=(t)=>{n.querySelectorAll('a').forEach(a=>a.setAttribute('aria-current',a.dataset.tur===t?'page':'false'));g.forEach(s=>s.hidden=!!t&&s.dataset.tur!==t)};n.addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;e.preventDefault();sec(a.dataset.tur);history.replaceState(null,'',a.dataset.tur?'#'+a.dataset.tur:location.pathname)});const h=location.hash.slice(1);if(h&&g.some(s=>s.dataset.tur===h))sec(h)})()</script>

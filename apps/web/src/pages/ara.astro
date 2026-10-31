@@ -1,6 +1,8 @@
 ---
 /** Arama: statik dizin (/ara-dizin.json) tarayıcıda taranır; sunucu gerekmez. */
 import Base from '../layouts/Base.astro'
+import * as api from '../lib/api'
+const kategoriler = await api.getCategories()
 ---
 <Base meta={{ title: 'Ara', description: 'UPDATED içinde haber, inceleme ve ürün ara.', path: '/ara', noindex: true }}>
   <div class="wrap">
@@ -8,7 +10,22 @@ import Base from '../layouts/Base.astro'
       <h1 class="h1">Ara</h1>
       <form action="/ara" method="get" role="search" class="chips" data-search-page><label class="sr" for="aq">Arama</label><input id="aq" class="sel" style="min-width:min(100%,420px)" name="q" placeholder="Ürün, haber, kategori…" autocomplete="off" /><button class="btn btn-p" type="submit">Ara</button></form>
     </div>
+    {/* Arama boşken sayfa boş kalmasın: kategoriler ve sık bakılan bölümler (31 Ekim 2026); sonuç gelince betik gizler */}
+    <div class="ara-oneri" data-ara-oneri>
+      <h2 class="label">Kategoriler</h2>
+      <div class="ara-cips">{kategoriler.map((k) => <a href={`/${k.slug}`}>{k.name}</a>)}</div>
+      <h2 class="label">Bölümler</h2>
+      <div class="ara-cips"><a href="/urun">Künyeler</a><a href="/karsilastirma">Kıyaslamalar</a><a href="/inceleme">İncelemeler</a><a href="/araclar">Araçlar</a><a href="/kulup">Kulüp</a></div>
+    </div>
     <p class="meta" data-search-count aria-live="polite"></p>
     <ul class="res" data-search-results style="list-style:none;padding:0"></ul>
   </div>
 </Base>
+<style>
+  .ara-oneri{display:flex;flex-direction:column;gap:10px;padding-bottom:48px}
+  .ara-oneri .label{color:var(--text-3);margin:12px 0 0}
+  .ara-cips{display:flex;flex-wrap:wrap;gap:8px}
+  .ara-cips a{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:var(--r-dugme,0);color:var(--text);text-decoration:none;font-size:14px;font-weight:600}
+  .ara-cips a:hover{border-color:var(--text)}
+</style>
+<script is:inline>(()=>{const o=document.querySelector('[data-ara-oneri]'),q=new URLSearchParams(location.search).get('q');if(o&&q&&q.trim())o.hidden=true})()</script>

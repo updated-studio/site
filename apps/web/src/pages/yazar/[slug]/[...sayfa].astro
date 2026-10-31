@@ -5,6 +5,8 @@ import { yazarFoto } from '../../../lib/ui'
 export async function getStaticPaths() {
   const out: any[] = []
   for (const a of await api.allAuthors()) {
+    // İmzalı haberi olmayan yazar sayfası üretilmez (WordPress'ten kalan "admin", kaynak hesapları gibi boş sayfalar, 31 Ekim 2026)
+    if (!(await api.getAuthorNews(a.slug, 1)).length) continue
     const n = await api.pageCount('yazar', a.slug)
     for (let i = 1; i <= n; i++) out.push({ params: { slug: a.slug, sayfa: i > 1 ? `sayfa/${i}` : undefined }, props: { a, p: i } })
   }

@@ -6,6 +6,7 @@
 import Base from '../../layouts/Base.astro'
 import Img from '../../components/Img.astro'
 import Ad from '../../components/Ad.astro'
+import VideoDuvar from '../../components/VideoDuvar.astro'
 import * as api from '../../lib/api'
 import { listMeta } from '../../lib/seo'
 import { turAdi } from '../../lib/turler'
@@ -20,6 +21,9 @@ const one = p === 1 ? [...items].sort((a, b) => b.score - a.score || +new Date(b
 const duvar = items.filter((r) => !one.includes(r))
 const turler = [...new Set(items.map((r) => r.product?.type).filter(Boolean))] as string[]
 const p20 = (s: number) => Math.round(s)
+// Yazılı inceleme yokken sayfa boş kalmasın: kanaldaki uzun videolar (çoğu inceleme ve kıyas) gösterilir (31 Ekim 2026)
+const [youtube, site] = items.length ? [[], null] : await Promise.all([api.getYoutube(), api.getSite()])
+const videolar = youtube.filter((v) => !v.short)
 ---
 <Base meta={listMeta('İncelemeler', 'Kullanarak test ettiğimiz cihazlar: /20 puan, artılar, eksiler ve kime uygun olduğu.', p > 1 ? `/inceleme/sayfa/${p}` : '/inceleme', items.map((r) => ({ path: r.path, title: r.title })))}>
   <div class="wrap">
@@ -30,7 +34,7 @@ const p20 = (s: number) => Math.round(s)
         {turler.map((t) => <a href={`#${t}`} data-tur={t}>{turAdi(t)}</a>)}
       </nav>}
     </div>
-    {items.length === 0 ? <div class="rh-bos" style="padding-bottom:48px"><p class="lead" style="margin:0">İlk incelemeler hazırlanıyor: cihazları kullanarak test ediyoruz, puan /20. O zamana kadar ürünleri <a href="/karsilastirma">Kıyaslamalar</a>'da yan yana koyabilir, <a href="/urun">Künyeler</a>'de teknik verilere bakabilirsin.</p></div> : <>
+    {items.length === 0 ? <div class="rh-bos" style="padding-bottom:48px"><p class="lead" style="margin:0">İlk incelemeler hazırlanıyor: cihazları kullanarak test ediyoruz, puan /20. O zamana kadar ürünleri <a href="/karsilastirma">Kıyaslamalar</a>'da yan yana koyabilir, <a href="/urun">Künyeler</a>'de teknik verilere bakabilirsin.</p>{videolar.length > 0 && site && <div style="margin-top:40px"><VideoDuvar videos={videolar} channel={site.youtube} baslik="Video incelemeler" /></div>}</div> : <>
       {one.length > 0 && <section class="icl-one" aria-label="Öne çıkan">
         <a class="icl-k buyuk" href={one[0].path} data-tur={one[0].product?.type}>
           {one[0].cover && <Img img={one[0].cover} alt="" eager sizes="(max-width: 900px) 100vw, 800px" />}

@@ -29,7 +29,7 @@ const updated = n.updatedAt && +new Date(n.updatedAt) - +new Date(n.publishedAt)
     <div class="kunye-row">
       <a class="yz-link" href={`/yazar/${n.author.slug}`} rel="author"><Fragment set:html={yazarFoto(n.author, 32, await yazarFotolari())} />{n.author.name}</a><Fragment set:html={km('takvim', date(n.publishedAt), n.publishedAt) + km('saat', time(n.publishedAt))} />
       {n.readingTime && <Fragment set:html={km('okuma', `${n.readingTime} dk okuma`)} />}
-      {updated && <Fragment set:html={km('guncel', `Güncellendi ${time(n.updatedAt!)}`, n.updatedAt)} />}
+      {updated && <Fragment set:html={km('guncel', `Güncellendi ${date(n.updatedAt!) === date(n.publishedAt) ? '' : date(n.updatedAt!) + ' '}${time(n.updatedAt!)}`, n.updatedAt)} />}
       <a href="#topluluk" data-yorum-say hidden></a>
     </div>
   </div>

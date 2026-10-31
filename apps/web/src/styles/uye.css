@@ -74,7 +74,7 @@ h1 .onay{width:.7em;height:.7em;vertical-align:.02em;margin-left:8px}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .yr-btn.on{color:var(--orange)}}
 .yr-btn:disabled{opacity:1;color:var(--text-3);cursor:default;text-decoration:none}
 .yr-f{margin-top:8px}
-.yr-f textarea,.hs-f input:not([type=checkbox]):not([type=radio]),.hs-f textarea,.hs-f select,.yr-sk select{width:100%;min-height:44px;border:1px solid var(--input);background:var(--surface);color:var(--text);font:inherit;font-size:16px;line-height:1.5;padding:10px 12px;border-radius:0;transition:border-color var(--t1) var(--ease)}
+.yr-f textarea,.hs-f input:not([type=checkbox]):not([type=radio]),.hs-f textarea,.hs-f select,.yr-sk select{width:100%;min-height:44px;border:1px solid var(--input);background:var(--surface);color:var(--text);font:inherit;font-size:16px;line-height:1.5;padding:10px 12px;border-radius:var(--r-dugme,0);transition:border-color var(--t1) var(--ease)}
 .yr-f textarea{resize:vertical;min-height:88px}
 .yr-f textarea:focus,.hs-f input:focus,.hs-f textarea:focus{outline:2px solid var(--blue);outline-offset:0;border-color:var(--blue)}
 .yr-fa{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:8px}

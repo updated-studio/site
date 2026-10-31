@@ -1,12 +1,13 @@
 ---
 import Base from '../../layouts/Base.astro'
 import { ARACLAR } from '../../lib/araclar'
+import { ico } from '../../lib/ui'
 ---
 <Base meta={{ title: 'Fotoğraf ve video araçları | UPDATED', description: 'Fotoğrafçılar ve videograflar için ücretsiz hesaplayıcılar: altın saat, ND filtre, krop faktör, SD kart kayıt süresi, baskı boyutu. Üyelik gerekmez.', path: '/araclar' }}>
   <div class="wrap">
-    <div class="art-head" style="max-width:none;padding-bottom:24px"><span class="cat">UPDATED</span><h1 class="h1">Araçlar</h1><p class="lead" style="margin:0">Çekimini planlamak için ücretsiz hesaplayıcılar. Üyelik gerekmez.</p></div>
+    <div class="art-head" style="max-width:none;padding-bottom:24px"><span class="cat">Ücretsiz · {ARACLAR.length} araç</span><h1 class="h1">Araçlar</h1><p class="lead" style="margin:0">Çekimini planlamak için ücretsiz hesaplayıcılar. Üyelik gerekmez.</p></div>
     <div class="arac-izgara">
-      {ARACLAR.map((a) => <a class="arac-kart" href={a.yol}><h2>{a.ad}</h2><p>{a.aciklama}</p><span class="btn-t">Aç →</span></a>)}
+      {ARACLAR.map((a) => <a class="arac-kart" href={a.yol}><h2>{a.ad}</h2><p>{a.aciklama}</p><span class="ar-ac">Aç <Fragment set:html={ico('right', 14)} /></span></a>)}
     </div>
   </div>
 </Base>
