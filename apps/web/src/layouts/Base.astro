@@ -9,12 +9,13 @@ import BreakingStrip from '../components/BreakingStrip.astro'
 import Footer from '../components/Footer.astro'
 import { allPages, getAds, getBreaking, getSite, pickAd } from '../lib/api'
 import Ad from '../components/Ad.astro'
+import YanEv from '../components/YanEv.astro'
 import { showAdSlots } from '../lib/env'
 import { SITE, siteLd, type Meta } from '../lib/seo'
 import { ico } from '../lib/ui'
 import { env } from '../lib/env'
-interface Props { meta: Meta; breaking?: boolean; bodyClass?: string }
-const { meta, breaking = true, bodyClass } = Astro.props
+interface Props { meta: Meta; breaking?: boolean; bodyClass?: string; yanEv?: boolean }
+const { meta, breaking = true, bodyClass, yanEv = false } = Astro.props
 const staging = env('STAGING') === '1' // hazırlık sitesi arama motorlarına kapalı
 const [site, hot, sayfalar, ads] = await Promise.all([getSite(), breaking ? getBreaking() : Promise.resolve([]), allPages(), getAds()])
 // Yan dikey reklam (28 Ekim 2026, kullanıcı onayı): yalnız 1600 px ve üstü ekranda, içeriğin iki yanında, kayarken yerinde kalır.
@@ -22,6 +23,9 @@ const [site, hot, sayfalar, ads] = await Promise.all([getSite(), breaking ? getB
 const yanlar = ads.filter((a) => a.slot === 'sky')
 const yanSag = pickAd(ads, 'sky', 0), yanSol = yanlar.length > 1 ? pickAd(ads, 'sky', 1) : null
 const yanOrnek = showAdSlots()
+// Ana sayfada (31 Ekim 2026, kullanıcı: "sağ ve sol boşluğun en sol ve en sağına sabit dikdörtgen reklam alanı") kampanya yoksa
+// iki yanda kendi tanıtımımız durur: reklam verene /reklam sayfası. Kampanya gelince yerini alır.
+const ev = yanEv && !yanOrnek
 const url = SITE + (meta.path === '/' ? '' : meta.path)
 const canonical = meta.canonical || url
 // Paylaşım görseli: sayfanın kendi görseli yoksa marka görseli (29 Ekim 2026 taraması: liste sayfaları önizlemesiz paylaşılıyordu)
@@ -72,8 +76,8 @@ const ld = { '@context': 'https://schema.org', '@graph': [...siteLd(sayfalar), .
   <slot name="top" />
   <div class="govde">
     <main id="main"><slot /></main>
-    {(yanSol || yanOrnek) && <div class="yan-rek yan-sol"><Ad slot="sky" ad={yanSol} bare /></div>}
-    {(yanSag || yanOrnek) && <div class="yan-rek yan-sag"><Ad slot="sky" ad={yanSag} bare /></div>}
+    {(yanSol || yanOrnek) ? <div class="yan-rek yan-sol"><Ad slot="sky" ad={yanSol} bare /></div> : ev && <div class="yan-rek yan-sol"><YanEv /></div>}
+    {(yanSag || yanOrnek) ? <div class="yan-rek yan-sag"><Ad slot="sky" ad={yanSag} bare /></div> : ev && <div class="yan-rek yan-sag"><YanEv /></div>}
   </div>
   <Footer site={site} sayfalar={sayfalar} />
   <div class="search" id="search" role="dialog" aria-modal="true" aria-label="Arama" hidden>

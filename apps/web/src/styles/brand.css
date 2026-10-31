@@ -305,13 +305,21 @@ h3{font-weight:700}
 /* Yan dikey (28 Ekim 2026): içerik kutusunun 24 px dışında; yalnız ≥1600 px. Üst menünün altında yapışık, alt bilgiye girmez (gövde boyunca). */
 .govde{position:relative}
 .yan-rek{display:none}
-@media (min-width:1600px){
-  .yan-rek{display:block;position:absolute;top:24px;bottom:48px;width:160px}
-  .yan-sol{right:calc(50% + var(--max) / 2 + 24px)}
-  .yan-sag{left:calc(50% + var(--max) / 2 + 24px)}
+/* 31 Ekim 2026 (kullanıcı): yanlar ekranın en sol ve en sağ kenarında; 1504 px'ten itibaren 120 px (içerikle arada en az 16 px), 1600 px'ten itibaren 160 px */
+@media (min-width:1504px){
+  .yan-rek{display:block;position:absolute;top:24px;bottom:48px;width:120px}
+  .yan-sol{left:max(16px,env(safe-area-inset-left,0px))}
+  .yan-sag{right:max(16px,env(safe-area-inset-right,0px))}
   .yan-rek .ad{position:sticky;top:calc(var(--hdr-alt) + 16px)}
+  .yan-rek .ad-sky .slot{width:120px;aspect-ratio:120/600}
 }
+@media (min-width:1600px){.yan-rek{width:160px}.yan-rek .ad-sky .slot{width:160px;aspect-ratio:160/600}.yan-sol{left:24px}.yan-sag{right:24px}}
 .ad-sky .slot{width:160px;aspect-ratio:160/600}
+.ad-sky .yan-ev{display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:10px;padding:16px 14px;text-align:left;text-transform:none;letter-spacing:0;font-family:var(--f-body);font-size:14px;color:var(--text-2);text-decoration:none;border:1px solid var(--line);border-radius:var(--r-kart,0);background:linear-gradient(180deg,var(--surface-2),var(--surface))}
+.ad-sky .yan-ev b{font-family:var(--f-head);font-weight:900;font-size:24px;line-height:1.05;color:var(--text);text-wrap:balance}
+.ad-sky .yan-ev .yan-ev-m{line-height:1.45}
+.ad-sky .yan-ev .btn{padding:0 12px;font-size:13px}
+.ad-sky .yan-ev:hover b{text-decoration:underline}
 /* Telefonda akış içi kutu (6. karttan sonra); masaüstünde yok */
 .ad-tel{display:none}
 @media (max-width:767px){.ad-tel{display:block}}

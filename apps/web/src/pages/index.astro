@@ -1,7 +1,7 @@
 ---
 /**
  * Ana sayfa (Fatih, 26 Ekim 2026): manşet (13, A biçimi) + Reels + dikey afiş → yatay reklam → video haberler → son haberler → incelemeler →
- * kıyasla → radar / kıyas robotu / 60 saniye / konular (yanda en çok okunanlar, haftalık görev, reklam) → künyeler → araçlar → kulüp → sonsuz akış.
+ * kıyasla → radar / kıyas robotu / 60 saniye / konular (yanda en çok okunanlar, haftalık görev, reklam) → künyeler → araçlar → kulüp → "Tüm haberler" kapısı (sonsuz akış 31 Ekim 2026'da kalktı).
  * 28 Ekim 2026 (kullanıcı: "ana ekranın devamını ana ekrana uyacak şekilde doldur"): Kıyasla, Konular, Araçlar, Kulüp bölümleri ve haftalık görev
  * kartı eklendi; veri olmayan bölüm basılmaz, numaralar sırayla verilir.
  */
@@ -19,7 +19,6 @@ import KiyasBaslat from '../components/modules/KiyasBaslat.astro'
 import GorevKarti from '../components/modules/GorevKarti.astro'
 import AracRafi from '../components/modules/AracRafi.astro'
 import KulupPano from '../components/modules/KulupPano.astro'
-import InfiniteFeed from '../components/InfiniteFeed.astro'
 import * as api from '../lib/api'
 import type { News } from '../lib/types'
 import '../styles/kiyas.css'
@@ -45,7 +44,7 @@ const radarVar = m.radar && radar.length > 0
 const robotVar = m.kiyasRobotu && products.filter((p) => (p.specs || []).some((s) => s.value)).length >= 2
 const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşılaştırmalar', description: site.tagline, path: '/' }
 ---
-<Base meta={meta}>
+<Base meta={meta} yanEv>
   <h1 class="sr">UPDATED · Teknoloji haberleri, incelemeler ve karşılaştırmalar</h1>
   <section class="sec" style="padding-top:24px">
     <div class="wrap"><Manset slides={slides} reels={m.reels ? reels : []} shorts={shorts} ad={api.pickAd(ads, 'hp')} instagram={site.instagram} youtube={site.youtube} /></div>
@@ -72,7 +71,7 @@ const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşıla�
     <div class="ana-sol">
       {robotVar && <div><KiyasRobotu products={products} no={no()} /></div>}
       {m.altmisSaniye && <div><Altmis items={latest} no={no()} /></div>}
-      {/* Gündemden: sağ sütun uzun kaldığında solda boşluk açılmasın; "Son haberler"in devamı, sonsuz akış 21. haberden başlıyor */}
+      {/* Gündemden: sağ sütun uzun kaldığında solda boşluk açılmasın; "Son haberler"in devamı */}
       {rest.length > 4 && <div><div class="sh"><h2><span class="no">{no()}</span>Gündemden</h2><a class="btn-t btn" href="/haberler">Tümü</a></div><div class="grid-yatay" data-dolgu>{rest.slice(4, 20).map((n, i) => i < 6 ? <CardStd item={n} /> : <div class="gy-ek" hidden><CardStd item={n} /></div>)}</div></div>}
     </div>
     <div class="rail">
@@ -91,9 +90,8 @@ const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşıla�
   {/* Künyeler en altta (30 Ekim 2026, kullanıcı) */}
   {m.kunyeRafi && products.length > 0 && <section class="sec"><div class="wrap"><KunyeRafi products={products} /></div></section>}
 
-  <section class="sec"><div class="wrap">
-    <InfiniteFeed title="Daha fazla haber" source="son" items={[]} startPage={2} videos={videos} reels={reels} ads={ads} channel={site.youtube} profile={site.instagram} renderFirst={false} />
-  </div></section>
+  {/* Sonsuz akış kalktı (31 Ekim 2026, kullanıcı): ana sayfa karşılama sayfası, sonunda haberlerin devamına tek kapı */}
+  <section class="sec"><div class="wrap"><div class="ana-son"><div><span class="eyebrow">Devamı</span><h2>Bütün haberler bir tık ötede</h2></div><a class="btn btn-p" href="/haberler">Tüm haberler</a></div></div></section>
 </Base>
 <script>
   // Geniş ekranda sağ sütun (radar, en çok okunanlar, görev) soldan uzun kalırsa Gündemden'e ikişer haber eklenir; boşluk kapanır
@@ -106,6 +104,8 @@ const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşıla�
   addEventListener('load', dolgu); setTimeout(dolgu, 1500)
 </script>
 <style is:global>
+  .ana-son{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:28px 0;border-top:1px solid var(--line)}
+  .ana-son h2{margin:4px 0 0;font-size:28px}
   .grid-yatay > .gy-ek{display:contents}
   .grid-yatay > .gy-ek[hidden]{display:none}
   /* Sol sütundaki modüller arası boşluk tek yerden (Altmis kendi üst boşluğunu da taşıyordu) */
