@@ -18,7 +18,7 @@ const jsonld = [{ '@context': 'https://schema.org', '@type': 'WebApplication', n
       </div>
       <aside class="rail rail-yan">
         <div><h2 class="label ys-baslik">Diğer araçlar</h2>
-          <ul class="arac-l">{ARACLAR.filter((a) => a.yol !== yol).map((a) => <li><a href={a.yol}><b>{a.ad}</b><span>{a.aciklama}</span></a></li>)}</ul>
+          <ul class="arac-l">{ARACLAR.filter((a) => a.yol !== yol).map((a) => <li><a href={a.yol}><b>{a.ad}</b></a></li>)}</ul>
         </div>
         <div class="arac-uper" data-uper-oneri>
           <b>Araçlar herkese açık.</b>

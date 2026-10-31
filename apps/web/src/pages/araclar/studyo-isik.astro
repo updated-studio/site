@@ -1,0 +1,86 @@
+---
+/**
+ * Stüdyo ışık simülasyonu (toplantı notu 30 Ekim 2026, araç 11): ana ışığın yönü, yüksekliği, uzaklığı, değiştiricinin boyu ve dolgu oranı
+ * → küre üzerinde gölgelendirme (Lambert + yumuşak geçiş), ışık deseninin adı, ters kare kanunuyla pozlama farkı. Basitleştirilmiş model.
+ */
+import AracSayfa from '../../components/AracSayfa.astro'
+const DEG: [string, number][] = [['Çıplak flaş (sert)', 0.05], ['Beauty dish', 0.25], ['Softbox 60×60', 0.45], ['Softbox 90 cm / şemsiye', 0.65], ['Oktabox 150 cm (çok yumuşak)', 0.9]]
+---
+<AracSayfa yol="/araclar/studyo-isik" baslik="Stüdyo ışık simülasyonu" lead="Ana ışığı konunun etrafında döndür, yükselt, uzaklaştır; değiştiriciyi ve dolgu ışığını seç. Gölgenin nasıl değiştiğini, ışık deseninin adını ve pozlama farkını anında gör."
+  aciklama="Stüdyo portre ışık simülasyonu: Rembrandt, loop, butterfly, split ışık desenleri; softbox boyu, dolgu oranı ve ters kare kanunu ile pozlama. Ücretsiz.">
+  <form class="arac-form" data-si onsubmit="return false">
+    <label for="si-yon">Ana ışığın yönü (derece)<input id="si-yon" type="range" min="-90" max="90" value="45" /></label>
+    <label for="si-yuk">Yükseklik (derece)<input id="si-yuk" type="range" min="-20" max="70" value="35" /></label>
+    <label for="si-mes">Konuya uzaklık (metre)<input id="si-mes" type="number" min="0.5" max="6" step="0.1" value="1.5" inputmode="decimal" /></label>
+    <label for="si-deg">Değiştirici<select id="si-deg">{DEG.map(([ad, y], i) => <option value={y} selected={i === 2}>{ad}</option>)}</select></label>
+    <label for="si-dolgu">Dolgu ışığı<select id="si-dolgu"><option value="0">Yok (karanlık gölge)</option><option value="0.12">Hafif (8:1)</option><option value="0.25" selected>Orta (4:1)</option><option value="0.5">Güçlü (2:1)</option></select></label>
+  </form>
+  <div class="si-sahne"><canvas data-si-kure width="320" height="320" aria-label="Işık önizlemesi"></canvas><canvas data-si-ust width="320" height="320" aria-hidden="true"></canvas></div>
+  <div class="arac-sonuc" data-sonuc aria-live="polite"></div>
+  <Fragment slot="nasil">
+    <h2>Portre ışığının dört temel deseni</h2>
+    <p><b>Butterfly (kelebek):</b> ışık tam önde ve yüksekte; burnun altında küçük, kelebek biçimli bir gölge oluşur. Güzellik ve moda portrelerinde sık kullanılır. <b>Loop:</b> ışık 30-45° yanda; burun gölgesi yanağa doğru küçük bir halka çizer, en çok kullanılan doğal desen. <b>Rembrandt:</b> ışık 45-60° yanda ve yüksekte; gölgedeki yanakta küçük bir üçgen ışık kalır. <b>Split:</b> ışık 90° yanda; yüz ikiye bölünür, dramatik ve sert.</p>
+    <p>Işığın <b>boyu</b> konuya göre ne kadar büyükse geçiş o kadar yumuşaktır: aynı softbox'ı yaklaştırınca ışık yumuşar, uzaklaştırınca sertleşir. <b>Ters kare kanunu</b>: ışığın konuya uzaklığı iki katına çıkınca konuya düşen ışık dörtte bire iner (2 stop).</p>
+    <p>Bu simülasyon yüzü küre olarak basitleştirir; burun ve göz çukuru gölgeleri gösterilmez, yalnız desenin adı verilir. Gerçek çekimde reflektör ve ortamdan yansıyan ışık gölgeleri biraz daha açar.</p>
+  </Fragment>
+</AracSayfa>
+<style is:global>
+  .si-sahne{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .si-sahne canvas{width:100%;height:auto;border-radius:var(--r-kart,0);background:#15171A}
+  [data-si] input[type=range]{height:auto;padding:0;accent-color:var(--blue)}
+  [data-sonuc] .arac-ikili{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
+  [data-sonuc] .arac-buyuk b{font-size:clamp(22px,2.6vw,28px)}
+  @media (max-width:520px){.si-sahne{grid-template-columns:minmax(0,1fr)}}
+</style>
+<script>
+  const $ = <T extends Element>(s: string) => document.querySelector<T>(s)!
+  const n = (s: string) => Number($<HTMLInputElement | HTMLSelectElement>(s).value)
+  const kure = $<HTMLCanvasElement>('[data-si-kure]').getContext('2d')!, ust = $<HTMLCanvasElement>('[data-si-ust]').getContext('2d')!
+  const img = kure.createImageData(320, 320)
+  const ilkMesafe = 1.5
+  function desen(yon: number, yuk: number) {
+    const a = Math.abs(yon)
+    if (yuk < 5) return 'Alttan ışık (korku etkisi)'
+    if (a < 12 && yuk >= 25) return 'Butterfly (kelebek)'
+    if (a < 25) return 'Düz / geniş ön ışık'
+    if (a < 42) return 'Loop'
+    if (a < 68) return yuk >= 25 ? 'Rembrandt' : 'Loop (alçak)'
+    return 'Split (yarım yüz)'
+  }
+  function ciz() {
+    const yon = n('#si-yon'), yuk = n('#si-yuk'), mes = Math.max(0.3, n('#si-mes')), boy = n('#si-deg'), dolgu = n('#si-dolgu')
+    const r = (yon * Math.PI) / 180, e = (yuk * Math.PI) / 180
+    const L = [Math.sin(r) * Math.cos(e), Math.sin(e), Math.cos(r) * Math.cos(e)] // x sağ, y yukarı, z makineye doğru
+    const yumus = Math.min(0.95, boy * (ilkMesafe / mes)) // ışık yaklaştıkça yumuşar
+    const d = img.data, R = 130
+    for (let py = 0; py < 320; py++) for (let px = 0; px < 320; px++) {
+      const i = (py * 320 + px) * 4, x = (px - 160) / R, y = (160 - py) / R, rr = x * x + y * y
+      if (rr > 1) { d[i] = 21; d[i + 1] = 23; d[i + 2] = 26; d[i + 3] = 255; continue }
+      const z = Math.sqrt(1 - rr), lam = x * L[0] + y * L[1] + z * L[2]
+      // Yumuşak ışık: terminator çizgisi genişler (wrap lighting)
+      const isik = Math.max(0, (lam + yumus) / (1 + yumus)) ** (1 + (1 - yumus)), dol = dolgu * Math.max(0, z) // dolgu makine yönünden
+      const t = Math.min(1, isik * 0.95 + dol * 0.6)
+      d[i] = Math.round(235 * t + 18); d[i + 1] = Math.round(190 * t + 16); d[i + 2] = Math.round(160 * t + 16); d[i + 3] = 255
+    }
+    kure.putImageData(img, 0, 0)
+    // Üstten: konu ortada, makine altta, ışık yönü ve uzaklığı
+    ust.clearRect(0, 0, 320, 320); ust.fillStyle = '#15171A'; ust.fillRect(0, 0, 320, 320)
+    const k = Math.min(46, 125 / mes), lx = 160 + Math.sin(r) * mes * k, ly = 140 - Math.cos(r) * mes * k * -1
+    ust.strokeStyle = 'rgba(255,255,255,.12)'; for (let m = 1; m <= 6; m++) { ust.beginPath(); ust.arc(160, 140, m * k, 0, Math.PI * 2); ust.stroke() }
+    ust.fillStyle = '#FF6B1A'; ust.beginPath(); ust.arc(160, 140, 12, 0, Math.PI * 2); ust.fill()
+    ust.fillStyle = '#F2F2F2'; ust.fillRect(150, 290, 20, 14)
+    const gen = 10 + boy * 60
+    ust.save(); ust.translate(lx, ly); ust.rotate(Math.atan2(140 - ly, 160 - lx)); ust.fillStyle = '#FFE8A8'; ust.fillRect(-4, -gen / 2, 8, gen); ust.restore()
+    ust.strokeStyle = 'rgba(255,232,168,.5)'; ust.setLineDash([4, 4]); ust.beginPath(); ust.moveTo(lx, ly); ust.lineTo(160, 140); ust.stroke(); ust.setLineDash([])
+    ust.fillStyle = '#8E9297'; ust.font = '12px IBM Plex Mono, monospace'; ust.fillText('ÜSTTEN · halka = 1 m', 10, 20); ust.fillText('makine', 140, 316)
+    const stop = 2 * Math.log2(mes / ilkMesafe), oran = dolgu ? Math.round((1 + dolgu) / dolgu) : null
+    $('[data-sonuc]').innerHTML = `<div class="arac-ikili">
+        <div class="arac-buyuk"><span class="label">Işık deseni</span><b>${desen(yon, yuk)}</b><span class="meta">${Math.abs(yon)}° yanda, ${yuk}° yukarıda</span></div>
+        <div class="arac-buyuk"><span class="label">Işığın karakteri</span><b>${yumus > 0.6 ? 'Çok yumuşak' : yumus > 0.35 ? 'Yumuşak' : yumus > 0.15 ? 'Orta' : 'Sert'}</b><span class="meta">değiştirici boyu ve uzaklığa göre</span></div>
+        <div class="arac-buyuk"><span class="label">Pozlama farkı</span><b>${Math.abs(stop) < 0.05 ? '0' : (stop > 0 ? '−' : '+') + Math.abs(stop).toFixed(1).replace('.', ',')} stop</b><span class="meta">${ilkMesafe.toString().replace('.', ',')} m'ye göre (ters kare kanunu)</span></div>
+        <div class="arac-buyuk"><span class="label">Işık oranı</span><b>${oran ? `${oran}:1` : 'Dolgu yok'}</b><span class="meta">aydınlık / gölge tarafı</span></div>
+      </div>`
+  }
+  document.querySelector('[data-si]')!.addEventListener('input', ciz)
+  ciz()
+</script>

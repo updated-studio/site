@@ -1,13 +1,20 @@
 ---
 import Base from '../../layouts/Base.astro'
-import { ARACLAR } from '../../lib/araclar'
+import { ARACLAR, GRUPLAR } from '../../lib/araclar'
 import { ico } from '../../lib/ui'
 ---
-<Base meta={{ title: 'Fotoğraf ve video araçları | UPDATED', description: 'Fotoğrafçılar ve videograflar için ücretsiz hesaplayıcılar: dolunay, alan derinliği, timelapse, altın saat, ND filtre, krop faktör, SD kart, baskı boyutu. Üyelik gerekmez.', path: '/araclar' }}>
+<Base meta={{ title: 'Fotoğraf ve video araçları | UPDATED', description: 'Fotoğrafçılar ve videograflar için ücretsiz hesaplayıcılar: dolunay, alan derinliği, timelapse, astrofotoğraf, flaş, makro, ağır çekim, dron GSD, batarya, lens görünümü, stüdyo ışığı, altın saat, ND filtre ve daha fazlası. Üyelik gerekmez.', path: '/araclar' }}>
   <div class="wrap">
     <div class="art-head" style="max-width:none;padding-bottom:24px"><span class="cat">Ücretsiz · {ARACLAR.length} araç</span><h1 class="h1">Araçlar</h1><p class="lead" style="margin:0">Çekimini planlamak için ücretsiz hesaplayıcılar. Üyelik gerekmez.</p></div>
-    <div class="arac-izgara">
-      {ARACLAR.map((a) => <a class="arac-kart" href={a.yol}><h2>{a.ad}</h2><p>{a.aciklama}</p><span class="ar-ac">Aç <Fragment set:html={ico('right', 14)} /></span></a>)}
-    </div>
+    {GRUPLAR.map((g) => <section class="arac-grup"><h2 class="label">{g}</h2>
+      <div class="arac-izgara">
+        {ARACLAR.filter((a) => a.grup === g).map((a) => <a class="arac-kart" href={a.yol}><h3>{a.ad}</h3><p>{a.aciklama}</p><span class="ar-ac">Aç <Fragment set:html={ico('right', 14)} /></span></a>)}
+      </div>
+    </section>)}
   </div>
 </Base>
+<style>
+  .arac-grup .label{color:var(--text-3);margin:0 0 12px}
+  .arac-grup .arac-izgara{grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));padding-bottom:36px}
+  .arac-grup h3{font-size:22px;margin:0}
+</style>

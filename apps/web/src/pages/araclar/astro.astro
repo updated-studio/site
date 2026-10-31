@@ -1,0 +1,68 @@
+---
+/** Astrofotoğraf pozlama (toplantı notu 30 Ekim 2026, araç 5): yıldızlar iz bırakmadan en uzun enstantane; 500 kuralı ve NPF kuralı yan yana, gök yüksekliği (dek) etkisi, başlangıç ayarı. */
+import AracSayfa from '../../components/AracSayfa.astro'
+// [ad, genişlik mm, yükseklik mm, megapiksel]
+const SENSOR: [string, number, number, number][] = [
+  ['Full frame, 24 MP', 36, 24, 24], ['Full frame, 33 MP', 36, 24, 33], ['Full frame, 45-61 MP', 36, 24, 50], ['APS-C, 24-26 MP', 23.5, 15.6, 26],
+  ['APS-C (Canon), 24-32 MP', 22.3, 14.9, 28], ['Micro Four Thirds, 20 MP', 17.3, 13, 20], ['1 inç, 20 MP', 13.2, 8.8, 20],
+]
+const HEDEF: [string, number][] = [['Samanyolu merkezi (Türkiye yazı)', -29], ['Gök ekvatoru (en hızlı kayma)', 0], ['Orion, Ülker (kış)', 10], ['Büyükayı, Kutup yıldızı yönü', 60]]
+---
+<AracSayfa yol="/araclar/astro" baslik="Astrofotoğraf hesaplayıcı" lead="Yıldızlar iz bırakmadan en uzun kaç saniye pozlayabilirsin? 500 kuralını ve daha hassas NPF kuralını sensörüne ve lensine göre hesapla."
+  aciklama="Astrofotoğraf enstantane hesaplayıcı: 500 kuralı ve NPF kuralı, Samanyolu için sensör, odak uzaklığı ve diyaframa göre en uzun pozlama, ISO önerisi. Ücretsiz.">
+  <form class="arac-form" data-astro onsubmit="return false">
+    <label for="as-sensor">Sensör<select id="as-sensor">{SENSOR.map(([ad, w, h, mp], i) => <option value={`${w}x${h}x${mp}`} selected={i === 0}>{ad}</option>)}</select></label>
+    <label for="as-f">Odak uzaklığı (mm)<input id="as-f" type="number" min="7" max="600" value="20" inputmode="numeric" /></label>
+    <label for="as-n">Diyafram<select id="as-n">{['1.4', '1.8', '2', '2.8', '3.5', '4', '5.6'].map((n) => <option value={n} selected={n === '2.8'}>f/{n.replace('.', ',')}</option>)}</select></label>
+    <label for="as-dek">Nereyi çekiyorsun?<select id="as-dek">{HEDEF.map(([ad, d]) => <option value={d}>{ad}</option>)}</select></label>
+  </form>
+  <div class="ast-sahne" aria-hidden="true"><canvas data-ast width="800" height="260"></canvas><span class="ast-etiket" data-ast-etiket></span></div>
+  <div class="arac-sonuc" data-sonuc aria-live="polite"></div>
+  <Fragment slot="nasil">
+    <h2>500 kuralı mı, NPF kuralı mı?</h2>
+    <p>Dünya döndüğü için yıldızlar gökyüzünde kayar; enstantane uzadıkça nokta yerine çizgi olurlar. <b>500 kuralı</b> eski ve basit bir sınırdır: 500'ü full frame karşılığı odak uzaklığına böl. Yüksek çözünürlüklü bugünkü sensörlerde bu süre fazla gelir; yıldızlar büyütünce hafif uzamış görünür.</p>
+    <p><b>NPF kuralı</b> (Frédéric Michaud, Société Astronomique de France) diyaframı ve piksel boyunu da hesaba katar; bu araç basitleştirilmiş hâlini kullanır: (35 × f sayısı + 30 × piksel boyu µm) ÷ odak uzaklığı. Ekvatordan uzak (kutba yakın) yıldızlar daha yavaş kaydığı için o yöne bakınca süre uzar.</p>
+    <p>Başlangıç ayarı: lensin en açık diyaframı, ISO 3200-6400, odak manuel ve sonsuzda (canlı görüntüde parlak bir yıldızı büyütüp keskinleştir), beyaz dengesi 3800-4200 K. En iyi gece ay olmayan gecedir; yeni ay haftasını <a href="/araclar/dolunay">Dolunay ve ay evresi</a> aracından bulabilirsin. Şehir ışığından en az 50 km uzaklaş.</p>
+  </Fragment>
+</AracSayfa>
+<style is:global>
+  .ast-sahne{position:relative;border-radius:var(--r-kart,0);overflow:hidden;background:#05070F}
+  .ast-sahne canvas{display:block;width:100%;height:auto}
+  .ast-etiket{position:absolute;left:14px;bottom:12px;font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#B4B7BB}
+  [data-sonuc] .arac-ikili{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+  [data-sonuc] .arac-buyuk b{font-size:clamp(24px,3vw,32px)}
+</style>
+<script>
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!
+  const sensor = $<HTMLSelectElement>('#as-sensor'), fIn = $<HTMLInputElement>('#as-f'), nIn = $<HTMLSelectElement>('#as-n'), dek = $<HTMLSelectElement>('#as-dek')
+  const out = $('[data-sonuc]'), cv = $<HTMLCanvasElement>('[data-ast]'), x = cv.getContext('2d')!
+  // Sabit yıldız alanı (tohumlu rastgele): her çizimde aynı gökyüzü
+  let tohum = 7; const r = () => ((tohum = (tohum * 16807) % 2147483647) / 2147483647)
+  const YILDIZ = Array.from({ length: 260 }, () => ({ x: r() * 800, y: r() * 260, p: 0.3 + r() * 1.6, a: 0.35 + r() * 0.65 }))
+  const sn = (t: number) => `${t.toFixed(t < 10 ? 1 : 0).replace('.', ',')} sn`
+  function hesapla() {
+    const [w, h, mp] = sensor.value.split('x').map(Number), f = Math.max(5, Number(fIn.value) || 20), N = Number(nIn.value), d = Number(dek.value)
+    const crop = 43.27 / Math.hypot(w, h), piksel = (w / Math.sqrt((mp * 1e6 * w) / h)) * 1000 // µm
+    const kos = Math.cos((d * Math.PI) / 180)
+    const k500 = 500 / (f * crop) / kos, npf = (35 * N + 30 * piksel) / f / kos
+    const iso = N <= 1.8 ? 1600 : N <= 2.8 ? 3200 : 6400
+    out.innerHTML = `<div class="arac-ikili">
+        <div class="arac-buyuk"><span class="label">NPF kuralı (önerilen)</span><b>${sn(npf)}</b><span class="meta">yıldızlar büyütünce de nokta</span></div>
+        <div class="arac-buyuk"><span class="label">500 kuralı</span><b>${sn(k500)}</b><span class="meta">ekranda nokta, büyütünce hafif uzar</span></div>
+        <div class="arac-buyuk"><span class="label">Başlangıç ayarı</span><b>f/${String(N).replace('.', ',')} · ISO ${iso}</b><span class="meta">enstantane ${sn(Math.floor(npf))}, beyaz dengesi ~4000 K</span></div>
+        <div class="arac-buyuk"><span class="label">Piksel boyu</span><b>${piksel.toFixed(2).replace('.', ',')} µm</b><span class="meta">full frame karşılığı ${Math.round(f * crop)} mm</span></div>
+      </div>`
+    ciz(k500 / npf)
+  }
+  // Sahne: NPF süresinde yıldızlar nokta; 500 kuralı süresinde ne kadar uzayacakları gösterilir
+  function ciz(oran: number) {
+    x.fillStyle = '#05070F'; x.fillRect(0, 0, 800, 260)
+    const g = x.createRadialGradient(560, 200, 10, 560, 200, 380); g.addColorStop(0, 'rgba(120,110,170,.35)'); g.addColorStop(1, 'rgba(5,7,15,0)'); x.fillStyle = g; x.fillRect(0, 0, 800, 260)
+    const iz = Math.max(0, (oran - 1) * 6)
+    x.lineCap = 'round'
+    for (const s of YILDIZ) { x.strokeStyle = `rgba(255,255,255,${s.a})`; x.lineWidth = s.p * 1.6; x.beginPath(); x.moveTo(s.x, s.y); x.lineTo(s.x + iz, s.y - iz * 0.35); x.stroke() }
+    $('[data-ast-etiket]').textContent = iz < 1 ? 'Her iki kuralda da yıldızlar nokta' : `500 kuralı süresinde yıldızlar ~${Math.round(iz)} piksel iz bırakır`
+  }
+  document.querySelector('[data-astro]')!.addEventListener('input', hesapla)
+  hesapla()
+</script>

@@ -1,0 +1,86 @@
+---
+/**
+ * Lens görünümü (toplantı notu 30 Ekim 2026, araç 4): konu kadrajda hep aynı boyda kalacak şekilde odak uzaklığı değişir; makine konudan
+ * uzaklaşır, yüz perspektifi düzleşir, arka plan büyür. Çizim şematik; oranlar perspektif formülünden (konu boyu sabit, uzaklık ∝ f).
+ */
+import AracSayfa from '../../components/AracSayfa.astro'
+const DURAK = [14, 24, 35, 50, 85, 135, 200]
+---
+<AracSayfa yol="/araclar/lens-gorunumu" baslik="Lens görünümü" lead="Odak uzaklığı değişince portre nasıl değişir? Konu kadrajda aynı boyda kalırken makinenin konuya uzaklığını, yüzün perspektifini ve arka planın büyümesini gör."
+  aciklama="Odak uzaklığı ve perspektif: 14 mm'den 200 mm'ye portrede yüz bozulması, arka plan sıkışması ve konuya uzaklık. Hangi lens portre için uygun? Ücretsiz.">
+  <form class="arac-form" data-lg onsubmit="return false">
+    <label for="lg-f">Odak uzaklığı (full frame)<input id="lg-f" type="range" min="0" max="6" step="1" value="3" list="lg-duraklar" /></label>
+    <datalist id="lg-duraklar">{DURAK.map((d, i) => <option value={i} label={`${d}`}></option>)}</datalist>
+  </form>
+  <div class="lg-duraklar" aria-hidden="true">{DURAK.map((d) => <span>{d}</span>)}</div>
+  <div class="lg-sahne" aria-hidden="true">
+    <svg class="lg-kare" viewBox="0 0 400 300" data-lg-kare></svg>
+    <svg class="lg-ust" viewBox="0 0 400 300" data-lg-ust></svg>
+  </div>
+  <div class="arac-sonuc" data-sonuc aria-live="polite"></div>
+  <Fragment slot="nasil">
+    <h2>Perspektifi lens değil mesafe belirler</h2>
+    <p>Geniş açı lens yüzü "bozmaz"; bozan, aynı kadrajı doldurmak için konuya çok yaklaşmaktır. 24 mm ile omuz plan bir portre çekmek için makine yüze yarım metre kadar yaklaşır: burun, kulaklardan belirgin biçimde yakındır ve olduğundan büyük görünür. 85 mm'de aynı kadraj için 2 metreden fazla uzaklaşırsın; yüzün önüyle arkası arasındaki fark önemsizleşir, oranlar doğal görünür.</p>
+    <p>Aynı nedenle uzun lens arka planı "sıkıştırır": konu aynı boyda kalırken arkadaki dağ ya da bina büyür ve konuya yakın görünür. Geniş açıda ise arka plan küçülür, ortam kadraja girer.</p>
+    <p>Portre için klasik aralık 85-135 mm'dir (full frame karşılığı). Ortam portresi ve sokak için 35 mm, sıkıştırılmış manzara ve uzaktan doğal anlar için 135-200 mm sık kullanılır. APS-C'de odak uzaklığını 1,5 ile çarparak karşılığını bul (<a href="/araclar/krop-faktor">Krop faktör</a>).</p>
+  </Fragment>
+</AracSayfa>
+<style is:global>
+  .lg-duraklar{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:12px;color:var(--text-3);margin-top:-8px}
+  .lg-sahne{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px}
+  .lg-sahne svg{width:100%;height:auto;border-radius:var(--r-kart,0);background:var(--surface-2)}
+  [data-lg] input[type=range]{height:auto;padding:0;accent-color:var(--blue)}
+  [data-sonuc] .arac-ikili{grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr))}
+  [data-sonuc] .arac-buyuk b{font-size:clamp(24px,3vw,30px)}
+  @media (max-width:640px){.lg-sahne{grid-template-columns:minmax(0,1fr)}}
+</style>
+<script>
+  const DURAK = [14, 24, 35, 50, 85, 135, 200]
+  const $ = <T extends Element>(s: string) => document.querySelector<T>(s)!
+  const v = (n: number, k = 1) => n.toLocaleString('tr-TR', { maximumFractionDigits: k })
+  function ciz() {
+    const f = DURAK[Number($<HTMLInputElement>('#lg-f').value)]
+    // Omuz plan: dikey 24 mm sensöre ~0,6 m yükseklik sığsın → uzaklık = f × 0,6 / 24 (m)
+    const d = (f * 0.6) / 24, burun = 0.1 // burun ucu ile kulak arası ~10 cm
+    const burunBuyut = d / (d - burun) // burun, kulak hizasına göre bu kadar büyük görünür
+    const arka = 30, arkaBoy = (f / 50) // 30 m arkadaki dağ: 50 mm'ye göre büyüme
+    const yuzG = 64, burunG = 14 * burunBuyut, kulakG = Math.max(4, 12 - (burunBuyut - 1) * 30) // kulaklar geniş açıda yüzün arkasına kaçar
+    const dagH = Math.min(260, 70 * arkaBoy), dagW = Math.min(900, 260 * arkaBoy)
+    $('[data-lg-kare]').innerHTML = `
+      <defs><linearGradient id="lg-gok" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5B8BD0"/><stop offset="1" stop-color="#C9DCF2"/></linearGradient></defs>
+      <rect width="400" height="300" fill="url(#lg-gok)"/>
+      <path d="M${200 - dagW / 2} 300 L200 ${300 - dagH - 40} L${200 + dagW / 2} 300Z" fill="#5E6B7E"/>
+      <path d="M${200 - dagW / 6} ${300 - dagH * 0.62 - 40} L200 ${300 - dagH - 40} L${200 + dagW / 6} ${300 - dagH * 0.62 - 40}Z" fill="#EEF2F7"/>
+      <rect y="250" width="400" height="50" fill="#3D4A3A"/>
+      <g transform="translate(200 175)">
+        <path d="M-95 125 Q-90 40 0 40 Q90 40 95 125Z" fill="#2B2F36"/>
+        <rect x="-16" y="18" width="32" height="30" fill="#C99A7C"/>
+        <ellipse cx="${-yuzG + 2}" cy="-2" rx="${kulakG}" ry="16" fill="#B98667"/><ellipse cx="${yuzG - 2}" cy="-2" rx="${kulakG}" ry="16" fill="#B98667"/>
+        <ellipse cx="0" cy="-6" rx="${yuzG}" ry="${yuzG * 1.22}" fill="#D9A989"/>
+        <path d="M${-yuzG} -40 Q0 ${-yuzG * 1.6} ${yuzG} -40 Q${yuzG * 0.8} ${-yuzG * 1.35} 0 ${-yuzG * 1.3} Q${-yuzG * 0.8} ${-yuzG * 1.35} ${-yuzG} -40Z" fill="#3A2A22"/>
+        <ellipse cx="-24" cy="-12" rx="7" ry="5" fill="#2A2A2A"/><ellipse cx="24" cy="-12" rx="7" ry="5" fill="#2A2A2A"/>
+        <ellipse cx="0" cy="${8 + (burunBuyut - 1) * 10}" rx="${burunG * 0.55}" ry="${burunG}" fill="#C88F70"/>
+        <path d="M-18 ${36 + (burunBuyut - 1) * 6} Q0 ${44 + (burunBuyut - 1) * 6} 18 ${36 + (burunBuyut - 1) * 6}" stroke="#8E4F43" stroke-width="4" fill="none" stroke-linecap="round"/>
+      </g>
+      <text x="12" y="22" font-family="IBM Plex Mono, monospace" font-size="14" fill="#fff">${f} mm</text>`
+    // Üstten görünüş: makine, konu ve görüş açısı
+    const aci = 2 * Math.atan(36 / (2 * f)), olcek = 240 / Math.max(5, (200 * 0.6) / 24), cx = 60 + d * olcek
+    const kol = 340, yx = Math.cos(aci / 2) * kol, yy = Math.sin(aci / 2) * kol
+    $('[data-lg-ust]').innerHTML = `
+      <path d="M40 150 L${40 + yx} ${150 - yy} L${40 + yx} ${150 + yy}Z" fill="var(--blue)" opacity=".15"/>
+      <line x1="40" y1="150" x2="${40 + yx}" y2="${150 - yy}" stroke="var(--blue)"/><line x1="40" y1="150" x2="${40 + yx}" y2="${150 + yy}" stroke="var(--blue)"/>
+      <rect x="22" y="138" width="20" height="24" rx="3" fill="var(--text)"/>
+      <circle cx="${Math.min(cx, 380)}" cy="150" r="10" fill="var(--orange)"/>
+      <line x1="40" y1="190" x2="${Math.min(cx, 380)}" y2="190" stroke="var(--text-3)" stroke-dasharray="4 4"/>
+      <text x="${(40 + Math.min(cx, 380)) / 2}" y="210" font-family="IBM Plex Mono, monospace" font-size="14" fill="var(--text)" text-anchor="middle">${v(d, 2)} m</text>
+      <text x="12" y="24" font-family="IBM Plex Mono, monospace" font-size="12" fill="var(--text-3)">ÜSTTEN</text>`
+    $('[data-sonuc]').innerHTML = `<div class="arac-ikili">
+        <div class="arac-buyuk"><span class="label">Konuya uzaklık</span><b>${v(d, 2)} m</b><span class="meta">omuz plan portre için</span></div>
+        <div class="arac-buyuk"><span class="label">Burun büyümesi</span><b>%${v((burunBuyut - 1) * 100, 0)}</b><span class="meta">${burunBuyut > 1.15 ? 'belirgin bozulma' : burunBuyut > 1.06 ? 'hafif, fark edilir' : 'doğal oranlar'}</span></div>
+        <div class="arac-buyuk"><span class="label">Arka plan</span><b>${v(arkaBoy, 2)}×</b><span class="meta">50 mm'ye göre büyüklük</span></div>
+        <div class="arac-buyuk"><span class="label">Yatay görüş açısı</span><b>${v((aci * 180) / Math.PI, 0)}°</b><span class="meta">full frame</span></div>
+      </div>`
+  }
+  $('#lg-f').addEventListener('input', ciz)
+  ciz()
+</script>

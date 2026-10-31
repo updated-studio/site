@@ -1,0 +1,50 @@
+---
+/** Flaş hesaplayıcı (toplantı notu 30 Ekim 2026, araç 6): kılavuz sayısı (GN), ISO, güç, ışık değiştirici → diyafram ya da en uzak mesafe. */
+import AracSayfa from '../../components/AracSayfa.astro'
+const GUC = ['1/1', '1/2', '1/4', '1/8', '1/16', '1/32', '1/64', '1/128']
+// [ad, ışık kaybı stop]
+const DEGISTIRICI: [string, number][] = [['Çıplak flaş', 0], ['Difüzör kapak', 1], ['Tavana / duvara sektirme', 2], ['Şemsiye (yansıtan)', 1], ['Softbox (çift difüzör)', 1.7], ['Beauty dish', 0.7], ['Snoot / grid', 0.3]]
+---
+<AracSayfa yol="/araclar/flas" baslik="Flaş hesaplayıcı" lead="Flaşının kılavuz sayısını, ISO'yu ve gücü gir; konuya uzaklığa göre hangi diyaframı kullanacağını ya da flaşın en uzak nereye yeteceğini bul."
+  aciklama="Flaş kılavuz sayısı (GN) hesaplayıcı: mesafe, diyafram, ISO ve flaş gücüne göre doğru pozlama; softbox, şemsiye ve sektirme ışık kaybı. Ücretsiz.">
+  <form class="arac-form" data-flas onsubmit="return false">
+    <label for="fl-gn">Kılavuz sayısı (GN, ISO 100, metre)<input id="fl-gn" type="number" min="5" max="120" value="60" inputmode="numeric" /></label>
+    <label for="fl-iso">ISO<select id="fl-iso">{[100, 200, 400, 800, 1600, 3200].map((v) => <option value={v} selected={v === 100}>{v}</option>)}</select></label>
+    <label for="fl-guc">Flaş gücü<select id="fl-guc">{GUC.map((g, i) => <option value={1 / 2 ** i}>{g}</option>)}</select></label>
+    <label for="fl-deg">Işık değiştirici<select id="fl-deg">{DEGISTIRICI.map(([ad, s]) => <option value={s}>{ad}</option>)}</select></label>
+    <label for="fl-m">Konuya uzaklık (metre)<input id="fl-m" type="number" min="0.3" max="100" step="0.1" value="3" inputmode="decimal" /></label>
+    <label for="fl-n">Kullanmak istediğin diyafram<select id="fl-n">{['1.4', '2', '2.8', '4', '5.6', '8', '11', '16'].map((n) => <option value={n} selected={n === '5.6'}>f/{n.replace('.', ',')}</option>)}</select></label>
+  </form>
+  <div class="arac-sonuc" data-sonuc aria-live="polite"></div>
+  <Fragment slot="nasil">
+    <h2>Kılavuz sayısı nasıl kullanılır?</h2>
+    <p>Kılavuz sayısı (GN), flaşın gücünü tek sayıyla anlatır: <b>GN = mesafe × f sayısı</b> (ISO 100'de, metre). GN 60'lık bir flaş, 6 metredeki konuyu f/10'da doğru pozlar; 3 metrede f/20 gerekir. Üreticiler GN'yi çoğunlukla en dar ışık açısında (ör. 200 mm zoom kafası) verir; geniş açıda gerçek değer daha düşüktür.</p>
+    <p>ISO iki katına çıkınca GN 1,4 kat (√2) artar; flaş gücü yarıya inince GN 1,4 kat azalır. Işığı sektirmek ya da softbox kullanmak ışığı yumuşatır ama 1-2 stop kaybettirir; bu araç bunu da hesaba katar.</p>
+    <p>Enstantane flaşın pozlamasını değil, ortam ışığını belirler: flaş senkron hızının (çoğu makinede 1/200-1/250 sn) üstüne çıkma. Hesap bir başlangıç noktasıdır; çevre duvarları ve tavan ışığı geri yansıtır, ilk kareye bakıp ince ayar yap.</p>
+  </Fragment>
+</AracSayfa>
+<style is:global>
+  [data-sonuc] .arac-ikili{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+  [data-sonuc] .arac-buyuk b{font-size:clamp(24px,3vw,32px)}
+</style>
+<script>
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!
+  const deg = (s: string) => Number($<HTMLInputElement | HTMLSelectElement>(s).value)
+  const STD = [1, 1.4, 2, 2.8, 4, 5.6, 8, 11, 16, 22, 32]
+  const yakin = (n: number) => STD.reduce((a, b) => (Math.abs(Math.log(b / n)) < Math.abs(Math.log(a / n)) ? b : a))
+  const v = (n: number, k = 1) => n.toLocaleString('tr-TR', { maximumFractionDigits: k })
+  function hesapla() {
+    const gn = deg('#fl-gn'), iso = deg('#fl-iso'), guc = deg('#fl-guc'), kayip = deg('#fl-deg'), m = Math.max(0.3, deg('#fl-m')), N = deg('#fl-n')
+    const etkin = gn * Math.sqrt(iso / 100) * Math.sqrt(guc) / Math.sqrt(2 ** kayip)
+    const gerekenN = etkin / m, enUzak = etkin / N
+    const fark = Math.log2((gerekenN / N) ** 2) // + ise fazla ışık (stop)
+    const oneri = Math.abs(fark) < 0.34 ? 'Pozlama doğru' : fark > 0 ? `${v(fark)} stop fazla ışık: gücü ${Math.max(1, Math.round(fark))} kademe düşür ya da diyaframı kıs` : `${v(-fark)} stop eksik: gücü artır, ISO'yu yükselt ya da yaklaş`
+    $('[data-sonuc]').innerHTML = `<div class="arac-ikili">
+        <div class="arac-buyuk"><span class="label">${v(m)} m için diyafram</span><b>f/${v(yakin(gerekenN))}</b><span class="meta">hesap: f/${v(gerekenN)}</span></div>
+        <div class="arac-buyuk"><span class="label">f/${String(N).replace('.', ',')} ile en uzak</span><b>${v(enUzak)} m</b><span class="meta">bu mesafeden ötesi karanlık kalır</span></div>
+        <div class="arac-buyuk"><span class="label">Etkin kılavuz sayısı</span><b>${v(etkin)}</b><span class="meta">ISO, güç ve değiştirici dahil</span></div>
+      </div><p class="meta" style="text-transform:none;letter-spacing:0;font-size:14px">${oneri}.</p>`
+  }
+  document.querySelector('[data-flas]')!.addEventListener('input', hesapla)
+  hesapla()
+</script>

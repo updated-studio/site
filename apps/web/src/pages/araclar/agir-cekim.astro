@@ -1,0 +1,49 @@
+---
+/** Kare hızı ve ağır çekim (toplantı notu 30 Ekim 2026, araç 9): çekim fps + oynatma fps → yavaşlama, klip süresi, 180° enstantane, ışık kaybı. */
+import AracSayfa from '../../components/AracSayfa.astro'
+const CEKIM = [24, 25, 30, 48, 50, 60, 100, 120, 240, 960]
+const OYNAT = [24, 25, 30, 60]
+---
+<AracSayfa yol="/araclar/agir-cekim" baslik="Ağır çekim hesaplayıcı" lead="Kaç fps çekip kaç fps oynatacağını seç; videonun kaç kat yavaşlayacağını, olayın ne kadar süreceğini, doğru enstantaneyi ve ışık kaybını gör."
+  aciklama="Ağır çekim (slow motion) ve kare hızı hesaplayıcı: 50, 60, 120, 240 fps için yavaşlama oranı, klip süresi, 180 derece kuralına göre enstantane ve ışık kaybı. Ücretsiz.">
+  <form class="arac-form" data-ac onsubmit="return false">
+    <label for="ac-cek">Çekim kare hızı<select id="ac-cek">{CEKIM.map((f) => <option value={f} selected={f === 120}>{f} fps</option>)}</select></label>
+    <label for="ac-oyn">Oynatma (zaman çizelgesi)<select id="ac-oyn">{OYNAT.map((f) => <option value={f} selected={f === 25}>{f} fps</option>)}</select></label>
+    <label for="ac-sure">Gerçek olayın süresi (saniye)<input id="ac-sure" type="number" min="0.1" step="0.1" value="3" inputmode="decimal" /></label>
+  </form>
+  <div class="ac-zaman" aria-hidden="true"><div><span>Gerçek</span><i data-ac-g></i></div><div><span>Ekranda</span><i data-ac-e></i></div></div>
+  <div class="arac-sonuc" data-sonuc aria-live="polite"></div>
+  <Fragment slot="nasil">
+    <h2>Ağır çekim nasıl çalışır?</h2>
+    <p>Ağır çekim, oynatacağından daha yüksek kare hızında çekmektir. 120 fps çekip 25 fps'lik bir zaman çizelgesinde oynatırsan her saniye 4,8 kat uzar: 3 saniyelik bir sıçrama ekranda 14,4 saniye sürer. Oran = çekim fps ÷ oynatma fps.</p>
+    <p>Türkiye'de televizyon ve çoğu kurgu PAL sistemine göre 25 fps'dir; bu durumda 50 fps 2×, 100 fps 4× ağır çekim verir. Elektrik şebekesi 50 Hz olduğundan iç mekân ışıklarında titreme olmaması için de 25, 50, 100 fps tercih edilir (60 ve 120 fps'de bazı LED ve floresanlar titrer).</p>
+    <p>Hareket bulanıklığının doğal görünmesi için enstantaneyi kare hızının iki katının tersine ayarla (180° kuralı): 120 fps'de 1/240 sn. Kare hızı arttıkça her kareye düşen ışık azalır; 25 fps'den 100 fps'e çıkmak 2 stop ışık kaybettirir.</p>
+  </Fragment>
+</AracSayfa>
+<style is:global>
+  .ac-zaman{display:flex;flex-direction:column;gap:10px}
+  .ac-zaman > div{display:grid;grid-template-columns:84px minmax(0,1fr);gap:12px;align-items:center;font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3)}
+  .ac-zaman i{display:block;height:14px;border-radius:7px;transition:width var(--t2) var(--ease)}
+  [data-ac-g]{background:var(--text-3)}
+  [data-ac-e]{background:var(--blue)}
+  [data-sonuc] .arac-ikili{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+  [data-sonuc] .arac-buyuk b{font-size:clamp(24px,3vw,32px)}
+</style>
+<script>
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!
+  const v = (n: number, k = 1) => n.toLocaleString('tr-TR', { maximumFractionDigits: k })
+  const ens = (fps: number) => { const t = 1 / (2 * fps), std = [1 / 50, 1 / 60, 1 / 100, 1 / 125, 1 / 200, 1 / 250, 1 / 500, 1 / 1000, 1 / 2000]; return `1/${Math.round(1 / std.reduce((a, b) => (Math.abs(Math.log(b / t)) < Math.abs(Math.log(a / t)) ? b : a)))}` }
+  function hesapla() {
+    const cek = Number($<HTMLSelectElement>('#ac-cek').value), oyn = Number($<HTMLSelectElement>('#ac-oyn').value), s = Math.max(0.1, Number($<HTMLInputElement>('#ac-sure').value) || 1)
+    const oran = cek / oyn, ekran = s * oran, kayip = Math.log2(cek / oyn), titrer = cek % 50 !== 0 && cek % 25 !== 0
+    $('[data-ac-g]').style.width = `${Math.max(2, (s / ekran) * 100)}%`; $('[data-ac-e]').style.width = '100%'
+    $('[data-sonuc]').innerHTML = `<div class="arac-ikili">
+        <div class="arac-buyuk"><span class="label">Yavaşlama</span><b>${oran < 1 ? `${v(1 / oran)}× hızlı` : `${v(oran)}×`}</b><span class="meta">${cek} fps → ${oyn} fps</span></div>
+        <div class="arac-buyuk"><span class="label">Ekranda süre</span><b>${v(ekran)} sn</b><span class="meta">gerçekte ${v(s)} sn</span></div>
+        <div class="arac-buyuk"><span class="label">Enstantane (180°)</span><b>${ens(cek)} sn</b><span class="meta">tam değer 1/${2 * cek} sn</span></div>
+        <div class="arac-buyuk"><span class="label">Işık kaybı</span><b>${kayip > 0 ? `${v(kayip)} stop` : 'Yok'}</b><span class="meta">${oyn} fps çekime göre</span></div>
+      </div>${titrer ? `<p class="meta" style="text-transform:none;letter-spacing:0;font-size:14px;color:var(--orange-tx)">${cek} fps, Türkiye'nin 50 Hz şebekesiyle uyumsuz: iç mekân ışıkları titreyebilir. 50 ya da 100 fps dene.</p>` : ''}`
+  }
+  document.querySelector('[data-ac]')!.addEventListener('input', hesapla)
+  hesapla()
+</script>

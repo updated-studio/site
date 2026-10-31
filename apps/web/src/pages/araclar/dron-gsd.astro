@@ -1,0 +1,48 @@
+---
+/** Dron GSD hesaplayıcı (toplantı notu 30 Ekim 2026, araç 8): uçuş yüksekliği → yer örnekleme aralığı (cm/piksel), karenin yerde kapladığı alan, istenen GSD için yükseklik. */
+import AracSayfa from '../../components/AracSayfa.astro'
+// [ad, sensör genişliği mm, sensör yüksekliği mm, odak mm (gerçek), görüntü genişliği px, yükseklik px] — üretici verileri ve yaygın hesaplayıcıların kabul ettiği yaklaşık değerler
+const DRON: [string, number, number, number, number, number][] = [
+  ['DJI Mini 4 Pro (12 MP)', 9.6, 7.2, 6.72, 4032, 3024], ['DJI Mini 4 Pro (48 MP)', 9.6, 7.2, 6.72, 8064, 6048], ['DJI Air 3 (geniş, 12 MP)', 9.6, 7.2, 6.72, 4032, 3024],
+  ['DJI Mavic 3 (Hasselblad 4/3)', 17.3, 13, 12.29, 5280, 3956], ['DJI Mavic 3 Enterprise', 17.3, 13, 12.29, 5280, 3956], ['DJI Phantom 4 Pro V2.0', 13.2, 8.8, 8.8, 5472, 3648],
+]
+---
+<AracSayfa yol="/araclar/dron-gsd" baslik="Dron GSD hesaplayıcı" lead="Dronunu ve uçuş yüksekliğini seç; bir pikselin yerde kaç santimetreye denk geldiğini (GSD) ve tek karenin kapladığı alanı gör. Haritalama ve ölçüm uçuşlarını planla."
+  aciklama="Dron GSD (yer örnekleme aralığı) hesaplayıcı: DJI Mini, Air, Mavic ve Phantom için uçuş yüksekliğine göre cm/piksel, kare alanı ve hedef GSD için yükseklik. Ücretsiz.">
+  <form class="arac-form" data-gsd onsubmit="return false">
+    <label for="gs-dron">Dron / kamera<select id="gs-dron">{DRON.map(([ad, ...d]) => <option value={d.join('x')}>{ad}</option>)}</select></label>
+    <label for="gs-h">Uçuş yüksekliği (metre)<input id="gs-h" type="number" min="5" max="500" value="100" inputmode="numeric" /></label>
+    <label for="gs-hedef">Hedef GSD (cm/piksel)<input id="gs-hedef" type="number" min="0.2" max="20" step="0.1" value="2" inputmode="decimal" /></label>
+  </form>
+  <input class="ad-kaydir" type="range" min="10" max="150" value="100" data-gs-kaydir aria-label="Uçuş yüksekliği (kaydır)" />
+  <div class="arac-sonuc" data-sonuc aria-live="polite"></div>
+  <Fragment slot="nasil">
+    <h2>GSD nedir?</h2>
+    <p>Yer örnekleme aralığı (GSD, ground sample distance), fotoğraftaki iki piksel merkezi arasındaki mesafenin yerdeki karşılığıdır. GSD 2 cm/piksel ise yerdeki 2 cm'lik bir ayrıntı tek pikselde toplanır; bundan küçük şeyler ayırt edilemez. Ölçüm, haritalama ve 3B model için GSD ne kadar küçükse o kadar ayrıntı vardır.</p>
+    <p>Formül: <b>GSD = (sensör genişliği × uçuş yüksekliği) ÷ (odak uzaklığı × görüntü genişliği)</b>. Yükseklik iki katına çıkınca GSD de iki katına çıkar; daha geniş alan taranır ama ayrıntı azalır. Haritalamada karelerin %70-80 üst üste binmesi önerilir.</p>
+    <p>Uçmadan önce kurallara bak: Türkiye'de insansız hava aracı uçuşları SHGM'nin İHA talimatına bağlıdır; 250 gramı aşan dronlar kayıt gerektirir, yasaklı bölgeler ve yükseklik sınırları vardır. Bu araç yalnız hesap yapar, uçuş izni yerine geçmez.</p>
+  </Fragment>
+</AracSayfa>
+<style is:global>
+  .ad-kaydir{width:100%;accent-color:var(--blue)}
+  [data-sonuc] .arac-ikili{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+  [data-sonuc] .arac-buyuk b{font-size:clamp(24px,3vw,32px)}
+</style>
+<script>
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!
+  const v = (n: number, k = 1) => n.toLocaleString('tr-TR', { maximumFractionDigits: k })
+  const hIn = $<HTMLInputElement>('#gs-h'), kay = $<HTMLInputElement>('[data-gs-kaydir]')
+  function hesapla() {
+    const [sw, sh, f, iw, ih] = $<HTMLSelectElement>('#gs-dron').value.split('x').map(Number), H = Math.max(1, Number(hIn.value) || 100), hedef = Number($<HTMLInputElement>('#gs-hedef').value) || 2
+    const gsd = (sw * H * 100) / (f * iw), alanG = (gsd * iw) / 100, alanY = (gsd * ih) / 100, hedefH = (hedef * f * iw) / (sw * 100)
+    $('[data-sonuc]').innerHTML = `<div class="arac-ikili">
+        <div class="arac-buyuk"><span class="label">GSD</span><b>${v(gsd, 2)} cm/piksel</b><span class="meta">${v(H, 0)} m yükseklikte</span></div>
+        <div class="arac-buyuk"><span class="label">Tek karenin alanı</span><b>${v(alanG, 0)} × ${v(alanY, 0)} m</b><span class="meta">${v((alanG * alanY) / 10000, 2)} hektar</span></div>
+        <div class="arac-buyuk"><span class="label">${v(hedef)} cm/piksel için</span><b>${v(hedefH, 0)} m</b><span class="meta">en fazla bu yükseklikte uç</span></div>
+      </div>`
+  }
+  hIn.addEventListener('input', () => { kay.value = hIn.value; hesapla() })
+  kay.addEventListener('input', () => { hIn.value = kay.value; hesapla() })
+  document.querySelector('[data-gsd]')!.addEventListener('input', hesapla)
+  hesapla()
+</script>

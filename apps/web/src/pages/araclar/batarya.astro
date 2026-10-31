@@ -1,0 +1,57 @@
+---
+/** Batarya ömrü (toplantı notu 30 Ekim 2026, araç 10): üreticinin bir pille verdiği süreden yola çıkıp yedek pil, soğuk hava, pil yaşı ve powerbank ile toplam çekim süresi. */
+import AracSayfa from '../../components/AracSayfa.astro'
+// [ad, bir pille video dk (üreticinin CIPA ya da yaklaşık kayıt süresi), pil Wh]
+const CIHAZ: [string, number, number][] = [
+  ['Aynasız, büyük pil (Sony NP-FZ100 vb.)', 120, 16.4], ['Aynasız, orta pil (Canon LP-E6NH vb.)', 90, 16], ['Aynasız, küçük pil (Fujifilm NP-W126S vb.)', 50, 8.7],
+  ['Aksiyon kamera (GoPro, Osmo Action)', 75, 6.5], ['360 kamera (Insta360 X serisi)', 80, 8.6], ['Cep gimbal kamera (Osmo Pocket)', 140, 5.1], ['Dron, mini sınıf (uçuş)', 30, 19.1], ['Kendi değerimi gireceğim', 60, 15],
+]
+---
+<AracSayfa yol="/araclar/batarya" baslik="Batarya ömrü hesaplayıcı" lead="Cihazını ve kaç yedek pilin olduğunu seç; soğuk havayı ve pilin yaşını hesaba katarak toplam ne kadar çekim yapabileceğini, powerbank'in kaç şarj vereceğini gör."
+  aciklama="Kamera ve dron batarya ömrü hesaplayıcı: yedek pil, soğuk hava, pil yaşı ve powerbank ile toplam kayıt ve uçuş süresi. Ücretsiz.">
+  <form class="arac-form" data-bt onsubmit="return false">
+    <label for="bt-cihaz">Cihaz<select id="bt-cihaz">{CIHAZ.map(([ad, dk, wh]) => <option value={`${dk}x${wh}`}>{ad}</option>)}</select></label>
+    <label for="bt-dk">Bir pille süre (dakika)<input id="bt-dk" type="number" min="5" max="600" value="120" inputmode="numeric" /></label>
+    <label for="bt-adet">Pil sayısı (takılı olan dahil)<input id="bt-adet" type="number" min="1" max="20" value="3" inputmode="numeric" /></label>
+    <label for="bt-isi">Hava sıcaklığı<select id="bt-isi"><option value="1">15 °C ve üstü</option><option value="0.9">5 – 15 °C</option><option value="0.75">-5 – 5 °C</option><option value="0.55">-5 °C altı</option></select></label>
+    <label for="bt-yas">Pillerin durumu<select id="bt-yas"><option value="1">Yeni (1 yıldan az)</option><option value="0.9">1-2 yıllık</option><option value="0.8">2 yıldan eski</option></select></label>
+    <label for="bt-pb">Powerbank (mAh, 0 = yok)<input id="bt-pb" type="number" min="0" step="1000" value="20000" inputmode="numeric" /></label>
+  </form>
+  <div class="bt-piller" data-bt-piller aria-hidden="true"></div>
+  <div class="arac-sonuc" data-sonuc aria-live="polite"></div>
+  <Fragment slot="nasil">
+    <h2>Gerçek pil süresi neden kutudakinden kısa?</h2>
+    <p>Üreticilerin verdiği süreler (CIPA standardı) oda sıcaklığında, yeni pille ve belli bir kullanım düzeniyle ölçülür. Sahada ekranı açık tutmak, sabitlemeyi açmak, 4K 60p çekmek ya da kablosuz bağlantı süreyi kısaltır; bu yüzden "bir pille süre"yi kendi deneyimine göre düzelt.</p>
+    <p>Lityum iyon piller soğukta kimyasal olarak yavaşlar: 0 °C civarında kapasitenin dörtte biri, sıfırın altında yarıya yakını kaybolabilir. Yedek pilleri iç cebinde, vücut ısısında taşı; ısınınca kaybettikleri kapasitenin çoğu geri gelir. Pil yaşlandıkça (300-500 şarj döngüsü sonra) kapasite %80'e iner.</p>
+    <p>Powerbank hesabı: mAh değeri 3,7 V üzerinden verilir; çevrim kaybıyla gerçekte enerjinin %65'i cihaza ulaşır. 20.000 mAh'lik bir powerbank yaklaşık 48 Wh verir.</p>
+  </Fragment>
+</AracSayfa>
+<style is:global>
+  .bt-piller{display:flex;flex-wrap:wrap;gap:8px}
+  .bt-pil{position:relative;width:46px;height:22px;border:2px solid var(--text-3);border-radius:5px;padding:2px}
+  .bt-pil::after{content:"";position:absolute;right:-6px;top:6px;width:4px;height:7px;border-radius:0 2px 2px 0;background:var(--text-3)}
+  .bt-pil i{display:block;height:100%;border-radius:2px;background:var(--blue)}
+  .bt-pil.pb{width:62px;border-color:var(--orange)}.bt-pil.pb i{background:var(--orange)}
+  [data-sonuc] .arac-ikili{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+  [data-sonuc] .arac-buyuk b{font-size:clamp(24px,3vw,32px)}
+</style>
+<script>
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!
+  const n = (s: string) => Number($<HTMLInputElement | HTMLSelectElement>(s).value) || 0
+  const sure = (dk: number) => (dk < 60 ? `${Math.round(dk)} dk` : `${Math.floor(dk / 60)} sa ${Math.round(dk % 60)} dk`)
+  const cihaz = $<HTMLSelectElement>('#bt-cihaz')
+  cihaz.addEventListener('change', () => { $<HTMLInputElement>('#bt-dk').value = cihaz.value.split('x')[0] })
+  function hesapla() {
+    const wh = Number(cihaz.value.split('x')[1]), dk = Math.max(1, n('#bt-dk')), adet = Math.max(1, n('#bt-adet')), isi = n('#bt-isi'), yas = n('#bt-yas'), pb = n('#bt-pb')
+    const pilDk = dk * isi * yas, toplam = pilDk * adet, pbWh = (pb * 3.7) / 1000 * 0.65, pbSarj = pbWh / wh, pbDk = pbSarj * dk * yas
+    $('[data-bt-piller]').innerHTML = Array.from({ length: Math.min(adet, 12) }, () => `<span class="bt-pil"><i style="width:${Math.round(isi * yas * 100)}%"></i></span>`).join('') + (pb ? `<span class="bt-pil pb" title="Powerbank"><i style="width:${Math.min(100, Math.round(pbSarj * 25))}%"></i></span>` : '')
+    $('[data-sonuc]').innerHTML = `<div class="arac-ikili">
+        <div class="arac-buyuk"><span class="label">Toplam süre (piller)</span><b>${sure(toplam)}</b><span class="meta">pil başına ${sure(pilDk)}</span></div>
+        <div class="arac-buyuk"><span class="label">Powerbank ile</span><b>${pb ? sure(toplam + pbDk) : '—'}</b><span class="meta">${pb ? `~${pbSarj.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} pil şarjı (${Math.round(pbWh)} Wh kullanılabilir)` : 'powerbank girilmedi'}</span></div>
+        <div class="arac-buyuk"><span class="label">Kayıp</span><b>%${Math.round((1 - isi * yas) * 100)}</b><span class="meta">soğuk hava ve pil yaşı yüzünden</span></div>
+      </div>`
+  }
+  document.querySelector('[data-bt]')!.addEventListener('input', hesapla)
+  cihaz.addEventListener('change', hesapla)
+  hesapla()
+</script>

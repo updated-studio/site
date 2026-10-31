@@ -1,0 +1,56 @@
+---
+/** Makro hesaplayıcı (toplantı notu 30 Ekim 2026, araç 7): büyütme oranı, uzatma tüpü etkisi, kadraja giren alan, etkin diyafram ve ışık kaybı, alan derinliği. */
+import AracSayfa from '../../components/AracSayfa.astro'
+const SENSOR: [string, number, number][] = [['Full frame', 36, 24], ['APS-C', 23.5, 15.6], ['APS-C (Canon)', 22.3, 14.9], ['Micro Four Thirds', 17.3, 13], ['1 inç', 13.2, 8.8]]
+// [ad, odak mm, en büyük büyütme]
+const LENS: [string, number, number][] = [['100 mm makro (1:1)', 100, 1], ['90 mm makro (1:1)', 90, 1], ['60 mm makro (1:1)', 60, 1], ['50 mm normal lens', 50, 0.15], ['24-70 mm, 70 mm ucu', 70, 0.25], ['Laowa 2,5-5× ultra makro', 25, 2.5]]
+---
+<AracSayfa yol="/araclar/makro" baslik="Makro hesaplayıcı" lead="Lensini, uzatma tüpünü ve sensörünü seç; büyütme oranını, kadraja ne kadar alan sığdığını, etkin diyaframı ve alan derinliğini gör."
+  aciklama="Makro fotoğraf hesaplayıcı: büyütme oranı (1:1, 2:1), uzatma tüpü etkisi, kadraj genişliği, etkin diyafram, ışık kaybı ve makroda alan derinliği. Ücretsiz.">
+  <form class="arac-form" data-makro onsubmit="return false">
+    <label for="mk-sensor">Sensör<select id="mk-sensor">{SENSOR.map(([ad, w, h]) => <option value={`${w}x${h}`}>{ad}</option>)}</select></label>
+    <label for="mk-lens">Lens<select id="mk-lens">{LENS.map(([ad, f, m]) => <option value={`${f}x${m}`}>{ad}</option>)}</select></label>
+    <label for="mk-tup">Uzatma tüpü (toplam mm)<select id="mk-tup">{[0, 10, 16, 21, 26, 31, 36, 47, 57, 68].map((t) => <option value={t}>{t ? `${t} mm` : 'Yok'}</option>)}</select></label>
+    <label for="mk-n">Diyafram<select id="mk-n">{['2.8', '4', '5.6', '8', '11', '16'].map((n) => <option value={n} selected={n === '8'}>f/{n.replace('.', ',')}</option>)}</select></label>
+  </form>
+  <div class="mk-olcek" aria-hidden="true"><div class="mk-kadraj" data-mk-kadraj><span data-mk-kadraj-yazi></span></div><div class="mk-cetvel"></div></div>
+  <div class="arac-sonuc" data-sonuc aria-live="polite"></div>
+  <Fragment slot="nasil">
+    <h2>Büyütme oranı nedir?</h2>
+    <p>Büyütme oranı, konunun sensör üzerindeki boyunun gerçek boyuna oranıdır. <b>1:1</b> (1×) demek, 1 cm'lik bir böceğin sensörde de 1 cm yer kaplaması demektir; full frame'de kadraj 36 × 24 mm'lik bir alanı gösterir. Gerçek makro lensler 1:1'e ulaşır; normal lensler çoğunlukla 1:4 civarında kalır.</p>
+    <p><b>Uzatma tüpü</b> lensi sensörden uzaklaştırır ve daha yakına odaklamayı sağlar; ek büyütme yaklaşık tüp uzunluğu ÷ odak uzaklığı kadardır. Kısa odaklı lenste aynı tüp daha çok büyütür. Bedeli ışıktır: büyütme arttıkça etkin diyafram kararır (f × (1 + büyütme)).</p>
+    <p>Makroda alan derinliği milimetrelerle ölçülür; f/16'nın ötesinde kırınım keskinliği düşürür. Derinlik gerekiyorsa birkaç kareyi farklı noktalara odaklayıp birleştir (odak istifleme, focus stacking).</p>
+  </Fragment>
+</AracSayfa>
+<style is:global>
+  .mk-olcek{position:relative;height:200px;border-radius:var(--r-kart,0);background:var(--surface-2);display:grid;place-items:center;overflow:hidden}
+  .mk-kadraj{position:relative;border:2px solid var(--blue);background:rgb(37 99 235 / .12);display:grid;place-items:center;transition:width var(--t2) var(--ease),height var(--t2) var(--ease)}
+  .mk-kadraj span{font-family:var(--f-mono);font-size:12px;color:var(--text);white-space:nowrap;padding:2px 6px;background:var(--surface);border-radius:6px}
+  .mk-cetvel{position:absolute;left:12px;bottom:10px;width:100px;height:8px;border:1px solid var(--text-3);border-top:0}
+  .mk-cetvel::after{content:"1 cm";position:absolute;left:0;bottom:10px;font-family:var(--f-mono);font-size:11px;color:var(--text-3)}
+  [data-sonuc] .arac-ikili{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+  [data-sonuc] .arac-buyuk b{font-size:clamp(24px,3vw,32px)}
+</style>
+<script>
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!
+  const v = (n: number, k = 1) => n.toLocaleString('tr-TR', { maximumFractionDigits: k })
+  const oran = (m: number) => (m >= 1 ? `${v(m, 2)}:1` : `1:${v(1 / m, 1)}`)
+  function hesapla() {
+    const [w, h] = $<HTMLSelectElement>('#mk-sensor').value.split('x').map(Number), [f, m0] = $<HTMLSelectElement>('#mk-lens').value.split('x').map(Number)
+    const tup = Number($<HTMLSelectElement>('#mk-tup').value), N = Number($<HTMLSelectElement>('#mk-n').value)
+    const m = m0 + tup / f, kw = w / m, kh = h / m, etkin = N * (1 + m), kayip = 2 * Math.log2(1 + m)
+    const c = Math.hypot(w, h) / 1500, dof = (2 * N * c * (1 + m)) / (m * m) // mm
+    // Ölçek: 100 px = 1 cm; kadraj kutusu bu ölçekte (sığmazsa sınırlanır)
+    const kut = $('[data-mk-kadraj]'), px = 10 // px/mm
+    kut.style.width = `${Math.min(kw * px, 640)}px`; kut.style.height = `${Math.min(kh * px, 190)}px`
+    $('[data-mk-kadraj-yazi]').textContent = `${v(kw)} × ${v(kh)} mm`
+    $('[data-sonuc]').innerHTML = `<div class="arac-ikili">
+        <div class="arac-buyuk"><span class="label">Büyütme oranı</span><b>${oran(m)}</b><span class="meta">${tup ? `tüp ${v(tup / f, 2)}× ekledi` : 'lensin en yakın odağında'}</span></div>
+        <div class="arac-buyuk"><span class="label">Kadraja giren alan</span><b>${v(kw)} × ${v(kh)} mm</b><span class="meta">${kw < 15 ? 'bir karıncanın başı kadar' : kw < 40 ? 'bir pul kadar' : kw < 90 ? 'bir kredi kartı kadar' : 'avuç içi ve üstü'}</span></div>
+        <div class="arac-buyuk"><span class="label">Etkin diyafram</span><b>f/${v(etkin)}</b><span class="meta">${v(kayip)} stop ışık kaybı${etkin > 22 ? ', kırınım keskinliği düşürür' : ''}</span></div>
+        <div class="arac-buyuk"><span class="label">Alan derinliği</span><b>${dof < 1 ? `${v(dof * 1000, 0)} µm` : `${v(dof)} mm`}</b><span class="meta">netlik bu kadar ince bir dilim</span></div>
+      </div>`
+  }
+  document.querySelector('[data-makro]')!.addEventListener('input', hesapla)
+  hesapla()
+</script>
