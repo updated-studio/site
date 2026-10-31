@@ -53,6 +53,8 @@
 
 ## Günlük (en yeni üstte)
 
+- **31 Ekim 2026 22:00 · Kategori şeridindeki İncelemeler/Rehber geri alındı** (kullanıcı: istenen ana sayfada bölümdü, şerit değil). İkisi ana sayfada 05/06 bölüm olarak duruyor.
+
 - **31 Ekim 2026 21:45 · Platform logoları (kullanıcı önerisi).** Manşet yanındaki bölüm "Son videolar" → Instagram logosuyla "Reels" (Reels yoksa YouTube logosuyla "Shorts"); video duvarı "Video haberler" → YouTube logosuyla "Videolar" (`lib/ui.ts` `logoInstagram`, `logoYoutube`).
 
 - **31 Ekim 2026 21:30 · Kategori şeridine İncelemeler ve Rehber (kullanıcı: "menüye ekle").** Tümü'nün yanında turuncu yazılı iki bölüm, kategorilerden ince çizgiyle ayrı; açık olan sayfada turuncu dolgu (`Header.astro`, `cam.css` `.ks-bolum`).

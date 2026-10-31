@@ -38,10 +38,6 @@ const DILLER: [string, string][] = [['en', 'English'], ['de', 'Deutsch'], ['ru',
   {/* Kategori şeridi (30 Ekim 2026, kullanıcı: "üst barın altında kategoriler her zaman, mobilde de bilgisayarda da"): üst menüyle birlikte yapışık */}
   {kategoriler.length > 0 && <nav class="kat-serit" aria-label="Kategoriler"><div class="wrap">
     <a href="/haberler" aria-current={current.startsWith('/haberler') ? 'page' : undefined}><span>Tümü</span></a>
-    {/* İncelemeler ve Rehber şeritte ayrı bölüm (31 Ekim 2026, kullanıcı: "menüye ekle"); kategorilerden ince çizgiyle ayrılır */}
-    <a class="ks-bolum" href="/inceleme" aria-current={current.startsWith('/inceleme') ? 'page' : undefined}><span>İncelemeler</span></a>
-    <a class="ks-bolum" href="/rehber" aria-current={current.startsWith('/rehber') ? 'page' : undefined}><span>Rehber</span></a>
-    <i class="ks-ayrac" aria-hidden="true"></i>
     {kategoriler.map((c) => <a href={`/${c.slug}`} aria-current={current === `/${c.slug}` || current.startsWith(`/${c.slug}/`) ? 'page' : undefined}><span>{c.name}</span></a>)}
   </div></nav>}
 </header>
