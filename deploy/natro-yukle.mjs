@@ -51,20 +51,27 @@ for (const k of process.env.YEDEK === '0' ? [] : cakisan) {
   lftp(`get "${k}" -o "${yerel}"; put "${yerel}" -o "${k}.wp-yedek"`)
   console.log(`yedeklendi: ${k} → ${k}.wp-yedek`)
 }
-const removed = Object.keys(old).filter((k) => !(k in now) && k !== MAN)
-console.log(`Toplam ${Object.keys(now).length} dosya · değişen ${changed.length} · silinecek ${removed.length}`)
+// Eski stil/betik dosyaları (_astro/) hemen silinmez: önbellekteki eski sayfa onlara bağlı, silinirse yenileyen okur tasarımsız sayfa görür
+// (31 Ekim 2026, kullanıcı: "reklam alanları yeniledikçe gelip gidiyor"). Manifestte "eski:<zaman>" olarak 1 saat tutulur, sonra silinir.
+const SAKLA = 3600e3, simdi = Date.now()
+const bekleyen = {}
+const removed = Object.keys(old).filter((k) => !(k in now) && k !== MAN).filter((k) => {
+  if (!k.startsWith('_astro/')) return true
+  const t = String(old[k]).startsWith('eski:') ? Number(String(old[k]).slice(5)) : simdi
+  if (simdi - t >= SAKLA) return true
+  bekleyen[k] = `eski:${t}`; return false
+})
+console.log(`Toplam ${Object.keys(now).length} dosya · değişen ${changed.length} · silinecek ${removed.length} · bekletilen eski varlık ${Object.keys(bekleyen).length}`)
 
-const STAGE = join(TMP, 'gonder')
-for (const k of changed) { mkdirSync(dirname(join(STAGE, k)), { recursive: true }); copyFileSync(join(DIST, k), join(STAGE, k)) }
-// Önce görseller ve varlıklar, en son sayfalar ve .htaccess: yarım yüklemede kırık sayfa kalmasın.
-if (changed.length) {
-  const hasHt = changed.includes('.htaccess'); if (hasHt) rmSync(join(STAGE, '.htaccess'))
-  lftp(`mirror -R --parallel=4 --no-perms ${STAGE} .`)
-  if (hasHt) lftp(`put -O . ${join(DIST, '.htaccess')}`)
-}
+// İki geçiş: önce görseller, stil ve betikler; sonra sayfalar (.html); en son .htaccess. Yeni sayfa, stili sunucuya varmadan yayına çıkmasın.
+const STAGE = join(TMP, 'gonder'), SAYFA = join(TMP, 'sayfa')
+for (const k of changed) { if (k === '.htaccess') continue; const h = k.endsWith('.html') ? SAYFA : STAGE; mkdirSync(dirname(join(h, k)), { recursive: true }); copyFileSync(join(DIST, k), join(h, k)) }
+if (existsSync(STAGE)) lftp(`mirror -R --parallel=4 --no-perms ${STAGE} .`)
+if (existsSync(SAYFA)) lftp(`mirror -R --parallel=4 --no-perms ${SAYFA} .`)
+if (changed.includes('.htaccess')) lftp(`put -O . ${join(DIST, '.htaccess')}`)
 if (removed.length) {
   for (let i = 0; i < removed.length; i += 200) lftp(removed.slice(i, i + 200).map((k) => `rm -f "${k.replace(/"/g, '')}"`).join('; '))
 }
-writeFileSync(join(TMP, MAN), JSON.stringify(now))
+writeFileSync(join(TMP, MAN), JSON.stringify({ ...now, ...bekleyen }))
 lftp(`put -O . ${join(TMP, MAN)}`)
 console.log('Yükleme tamam.')

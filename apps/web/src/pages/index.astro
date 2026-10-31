@@ -22,8 +22,8 @@ import * as api from '../lib/api'
 import type { News } from '../lib/types'
 import '../styles/kiyas.css'
 
-const [home, latest, reviews, videos, reels, ads, radar, products, site, youtube, katalog, kategoriler, gorevler] = await Promise.all([
-  api.getHome(), api.getLatest(1, 40), api.getReviews(1, 4), api.getVideos(), api.getReels(), api.getAds(), api.getRadar(), api.getProducts(12), api.getSite(), api.getYoutube(), api.kunyeKatalog(), api.getCategories(), api.getGorevler(),
+const [home, latest, reviews, incHaber, rehber, videos, reels, ads, radar, products, site, youtube, katalog, kategoriler, gorevler] = await Promise.all([
+  api.getHome(), api.getLatest(1, 40), api.getReviews(1, 4), api.getIncelemeHaberleri(8), api.getRehber(8), api.getVideos(), api.getReels(), api.getAds(), api.getRadar(), api.getProducts(12), api.getSite(), api.getYoutube(), api.kunyeKatalog(), api.getCategories(), api.getGorevler(),
 ])
 // Videolar: kısa olanlar "Son videolar" sütununa (Instagram Reels yoksa), uzunlar "Video haberler" duvarına; paneldeki videolar önce
 const shorts = youtube.filter((v) => v.short)
@@ -36,6 +36,7 @@ const kullanilan = new Set(secilen.map(anahtar))
 const slides = [...secilen, ...latest.filter((n) => !kullanilan.has(anahtar(n)))].slice(0, 13)
 slides.forEach((s) => kullanilan.add(anahtar(s)))
 const rest = latest.filter((n) => !kullanilan.has(anahtar(n)))
+const incelemeler = [...reviews, ...incHaber.filter((n) => n.label !== 'rehber')].slice(0, 4)
 // Bölüm numaraları basılan sıraya göre (veri olmayan bölüm atlanır, numara boşluk bırakmaz)
 let sayac = 0
 const no = () => String(++sayac).padStart(2, '0')
@@ -49,6 +50,10 @@ const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşıla�
     <div class="wrap"><Manset slides={slides} reels={m.reels ? reels : []} shorts={shorts} ad={api.pickAd(ads, 'hp')} instagram={site.instagram} youtube={site.youtube} /></div>
   </section>
   <Ad slot="lb" ad={api.pickAd(ads, 'lb')} />
+
+  {/* Video haberler manşetin hemen altında (31 Ekim 2026, kullanıcı: "video kısmı çok altta kalmış") */}
+  {m.videolar && uzun.length > 0 && <section class="sec"><div class="wrap"><VideoDuvar videos={uzun} channel={site.youtube} /></div></section>}
+
 
   {/* Sıra (31 Ekim 2026, kullanıcı onayı): günün haberleri manşetin hemen altında; sonra 60 saniye, videolar, kıyas, künyeler, araçlar, kulüp */}
   <section class="sec"><div class="wrap with-rail">
@@ -67,13 +72,17 @@ const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşıla�
 
   {m.altmisSaniye && <section class="sec ana-60"><div class="wrap"><Altmis items={latest} no={no()} /></div></section>}
 
-  {m.videolar && uzun.length > 0 && <section class="sec"><div class="wrap"><VideoDuvar videos={uzun} channel={site.youtube} /></div></section>}
-
   <Ad slot="lb" ad={api.pickAd(ads, 'lb', 1)} />
 
-  {reviews.length > 0 && <section class="sec"><div class="wrap">
+  {/* İncelemeler ve Rehber ayrı bölümler (31 Ekim 2026, kullanıcı): puanlı inceleme azken başlığında "inceleme" geçen yazılar tamamlar */}
+  {incelemeler.length > 0 && <section class="sec"><div class="wrap">
     <div class="sh"><h2><span class="no">{no()}</span>İncelemeler</h2><a class="btn-t btn" href="/inceleme">Tümü</a></div>
-    <div class="grid4">{reviews.slice(0, 4).map((r) => <CardStd item={r} />)}</div>
+    <div class="grid4">{incelemeler.map((r) => <CardStd item={r} />)}</div>
+  </div></section>}
+
+  {rehber.length > 0 && <section class="sec"><div class="wrap">
+    <div class="sh"><h2><span class="no">{no()}</span>Rehber</h2><a class="btn-t btn" href="/rehber">Tümü</a></div>
+    <div class="grid4">{rehber.slice(0, 4).map((n) => <CardStd item={n} />)}</div>
   </div></section>}
 
   {katalog.length >= 2 && <section class="sec"><div class="wrap"><KiyasBaslat katalog={katalog} no={no()} /></div></section>}

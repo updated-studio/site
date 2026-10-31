@@ -7,6 +7,7 @@ import Base from '../../layouts/Base.astro'
 import Img from '../../components/Img.astro'
 import Ad from '../../components/Ad.astro'
 import VideoDuvar from '../../components/VideoDuvar.astro'
+import CardStd from '../../components/CardStd.astro'
 import * as api from '../../lib/api'
 import { listMeta } from '../../lib/seo'
 import { turAdi } from '../../lib/turler'
@@ -22,7 +23,7 @@ const duvar = items.filter((r) => !one.includes(r))
 const turler = [...new Set(items.map((r) => r.product?.type).filter(Boolean))] as string[]
 const p20 = (s: number) => Math.round(s)
 // Yazılı inceleme yokken sayfa boş kalmasın: kanaldaki uzun videolar (çoğu inceleme ve kıyas) gösterilir (31 Ekim 2026)
-const [youtube, site] = items.length ? [[], null] : await Promise.all([api.getYoutube(), api.getSite()])
+const [youtube, site, yazilar] = items.length ? [[], null, []] : await Promise.all([api.getYoutube(), api.getSite(), api.getIncelemeHaberleri(24)])
 const videolar = youtube.filter((v) => !v.short)
 ---
 <Base meta={listMeta('İncelemeler', 'Kullanarak test ettiğimiz cihazlar: /20 puan, artılar, eksiler ve kime uygun olduğu.', p > 1 ? `/inceleme/sayfa/${p}` : '/inceleme', items.map((r) => ({ path: r.path, title: r.title })))}>
@@ -34,7 +35,7 @@ const videolar = youtube.filter((v) => !v.short)
         {turler.map((t) => <a href={`#${t}`} data-tur={t}>{turAdi(t)}</a>)}
       </nav>}
     </div>
-    {items.length === 0 ? <div style="padding-bottom:48px"><p class="lead rh-bos" style="margin:0;padding:24px 0 0">İlk incelemeler hazırlanıyor: cihazları kullanarak test ediyoruz, puan /20. O zamana kadar ürünleri <a href="/karsilastirma">Kıyaslamalar</a>'da yan yana koyabilir, <a href="/urun">Künyeler</a>'de teknik verilere bakabilirsin.</p>{videolar.length > 0 && site && <div style="margin-top:40px"><VideoDuvar videos={videolar} channel={site.youtube} baslik="Video incelemeler" /></div>}</div> : <>
+    {items.length === 0 ? <div style="padding-bottom:48px"><p class="lead rh-bos" style="margin:0;padding:24px 0 0">Puanlı incelemeler hazırlanıyor: cihazları kullanarak test ediyoruz, puan /20. Aşağıda şimdiye kadarki inceleme yazılarımız ve videolarımız var; ürünleri <a href="/karsilastirma">Kıyaslamalar</a>'da yan yana da koyabilir, <a href="/urun">Künyeler</a>'de teknik verilere bakabilirsin.</p>{yazilar.length > 0 && <section class="sec" style="padding-bottom:0" aria-label="İnceleme yazıları"><div class="sh"><h2>İnceleme yazıları</h2></div><div class="grid4">{yazilar.map((n) => <CardStd item={n} />)}</div></section>}{videolar.length > 0 && site && <div style="margin-top:40px"><VideoDuvar videos={videolar} channel={site.youtube} baslik="Video incelemeler" /></div>}</div> : <>
       {one.length > 0 && <section class="icl-one" aria-label="Öne çıkan">
         <a class="icl-k buyuk" href={one[0].path} data-tur={one[0].product?.type}>
           {one[0].cover && <Img img={one[0].cover} alt="" eager sizes="(max-width: 900px) 100vw, 800px" />}
