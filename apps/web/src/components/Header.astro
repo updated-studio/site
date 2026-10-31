@@ -9,6 +9,9 @@ const kategoriler = await getCategories() // telefon menüsünde kategoriler (ü
 /** Etkin bölüm: Ana Sayfa yalnız kökte; Kıyaslamalar künye sayfalarını da kapsar */
 const BOLUM: Record<string, string[]> = { '/karsilastirma': ['/karsilastirma', '/urun'] }
 const on = (h: string) => ((h === '/' ? current === '/' : (BOLUM[h] || [h]).some((b) => current.startsWith(b))) ? 'page' : undefined)
+// Dil menüsü (31 Ekim 2026, kullanıcı: "önizleme dili, Google sayfa çevirisi bile yapıyor"): sayfa Google Çeviri'nin ücretsiz sayfa çevirisinde açılır;
+// sunucuya yük yok, arama motorlarına ayrı dil olarak bildirilmez. Gerçek çok dilli site sonraya bırakıldı.
+const DILLER: [string, string][] = [['en', 'English'], ['de', 'Deutsch'], ['ru', 'Русский'], ['es', 'Español'], ['ar', 'العربية'], ['zh-CN', '中文']]
 ---
 <header class="hdr" id="hdr">
   <div class="wrap">
@@ -24,6 +27,9 @@ const on = (h: string) => ((h === '/' ? current === '/' : (BOLUM[h] || [h]).some
     <div class="hdr-r">
       <button class="srch" type="button" data-open-search aria-label="Ara"><Fragment set:html={ico('search')} /><span>Ara</span></button>
       <button class="ibtn" type="button" data-theme-btn aria-label="Görünüm"><Fragment set:html={ico('auto')} /></button>
+      <details class="dil" data-dil><summary class="ibtn" aria-label="Dil / Language" title="Language"><Fragment set:html={ico('dil')} /></summary>
+        <div class="dil-m" role="menu">{DILLER.map(([k, ad]) => <a role="menuitem" href={`https://updated-com-tr.translate.goog/?_x_tr_sl=tr&_x_tr_tl=${k}`} data-dil-kod={k} lang={k} rel="nofollow">{ad}</a>)}<span>Google Translate</span></div>
+      </details>
       <a class="btn btn-p" href="#bulten">Bülten</a>
       <a class="ibtn uye-b" href="/hesap" data-uye-btn aria-label="Uper ol / giriş yap" title="Uper ol / giriş yap"><Fragment set:html={ico('user')} /></a>
       <button class="ibtn menu-b" type="button" data-menu aria-expanded="false" aria-controls="sheet" aria-label="Menü"><Fragment set:html={ico('menu')} /></button>
@@ -35,11 +41,13 @@ const on = (h: string) => ((h === '/' ? current === '/' : (BOLUM[h] || [h]).some
     {kategoriler.map((c) => <a href={`/${c.slug}`} aria-current={current === `/${c.slug}` || current.startsWith(`/${c.slug}/`) ? 'page' : undefined}><span>{c.name}</span></a>)}
   </div></nav>}
 </header>
+<script is:inline>(()=>{document.querySelectorAll('[data-dil-kod]').forEach(a=>{a.href='https://updated-com-tr.translate.goog'+location.pathname+'?_x_tr_sl=tr&_x_tr_tl='+a.dataset.dilKod+'&_x_tr_hl='+a.dataset.dilKod})})()</script>
 <script is:inline>(()=>{const a=document.querySelector('.kat-serit [aria-current=page]');if(!a)return;const w=a.parentElement;w.scrollLeft=a.offsetLeft-(w.clientWidth-a.offsetWidth)/2})()</script>
 <nav class="sheet" id="sheet" aria-label="Mobil menü" hidden>
   {nav.map((n) => <a href={n.href}>{n.label}</a>)}
   <a href={site.kulupUrl}>Kulüp</a>
   <a href="/hesap">Hesabım</a>
   {kategoriler.length > 0 && <div class="sheet-kat"><span class="label">Kategoriler</span>{kategoriler.map((c) => <a href={`/${c.slug}`}>{c.name}</a>)}</div>}
+  <div class="sheet-dil"><span class="label">Language</span>{DILLER.map(([k, ad]) => <a href={`https://updated-com-tr.translate.goog/?_x_tr_sl=tr&_x_tr_tl=${k}`} data-dil-kod={k} lang={k} rel="nofollow">{ad}</a>)}</div>
   <div class="sheet-tema"><span>Görünüm</span><button class="ibtn" type="button" data-theme-btn aria-label="Görünüm"><Fragment set:html={ico('auto')} /></button></div>
 </nav>
