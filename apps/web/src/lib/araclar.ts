@@ -1,5 +1,8 @@
 /** Araçlar (offocus yol haritası 1, 25 Ekim 2026; dolunay, alan derinliği, timelapse 31 Ekim 2026 toplantı notundan): herkese açık hesaplayıcılar; üyelik zorunlu değil. Liste sayfası ve yan menü buradan. */
 export const ARACLAR = [
+  { grup: 'Prodüksiyon', yol: '/araclar/storyboard', ad: 'Storyboard', kisa: 'Storyboard', aciklama: 'Kare kare çekim planı: çizim, plan ölçeği, hareket, süre; PNG olarak indir.' },
+  { grup: 'Prodüksiyon', yol: '/araclar/maliyet', ad: 'Çekim maliyet hesaplayıcı', kisa: 'Maliyet', aciklama: 'Ekip, ekipman, mekân ve kurgu kalemleriyle TL bütçe, pay ve KDV.' },
+  { grup: 'Prodüksiyon', yol: '/araclar/ekipman-listesi', ad: 'Ekipman kontrol listesi', kisa: 'Ekipman listesi', aciklama: 'Çekim türüne göre hazır liste; çıkmadan önce tek tek işaretle.' },
   { grup: 'Planlama', yol: '/araclar/dolunay', ad: 'Dolunay ve ay evresi', kisa: 'Dolunay', aciklama: 'Ay evresi, ilindeki ay doğuşu, sonraki dolunay ve süper ay takvimi.' },
   { grup: 'Lens ve kadraj', yol: '/araclar/alan-derinligi', ad: 'Alan derinliği hesaplayıcı', kisa: 'Alan derinliği', aciklama: 'Netliğin başladığı ve bittiği mesafe, hiperfokal mesafe, kadraj genişliği.' },
   { grup: 'Planlama', yol: '/araclar/timelapse', ad: 'Timelapse hesaplayıcı', kisa: 'Timelapse', aciklama: 'Aralık, kare sayısı, video süresi ve kart alanı; bulut, gün batımı, yıldız ayarları.' },
@@ -17,4 +20,4 @@ export const ARACLAR = [
   { grup: 'Ekipman ve çıktı', yol: '/araclar/sd-kart', ad: 'SD kart kayıt süresi', kisa: 'SD kart', aciklama: 'Kartına kaç dakika video sığar, hangi hız sınıfı gerekir.' },
   { grup: 'Ekipman ve çıktı', yol: '/araclar/baski-boyutu', ad: 'Baskı boyutu hesaplayıcı', kisa: 'Baskı boyutu', aciklama: 'Fotoğrafını kaliteli olarak en fazla kaç santim basabilirsin.' },
 ] as const
-export const GRUPLAR = ['Planlama', 'Pozlama ve ışık', 'Lens ve kadraj', 'Ekipman ve çıktı'] as const
+export const GRUPLAR = ['Prodüksiyon', 'Planlama', 'Pozlama ve ışık', 'Lens ve kadraj', 'Ekipman ve çıktı'] as const

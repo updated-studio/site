@@ -1,0 +1,88 @@
+---
+/**
+ * İşe göre ekipman kontrol listesi (toplantı notu 30 Ekim 2026, araç 14): çekim türü seçilir, hazır liste gelir; işaretler ve eklenen
+ * maddeler tarayıcıda saklanır (Uper hesabına taşınması sonraki adım). Çıkmadan önce "kontrol aşaması": eksik kalanlar üstte toplanır.
+ */
+import AracSayfa from '../../components/AracSayfa.astro'
+// [grup, madde][] — çekim türüne göre hazır liste
+const LISTE: Record<string, { ad: string; m: [string, string][] }> = {
+  roportaj: { ad: 'Röportaj / podcast', m: [['Kamera', 'Ana kamera (A)'], ['Kamera', 'İkinci kamera (B, yan açı)'], ['Kamera', 'Lensler: 24-70 ve 50/85 mm'], ['Ses', 'Yaka mikrofonu (her konuşmacıya bir)'], ['Ses', 'Shotgun ya da masa mikrofonu (yedek ses)'], ['Ses', 'Kulaklık'], ['Işık', 'Ana ışık + softbox'], ['Işık', 'Dolgu ışığı ya da reflektör'], ['Işık', 'Arka plan / saç ışığı'], ['Destek', 'İki tripod'], ['Güç', 'Yedek piller (kamera başına en az 2)'], ['Güç', 'Uzatma kablosu, çoklu priz'], ['Kayıt', 'Boş ve biçimlendirilmiş kartlar'], ['Evrak', 'Konuşmacı izin (rıza) formu']] },
+  dugun: { ad: 'Düğün / etkinlik', m: [['Kamera', 'İki gövde (biri yedek)'], ['Kamera', 'Geniş açı, 24-70, 70-200 mm'], ['Kamera', 'Hızlı sabit lens (35 ya da 50 mm f/1.4-1.8)'], ['Işık', 'Tepe flaşı + yedek flaş'], ['Işık', 'Flaş difüzörü, renk jelleri'], ['Ses', 'Kamera üstü mikrofon'], ['Ses', 'Yaka mikrofonu (nikâh, konuşmalar)'], ['Destek', 'Gimbal'], ['Destek', 'Monopod'], ['Güç', 'Kamera başına 3+ pil, flaşa yedek AA'], ['Güç', 'Powerbank, şarj aletleri'], ['Kayıt', 'Çift kart yuvasına iki kart (yedekli kayıt)'], ['Evrak', 'Program akışı, önemli kişi listesi'], ['Kişisel', 'Su, atıştırmalık, rahat ayakkabı']] },
+  vlog: { ad: 'Vlog / gezi', m: [['Kamera', 'Kamera ya da cep gimbal kamera'], ['Kamera', 'Geniş açı lens'], ['Kamera', 'Aksiyon / 360 kamera'], ['Ses', 'Kablosuz mikrofon seti'], ['Ses', 'Rüzgâr köpüğü (deadcat)'], ['Destek', 'Mini tripod / selfie çubuğu'], ['Destek', 'Gimbal'], ['Filtre', 'ND filtre seti'], ['Güç', 'Powerbank + kablolar'], ['Güç', 'Yedek piller'], ['Kayıt', 'Yedek kart'], ['Kayıt', 'Taşınabilir SSD (gün sonu yedeği)'], ['Evrak', 'Dron izinleri, gerekirse çekim izni']] },
+  urun: { ad: 'Ürün / masa çekimi', m: [['Kamera', 'Kamera + makro ya da 50 mm lens'], ['Destek', 'Tripod, tepeden çekim kolu'], ['Işık', 'İki sürekli ışık + softbox'], ['Işık', 'Reflektör ve siyah bayrak (negatif dolgu)'], ['Sahne', 'Fon kâğıdı / masa yüzeyi'], ['Sahne', 'Toz bezi, eldiven, mikrofiber'], ['Sahne', 'Hamur / yapışkan (ürünü sabitlemek için)'], ['Kayıt', 'Bilgisayara bağlı çekim (tether) kablosu'], ['Güç', 'Yedek piller'], ['Evrak', 'Çekim listesi (açılar, renkler)']] },
+  dron: { ad: 'Dron çekimi', m: [['Dron', 'Dron + kumanda'], ['Dron', 'Yedek pervaneler'], ['Dron', 'ND filtre seti'], ['Güç', 'En az 3 batarya (dolu)'], ['Güç', 'Araç şarj aleti / şarj hub'], ['Kayıt', 'Boş kart + yedek'], ['Evrak', 'SHGM kaydı ve uçuş izni'], ['Evrak', 'Hava durumu ve rüzgâr kontrolü'], ['Evrak', 'Yasak bölge haritası kontrolü'], ['Kişisel', 'Güneşlik / kumanda gölgeliği']] },
+  sokak: { ad: 'Sokak / gezi fotoğrafı', m: [['Kamera', 'Hafif gövde'], ['Kamera', 'Tek sabit lens (28 ya da 35 mm)'], ['Kamera', 'Telefoto zoom (isteğe bağlı)'], ['Güç', 'İki yedek pil'], ['Kayıt', 'Yedek kart'], ['Destek', 'Bilek kayışı'], ['Kişisel', 'Yağmurluk / kamera kılıfı'], ['Kişisel', 'Su, yol haritası']] },
+}
+---
+<AracSayfa yol="/araclar/ekipman-listesi" baslik="Ekipman kontrol listesi" lead="Çekimin türünü seç, hazır listeyi kendine göre düzenle, çıkmadan önce tek tek işaretle. Eksik kalan bir şey varsa en üstte görünür."
+  aciklama="Çekim ekipman kontrol listesi: röportaj, düğün, vlog, ürün, dron ve sokak fotoğrafı için hazır liste, kendi maddelerin, çıkış öncesi kontrol. Ücretsiz.">
+  <div class="el-turler" role="tablist" aria-label="Çekim türü">
+    {Object.entries(LISTE).map(([k, v], i) => <button type="button" role="tab" class="btn" aria-selected={i === 0 ? 'true' : 'false'} data-tur={k}>{v.ad}</button>)}
+  </div>
+  <div class="el-ust">
+    <div class="el-ilerleme" aria-hidden="true"><i data-el-cubuk></i></div>
+    <span class="mono" data-el-sayi aria-live="polite"></span>
+    <button type="button" class="btn" data-el-sifirla>İşaretleri temizle</button>
+  </div>
+  <div data-el-liste class="el-liste"></div>
+  <form class="el-ekle" data-el-ekle>
+    <label for="el-yeni" class="sr">Yeni madde</label><input id="el-yeni" maxlength="80" placeholder="Listeye ekle: ör. Yedek lens kapağı" />
+    <button class="btn" type="submit">Ekle</button>
+  </form>
+  <script type="application/json" data-el-veri set:html={JSON.stringify(LISTE)} />
+  <Fragment slot="nasil">
+    <h2>Neden kontrol listesi?</h2>
+    <p>Çekimlerin çoğu büyük bir hatadan değil, unutulan küçük bir şeyden zarar görür: dolmamış bir pil, evde kalmış bir kart, rüzgâr köpüğü olmadan kaydedilmiş ses. Pilotların uçuş öncesi listesi gibi, çıkmadan önce her maddeyi elle işaretlemek bu riski neredeyse sıfırlar.</p>
+    <p>Hazır listeler başlangıç içindir; kendi ekipmanına göre madde ekle ya da çıkar. Listen ve işaretlerin bu tarayıcıda saklanır, sayfayı kapatıp açınca kaldığın yerden devam edersin.</p>
+  </Fragment>
+</AracSayfa>
+<style is:global>
+  .el-turler{display:flex;flex-wrap:wrap;gap:8px}
+  .el-turler .btn{min-height:40px;font-size:14px}
+  .el-turler .btn[aria-selected=true]{background:var(--text);color:var(--bg);border-color:var(--text)}
+  .el-ust{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .el-ilerleme{flex:1;min-width:140px;height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+  .el-ilerleme i{display:block;height:100%;background:var(--blue);transition:width var(--t2) var(--ease)}
+  .el-liste{display:flex;flex-direction:column;gap:18px}
+  .el-grup h3{margin:0 0 6px;font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3);font-weight:600}
+  .el-grup.eksik h3{color:var(--orange-tx)}
+  .el-grup ul{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+  .el-grup li{display:flex;align-items:center;gap:10px;min-height:48px;border-bottom:1px solid var(--line)}
+  .el-grup label{flex:1;display:flex;align-items:center;gap:12px;cursor:pointer;min-height:48px}
+  .el-grup input[type=checkbox]{width:22px;height:22px;accent-color:var(--blue);flex:none}
+  .el-grup li.ok label span{color:var(--text-3);text-decoration:line-through}
+  .el-grup li button{border:0;background:none;color:var(--text-3);cursor:pointer;min-width:44px;min-height:44px;font-size:18px}
+  .el-ekle{display:flex;gap:8px}
+  .el-ekle input{flex:1;min-width:0;height:44px;padding:0 12px;font:inherit;font-size:16px;color:var(--text);background:var(--bg);border:1px solid var(--input);border-radius:var(--r-dugme,0)}
+  .el-tamam{padding:14px 16px;border-radius:var(--r-kart,0);background:var(--surface-2);font-weight:600}
+</style>
+<script>
+  type Madde = { g: string; ad: string; ok: boolean; ek?: boolean }
+  const VERI = JSON.parse(document.querySelector('[data-el-veri]')!.textContent!) as Record<string, { ad: string; m: [string, string][] }>
+  const $ = <T extends Element>(s: string) => document.querySelector<T>(s)!
+  const anahtar = (t: string) => `up-ekipman-${t}`
+  let tur = Object.keys(VERI)[0]
+  try { const s = localStorage.getItem('up-ekipman-tur'); if (s && VERI[s]) tur = s } catch { /* depolama kapalı */ }
+  const oku = (t: string): Madde[] => { try { const s = localStorage.getItem(anahtar(t)); if (s) return JSON.parse(s) } catch { /* */ } return VERI[t].m.map(([g, ad]) => ({ g, ad, ok: false })) }
+  const yaz = (t: string, l: Madde[]) => { try { localStorage.setItem(anahtar(t), JSON.stringify(l)) } catch { /* */ } }
+  let liste = oku(tur)
+  const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!)
+  function ciz() {
+    document.querySelectorAll('[data-tur]').forEach((b) => b.setAttribute('aria-selected', String((b as HTMLElement).dataset.tur === tur)))
+    const tamam = liste.filter((m) => m.ok).length
+    $<HTMLElement>('[data-el-cubuk]').style.width = `${liste.length ? (tamam / liste.length) * 100 : 0}%`
+    $('[data-el-sayi]').textContent = `${tamam} / ${liste.length} hazır`
+    const eksik = liste.map((m, i) => ({ m, i })).filter((x) => !x.m.ok)
+    const gruplar = [...new Set(liste.map((m) => m.g))]
+    const satir = ({ m, i }: { m: Madde; i: number }) => `<li class="${m.ok ? 'ok' : ''}"><label><input type="checkbox" data-i="${i}" ${m.ok ? 'checked' : ''}/><span>${esc(m.ad)}</span></label><button type="button" data-sil="${i}" aria-label="${esc(m.ad)} maddesini sil">×</button></li>`
+    $('[data-el-liste]').innerHTML = (tamam === liste.length && liste.length ? '<div class="el-tamam">Her şey hazır. İyi çekimler.</div>' : '')
+      + (tamam && eksik.length ? `<section class="el-grup eksik"><h3>Eksik kalan (${eksik.length})</h3><ul>${eksik.map(satir).join('')}</ul></section>` : '')
+      + gruplar.map((g) => { const l = liste.map((m, i) => ({ m, i })).filter((x) => x.m.g === g && (!tamam || x.m.ok || !eksik.length)); return l.length ? `<section class="el-grup"><h3>${esc(g)}</h3><ul>${l.map(satir).join('')}</ul></section>` : '' }).join('')
+  }
+  $('[data-el-liste]').addEventListener('change', (e) => { const c = e.target as HTMLInputElement; if (c.dataset.i) { liste[+c.dataset.i].ok = c.checked; yaz(tur, liste); ciz() } })
+  $('[data-el-liste]').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest<HTMLElement>('[data-sil]'); if (b) { liste.splice(+b.dataset.sil!, 1); yaz(tur, liste); ciz() } })
+  document.querySelectorAll<HTMLElement>('[data-tur]').forEach((b) => b.addEventListener('click', () => { tur = b.dataset.tur!; try { localStorage.setItem('up-ekipman-tur', tur) } catch { /* */ } liste = oku(tur); ciz() }))
+  $('[data-el-sifirla]').addEventListener('click', () => { liste.forEach((m) => (m.ok = false)); yaz(tur, liste); ciz() })
+  $('[data-el-ekle]').addEventListener('submit', (e) => { e.preventDefault(); const i = $<HTMLInputElement>('#el-yeni'), ad = i.value.trim(); if (!ad) return; liste.push({ g: 'Benim eklediklerim', ad, ok: false, ek: true }); i.value = ''; yaz(tur, liste); ciz() })
+  ciz()
+</script>

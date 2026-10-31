@@ -1,0 +1,97 @@
+---
+/**
+ * Çekim maliyet hesaplayıcı (toplantı notu 30 Ekim 2026, araç 12): kalem kalem bütçe. Fiyatlar kullanıcıdan gelir (piyasa fiyatı
+ * uydurulmaz; TL, KDV ve beklenmeyen gider payı Türkiye'ye göre). Kalemler hazır şablonla gelir, eklenip silinebilir; tarayıcıda saklanır.
+ */
+import AracSayfa from '../../components/AracSayfa.astro'
+// [grup, kalem, birim] — çekim türüne göre başlangıç kalemleri (tutarlar boş)
+const SABLON: Record<string, { ad: string; k: [string, string, string][] }> = {
+  reklam: { ad: 'Reklam / tanıtım filmi', k: [['Ekip', 'Yönetmen', 'gün'], ['Ekip', 'Görüntü yönetmeni', 'gün'], ['Ekip', 'Kamera asistanı', 'gün'], ['Ekip', 'Işık şefi', 'gün'], ['Ekip', 'Ses kayıt', 'gün'], ['Ekip', 'Makyaj / saç', 'gün'], ['Oyuncu', 'Oyuncu / model', 'gün'], ['Ekipman', 'Kamera paketi kirası', 'gün'], ['Ekipman', 'Işık paketi kirası', 'gün'], ['Mekân', 'Mekân / stüdyo kirası', 'gün'], ['Lojistik', 'Ulaşım', 'adet'], ['Lojistik', 'Yemek (kişi başı)', 'kişi'], ['Kurgu', 'Kurgu', 'gün'], ['Kurgu', 'Renk düzenleme', 'gün'], ['Kurgu', 'Müzik lisansı', 'adet']] },
+  dugun: { ad: 'Düğün / etkinlik', k: [['Ekip', 'Fotoğrafçı', 'gün'], ['Ekip', 'Videograf', 'gün'], ['Ekip', 'Asistan', 'gün'], ['Ekipman', 'Dron', 'gün'], ['Lojistik', 'Ulaşım', 'adet'], ['Lojistik', 'Konaklama', 'gece'], ['Kurgu', 'Fotoğraf düzenleme', 'adet'], ['Kurgu', 'Film kurgusu', 'gün'], ['Teslim', 'Albüm baskısı', 'adet']] },
+  youtube: { ad: 'YouTube videosu', k: [['Ekip', 'Kamera operatörü', 'gün'], ['Ekip', 'Sunucu', 'gün'], ['Ekipman', 'Ekipman kirası', 'gün'], ['Mekân', 'Mekân', 'gün'], ['Kurgu', 'Kurgu', 'saat'], ['Kurgu', 'Kapak görseli tasarımı', 'adet'], ['Kurgu', 'Altyazı / çeviri', 'adet']] },
+}
+---
+<AracSayfa yol="/araclar/maliyet" baslik="Çekim maliyet hesaplayıcı" lead="Çekiminin bütçesini kalem kalem çıkar: ekip, ekipman, mekân, ulaşım, kurgu. Kendi fiyatlarını gir; beklenmeyen gider payı ve KDV ile toplamı gör."
+  aciklama="Video ve fotoğraf çekimi maliyet hesaplayıcı: ekip, ekipman kirası, mekân, ulaşım ve kurgu kalemleri, beklenmeyen gider payı ve KDV ile TL bütçe. Ücretsiz.">
+  <div class="el-turler" role="tablist" aria-label="Şablon">
+    {Object.entries(SABLON).map(([k, v]) => <button type="button" role="tab" class="btn" data-sablon={k}>{v.ad}</button>)}
+    <button type="button" class="btn" data-sablon="">Boş başla</button>
+  </div>
+  <div class="ml-tablo" role="region" aria-label="Bütçe kalemleri" tabindex="0">
+    <table>
+      <thead><tr><th scope="col">Kalem</th><th scope="col">Birim fiyat (TL)</th><th scope="col">Miktar</th><th scope="col">Tutar</th><th scope="col"><span class="sr">Sil</span></th></tr></thead>
+      <tbody data-ml-govde></tbody>
+    </table>
+  </div>
+  <form class="el-ekle" data-ml-ekle>
+    <label for="ml-yeni" class="sr">Yeni kalem</label><input id="ml-yeni" maxlength="60" placeholder="Kalem ekle: ör. Jeneratör" />
+    <button class="btn" type="submit">Ekle</button>
+  </form>
+  <form class="arac-form" data-ml-ayar onsubmit="return false">
+    <label for="ml-pay">Beklenmeyen gider payı<select id="ml-pay"><option value="0">Yok</option><option value="0.05">%5</option><option value="0.1" selected>%10</option><option value="0.15">%15</option></select></label>
+    <label for="ml-kdv">KDV<select id="ml-kdv"><option value="0">Dahil değil / yok</option><option value="0.2" selected>%20</option><option value="0.1">%10</option></select></label>
+  </form>
+  <div class="arac-sonuc" data-sonuc aria-live="polite"></div>
+  <script type="application/json" id="ml-sablon" set:html={JSON.stringify(SABLON)} />
+  <Fragment slot="nasil">
+    <h2>Bütçe nasıl çıkarılır?</h2>
+    <p>Önce gün sayısını belirle: hazırlık, çekim ve kurgu günleri ayrı kalemlerdir. Ekip ve ekipman çoğunlukla gün üzerinden, kurgu gün ya da saat üzerinden, ulaşım ve yemek adet ya da kişi üzerinden fiyatlanır. Bu araç piyasa fiyatı önermez; fiyatlar şehre, deneyime ve işin kapsamına göre çok değişir. Kendi teklifini ya da aldığın teklifleri gir.</p>
+    <p>Bütçeye %10 civarı <b>beklenmeyen gider payı</b> eklemek yaygın bir uygulamadır: hava yüzünden kayan bir gün, bozulan bir ekipman ya da uzayan kurgu bu paydan karşılanır. Fatura kesiliyorsa KDV'yi ayrıca ekle.</p>
+    <p>Bütçen bu tarayıcıda saklanır; sayfayı kapatıp açınca kaldığın yerden devam edersin.</p>
+  </Fragment>
+</AracSayfa>
+<style is:global>
+  .el-turler{display:flex;flex-wrap:wrap;gap:8px}
+  .el-turler .btn{min-height:40px;font-size:14px}
+  .ml-tablo{position:relative;max-width:100%;overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-kart,0)}
+  .ml-tablo table{width:100%;min-width:560px;border-collapse:collapse}
+  .ml-tablo th{padding:10px 12px;text-align:left;font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3);background:var(--surface-2);font-weight:600}
+  .ml-tablo td{padding:6px 12px;border-top:1px solid var(--line);vertical-align:middle}
+  .ml-tablo tr.grup td{padding-top:14px;font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3)}
+  .ml-tablo input{width:100%;min-width:0;height:40px;padding:0 10px;font:inherit;font-size:15px;color:var(--text);background:var(--bg);border:1px solid var(--input);border-radius:var(--r-dugme,0)}
+  .ml-tablo td.tutar{font-family:var(--f-mono);white-space:nowrap;text-align:right}
+  .ml-tablo button{border:0;background:none;color:var(--text-3);cursor:pointer;min-width:44px;min-height:44px;font-size:18px}
+  .el-ekle{display:flex;gap:8px}
+  .el-ekle input{flex:1;min-width:0;height:44px;padding:0 12px;font:inherit;font-size:16px;color:var(--text);background:var(--bg);border:1px solid var(--input);border-radius:var(--r-dugme,0)}
+  [data-sonuc] .arac-ikili{grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr))}
+  [data-sonuc] .arac-buyuk b{font-size:clamp(22px,2.6vw,30px)}
+</style>
+<script>
+  type Kalem = { g: string; ad: string; birim: string; fiyat: number; adet: number }
+  const SABLON = JSON.parse(document.getElementById('ml-sablon')!.textContent!) as Record<string, { ad: string; k: [string, string, string][] }>
+  const $ = <T extends Element>(s: string) => document.querySelector<T>(s)!
+  const TL = (n: number) => n.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 })
+  const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!)
+  const sablondan = (k: string): Kalem[] => (SABLON[k]?.k ?? []).map(([g, ad, birim]) => ({ g, ad, birim, fiyat: 0, adet: 1 }))
+  let liste: Kalem[] = sablondan('reklam')
+  try { const s = localStorage.getItem('up-maliyet'); if (s) liste = JSON.parse(s) } catch { /* depolama kapalı */ }
+  const yaz = () => { try { localStorage.setItem('up-maliyet', JSON.stringify(liste)) } catch { /* */ } }
+  function tablo() {
+    let son = ''
+    $('[data-ml-govde]').innerHTML = liste.map((k, i) => {
+      const bas = k.g !== son ? `<tr class="grup"><td colspan="5">${esc(k.g)}</td></tr>` : ''; son = k.g
+      return `${bas}<tr><td>${esc(k.ad)}</td><td><input type="number" min="0" step="50" inputmode="decimal" value="${k.fiyat || ''}" data-i="${i}" data-a="fiyat" aria-label="${esc(k.ad)} birim fiyat" placeholder="0"/></td><td><input type="number" min="0" step="1" inputmode="decimal" value="${k.adet}" data-i="${i}" data-a="adet" aria-label="${esc(k.ad)} miktar (${esc(k.birim)})"/></td><td class="tutar" data-t="${i}">${TL(k.fiyat * k.adet)}</td><td><button type="button" data-sil="${i}" aria-label="${esc(k.ad)} kalemini sil">×</button></td></tr>`
+    }).join('')
+    toplam()
+  }
+  function toplam() {
+    const ara = liste.reduce((s, k) => s + k.fiyat * k.adet, 0), pay = ara * Number($<HTMLSelectElement>('#ml-pay').value), kdv = (ara + pay) * Number($<HTMLSelectElement>('#ml-kdv').value)
+    const gruplar = [...new Set(liste.map((k) => k.g))].map((g) => [g, liste.filter((k) => k.g === g).reduce((s, k) => s + k.fiyat * k.adet, 0)] as const).filter(([, t]) => t > 0).sort((a, b) => b[1] - a[1])
+    $('[data-sonuc]').innerHTML = `<div class="arac-ikili">
+        <div class="arac-buyuk"><span class="label">Ara toplam</span><b>${TL(ara)}</b><span class="meta">${liste.length} kalem</span></div>
+        <div class="arac-buyuk"><span class="label">Beklenmeyen gider</span><b>${TL(pay)}</b><span class="meta">pay</span></div>
+        <div class="arac-buyuk"><span class="label">KDV</span><b>${TL(kdv)}</b><span class="meta">pay dahil tutara</span></div>
+        <div class="arac-buyuk"><span class="label">Genel toplam</span><b>${TL(ara + pay + kdv)}</b><span class="meta">teklif tutarı</span></div>
+      </div>${gruplar.length ? `<p class="meta" style="text-transform:none;letter-spacing:0;font-size:14px">${gruplar.map(([g, t]) => `${esc(g)} %${Math.round((t / ara) * 100)}`).join(' · ')}</p>` : ''}`
+  }
+  $('[data-ml-govde]').addEventListener('input', (e) => {
+    const t = e.target as HTMLInputElement; if (!t.dataset.i) return
+    const k = liste[+t.dataset.i]; (k as Record<string, unknown>)[t.dataset.a!] = Math.max(0, Number(t.value) || 0)
+    $(`[data-t="${t.dataset.i}"]`).textContent = TL(k.fiyat * k.adet); yaz(); toplam()
+  })
+  $('[data-ml-govde]').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest<HTMLElement>('[data-sil]'); if (b) { liste.splice(+b.dataset.sil!, 1); yaz(); tablo() } })
+  document.querySelectorAll<HTMLElement>('[data-sablon]').forEach((b) => b.addEventListener('click', () => { liste = b.dataset.sablon ? sablondan(b.dataset.sablon) : []; yaz(); tablo() }))
+  $('[data-ml-ekle]').addEventListener('submit', (e) => { e.preventDefault(); const i = $<HTMLInputElement>('#ml-yeni'), ad = i.value.trim(); if (!ad) return; liste.push({ g: 'Diğer', ad, birim: 'adet', fiyat: 0, adet: 1 }); i.value = ''; yaz(); tablo() })
+  $('[data-ml-ayar]').addEventListener('change', toplam)
+  tablo()
+</script>

@@ -492,7 +492,7 @@ main{overflow-x:clip}
 
 /* Araçlar (/araclar, 25 Ekim 2026) */
 .arac-ana{display:flex;flex-direction:column;gap:32px;min-width:0}
-.arac{display:flex;flex-direction:column;gap:20px;padding:24px;border:1px solid var(--line);background:var(--surface)}
+.arac{min-width:0;max-width:100%;display:flex;flex-direction:column;gap:20px;padding:24px;border:1px solid var(--line);background:var(--surface)}
 .arac-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;align-items:end}
 .arac-form label{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:600;color:var(--text-2)}
 .arac-form input,.arac-form select{height:44px;padding:0 12px;font:inherit;font-size:16px;font-weight:400;color:var(--text);background:var(--bg);border:1px solid var(--input)}
