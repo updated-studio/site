@@ -1,21 +1,96 @@
 ---
-/** "Bugün 60 saniyede": okur Oynat'a basar (kit: otomatik dönen slayt yok); her haber 10 sn. */
+/**
+ * "Bugün 60 saniyede" (1 Kasım 2026, kullanıcı: "oynat ve kaydırma düğmelerine gerek yok, parmakla kaydırır; özet sunuyorsak seslendirme ya da
+ * başka bir deneyim olmalı, normal slider'dan farkı olmalı"). Altı haber kart şeridinde, parmakla ya da tekerle kaydırılır; düğme yok.
+ * "Dinle": tarayıcının kendi Türkçe sesiyle özet okunur (ücretsiz, sunucuya yük yok); okunan kart öne gelir, üstteki çubuk ilerler.
+ * Kit: kendiliğinden dönen slayt yok; ses yalnız okur başlatınca. Tarayıcıda Türkçe ses yoksa Dinle düğmesi görünmez.
+ */
+import Img from '../Img.astro'
 import type { News } from '../../lib/types'
 import { ico } from '../../lib/ui'
 interface Props { items: News[]; no?: string }
 const { items, no = '05' } = Astro.props
-const data = items.slice(0, 6).map((n) => ({ c: n.category.name, t: n.title, s: n.spot, h: n.path }))
+const kisa = (s: string) => { const t = (s || '').replace(/\s+/g, ' ').trim(); const c = t.match(/^.{40,200}?[.!?](\s|$)/); return c ? c[0].trim() : t.slice(0, 180) }
+const list = items.slice(0, 6)
+// Özet başlığı tekrar ediyorsa (bazı haberlerde spot başlıkla başlar) başlık kısmı atılır
+const tekrarsiz = (t: string, s: string) => { const b = t.split(':')[0].trim(); return s.startsWith(b) ? s.slice(s.indexOf(t) === 0 ? t.length : b.length).replace(/^[\s:.,–-]+/, '') : s }
+const metin = list.map((n) => ({ c: n.category.name, t: n.title, s: kisa(tekrarsiz(n.title, n.spot || '')) }))
 ---
-{data.length > 0 && <>
-  <div class="sh" style="margin-top:48px"><h2><span class="no">{no}</span>Bugün 60 saniyede</h2></div>
-  <div class="s60" data-s60={JSON.stringify(data)}>
-    <div class="segs">{data.map(() => <i><b></b></i>)}</div>
-    <div class="s60-b"><span class="meta" data-m>{data[0].c} · 1/{data.length}</span><h3 data-h>{data[0].t}</h3><p data-p>{data[0].s}</p></div>
-    <div class="chips">
-      <button class="btn" type="button" data-prev aria-label="Önceki"><Fragment set:html={ico('left')} /></button>
-      <button class="btn btn-p" type="button" data-play>Oynat</button>
-      <button class="btn" type="button" data-next aria-label="Sonraki"><Fragment set:html={ico('right')} /></button>
-      <a class="btn-t btn" href={data[0].h} data-open>Haberi aç</a>
-    </div>
+{list.length > 0 && <section class="oz" data-ozet={JSON.stringify(metin)} aria-labelledby="oz-bas">
+  <div class="sh oz-sh"><h2 id="oz-bas"><span class="no">{no}</span>Bugün 60 saniyede</h2>
+    <button class="btn btn-p oz-dinle" type="button" data-dinle hidden><Fragment set:html={ico('play', 16)} /><span data-dinle-y>Dinle · 1 dk</span></button>
   </div>
-</>}
+  <div class="oz-segs" aria-hidden="true">{list.map(() => <i><b></b></i>)}</div>
+  <ol class="oz-iz" data-oz-iz>
+    {list.map((n, i) => (
+      <li class="oz-k" data-i={i}>
+        <a href={n.path}>
+          <span class="oz-g">{n.cover && <Img img={n.cover} alt="" sizes="(max-width: 760px) 85vw, 400px" />}<span class="oz-no">{i + 1}/{list.length}</span></span>
+          <span class="oz-m"><span class="cat">{n.category.name}</span><h3>{n.title}</h3><span class="oz-s">{metin[i].s}</span></span>
+        </a>
+      </li>
+    ))}
+  </ol>
+</section>}
+<script>
+  const box = document.querySelector<HTMLElement>('[data-ozet]')
+  const ss = 'speechSynthesis' in window ? window.speechSynthesis : null
+  if (box && ss) {
+    const M = JSON.parse(box.dataset.ozet || '[]') as { c: string; t: string; s: string }[]
+    const btn = box.querySelector<HTMLButtonElement>('[data-dinle]')!, yazi = box.querySelector('[data-dinle-y]')!
+    const iz = box.querySelector<HTMLElement>('[data-oz-iz]')!, kartlar = [...box.querySelectorAll<HTMLElement>('.oz-k')], cubuk = [...box.querySelectorAll<HTMLElement>('.oz-segs b')]
+    let ses: SpeechSynthesisVoice | undefined, i = 0, calisiyor = false, t0 = 0, sure = 1, raf = 0
+    const sesBul = () => { ses = ss.getVoices().find((v) => /^tr(-|_|$)/i.test(v.lang)); btn.hidden = !ses }
+    sesBul(); ss.addEventListener?.('voiceschanged', sesBul)
+    const goster = (k: number) => {
+      kartlar.forEach((x, q) => x.toggleAttribute('data-simdi', q === k))
+      cubuk.forEach((b, q) => (b.style.width = q < k ? '100%' : '0%'))
+      const x = kartlar[k]; iz.scrollTo({ left: x.offsetLeft - iz.offsetLeft, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
+    }
+    const ilerle = (now: number) => { if (!calisiyor) return; cubuk[i].style.width = Math.min(100, ((now - t0) / sure) * 100) + '%'; raf = requestAnimationFrame(ilerle) }
+    const dur = (bitti = false) => {
+      calisiyor = false; ss.cancel(); cancelAnimationFrame(raf); box.removeAttribute('data-caliyor')
+      yazi.textContent = bitti ? 'Baştan dinle' : 'Devam et'; if (bitti) { i = 0; kartlar.forEach((x) => x.removeAttribute('data-simdi')) }
+    }
+    const oku = () => {
+      if (i >= M.length) { cubuk.forEach((b) => (b.style.width = '100%')); dur(true); return }
+      const n = M[i], u = new SpeechSynthesisUtterance(`${i === 0 ? 'Bugün altmış saniyede. ' : ''}${n.c}. ${n.t}. ${n.s}`)
+      u.lang = 'tr-TR'; if (ses) u.voice = ses; u.rate = 1.05
+      sure = Math.max(4000, (u.text.length / 15) * 1000); t0 = performance.now(); goster(i); cancelAnimationFrame(raf); raf = requestAnimationFrame(ilerle)
+      u.onend = () => { if (!calisiyor) return; cubuk[i].style.width = '100%'; i++; oku() }
+      ss.speak(u)
+    }
+    btn.addEventListener('click', () => {
+      if (calisiyor) { dur(); return }
+      calisiyor = true; box.setAttribute('data-caliyor', ''); yazi.textContent = 'Durdur'; ss.cancel(); oku()
+    })
+    // Okur kartı parmakla değiştirirse okuma o karttan sürer
+    let zaman = 0
+    iz.addEventListener('scroll', () => { if (!calisiyor) return; clearTimeout(zaman); zaman = window.setTimeout(() => {
+      const k = Math.round(iz.scrollLeft / (kartlar[0].offsetWidth + 12)); if (k !== i && k >= 0 && k < M.length) { i = k; ss.cancel(); oku() }
+    }, 400) }, { passive: true })
+    addEventListener('pagehide', () => ss.cancel())
+  }
+</script>
+<style is:global>
+  .oz-sh{align-items:center}
+  .oz-dinle{gap:8px}
+  .oz[data-caliyor] .oz-dinle{background:var(--text);color:var(--bg)}
+  .oz-segs{display:flex;gap:4px;margin:0 0 12px}
+  .oz-segs i{flex:1;height:3px;border-radius:2px;background:var(--line);overflow:hidden}
+  .oz-segs b{display:block;height:100%;width:0;background:var(--orange)}
+  .oz-iz{list-style:none;margin:0;padding:0;display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 24px) / 3);gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+  .oz-iz::-webkit-scrollbar{display:none}
+  .oz-k{scroll-snap-align:start;min-width:0}
+  .oz-k > a{display:flex;flex-direction:column;height:100%;border:1px solid var(--line);border-radius:var(--r-kart,0);background:var(--surface);box-shadow:var(--cam-golge,none);overflow:hidden;color:var(--text);text-decoration:none;transition:border-color var(--t2,200ms) var(--ease,ease)}
+  .oz-k[data-simdi] > a{border-color:var(--orange);box-shadow:0 0 0 1px var(--orange),var(--cam-golge,none)}
+  .oz-g{position:relative;display:block;aspect-ratio:16/9;background:var(--img)}
+  .oz-g img{width:100%;height:100%;object-fit:cover;display:block}
+  .oz-no{position:absolute;left:10px;top:10px;padding:2px 8px;border-radius:99px;background:rgb(0 0 0 / .6);color:#fff;font-family:var(--f-mono);font-size:12px;font-weight:600}
+  .oz-m{display:flex;flex-direction:column;gap:6px;padding:14px 16px 18px}
+  .oz-m h3{margin:0;font-size:21px;line-height:1.22}
+  .oz-s{font-size:15px;line-height:1.45;color:var(--text-2)}
+  .oz-k > a:hover h3{text-decoration:underline}
+  @media (max-width:1100px){.oz-iz{grid-auto-columns:calc((100% - 12px) / 2)}}
+  @media (max-width:760px){.oz-iz{grid-auto-columns:86%;margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding-inline:max(16px,env(safe-area-inset-left,0px));scroll-padding-inline:max(16px,env(safe-area-inset-left,0px))}}
+</style>

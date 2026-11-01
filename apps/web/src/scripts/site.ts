@@ -39,7 +39,8 @@ function theme() {
 /* ---------- mobil menü, arama ---------- */
 function menu() {
   const b = $('[data-menu]'), s = $('#sheet'); if (!b || !s) return
-  const set = (open: boolean) => { s.hidden = !open; b.setAttribute('aria-expanded', String(open)); b.innerHTML = ico(open ? 'x' : 'menu') }
+  // Menü açıkken üst şeritler (bölümler, kategoriler) gizlenir; menü onların tekrarı değil (1 Kasım 2026)
+  const set = (open: boolean) => { s.hidden = !open; document.documentElement.classList.toggle('menu-acik', open); b.setAttribute('aria-expanded', String(open)); b.innerHTML = ico(open ? 'x' : 'menu') }
   b.addEventListener('click', () => set(!!s.hidden))
   s.addEventListener('click', (e) => { if ((e.target as HTMLElement).tagName === 'A') set(false) })
 }
@@ -260,31 +261,6 @@ function kunyeCard() {
 }
 
 /* ---------- 60 saniye: okur oynatır ---------- */
-function sixty() {
-  $$('[data-s60]').forEach((box) => {
-    const S = JSON.parse(box.dataset.s60 || '[]') as { c: string; t: string; s: string; h: string }[]
-    const segs = $$('.segs b', box), play = $('[data-play]', box)!
-    let i = 0, t0 = 0, run = false
-    const show = (k: number) => {
-      i = (k + S.length) % S.length; t0 = performance.now(); const n = S[i]
-      $('[data-m]', box)!.textContent = `${n.c} · ${i + 1}/${S.length}`; $('[data-h]', box)!.textContent = n.t; $('[data-p]', box)!.textContent = n.s
-      $<HTMLAnchorElement>('[data-open]', box)!.href = n.h
-      segs.forEach((s, q) => (s.style.width = q < i ? '100%' : '0%'))
-    }
-    const loop = (now: number) => {
-      if (!run) return; const e = now - t0; segs[i].style.width = Math.min(100, (e / 10000) * 100) + '%'
-      if (e > 10000) { if (i === S.length - 1) { run = false; play.textContent = 'Baştan'; return } show(i + 1) }
-      requestAnimationFrame(loop)
-    }
-    play.addEventListener('click', () => {
-      if (play.textContent === 'Baştan') show(0)
-      run = !run; play.textContent = run ? 'Duraklat' : 'Oynat'
-      if (run) { t0 = performance.now() - ((parseFloat(segs[i].style.width) || 0) / 100) * 10000; requestAnimationFrame(loop) }
-    })
-    $('[data-prev]', box)!.addEventListener('click', () => show(i - 1)); $('[data-next]', box)!.addEventListener('click', () => show(i + 1))
-  })
-}
-
 /* ---------- Kıyas Robotu ---------- */
 function robot() {
   $$('[data-robot]').forEach((box) => {
@@ -356,5 +332,5 @@ function okunanSekme() {
 /** Sonradan eklenen parçalara (sonsuz akış) davranış bağla. */
 function hydrate(root: ParentNode) { strips(root); youtube(root); videoAds(root) }
 
-theme(); menu(); search(); searchPage(); breaking(); accordion(); newPill(); clocks(); feeds(); kunyeCard(); sixty(); robot(); onlyDiff(); sokum(); newsletter(); okunanSekme(); videoBolumleri()
+theme(); menu(); search(); searchPage(); breaking(); accordion(); newPill(); clocks(); feeds(); kunyeCard(); robot(); onlyDiff(); sokum(); newsletter(); okunanSekme(); videoBolumleri()
 hydrate(document)

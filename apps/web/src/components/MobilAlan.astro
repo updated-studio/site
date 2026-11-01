@@ -1,7 +1,7 @@
 ---
 /**
  * Telefonda bölüm arası reklam alanı (31 Ekim 2026, kullanıcı: "mobilde birinci reklam videolardan sonra, ikincisi son haberlerden önce").
- * Kampanya varsa kutu reklam (300 × 250); yoksa kendi "Reklam ver" tanıtımımız. Yalnız 760 px ve altı.
+ * Kampanya varsa reklam görseli içerik genişliğinde 2:1 kutuda (telefon görseli varsa o); yoksa kendi "Reklam ver" tanıtımımız. Yalnız 760 px ve altı.
  * Tanıtım reklam değil: sınıf adları "ad-…" taşımaz (reklam engelleyiciler gizliyordu, bkz. YanEv).
  */
 import Ad from './Ad.astro'
@@ -20,11 +20,18 @@ const { ad } = Astro.props
   )}
 </div>
 <style is:global>
+  /* Ölçek kuralı (1 Kasım 2026, kullanıcı: "sağında solunda boşluk olmamalı, dikdörtgen olsun, doğru ölçeklensin"): telefon reklam alanı
+     içerik sütunu genişliğinde (kartlarla aynı kenar), en-boy 2:1; reklam görseli de bu kutuya genişliğince oturur. Sabit piksel genişlik yok. */
   .mobil-alan{display:none}
   @media (max-width:760px){
-    .mobil-alan{display:flex;justify-content:center;padding:8px max(16px,env(safe-area-inset-left,0px)) 8px max(16px,env(safe-area-inset-right,0px))}
-    .mobil-tanit{display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:8px;width:100%;max-width:300px;aspect-ratio:300/250;padding:20px;border:1px solid var(--line);border-radius:var(--r-kart,0);background:linear-gradient(180deg,var(--surface-2),var(--surface));box-shadow:var(--cam-golge,none);color:var(--text-2);text-decoration:none;font-size:14px}
-    .mobil-tanit b{font-family:var(--f-head);font-weight:900;font-size:28px;line-height:1.05;color:var(--text)}
-    .mobil-tanit .mobil-tanit-m{line-height:1.45}
+    .mobil-alan{display:block;padding:8px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px))}
+    .mobil-alan .ad{width:100%;margin:0}
+    .mobil-alan .ad .slot{display:block;width:100%;max-width:none;aspect-ratio:2/1;padding:0;overflow:hidden;border-radius:var(--r-kart,0)}
+    .mobil-alan .ad .slot picture{display:block;height:100%}
+    .mobil-alan .ad .slot img{width:100%;height:100%;object-fit:cover;display:block}
+    .mobil-tanit{display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:6px;width:100%;aspect-ratio:2/1;padding:18px 20px;border:1px solid var(--line);border-radius:var(--r-kart,0);background:linear-gradient(135deg,var(--surface-2),var(--surface));box-shadow:var(--cam-golge,none);color:var(--text-2);text-decoration:none;font-size:14px}
+    .mobil-tanit b{font-family:var(--f-head);font-weight:900;font-size:clamp(22px,7vw,30px);line-height:1.05;color:var(--text)}
+    .mobil-tanit .mobil-tanit-m{line-height:1.4}
+    .mobil-tanit .btn{margin-top:4px}
   }
 </style>

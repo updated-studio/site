@@ -37,24 +37,35 @@ const DILLER: [string, string][] = [['en', 'English'], ['de', 'Deutsch'], ['ru',
       <button class="ibtn menu-b" type="button" data-menu aria-expanded="false" aria-controls="sheet" aria-label="Menü"><Fragment set:html={ico('menu')} /></button>
     </div>
   </div>
+  {/* Telefonda ve tablette ana bölümler en üstte, kategoriler altında (1 Kasım 2026, kullanıcı): masaüstü üst menüsünün aynısı, menü düğmesine girmeden */}
+  <nav class="bolum-serit" aria-label="Bölümler (telefon)"><div class="wrap">
+    {nav.map((n) => <a href={n.href} aria-current={on(n.href)}>{n.label}</a>)}
+    <a class="kulup" href={site.kulupUrl} aria-current={kulupte ? 'page' : undefined}>Kulüp</a>
+  </div></nav>
   {/* Kategori şeridi (30 Ekim 2026, kullanıcı: "üst barın altında kategoriler her zaman, mobilde de bilgisayarda da"): üst menüyle birlikte yapışık */}
   {kategoriler.length > 0 && <nav class="kat-serit" aria-label="Kategoriler"><div class="wrap">
     <a href="/haberler" aria-current={current.startsWith('/haberler') ? 'page' : undefined}><span>Tümü</span></a>
     {kategoriler.map((c) => <a href={`/${c.slug}`} aria-current={current === `/${c.slug}` || current.startsWith(`/${c.slug}/`) ? 'page' : undefined}><span>{c.name}</span></a>)}
   </div></nav>}
-  {/* Telefonda ve tablette ana bölümler kategori şeridinin altında (31 Ekim 2026, kullanıcı): masaüstü üst menüsünün aynısı, menü düğmesine girmeden */}
-  <nav class="bolum-serit" aria-label="Bölümler (telefon)"><div class="wrap">
-    {nav.map((n) => <a href={n.href} aria-current={on(n.href)}>{n.label}</a>)}
-    <a class="kulup" href={site.kulupUrl} aria-current={kulupte ? 'page' : undefined}>Kulüp</a>
-  </div></nav>
 </header>
 <script is:inline>(()=>{document.querySelectorAll('[data-dil-kod]').forEach(a=>{a.href='https://updated-com-tr.translate.goog'+location.pathname+'?_x_tr_sl=tr&_x_tr_tl='+a.dataset.dilKod+'&_x_tr_hl='+a.dataset.dilKod})})()</script>
 <script is:inline>(()=>{document.querySelectorAll('.kat-serit [aria-current=page],.bolum-serit [aria-current=page],.kserit [aria-current=page]').forEach(a=>{const w=a.parentElement;w.scrollLeft=a.offsetLeft-(w.clientWidth-a.offsetWidth)/2})})()</script>
-<nav class="sheet" id="sheet" aria-label="Mobil menü" hidden>
-  {nav.map((n) => <a href={n.href}>{n.label}</a>)}
-  <a href={site.kulupUrl}>Kulüp</a>
-  <a href="/hesap">Hesabım</a>
-  {kategoriler.length > 0 && <div class="sheet-kat"><span class="label">Kategoriler</span>{kategoriler.map((c) => <a href={`/${c.slug}`}>{c.name}</a>)}</div>}
-  <div class="sheet-dil"><span class="label">Language</span>{DILLER.map(([k, ad]) => <a href={`https://updated-com-tr.translate.goog/?_x_tr_sl=tr&_x_tr_tl=${k}`} data-dil-kod={k} lang={k} rel="nofollow">{ad}</a>)}</div>
+<nav class="sheet" id="sheet" aria-label="Menü" hidden>
+  {/* Menü (1 Kasım 2026, kullanıcı: "üst menüde olan menüde tekrar olmasın, üç çizgiyi farklı değerlendirelim"): bölümler ve kategoriler
+      üst şeritlerde; menü açılınca şeritler gizlenir, burada geri kalan her şey ayrıntılı durur. */}
+  <a class="sh-hesap" href="/hesap" data-sheet-hesap><Fragment set:html={ico('user')} /><span><b>Hesabım</b><span>Uper ol ya da giriş yap: yorum, kayıt, puan</span></span></a>
+  <div class="sh-grup"><span class="label">Kulüp</span>
+    <a href={site.kulupUrl}>Kulüp ana sayfa</a><a href={`${site.kulupUrl}#dersler`}>Dersler</a><a href={`${site.kulupUrl}#pratik`}>Simülatörler</a><a href="/araclar">Araçlar</a><a href="/gorev">Haftalık görev</a><a href="/yarismalar">Yarışmalar</a>
+  </div>
+  <div class="sh-grup"><span class="label">Keşfet</span>
+    <a href="/urun">Künyeler</a><a href="/karsilastirma/kiyas">Kıyas aracı</a><a href="/ara">Arama</a><a href="/haberler">Tüm haberler</a>
+  </div>
+  <div class="sh-grup"><span class="label">Takip et</span>
+    <a href={site.youtube} target="_blank" rel="noopener">YouTube</a><a href={site.instagram} target="_blank" rel="noopener">Instagram</a><a href="#bulten">Bülten</a><a href="/rss.xml">RSS</a>
+  </div>
+  <div class="sh-grup"><span class="label">Language</span>{DILLER.map(([k, ad]) => <a href={`https://updated-com-tr.translate.goog/?_x_tr_sl=tr&_x_tr_tl=${k}`} data-dil-kod={k} lang={k} rel="nofollow">{ad}</a>)}</div>
   <div class="sheet-tema"><span>Görünüm</span><button class="ibtn" type="button" data-theme-btn aria-label="Görünüm"><Fragment set:html={ico('auto')} /></button></div>
+  <div class="sh-grup sh-kurumsal"><span class="label">UPDATED</span>
+    <a href="/hakkimizda">Hakkımızda</a><a href="/yayin-ilkeleri">Yayın ilkeleri</a><a href="/iletisim">İletişim</a><a href="/reklam">Reklam ver</a>
+  </div>
 </nav>
