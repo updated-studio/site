@@ -86,7 +86,7 @@ function breaking() {
     const items = JSON.parse(sd.dataset.items || '[]') as { t: string; h: string; at: string }[]
     const tek = items.map((n) => `<a href="${escH(n.h)}"><span class="t">${escH(n.at)}</span>${escH(n.t)}</a>`).join('')
     ray.innerHTML = tek + `<span class="sd-kopya" aria-hidden="true">${tek.replace(/<a /g, '<a tabindex="-1" ')}</span>`
-    requestAnimationFrame(() => { ray.style.setProperty('--sure', `${Math.max(12, Math.round(ray.scrollWidth / 2 / 70))}s`) })
+    requestAnimationFrame(() => { ray.style.setProperty('--sure', `${Math.max(8, Math.round(ray.scrollWidth / 2 / 120))}s`) }) // hızlı akış: 120 px/sn
   }
   ciz()
   sd.addEventListener('sd-yenile', ciz)

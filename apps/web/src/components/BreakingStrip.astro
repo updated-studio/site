@@ -1,14 +1,15 @@
 ---
-/** Son dakika şeridi: yalnız aktif haber varken. Kayan şerit (25 Ekim 2026, kullanıcı isteği): haberler sağdan sola akar,
- *  üzerine gelince / odaklanınca durur; "hareketi azalt" açıksa akmaz, elle kaydırılır. Akış scripts/site.ts breaking(). */
+/** Son dakika bandı (1 Kasım 2026, kullanıcı: "editör çok kritik son dakika girerse menü ile kategori şeridi arasında hızlı akan bant; fare
+ *  üstüne gelince durmaz, akmaya devam eder; tıklanabilir"). Üst barın içinde, yapışık. Yalnız son 2 saatte "Son dakika" etiketli haber varken
+ *  görünür; sonradan girilen son dakikayı canli.ts açar, süresi dolanı kapatır. "Hareketi azalt" açıksa akmaz, elle kaydırılır. Akış: site.ts breaking(). */
 import type { News } from '../lib/types'
 import { time } from '../lib/format'
 interface Props { items: News[] }
 const { items } = Astro.props
 const data = items.map((n) => ({ t: n.title, h: n.path, at: time(n.publishedAt) }))
 ---
-{items.length > 0 && (
-  <div class="sd" id="sd" role="region" aria-label="Son dakika" data-items={JSON.stringify(data)}>
+{(
+  <div class="sd" id="sd" role="region" aria-label="Son dakika" data-items={JSON.stringify(data)} hidden={items.length === 0}>
     <div class="wrap">
       <span class="lbl l-son">Son dakika</span>
       <div class="sd-kay" data-sd-kay>

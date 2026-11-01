@@ -3,8 +3,10 @@ import Logo from './Logo.astro'
 import { ico } from '../lib/ui'
 import { getCategories, kunyeKatalog, type SiteCfg } from '../lib/api'
 import { TUR } from '../lib/turler'
-interface Props { site: SiteCfg; current?: string }
-const { site, current = '' } = Astro.props
+import BreakingStrip from './BreakingStrip.astro'
+import type { News } from '../lib/types'
+interface Props { site: SiteCfg; current?: string; hot?: News[] }
+const { site, current = '', hot = [] } = Astro.props
 const nav = site.nav.slice(0, 7) // kit 10b: en fazla 7
 const kategoriler = await getCategories()
 // Alt şerit bölüme göre değişir (1 Kasım 2026, kullanıcı: "haberlerin altındayken haber kategorileri, onun dışında araçlar gibi kategoriler;
@@ -59,6 +61,7 @@ const DILLER: [string, string][] = [['en', 'English'], ['de', 'Deutsch'], ['ru',
     {nav.map((n) => <a href={n.href} aria-current={on(n.href)}>{n.label}</a>)}
   </div></nav>
   {/* Kategori şeridi (30 Ekim 2026, kullanıcı: "üst barın altında kategoriler her zaman, mobilde de bilgisayarda da"): üst menüyle birlikte yapışık */}
+  <BreakingStrip items={hot} />
   {alt && <nav class="kat-serit" aria-label={alt.ad}><div class="wrap">
     {alt.ogeler.map((o) => <a href={o.href} aria-current={o.aktif ? 'page' : undefined}><span>{o.ad}</span></a>)}
   </div></nav>}

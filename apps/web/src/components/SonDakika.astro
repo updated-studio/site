@@ -1,5 +1,5 @@
 ---
-/** Yan sütun "son dakika" modülü: en yeni 7 haber, saat (bir günden eskiyse tarih), kategori. */
+/** Yan sütun "Son haberler" modülü (1 Kasım 2026: adı "Son dakika"ydı; son dakika artık yalnız editörün girdiği kritik haberler için, üst bant): en yeni 7 haber, saat (bir günden eskiyse tarih), kategori. */
 import type { News } from '../lib/types'
 import { short, time } from '../lib/format'
 import { ico } from '../lib/ui'
@@ -7,8 +7,8 @@ interface Props { items: News[] }
 const { items } = Astro.props
 const now = Date.now()
 ---
-<aside class="sdk" aria-label="Son dakika">
-  <div class="sdk-h"><span class="lbl l-son">Son dakika</span><span class="mono" data-clock></span></div>
+<aside class="sdk" aria-label="Son haberler">
+  <div class="sdk-h"><span class="sdk-bas">Son haberler</span><span class="mono" data-clock></span></div>
   <ol>
     {items.slice(0, 7).map((n) => (
       <li class={n.label === 'son-dakika' && now - +new Date(n.publishedAt) < 24 * 3600e3 ? 'hot' : ''}><span class="t">{now - +new Date(n.publishedAt) < 20 * 3600e3 ? time(n.publishedAt) : short(n.publishedAt)}</span><a href={n.path}>{n.title}</a><span class="c">{n.category.name}{n.label === 'sizinti' ? ' · sızıntı' : ''}</span></li>

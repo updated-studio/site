@@ -30,6 +30,7 @@ async function tazele() {
   // Son dakika şeridi: son 2 saatte "son dakika" etiketli haber varsa
   const sd = document.getElementById('sd')
   const hot = items.filter((n) => n.l === 'son-dakika' && Date.now() - +new Date(n.at) < 2 * 3600e3)
+  if (sd) sd.hidden = !hot.length // süresi dolan son dakika bandı kapanır, yeni girilen açılır
   if (sd && hot.length) {
     const yeni = JSON.stringify(hot.map((n) => ({ t: n.t, h: BASE + n.h, at: saat(n.at) })))
     if (sd.dataset.items !== yeni) { sd.dataset.items = yeni; sd.dispatchEvent(new Event('sd-yenile')) }
