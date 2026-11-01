@@ -18,13 +18,11 @@ const DILLER: [string, string][] = [['en', 'English'], ['de', 'Deutsch'], ['ru',
 <header class="hdr" id="hdr">
   <div class="wrap">
     <a class="logo" href="/" aria-label="UPDATED ana sayfa"><Logo /></a>
-    <details class="beta">
-      <summary title="Beta sürüm">Beta</summary>
-      <div class="beta-not"><b>Yeni UPDATED beta sürümünde.</b> Site yayında ama bazı bölümler hâlâ geliştiriliyor. Bir hata ya da eksik görürsen <a href="mailto:iletisim@updated.com.tr">iletisim@updated.com.tr</a> adresine yaz.</div>
-    </details>
+    {/* Beta rozeti yerine Kulüp (1 Kasım 2026, kullanıcı: "beta yazısını kaldırıp yerine kulübü koysak, dik çizgiyle vurgu"): logonun yanında,
+        her ekranda; böylece bölüm şeridi telefonda tek ekrana sığar. "Beta sürüm" ibaresi alt bilgide kalır. */}
+    <a class="logo-kulup" href={site.kulupUrl} aria-current={kulupte ? 'page' : undefined}>Kulüp</a>
     <nav class="nav" aria-label="Bölümler">
       {nav.map((n) => <a href={n.href} aria-current={on(n.href)}>{n.label}</a>)}
-      <a class="kulup" href={site.kulupUrl} aria-current={kulupte ? 'page' : undefined}>Kulüp</a>
     </nav>
     <div class="hdr-r">
       <button class="srch" type="button" data-open-search aria-label="Ara"><Fragment set:html={ico('search')} /><span>Ara</span></button>
@@ -40,7 +38,6 @@ const DILLER: [string, string][] = [['en', 'English'], ['de', 'Deutsch'], ['ru',
   {/* Telefonda ve tablette ana bölümler en üstte, kategoriler altında (1 Kasım 2026, kullanıcı): masaüstü üst menüsünün aynısı, menü düğmesine girmeden */}
   <nav class="bolum-serit" aria-label="Bölümler (telefon)"><div class="wrap">
     {nav.map((n) => <a href={n.href} aria-current={on(n.href)}>{n.label}</a>)}
-    <a class="kulup" href={site.kulupUrl} aria-current={kulupte ? 'page' : undefined}>Kulüp</a>
   </div></nav>
   {/* Kategori şeridi (30 Ekim 2026, kullanıcı: "üst barın altında kategoriler her zaman, mobilde de bilgisayarda da"): üst menüyle birlikte yapışık */}
   {kategoriler.length > 0 && <nav class="kat-serit" aria-label="Kategoriler"><div class="wrap">
@@ -63,7 +60,7 @@ const DILLER: [string, string][] = [['en', 'English'], ['de', 'Deutsch'], ['ru',
   <div class="sh-grup"><span class="label">Takip et</span>
     <a href={site.youtube} target="_blank" rel="noopener">YouTube</a><a href={site.instagram} target="_blank" rel="noopener">Instagram</a><a href="#bulten">Bülten</a><a href="/rss.xml">RSS</a>
   </div>
-  <div class="sh-grup"><span class="label">Language</span>{DILLER.map(([k, ad]) => <a href={`https://updated-com-tr.translate.goog/?_x_tr_sl=tr&_x_tr_tl=${k}`} data-dil-kod={k} lang={k} rel="nofollow">{ad}</a>)}</div>
+  <div class="sh-grup sh-dil"><span class="label">Language</span>{DILLER.map(([k, ad]) => <a href={`https://updated-com-tr.translate.goog/?_x_tr_sl=tr&_x_tr_tl=${k}`} data-dil-kod={k} lang={k} rel="nofollow">{ad}</a>)}</div>
   <div class="sheet-tema"><span>Görünüm</span><button class="ibtn" type="button" data-theme-btn aria-label="Görünüm"><Fragment set:html={ico('auto')} /></button></div>
   <div class="sh-grup sh-kurumsal"><span class="label">UPDATED</span>
     <a href="/hakkimizda">Hakkımızda</a><a href="/yayin-ilkeleri">Yayın ilkeleri</a><a href="/iletisim">İletişim</a><a href="/reklam">Reklam ver</a>

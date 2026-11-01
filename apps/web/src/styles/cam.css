@@ -109,7 +109,6 @@
 
 /* Telefonda Bülten düğmesi yok (yer ileride başka şeylere; bülten alt bilgide), Beta etiketi sığsın */
 @media (max-width:767px){.cam .hdr .btn-p{display:none}}
-@media (max-width:374px){.cam .logo svg{height:18px}.cam .beta summary{font-size:11px;padding:1px 6px;min-height:20px}.cam .hdr .wrap{gap:8px}.cam .hdr-r{gap:4px}.cam .beta{margin-left:-4px}}
 
 /* Kategori şeridi (30 Ekim 2026): üst menünün ikinci satırı, menüyle birlikte yapışık; yatay kayar. Dokunma alanı 44 px, görünen hap küçük. */
 .kat-serit{border-top:1px solid var(--line)}
@@ -131,14 +130,6 @@
   .bolum-serit a{flex:none;display:inline-flex;align-items:center;min-height:32px;padding:0 10px;border-radius:var(--r-etiket,999px);font-family:var(--f-head);font-weight:900;font-size:17px;text-transform:uppercase;letter-spacing:0;white-space:nowrap;text-decoration:none;color:var(--text)}
   .bolum-serit a[aria-current=page]{background:var(--text);color:var(--bg)}
 }
-/* Kulüp üst menüde çerçeveli (1 Kasım 2026, kullanıcı: "belli olsun farkı"): turuncu çerçeve, etkinken turuncu dolgu; haber bölümlerinden ayrı bir dünya */
-.cam .nav a.kulup{margin-left:10px;padding:5px 14px;border:2px solid var(--orange);border-radius:999px;line-height:1.1}
-.cam .nav a.kulup:hover{background:color-mix(in srgb,var(--orange) 14%,transparent);color:var(--text)}
-.cam .nav a.kulup[aria-current=page]{background:var(--orange);color:#111}
-@media (max-width:1100px){
-  .bolum-serit a.kulup{margin-left:6px;border:2px solid var(--orange);min-height:30px}
-  .bolum-serit a.kulup[aria-current=page]{background:var(--orange);color:#111}
-}
 /* Menü içeriği (1 Kasım 2026): ayrıntı menüsü; gruplar iki sütun, sade yazı. Açıkken üst şeritler gizli, menü üst barın hemen altından başlar */
 .sheet .sh-hesap{display:flex;align-items:center;gap:14px;padding:16px;margin:0 0 8px;border:1px solid var(--line);border-radius:var(--r-kart,14px);background:var(--surface);font-family:var(--f-body);font-size:15px;font-weight:400;text-transform:none;line-height:1.35;color:var(--text)}
 .sheet .sh-hesap > span{display:flex;flex-direction:column;gap:2px}.sheet .sh-hesap b{font-size:17px}.sheet .sh-hesap > span > span{color:var(--text-2);font-size:14px}
@@ -148,3 +139,23 @@
 .sh-kurumsal{border-bottom:0}
 .menu-acik .kat-serit,.menu-acik .bolum-serit{display:none!important}
 .menu-acik .cam .sheet,.cam.menu-acik .sheet{top:calc(86px + env(safe-area-inset-top,0px))}
+
+/* Logonun yanında Kulüp (1 Kasım 2026): logodan dik çizgiyle ayrılır, turuncu yazı; Kulüp çatısındayken turuncu dolgulu hap */
+.logo-kulup{flex:none;position:relative;display:inline-flex;align-items:center;min-height:34px;margin-left:6px;padding:0 10px;border-radius:999px;font-family:var(--f-head);font-weight:900;font-size:22px;line-height:1;text-transform:uppercase;letter-spacing:0;color:var(--orange-tx);text-decoration:none;transition:background var(--t1,120ms) var(--ease,ease)}
+.logo-kulup::before{content:"";position:absolute;left:-10px;top:4px;bottom:4px;width:2px;border-radius:1px;background:color-mix(in srgb,var(--text) 22%,transparent)}
+.logo-kulup:hover{background:color-mix(in srgb,var(--orange) 14%,transparent)}
+.logo-kulup[aria-current=page]{background:var(--orange);color:#111}
+.sh-dil{display:none}
+/* 360 px altı (eski küçük telefonlar): dil ve arama menüye iner, üst bar taşmasın */
+@media (max-width:359px){.sh-dil{display:grid}.cam .hdr-r .srch{display:none}}
+@media (max-width:480px){
+  .cam .hdr .wrap{gap:10px}
+  .cam .hdr .logo svg{height:20px}
+  .logo-kulup{font-size:19px;padding:0 8px;margin-left:4px}.logo-kulup::before{left:-8px}
+  .hdr .bolum-serit .wrap{justify-content:space-between;-webkit-mask-image:none;mask-image:none} /* sığdığı için kenar solması gerekmez */
+  .bolum-serit a{font-size:min(17px,3.55vw);padding:0 min(8px,1vw)} /* ekran genişliğiyle ölçeklenir: dört bölüm her telefonda tek satır */
+  .cam .hdr-r{gap:2px}
+  .cam .hdr-r .ibtn,.cam .hdr-r .srch{width:40px;min-width:40px;height:40px}
+}
+/* En küçük telefonlar (≤374 px): üst bar tek satıra sığsın; 480 px kurallarından sonra gelmeli */
+@media (max-width:374px){.cam .hdr .logo svg{height:17px}.cam .hdr .wrap{gap:8px}.cam .hdr-r{gap:0}.cam .hdr-r .ibtn,.cam .hdr-r .srch{width:36px;min-width:36px;height:40px}.logo-kulup{font-size:17px;padding:0 6px}.hdr .bolum-serit a{font-size:3.35vw}}

@@ -741,7 +741,8 @@ main{overflow-x:clip}
 .dil-m span{padding:6px 12px 2px;font-family:var(--f-mono);font-size:11px;color:var(--text-3)}
 .sheet-dil{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
 .sheet-dil .label{width:100%;color:var(--text-3)}
-@media (max-width:767px){.hdr-r .dil{display:none}}
+/* Dil seçimi telefonda da üst barda, aramanın sağında (1 Kasım 2026); yalnız 360 px altındaki çok dar ekranda menüye iner */
+@media (max-width:359px){.hdr-r .dil{display:none}}
 /* Araç kaydının yeri (scripts/araclar/hesap.ts) */
 .arac-hesap{margin:0;font-size:13px;color:var(--text-3)}
 .arac-hesap[data-durum=kaydedildi]{color:var(--text-2)}
