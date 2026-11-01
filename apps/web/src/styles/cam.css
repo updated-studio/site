@@ -166,3 +166,8 @@
 /* Son dakika bandı üst barın içinde (1 Kasım 2026): menü satırı (telefonda bölüm şeridi) ile kategori şeridi arasında, üst barla aynı genişlikte */
 :root:has(.hdr #sd:not([hidden])){--sd-h:40px}
 .cam .hdr .sd{margin:0;border-radius:0;box-shadow:none}
+
+/* Üst bar içerik genişliğinde (1 Kasım 2026, kullanıcı: "kırmızı çizgide kesilmeli"): bar, sayfanın içerik sütunuyla aynı kenarlarda biter;
+   logo içerik sütununun sol kenarına, hesap düğmesi sağ kenarına hizalanır. Geniş ekrandaki yan reklamlar barın dışında kalır. */
+.cam .hdr{margin-left:max(12px,env(safe-area-inset-left,0px),calc((100% - var(--max)) / 2 - 20px));margin-right:max(12px,env(safe-area-inset-right,0px),calc((100% - var(--max)) / 2 - 20px))}
+@media (min-width:1101px){.cam .hdr .wrap{max-width:none;padding-left:20px;padding-right:20px}}
