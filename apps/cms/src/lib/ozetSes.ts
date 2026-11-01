@@ -28,7 +28,16 @@ const sil = (k: string) => istemci().send(new DeleteObjectCommand({ Bucket: KOVA
 /** WAV (16 bit tek kanal) → MP3; olay döngüsü kilitlenmesin diye her 200 karede bir nefes alır */
 async function mp3(wav: Uint8Array): Promise<Uint8Array> {
   const d = new DataView(wav.buffer, wav.byteOffset, wav.byteLength)
-  const hz = d.getUint32(24, true), pcm = new Int16Array(wav.buffer.slice(wav.byteOffset + 44, wav.byteOffset + wav.byteLength))
+  const hz = d.getUint32(24, true), ham = new Int16Array(wav.buffer.slice(wav.byteOffset + 44, wav.byteOffset + wav.byteLength))
+  // Yumuşak giriş/çıkış (1 Kasım 2026, kullanıcı: "biterken cızırtı"): sondaki sessizlik ve tıkırtı kırpılır, 40 ms açılış ve 700 ms
+  // kosinüs kısılma, ardından 400 ms sessizlik
+  let son = ham.length; while (son > hz && Math.abs(ham[son - 1]) < 300) son--
+  son = Math.min(ham.length, son + Math.round(hz * 0.15))
+  const kuyruk = Math.round(hz * 0.4), pcm = new Int16Array(son + kuyruk)
+  pcm.set(ham.subarray(0, son))
+  const ac = Math.round(hz * 0.04), kis = Math.min(Math.round(hz * 0.7), son)
+  for (let i = 0; i < ac; i++) pcm[i] = Math.round(pcm[i] * (i / ac))
+  for (let i = 0; i < kis; i++) { const k = son - kis + i; pcm[k] = Math.round(pcm[k] * (0.5 + 0.5 * Math.cos((Math.PI * i) / kis))) }
   const enc = new Mp3Encoder(1, hz, 64), parca: Uint8Array[] = []
   for (let i = 0, k = 0; i < pcm.length; i += 1152, k++) {
     const b = enc.encodeBuffer(pcm.subarray(i, i + 1152)); if (b.length) parca.push(new Uint8Array(b))

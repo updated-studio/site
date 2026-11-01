@@ -1,9 +1,9 @@
 ---
 /**
- * "Bugün 60 saniyede" (1 Kasım 2026, kullanıcı: "oynat ve kaydırma düğmelerine gerek yok, parmakla kaydırır; özet sunuyorsak seslendirme ya da
+ * "Bugün 90 saniyede" (1 Kasım 2026; adı kullanıcıyla 60 → 90 saniye, kullanıcı: "oynat ve kaydırma düğmelerine gerek yok, parmakla kaydırır; özet sunuyorsak seslendirme ya da
  * başka bir deneyim olmalı, normal slider'dan farkı olmalı"). Altı haber kart şeridinde, parmakla ya da tekerle kaydırılır; düğme yok.
  * "Dinle" (1 Kasım 2026, kullanıcı: "robot gibi; gerçek insan sesi, kısa özet ve yorum, cihazın ses panelinden kontrol"): sunucuda hazırlanan
- * sesli bülten (Gemini metin + doğal Türkçe ses; Stüdyo ozet-ses + panel lib/ozetSes.ts → media/ozet/son.json). Ses dosyası <audio> ile çalar;
+ * sesli bülten (Gemini metin + doğal Türkçe ses; Stüdyo ozet-ses + panel lib/ozetSes.ts → media/ozet/son.json). Oynatıcı ortak (scripts/ozet.ts; sağ alt köşe düğmesiyle aynı ses);
  * Media Session ile kilit ekranı / denetim merkezi / bildirimden oynat-duraklat, ileri-geri (haber haber) yönetilir. Konuşulan haberin kartı
  * öne gelir, çubuk sesle ilerler. Bülten yoksa ya da 36 saatten eskiyse düğme görünmez. Kit: kendiliğinden dönen slayt yok; ses okur başlatınca.
  */
@@ -19,7 +19,7 @@ const tekrarsiz = (t: string, s: string) => { const b = t.split(':')[0].trim(); 
 const metin = list.map((n) => ({ c: n.category.name, t: n.title, s: kisa(tekrarsiz(n.title, n.spot || '')) }))
 ---
 {list.length > 0 && <section class="oz" data-ozet={JSON.stringify(metin)} aria-labelledby="oz-bas">
-  <div class="sh oz-sh"><h2 id="oz-bas"><span class="no">{no}</span>Bugün 60 saniyede</h2>
+  <div class="sh oz-sh"><h2 id="oz-bas"><span class="no">{no}</span>Bugün 90 saniyede</h2>
     <button class="btn btn-p oz-dinle" type="button" data-dinle hidden><span class="oz-ikon" data-dinle-i set:html={ico('play', 16)} /><span data-dinle-y>Dinle</span></button>
   </div>
   <div class="oz-segs" aria-hidden="true">{list.map(() => <i><b></b></i>)}</div>
@@ -34,68 +34,59 @@ const metin = list.map((n) => ({ c: n.category.name, t: n.title, s: kisa(tekrars
     ))}
   </ol>
   <details class="oz-metin" data-oz-metin hidden><summary>Bültenin metni</summary><p data-oz-metin-p></p></details>
-  <audio data-oz-ses preload="none"></audio>
-</section>}
+  </section>}
 <script>
-  type Ozet = { tarih: string; ses: string; sure: number; metin: string; maddeler: { id: number; yol: string; baslik: string; bas: number }[] }
+  import { ozetYukle, olay, calDuraklat, caliyor, zaman, basladi, git, sn, type Ozet } from '../../scripts/ozet'
   const box = document.querySelector<HTMLElement>('[data-ozet]')
-  const KAYNAK = 'https://panel.updated.com.tr/storage/v1/object/public/media/ozet/son.json'
   const IKON = { play: '<svg class="ico" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/></svg>', pause: '<svg class="ico" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor" stroke="none"/></svg>' }
-  const sn = (x: number) => `${Math.floor(x / 60)}:${String(Math.round(x % 60)).padStart(2, '0')}`
-  if (box) (async () => {
-    let o: Ozet | null = null
-    try { const r = await fetch(KAYNAK, { cache: 'no-cache' }); if (r.ok) o = await r.json() } catch {}
-    if (!o?.ses || Date.now() - +new Date(o.tarih) > 36 * 3600e3) return
-    const oz = o
-    const btn = box.querySelector<HTMLButtonElement>('[data-dinle]')!, yazi = box.querySelector('[data-dinle-y]')!, ikon = box.querySelector('[data-dinle-i]')!
-    const ses = box.querySelector<HTMLAudioElement>('[data-oz-ses]')!, iz = box.querySelector<HTMLElement>('[data-oz-iz]')!
-    const kartlar = [...box.querySelectorAll<HTMLElement>('.oz-k')], cubuk = [...box.querySelectorAll<HTMLElement>('.oz-segs b')]
-    const metin = box.querySelector<HTMLElement>('[data-oz-metin]')!
-    box.querySelector('[data-oz-metin-p]')!.textContent = oz.metin; metin.hidden = false
-    // Bültendeki haber → sayfadaki kart (adrese göre; bulunamazsa sıraya göre)
-    const kartOf = (k: number) => kartlar.find((x) => x.querySelector('a')?.getAttribute('href') === oz.maddeler[k]?.yol) ?? kartlar[k]
+  if (box) ozetYukle().then((o) => { if (o) kur(o) })
+  function kur(oz: Ozet) {
+    const b = box!
+    const btn = b.querySelector<HTMLButtonElement>('[data-dinle]')!, yazi = b.querySelector('[data-dinle-y]')!, ikon = b.querySelector('[data-dinle-i]')!
+    const iz = b.querySelector<HTMLElement>('[data-oz-iz]')!, kartlar = [...b.querySelectorAll<HTMLElement>('.oz-k')], cubuk = [...b.querySelectorAll<HTMLElement>('.oz-segs b')]
+    const metin = b.querySelector<HTMLElement>('[data-oz-metin]')!
+    b.querySelector('[data-oz-metin-p]')!.textContent = oz.metin; metin.hidden = false
+    const yolu = (x: HTMLElement) => x.querySelector('a')?.getAttribute('href')
+    const kartOf = (k: number) => kartlar.find((x) => yolu(x) === oz.maddeler[k]?.yol) ?? kartlar[k]
     const bitis = (k: number) => oz.maddeler[k + 1]?.bas ?? oz.sure
     yazi.textContent = `Dinle · ${sn(oz.sure)}`; btn.hidden = false
-    let simdiki = -1
+    // Kaymasız geçiş (1 Kasım 2026, kullanıcı: "geçişte kayma var"): kart şeridi kaydırılırken gelen kaydırma olayları okur hareketi sayılmaz;
+    // hedef, kartın şeritteki gerçek konumundan (scroll-padding dahil) hesaplanır
+    let otomatik = 0, simdiki = -1
+    const kaydir = (x: HTMLElement) => {
+      const pad = parseFloat(getComputedStyle(iz).scrollPaddingLeft) || 0
+      otomatik = Date.now() + 900
+      iz.scrollTo({ left: x.offsetLeft - iz.offsetLeft - pad, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
+    }
     const goster = (t: number) => {
       let k = -1; oz.maddeler.forEach((m, q) => { if (t >= m.bas) k = q })
-      cubuk.forEach((b, q) => { const m = oz.maddeler[q]; b.style.width = !m ? '0%' : t >= bitis(q) ? '100%' : t <= m.bas ? '0%' : `${((t - m.bas) / (bitis(q) - m.bas)) * 100}%` })
+      cubuk.forEach((c, q) => { const m = oz.maddeler[q]; c.style.width = !m ? '0%' : t >= bitis(q) ? '100%' : t <= m.bas ? '0%' : `${((t - m.bas) / (bitis(q) - m.bas)) * 100}%` })
       if (k === simdiki) return; simdiki = k
       kartlar.forEach((x) => x.removeAttribute('data-simdi'))
       const x = k >= 0 ? kartOf(k) : null
-      if (x) { x.setAttribute('data-simdi', ''); iz.scrollTo({ left: x.offsetLeft - iz.offsetLeft, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }) }
+      if (x) { x.setAttribute('data-simdi', ''); kaydir(x) }
     }
-    const atla = (yon: 1 | -1) => { const t = ses.currentTime; const hedef = yon > 0 ? oz.maddeler.find((m) => m.bas > t + 0.5)?.bas : [...oz.maddeler].reverse().find((m) => m.bas < t - 2)?.bas; ses.currentTime = hedef ?? (yon > 0 ? oz.sure : 0) }
-    const durum = () => { const c = !ses.paused; ikon.innerHTML = c ? IKON.pause : IKON.play; yazi.textContent = c ? 'Duraklat' : ses.currentTime > 0 && !ses.ended ? 'Devam et' : `Dinle · ${sn(oz.sure)}`; box.toggleAttribute('data-caliyor', c); if ('mediaSession' in navigator) navigator.mediaSession.playbackState = c ? 'playing' : 'paused' }
-    btn.addEventListener('click', () => {
-      if (!ses.src) {
-        ses.src = oz.ses
-        // Kilit ekranı ve cihazın ses paneli: başlık, görsel, oynat/duraklat, haber haber ileri/geri, sarma
-        if ('mediaSession' in navigator) {
-          const tarih = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long' }).format(new Date(oz.tarih))
-          navigator.mediaSession.metadata = new MediaMetadata({ title: 'Bugün 60 saniyede', artist: 'UPDATED', album: `${tarih} · teknoloji bülteni`, artwork: [{ src: '/marka/og-varsayilan.jpg', sizes: '1200x630', type: 'image/jpeg' }] })
-          const ms = navigator.mediaSession, h = (a: MediaSessionAction, f: MediaSessionActionHandler) => { try { ms.setActionHandler(a, f) } catch {} }
-          h('play', () => ses.play()); h('pause', () => ses.pause())
-          h('nexttrack', () => atla(1)); h('previoustrack', () => atla(-1))
-          h('seekforward', () => (ses.currentTime = Math.min(oz.sure, ses.currentTime + 10))); h('seekbackward', () => (ses.currentTime = Math.max(0, ses.currentTime - 10)))
-          h('seekto', (d) => { if (d.seekTime != null) ses.currentTime = d.seekTime })
-        }
-      }
-      if (ses.paused) ses.play().catch(() => {}); else ses.pause()
-    })
-    ses.addEventListener('play', durum); ses.addEventListener('pause', durum)
-    ses.addEventListener('ended', () => { cubuk.forEach((b) => (b.style.width = '100%')); kartlar.forEach((x) => x.removeAttribute('data-simdi')); simdiki = -1; durum() })
-    ses.addEventListener('timeupdate', () => {
-      goster(ses.currentTime)
-      if ('mediaSession' in navigator && ses.duration) try { navigator.mediaSession.setPositionState({ duration: ses.duration, position: ses.currentTime, playbackRate: ses.playbackRate }) } catch {}
-    })
-    // Okur kartı parmakla değiştirirse bülten o haberden sürer
-    let zaman = 0
-    iz.addEventListener('scroll', () => { if (ses.paused) return; clearTimeout(zaman); zaman = window.setTimeout(() => {
-      const k = Math.round(iz.scrollLeft / (kartlar[0].offsetWidth + 12)), x = kartlar[k], m = x && oz.maddeler.findIndex((y) => y.yol === x.querySelector('a')?.getAttribute('href'))
-      if (m != null && m >= 0 && m !== simdiki) ses.currentTime = oz.maddeler[m].bas + 0.05
-    }, 500) }, { passive: true })
-  })()
+    const durum = () => {
+      const c = caliyor()
+      ikon.innerHTML = c ? IKON.pause : IKON.play
+      yazi.textContent = c ? 'Duraklat' : basladi() ? 'Devam et' : `Dinle · ${sn(oz.sure)}`
+      b.toggleAttribute('data-caliyor', c)
+      if (!c && !basladi()) { cubuk.forEach((x) => (x.style.width = zaman() > 0 ? '100%' : '0%')); kartlar.forEach((x) => x.removeAttribute('data-simdi')); simdiki = -1 }
+    }
+    btn.addEventListener('click', () => calDuraklat(oz))
+    olay.addEventListener('durum', durum); olay.addEventListener('zaman', () => goster(zaman()))
+    // Okur kartı parmakla değiştirirse bülten o haberden sürer (en yakın kart, gerçek konuma göre)
+    let bekle = 0
+    iz.addEventListener('scroll', () => {
+      if (!caliyor() || Date.now() < otomatik) return
+      clearTimeout(bekle); bekle = window.setTimeout(() => {
+        const sol = iz.scrollLeft + iz.offsetLeft + (parseFloat(getComputedStyle(iz).scrollPaddingLeft) || 0)
+        const x = kartlar.reduce((a, c) => (Math.abs(c.offsetLeft - sol) < Math.abs(a.offsetLeft - sol) ? c : a))
+        const m = oz.maddeler.findIndex((y) => y.yol === yolu(x))
+        if (m >= 0 && m !== simdiki) git(oz.maddeler[m].bas + 0.05)
+      }, 450)
+    }, { passive: true })
+  }
 </script>
 <style is:global>
   .oz-sh{align-items:center}

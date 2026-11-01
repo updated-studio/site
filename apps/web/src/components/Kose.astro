@@ -1,0 +1,68 @@
+---
+/**
+ * Sağ alt köşe (1 Kasım 2026, kullanıcı: "reels ve videolar ekranda görünmediğinde logoları, bugünün özeti ses düğmesiyle birlikte sağ altın
+ * biraz üstünde bağlantı olarak bulunsun; hemen altında Kulüp düğmesi"). Her sayfada; ana sayfada Reels ya da Videolar bölümü ekrandayken gizlenir.
+ * Özet düğmesi ortak oynatıcıyı (scripts/ozet.ts) yönetir; çalarken çevresindeki halka ilerler. Menü ya da arama açıkken gizli.
+ */
+import { logoInstagram, logoYoutube } from '../lib/ui'
+interface Props { instagram: string; youtube: string; kulupUrl: string }
+const { instagram, youtube, kulupUrl } = Astro.props
+---
+<div class="kose" data-kose hidden>
+  <a class="kose-d" href={instagram} target="_blank" rel="noopener" aria-label="Instagram: Reels"><Fragment set:html={logoInstagram(22)} /></a>
+  <a class="kose-d" href={youtube} target="_blank" rel="noopener" aria-label="YouTube kanalı"><Fragment set:html={logoYoutube(20)} /></a>
+  <button class="kose-d kose-ozet" type="button" data-kose-ozet hidden aria-label="Bugün 90 saniyede: sesli bülteni dinle">
+    <svg class="kose-halka" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" /><circle class="kose-dolu" cx="24" cy="24" r="22" pathLength="100" data-kose-halka /></svg>
+    <span class="kose-ikon" data-kose-ikon></span>
+    <span class="kose-etiket" aria-hidden="true">Bugünün özeti</span>
+  </button>
+  <a class="kose-kulup" href={kulupUrl}>Kulüp</a>
+</div>
+<script>
+  import { ozetYukle, olay, calDuraklat, caliyor, zaman, type Ozet } from '../scripts/ozet'
+  const k = document.querySelector<HTMLElement>('[data-kose]')
+  if (k) {
+    const IKON = { play: '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>', pause: '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/></svg>' }
+    // Görünürlük: Reels ya da Videolar bölümü ekrandayken gizli; menü/arama açıkken gizli; ilk ekranda (en üstte) değil, biraz kaydırınca
+    const bolumler = [...document.querySelectorAll('.mv, .vd')]
+    const gorunen = new Set<Element>()
+    const arama = document.getElementById('search')
+    const guncelle = () => { k.hidden = gorunen.size > 0 || document.documentElement.classList.contains('menu-acik') || (!!arama && !arama.hidden) || scrollY < 240 }
+    const io = new IntersectionObserver((es) => { es.forEach((e) => (e.isIntersecting ? gorunen.add(e.target) : gorunen.delete(e.target))); guncelle() })
+    bolumler.forEach((b) => io.observe(b))
+    addEventListener('scroll', guncelle, { passive: true })
+    new MutationObserver(guncelle).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    if (arama) new MutationObserver(guncelle).observe(arama, { attributes: true, attributeFilter: ['hidden'] })
+    guncelle()
+    // Sesli bülten düğmesi
+    const btn = k.querySelector<HTMLButtonElement>('[data-kose-ozet]')!, ikon = k.querySelector<HTMLElement>('[data-kose-ikon]')!, halka = k.querySelector<SVGCircleElement>('[data-kose-halka]')!
+    ozetYukle().then((o: Ozet | null) => {
+      if (!o) return
+      btn.hidden = false; ikon.innerHTML = IKON.play
+      btn.addEventListener('click', () => calDuraklat(o))
+      olay.addEventListener('durum', () => { const c = caliyor(); ikon.innerHTML = c ? IKON.pause : IKON.play; btn.toggleAttribute('data-caliyor', c); btn.setAttribute('aria-label', c ? 'Sesli bülteni duraklat' : 'Bugün 90 saniyede: sesli bülteni dinle') })
+      olay.addEventListener('zaman', () => { halka.style.strokeDashoffset = String(100 - (zaman() / o.sure) * 100) })
+    })
+  }
+</script>
+<style is:global>
+  .kose{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(max(16px,env(safe-area-inset-bottom,0px)) + 56px);z-index:45;display:flex;flex-direction:column;align-items:center;gap:10px}
+  .kose[hidden]{display:none}
+  .kose-d{position:relative;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 92%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 8px 24px rgb(0 0 0 / .18);color:var(--text);cursor:pointer;padding:0;text-decoration:none;transition:transform var(--t1,120ms) var(--ease,ease)}
+  .kose-d:hover{transform:translateY(-2px)}
+  .kose-ozet{background:var(--blue,#2563EB);border-color:transparent;color:#fff}
+  .kose-ozet[hidden]{display:none}
+  .kose-ikon{display:grid;place-items:center}
+  .kose-halka{position:absolute;inset:-4px;width:56px;height:56px;transform:rotate(-90deg);pointer-events:none}
+  .kose-halka circle{fill:none;stroke:transparent;stroke-width:2.5}
+  .kose-ozet[data-caliyor] .kose-halka circle:first-child{stroke:color-mix(in srgb,var(--orange) 25%,transparent)}
+  .kose-halka .kose-dolu{stroke:var(--orange);stroke-dasharray:100;stroke-dashoffset:100;stroke-linecap:round;transition:stroke-dashoffset .25s linear}
+  .kose-etiket{position:absolute;right:calc(100% + 10px);top:50%;transform:translateY(-50%);white-space:nowrap;padding:6px 10px;border-radius:999px;background:var(--text);color:var(--bg);font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity var(--t1,120ms) var(--ease,ease)}
+  .kose-ozet:hover .kose-etiket,.kose-ozet:focus-visible .kose-etiket,.kose-ozet[data-caliyor] .kose-etiket{opacity:1}
+  .kose-kulup{display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border-radius:999px;background:var(--orange);color:#111;font-family:var(--f-head);font-weight:900;font-size:17px;text-transform:uppercase;text-decoration:none;box-shadow:0 8px 24px rgb(0 0 0 / .18)}
+  .kose-kulup:hover{filter:brightness(1.06)}
+  /* Geniş ekranda sağda dikey reklam alanı var: köşe düğmeleri yan yana, ekranın en altında (reklamın altında kalır) */
+  @media (min-width:1504px){.kose{flex-direction:row;bottom:max(16px,env(safe-area-inset-bottom,0px))}.kose-etiket{right:auto;left:50%;top:auto;bottom:calc(100% + 10px);transform:translateX(-50%)}}
+  @media (max-width:760px){.kose{gap:8px}.kose-d{width:44px;height:44px}.kose-halka{width:52px;height:52px}}
+  @media (prefers-reduced-motion: reduce){.kose-d,.kose-halka .kose-dolu{transition:none}}
+</style>

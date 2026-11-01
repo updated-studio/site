@@ -260,7 +260,7 @@ function kunyeCard() {
   addEventListener('scroll', () => { if (card && !card.hidden) { card.hidden = true; cur = '' } }, { passive: true })
 }
 
-/* ---------- 60 saniye: okur oynatır ---------- */
+
 /* ---------- Kıyas Robotu ---------- */
 function robot() {
   $$('[data-robot]').forEach((box) => {
