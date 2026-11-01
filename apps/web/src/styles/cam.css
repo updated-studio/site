@@ -130,3 +130,11 @@
   .bolum-serit a{flex:none;display:inline-flex;align-items:center;min-height:32px;padding:0 10px;border-radius:var(--r-etiket,999px);font-family:var(--f-head);font-weight:900;font-size:17px;text-transform:uppercase;letter-spacing:0;white-space:nowrap;text-decoration:none;color:var(--text)}
   .bolum-serit a[aria-current=page]{background:var(--text);color:var(--bg)}
 }
+/* Kulüp üst menüde çerçeveli (1 Kasım 2026, kullanıcı: "belli olsun farkı"): turuncu çerçeve, etkinken turuncu dolgu; haber bölümlerinden ayrı bir dünya */
+.cam .nav a.kulup{margin-left:10px;padding:5px 14px;border:2px solid var(--orange);border-radius:999px;line-height:1.1}
+.cam .nav a.kulup:hover{background:color-mix(in srgb,var(--orange) 14%,transparent);color:var(--text)}
+.cam .nav a.kulup[aria-current=page]{background:var(--orange);color:#111}
+@media (max-width:1100px){
+  .bolum-serit a.kulup{margin-left:6px;border:2px solid var(--orange);min-height:30px}
+  .bolum-serit a.kulup[aria-current=page]{background:var(--orange);color:#111}
+}

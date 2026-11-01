@@ -1,5 +1,6 @@
 ---
 /** Araç sayfası iskeleti: başlık, araç (slot), nasıl kullanılır (slot "nasil"), yan sütunda diğer araçlar ve üyelik önerisi (zorunlu değil). */
+import KulupSerit from './KulupSerit.astro'
 import Base from '../layouts/Base.astro'
 import { ARACLAR } from '../lib/araclar'
 import { SITE } from '../lib/seo'
@@ -9,6 +10,7 @@ const jsonld = [{ '@context': 'https://schema.org', '@type': 'WebApplication', n
   { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Araçlar', item: `${SITE}/araclar` }, { '@type': 'ListItem', position: 2, name: baslik, item: SITE + yol }] }]
 ---
 <Base meta={{ title: `${baslik} | UPDATED`, description: aciklama, path: yol, jsonld }}>
+  <KulupSerit aktif="araclar" slot="top" />
   <div class="wrap">
     <div class="art-head" style="max-width:none;padding-bottom:24px"><a class="cat" href="/araclar">Araçlar</a><h1 class="h1">{baslik}</h1><p class="lead" style="margin:0">{lead}</p></div>
     <div class="with-rail">

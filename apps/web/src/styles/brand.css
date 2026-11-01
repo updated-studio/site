@@ -424,7 +424,7 @@ h3{font-weight:700}
 
 /* footer */
 .ftr{background:var(--black);color:var(--white);margin-top:48px}
-.ftr .wrap{padding-block:48px;display:grid;grid-template-columns:minmax(0,1.2fr) repeat(3,minmax(0,1fr));gap:var(--gut)}
+.ftr .wrap{padding-block:48px;display:grid;grid-template-columns:minmax(0,1.2fr) repeat(4,minmax(0,1fr));gap:var(--gut)}
 .ftr .logo{color:var(--white)}
 .ftr .logo svg{height:28px}
 .ftr h2,.ftr h4{font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#B4B7BB;margin:0 0 12px;font-weight:600}
@@ -433,9 +433,10 @@ h3{font-weight:700}
 .ftr .bt{grid-column:1/-1;border-top:1px solid #333333;padding-top:16px;font-family:var(--f-mono);font-size:14px;color:#B4B7BB;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .nl{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
 .nl input{flex:1 1 200px;height:44px;border:1px solid #8E9297;background:#000000;color:#FFFFFF;padding:0 12px;font:inherit;font-size:15px;min-width:0}
+@media (max-width:1100px){.ftr .wrap{grid-template-columns:repeat(4,minmax(0,1fr))}.ftr .wrap > div:first-child{grid-column:1/-1}}
 @media (max-width:900px){.ftr .wrap{grid-template-columns:1fr 1fr}}
 /* Telefonda iki sütun (Fatih, 25 Ekim 2026): bülten tam genişlik, Bölümler | Kanallar yan yana, Kurumsal listesi iki sütun */
-@media (max-width:560px){.ftr .wrap{grid-template-columns:1fr 1fr;gap:28px 16px;padding-block:32px}.ftr .wrap > div:first-child,.ftr .wrap > div:nth-child(4){grid-column:1/-1}.ftr .wrap > div:nth-child(4) ul{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px}.ftr ul{font-size:14px}.ftr .bt{flex-direction:column;gap:4px}}
+@media (max-width:560px){.ftr .wrap{grid-template-columns:1fr 1fr;gap:28px 16px;padding-block:32px}.ftr .wrap > div:first-child,.ftr .wrap > div:last-child{grid-column:1/-1}.ftr .wrap > div:last-child ul{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px}.ftr ul{font-size:14px}.ftr .bt{flex-direction:column;gap:4px}}
 
 /* preview bar + drawers (panel look, kit §12) */
 .demo{position:fixed;left:50%;transform:translateX(-50%);bottom:max(12px,env(safe-area-inset-bottom,0px));z-index:70;display:flex;background:var(--black);border:1px solid #333333;max-width:calc(100vw - 24px);overflow-x:auto;scrollbar-width:none}

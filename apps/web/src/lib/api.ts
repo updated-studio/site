@@ -136,7 +136,8 @@ const cyc = <T,>(arr: T[], p: number, n = PAGE) => Array.from({ length: n }, (_,
 export type SiteCfg = { tagline: string; nav: { label: string; href: string }[]; youtube: string; instagram: string; kulupUrl: string; newsletterNote: string; amazonTag?: string }
 /** Üst menü (Fatih, 26 Ekim 2026): ana bölümler, her biri ayrı sayfa; İncelemeler ve Kıyaslamalar ayrı (Fatih, aynı gün). Kulüp başlıkta ayrıca vurgulanır. Panelin menü listesi kullanılmaz.
  *  "Ana Sayfa" maddesi yok (kullanıcı, 28 Ekim 2026: "updated.com.tr zaten ana sayfanın kendisi"); logo ana sayfaya götürür. */
-export const ANA_MENU = [['Haberler', '/haberler'], ['İncelemeler', '/inceleme'], ['Kıyaslamalar', '/karsilastirma'], ['Rehber', '/rehber'], ['Araçlar', '/araclar']].map(([label, href]) => ({ label, href }))
+// Araçlar 1 Kasım 2026'dan beri Kulüp'ün içinde (kullanıcı: "topluluksal şeylerin hepsi kulüpte")
+export const ANA_MENU = [['Haberler', '/haberler'], ['İncelemeler', '/inceleme'], ['Kıyaslamalar', '/karsilastirma'], ['Rehber', '/rehber']].map(([label, href]) => ({ label, href }))
 const DEF_NAV = ANA_MENU
 const DEF_SITE: SiteCfg = { tagline: 'Teknoloji haberleri, incelemeler ve karşılaştırmalar. Önce bilgi, sonra yorum.', nav: DEF_NAV, youtube: 'https://www.youtube.com/@nerdesinfatih', instagram: 'https://www.instagram.com/updated.tr/', kulupUrl: '/kulup', newsletterNote: 'Haftalık bülten pazartesi 08.30.' }
 let siteCache: { at: number; v: SiteCfg } | null = null

@@ -93,3 +93,13 @@ details.dev summary{cursor:pointer;font-weight:600}
 .cam .khero{border-bottom-width:1px;border-bottom-color:var(--line)}
 .cam .sim canvas{border-radius:var(--r-kart)}
 .cam .opts button,.cam .drop{border-radius:var(--r-dugme)}
+/* Kulüp çatısındaki diğer sayfalar (1 Kasım 2026): araçlar ve yarışmalar sekme şeridinde bağlantı */
+.ktabs a.kt-git{flex:none;display:inline-flex;align-items:center;height:48px;padding:0 12px;font-weight:600;font-size:15px;text-decoration:none;color:var(--text);white-space:nowrap;border-bottom:3px solid transparent}
+.ktabs a.kt-git:hover{color:var(--link)}
+/* Kulüp ana görünümünde araçlar (1 Kasım 2026: araçlar Kulüp çatısında) */
+.k-arac{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.k-arac-k{display:flex;flex-direction:column;gap:4px;padding:16px 18px;border:1px solid var(--line);border-radius:var(--r-kart,0);background:var(--surface);box-shadow:var(--cam-golge,none);color:var(--text);text-decoration:none;min-width:0}
+.k-arac-k b{font-size:17px}.k-arac-k span{font-size:14px;line-height:1.45;color:var(--text-2)}
+.k-arac-k:hover{border-color:var(--text)}
+@media (max-width:900px){.k-arac{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.k-arac{grid-template-columns:minmax(0,1fr)}}

@@ -1,4 +1,5 @@
 ---
+import KulupSerit from '../components/KulupSerit.astro'
 import Base from '../layouts/Base.astro'
 import { getGorevler } from '../lib/api'
 
@@ -8,6 +9,7 @@ const liste = await getGorevler()
 const aktif = liste.find((g) => +new Date(g.baslangic) <= simdi && simdi < +new Date(g.bitis))
 ---
 <Base meta={{ title: aktif ? `Haftalık fotoğraf görevi: ${aktif.baslik} | UPDATED` : 'Haftalık fotoğraf görevi | UPDATED', description: 'Her pazartesi yeni bir tema: fotoğrafını yükle, hafta sonunda Uper\'ler kör oylamayla haftanın fotoğrafını seçsin.', path: '/gorev' }}>
+  <KulupSerit aktif="gorev" slot="top" />
   <div class="wrap gv">
     <div class="art-head" style="max-width:none;padding-bottom:8px">
       <span class="cat">UPDATED · Haftalık görev</span>

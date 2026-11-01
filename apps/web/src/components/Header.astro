@@ -8,6 +8,8 @@ const nav = site.nav.slice(0, 7) // kit 10b: en fazla 7
 const kategoriler = await getCategories() // telefon menüsünde kategoriler (üst menü sade: 25 Ekim 2026)
 /** Etkin bölüm: Ana Sayfa yalnız kökte; Kıyaslamalar künye sayfalarını da kapsar */
 const BOLUM: Record<string, string[]> = { '/karsilastirma': ['/karsilastirma', '/urun'] }
+// Kulüp çatısı (1 Kasım 2026): dersler, araçlar, haftalık görev, yarışmalar
+const kulupte = [site.kulupUrl, '/araclar', '/gorev', '/yarismalar'].some((b) => current.startsWith(b))
 const on = (h: string) => ((h === '/' ? current === '/' : (BOLUM[h] || [h]).some((b) => current.startsWith(b))) ? 'page' : undefined)
 // Dil menüsü (31 Ekim 2026, kullanıcı: "önizleme dili, Google sayfa çevirisi bile yapıyor"): sayfa Google Çeviri'nin ücretsiz sayfa çevirisinde açılır;
 // sunucuya yük yok, arama motorlarına ayrı dil olarak bildirilmez. Gerçek çok dilli site sonraya bırakıldı.
@@ -22,7 +24,7 @@ const DILLER: [string, string][] = [['en', 'English'], ['de', 'Deutsch'], ['ru',
     </details>
     <nav class="nav" aria-label="Bölümler">
       {nav.map((n) => <a href={n.href} aria-current={on(n.href)}>{n.label}</a>)}
-      <a class="kulup" href={site.kulupUrl} aria-current={current.startsWith(site.kulupUrl) || current.startsWith('/gorev') || current.startsWith('/yarismalar') ? 'page' : undefined}>Kulüp</a>
+      <a class="kulup" href={site.kulupUrl} aria-current={kulupte ? 'page' : undefined}>Kulüp</a>
     </nav>
     <div class="hdr-r">
       <button class="srch" type="button" data-open-search aria-label="Ara"><Fragment set:html={ico('search')} /><span>Ara</span></button>
@@ -43,11 +45,11 @@ const DILLER: [string, string][] = [['en', 'English'], ['de', 'Deutsch'], ['ru',
   {/* Telefonda ve tablette ana bölümler kategori şeridinin altında (31 Ekim 2026, kullanıcı): masaüstü üst menüsünün aynısı, menü düğmesine girmeden */}
   <nav class="bolum-serit" aria-label="Bölümler (telefon)"><div class="wrap">
     {nav.map((n) => <a href={n.href} aria-current={on(n.href)}>{n.label}</a>)}
-    <a href={site.kulupUrl} aria-current={current.startsWith(site.kulupUrl) || current.startsWith('/gorev') || current.startsWith('/yarismalar') ? 'page' : undefined}>Kulüp</a>
+    <a class="kulup" href={site.kulupUrl} aria-current={kulupte ? 'page' : undefined}>Kulüp</a>
   </div></nav>
 </header>
 <script is:inline>(()=>{document.querySelectorAll('[data-dil-kod]').forEach(a=>{a.href='https://updated-com-tr.translate.goog'+location.pathname+'?_x_tr_sl=tr&_x_tr_tl='+a.dataset.dilKod+'&_x_tr_hl='+a.dataset.dilKod})})()</script>
-<script is:inline>(()=>{const a=document.querySelector('.kat-serit [aria-current=page]');if(!a)return;const w=a.parentElement;w.scrollLeft=a.offsetLeft-(w.clientWidth-a.offsetWidth)/2})()</script>
+<script is:inline>(()=>{document.querySelectorAll('.kat-serit [aria-current=page],.bolum-serit [aria-current=page],.kserit [aria-current=page]').forEach(a=>{const w=a.parentElement;w.scrollLeft=a.offsetLeft-(w.clientWidth-a.offsetWidth)/2})})()</script>
 <nav class="sheet" id="sheet" aria-label="Mobil menü" hidden>
   {nav.map((n) => <a href={n.href}>{n.label}</a>)}
   <a href={site.kulupUrl}>Kulüp</a>

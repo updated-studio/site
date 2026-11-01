@@ -1,11 +1,13 @@
 ---
+import KulupSerit from '../../components/KulupSerit.astro'
 import Base from '../../layouts/Base.astro'
 import { ARACLAR, GRUPLAR } from '../../lib/araclar'
 import { ico } from '../../lib/ui'
 ---
 <Base meta={{ title: 'Fotoğraf ve video araçları | UPDATED', description: 'Fotoğrafçılar ve videograflar için ücretsiz hesaplayıcılar: dolunay, alan derinliği, timelapse, astrofotoğraf, flaş, makro, ağır çekim, dron GSD, batarya, lens görünümü, stüdyo ışığı, altın saat, ND filtre ve daha fazlası. Üyelik gerekmez.', path: '/araclar' }}>
+  <KulupSerit aktif="araclar" slot="top" />
   <div class="wrap">
-    <div class="art-head" style="max-width:none;padding-bottom:24px"><span class="cat">Ücretsiz · {ARACLAR.length} araç</span><h1 class="h1">Araçlar</h1><p class="lead" style="margin:0">Çekimini planlamak için ücretsiz hesaplayıcılar. Üyelik gerekmez.</p></div>
+    <div class="art-head" style="max-width:none;padding-bottom:24px"><span class="cat">Kulüp · {ARACLAR.length} ücretsiz araç</span><h1 class="h1">Araçlar</h1><p class="lead" style="margin:0">Çekimini planlamak için ücretsiz hesaplayıcılar. Üyelik gerekmez.</p></div>
     {GRUPLAR.map((g) => <section class="arac-grup"><h2 class="label">{g}</h2>
       <div class="arac-izgara">
         {ARACLAR.filter((a) => a.grup === g).map((a) => <a class="arac-kart" href={a.yol}><h3>{a.ad}</h3><p>{a.aciklama}</p><span class="ar-ac">Aç <Fragment set:html={ico('right', 14)} /></span></a>)}

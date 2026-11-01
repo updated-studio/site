@@ -14,7 +14,7 @@ const yt = (v: Video) => v.youtubeId ? `https://www.youtube.com/watch?v=${v.yout
 ---
 {bas && (
   <section class="vd" aria-label={baslik}>
-    <div class="sh"><h2 class="pl-bas"><Fragment set:html={logoYoutube(24)} />{baslik}</h2><a class="btn-t btn" href={channel} target="_blank" rel="noopener">Kanala git</a></div>
+    <div class="sh"><h2 class="pl-bas"><Fragment set:html={logoYoutube(24)} />{baslik}</h2><a class="btn btn-p" href={channel} target="_blank" rel="noopener">Kanala git</a></div>
     <div class="vd-iz">
       <a class="vd-k vd-bas" href={yt(bas)} target="_blank" rel="noopener" data-yt={bas.youtubeId || undefined}>
         <span class="c-img"><Img img={bas.thumb} alt="" eager={false} sizes="(max-width: 900px) 100vw, 760px" /><span class="vd-oy" set:html={ico('play', 30)} /></span>

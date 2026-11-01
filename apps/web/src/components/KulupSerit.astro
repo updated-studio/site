@@ -1,0 +1,21 @@
+---
+/**
+ * Kulüp çatısının sekme şeridi (1 Kasım 2026, kullanıcı: "araçlar kulübün içine dahil olsun, topluluksal şeylerin hepsi kulüpte").
+ * Araçlar, haftalık görev ve yarışmalar sayfalarında üst barın altında; Kulüp sayfasındaki şeritle aynı görünüm (kulup.js de aynı bağlantıları ekler).
+ */
+interface Props { aktif: 'araclar' | 'gorev' | 'yarismalar' }
+const { aktif } = Astro.props
+const SEKME: [string, string, string?][] = [['/kulup', 'Kulüp'], ['/kulup#dersler', 'Dersler'], ['/kulup#pratik', 'Pratik'], ['/araclar', 'Araçlar', 'araclar'], ['/gorev', 'Haftalık görev', 'gorev'], ['/yarismalar', 'Yarışmalar', 'yarismalar']]
+---
+<nav class="ktabs kserit" aria-label="Kulüp bölümleri"><div class="wrap">
+  {SEKME.map(([h, ad, k]) => <a href={h} aria-current={k === aktif ? 'page' : undefined}>{ad}</a>)}
+</div></nav>
+<script is:inline>(()=>{const a=document.querySelector('.kserit [aria-current=page]');if(!a)return;const w=a.parentElement;w.scrollLeft=a.offsetLeft-(w.clientWidth-a.offsetWidth)/2})()</script>
+<style is:global>
+  .ktabs{position:sticky;top:calc(var(--hdr-alt) + env(safe-area-inset-top,0px));z-index:40;background:var(--bg)}
+  .ktabs .wrap{display:flex;gap:4px;align-items:center;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line)}
+  .ktabs .wrap::-webkit-scrollbar{display:none}
+  .ktabs a{flex:none;display:inline-flex;align-items:center;height:48px;padding:0 12px;font-weight:600;font-size:15px;text-decoration:none;color:var(--text);white-space:nowrap;border-bottom:3px solid transparent}
+  .ktabs a[aria-current=page]{border-bottom-color:var(--blue)}
+  .ktabs a:hover{color:var(--link)}
+</style>

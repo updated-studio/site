@@ -9,6 +9,7 @@ import '../styles/kulup.css'
 import { SITE } from '../lib/seo'
 import { getGorevler } from '../lib/api'
 import { date } from '../lib/format'
+import { ARACLAR } from '../lib/araclar'
 const meta = { title: 'Kulüp · Fotoğraf, video ve dron dersleri', description: 'Fotoğraf, video ve dron için dersler, simülatörler, alıştırmalar ve haftalık görevler.', path: '/kulup', jsonld: [{ '@type': 'Course', name: 'UPDATED Kulüp', description: 'Fotoğraf, video ve dron için dersler, simülatörler, alıştırmalar ve haftalık görevler.', provider: { '@type': 'Organization', name: 'UPDATED', sameAs: SITE }, inLanguage: 'tr-TR' }] }
 // Bu haftanın gerçek görevi (panel): Kulüp "Görevler" sekmesi ve ana sayfası gösterir, katılım /gorev'de
 const simdi = Date.now(), liste = await getGorevler()
@@ -23,8 +24,8 @@ const gorev = g ? { baslik: g.baslik, aciklama: g.aciklama || '', oylama: !aktif
   <script is:inline src="/kulup/media.js?v=2"></script>
   <script is:inline src="/kulup/logo.js"></script>
   <script is:inline src="/kulup/core.js"></script>
-  <script is:inline set:html={`UP.SITE_URL='/';UP.GOREV=${JSON.stringify(gorev).replace(/</g, '\\u003c')};`} />
-  <script is:inline src="/kulup/kulup.js?v=2"></script>
+  <script is:inline set:html={`UP.SITE_URL='/';UP.GOREV=${JSON.stringify(gorev).replace(/</g, '\\u003c')};UP.ARACLAR=${JSON.stringify(ARACLAR.map((a) => ({ ad: a.ad, yol: a.yol, aciklama: a.aciklama }))).replace(/</g, '\\u003c')};`} />
+  <script is:inline src="/kulup/kulup.js?v=4"></script>
   <script is:inline>UP.kulup();</script>
   <script>import '../scripts/kulup-uye.ts'</script>
 </Base>
