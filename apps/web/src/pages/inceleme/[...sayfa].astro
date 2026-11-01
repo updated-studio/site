@@ -35,7 +35,7 @@ const videolar = youtube.filter((v) => !v.short)
         {turler.map((t) => <a href={`#${t}`} data-tur={t}>{turAdi(t)}</a>)}
       </nav>}
     </div>
-    {items.length === 0 ? <div style="padding-bottom:48px"><p class="lead rh-bos" style="margin:0;padding:24px 0 0">Puanlı incelemeler hazırlanıyor: cihazları kullanarak test ediyoruz, puan /20. Aşağıda şimdiye kadarki inceleme yazılarımız ve videolarımız var; ürünleri <a href="/karsilastirma">Kıyaslamalar</a>'da yan yana da koyabilir, <a href="/urun">Künyeler</a>'de teknik verilere bakabilirsin.</p>{yazilar.length > 0 && <section class="sec" style="padding-bottom:0" aria-label="İnceleme yazıları"><div class="sh"><h2>İnceleme yazıları</h2></div><div class="grid4">{yazilar.map((n) => <CardStd item={n} />)}</div></section>}{videolar.length > 0 && site && <div style="margin-top:40px"><VideoDuvar videos={videolar} channel={site.youtube} baslik="Video incelemeler" /></div>}</div> : <>
+    {items.length === 0 ? <div style="padding-bottom:48px"><p class="lead rh-bos" style="margin:0;padding:24px 0 0">Puanlı incelemeler hazırlanıyor: cihazları kullanarak test ediyoruz, puan /20. Aşağıda şimdiye kadarki inceleme yazılarımız ve videolarımız var; ürünleri <a href="/karsilastirma">Kıyaslamalar</a>'da yan yana da koyabilir, <a href="/urun">Künyeler</a>'de teknik verilere bakabilirsin.</p>{yazilar.length > 0 && <section class="sec" style="padding-bottom:0" aria-label="İnceleme yazıları" id="yazilar"><div class="sh"><h2>İnceleme yazıları</h2></div><div class="grid4">{yazilar.map((n) => <CardStd item={n} />)}</div></section>}{videolar.length > 0 && site && <div style="margin-top:40px" id="videolar"><VideoDuvar videos={videolar} channel={site.youtube} baslik="Video incelemeler" /></div>}</div> : <>
       {one.length > 0 && <section class="icl-one" aria-label="Öne çıkan">
         <a class="icl-k buyuk" href={one[0].path} data-tur={one[0].product?.type}>
           {one[0].cover && <Img img={one[0].cover} alt="" eager sizes="(max-width: 900px) 100vw, 800px" />}
@@ -58,7 +58,7 @@ const videolar = youtube.filter((v) => !v.short)
         ))}</div>
       </section>}
 
-      {duvar.length > 0 && <section class="sec" aria-label="Tüm incelemeler">
+      {duvar.length > 0 && <section class="sec" aria-label="Tüm incelemeler" id="yazilar">
         <div class="sh"><h2>Tüm incelemeler</h2></div>
         <div class="icl-duvar" data-icl-duvar>{duvar.map((r) => (
           <a href={r.path} data-tur={r.product?.type}><span class="c-img">{r.cover && <Img img={r.cover} alt="" sizes="300px" />}<span class="icl-p">{p20(r.score)}</span></span><b set:html={baslik(r.title)} /><span class="ic-neden">{turAdi(r.product?.type)} · {r.product?.brand}</span></a>

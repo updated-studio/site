@@ -1,15 +1,30 @@
 ---
 import Logo from './Logo.astro'
 import { ico } from '../lib/ui'
-import { getCategories, type SiteCfg } from '../lib/api'
+import { getCategories, kunyeKatalog, type SiteCfg } from '../lib/api'
+import { TUR } from '../lib/turler'
 interface Props { site: SiteCfg; current?: string }
 const { site, current = '' } = Astro.props
 const nav = site.nav.slice(0, 7) // kit 10b: en fazla 7
 const kategoriler = await getCategories()
-// Kategori şeridi yalnız Haberler bölümünde (1 Kasım 2026, kullanıcı: "kategoriler haberler sayfasına girince olsun, ana ekranda gerek yok"):
-// /haberler, kategori sayfaları ve haber yazıları (/kategori/yazı)
+// Alt şerit bölüme göre değişir (1 Kasım 2026, kullanıcı: "haberlerin altındayken haber kategorileri, onun dışında araçlar gibi kategoriler;
+// kategoriler haberlerle sınırlı olmamalı"): Haberler → haber kategorileri; İncelemeler, Kıyaslamalar/Künyeler → ürün türleri ve araçlar;
+// Rehber → öğrenme ve uygulama yolları. Ana sayfada şerit yok; Kulüp çatısının kendi sekme şeridi var (KulupSerit / kulup.js).
 const ilk = (current.split('/')[1] || '').replace(/\.html$/, '') // derlemede liste sayfalarının yolu .html ile gelir
-const katGoster = ilk === 'haberler' || kategoriler.some((c) => c.slug === ilk)
+type Oge = { href: string; ad: string; aktif?: boolean }
+let alt: { ad: string; ogeler: Oge[] } | null = null
+if (ilk === 'haberler' || kategoriler.some((c) => c.slug === ilk)) {
+  alt = { ad: 'Haber kategorileri', ogeler: [{ href: '/haberler', ad: 'Tümü', aktif: ilk === 'haberler' }, ...kategoriler.map((c) => ({ href: `/${c.slug}`, ad: c.name, aktif: ilk === c.slug }))] }
+} else if (['inceleme', 'karsilastirma', 'urun'].includes(ilk)) {
+  const var_ = new Set((await kunyeKatalog()).map((k) => k.t)), turler = Object.keys(TUR).filter((t) => var_.has(t) && t !== 'other') // panel sırası: kamera, lens, dron…
+  const sabit: Oge[] = ilk === 'inceleme'
+    ? [{ href: '/inceleme', ad: 'Tüm incelemeler', aktif: true }, { href: '/inceleme#yazilar', ad: 'İnceleme yazıları' }, { href: '/inceleme#videolar', ad: 'Video incelemeler' }, { href: '/test-yontemimiz', ad: 'Test yöntemimiz' }]
+    : [{ href: '/karsilastirma/kiyas', ad: 'Kıyas aracı', aktif: current.startsWith('/karsilastirma/kiyas') }, { href: '/karsilastirma', ad: 'Kıyaslamalar', aktif: ilk === 'karsilastirma' && !current.startsWith('/karsilastirma/kiyas') }, { href: '/urun', ad: 'Tüm künyeler', aktif: ilk === 'urun' }]
+  alt = { ad: 'Ürünler', ogeler: [...sabit, ...turler.map((t) => ({ href: `/urun#${t}`, ad: TUR[t] })), { href: '/araclar', ad: 'Araçlar' }] }
+} else if (ilk === 'rehber') {
+  alt = { ad: 'Öğren ve uygula', ogeler: [{ href: '/rehber', ad: 'Tüm rehberler', aktif: true }, { href: '/araclar', ad: 'Araçlar' }, { href: '/kulup#dersler', ad: 'Kulüp dersleri' }, { href: '/kulup#pratik', ad: 'Simülatörler' }, { href: '/karsilastirma/kiyas', ad: 'Kıyas aracı' }, { href: '/urun', ad: 'Künyeler' }, { href: '/test-yontemimiz', ad: 'Test yöntemimiz' }] }
+}
+const katGoster = !!alt
 /** Etkin bölüm: Ana Sayfa yalnız kökte; Kıyaslamalar künye sayfalarını da kapsar */
 const BOLUM: Record<string, string[]> = { '/karsilastirma': ['/karsilastirma', '/urun'] }
 // Kulüp çatısı (1 Kasım 2026): dersler, araçlar, haftalık görev, yarışmalar
@@ -44,9 +59,8 @@ const DILLER: [string, string][] = [['en', 'English'], ['de', 'Deutsch'], ['ru',
     {nav.map((n) => <a href={n.href} aria-current={on(n.href)}>{n.label}</a>)}
   </div></nav>
   {/* Kategori şeridi (30 Ekim 2026, kullanıcı: "üst barın altında kategoriler her zaman, mobilde de bilgisayarda da"): üst menüyle birlikte yapışık */}
-  {katGoster && kategoriler.length > 0 && <nav class="kat-serit" aria-label="Kategoriler"><div class="wrap">
-    <a href="/haberler" aria-current={current.startsWith('/haberler') ? 'page' : undefined}><span>Tümü</span></a>
-    {kategoriler.map((c) => <a href={`/${c.slug}`} aria-current={current === `/${c.slug}` || current.startsWith(`/${c.slug}/`) ? 'page' : undefined}><span>{c.name}</span></a>)}
+  {alt && <nav class="kat-serit" aria-label={alt.ad}><div class="wrap">
+    {alt.ogeler.map((o) => <a href={o.href} aria-current={o.aktif ? 'page' : undefined}><span>{o.ad}</span></a>)}
   </div></nav>}
 </header>
 <script is:inline>(()=>{document.querySelectorAll('[data-dil-kod]').forEach(a=>{a.href='https://updated-com-tr.translate.goog'+location.pathname+'?_x_tr_sl=tr&_x_tr_tl='+a.dataset.dilKod+'&_x_tr_hl='+a.dataset.dilKod})})()</script>
