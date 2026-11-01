@@ -10,6 +10,7 @@ import Manset from '../components/hero/Manset.astro'
 import CardStd from '../components/CardStd.astro'
 import EnCokOkunan from '../components/EnCokOkunan.astro'
 import Ad from '../components/Ad.astro'
+import MobilAlan from '../components/MobilAlan.astro'
 import VideoDuvar from '../components/VideoDuvar.astro'
 import Radar from '../components/modules/Radar.astro'
 import KiyasRobotu from '../components/modules/KiyasRobotu.astro'
@@ -55,7 +56,22 @@ const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşıla�
   {m.videolar && uzun.length > 0 && <section class="sec"><div class="wrap"><VideoDuvar videos={uzun} channel={site.youtube} /></div></section>}
 
 
-  {/* Sıra (31 Ekim 2026, kullanıcı onayı): günün haberleri manşetin hemen altında; sonra 60 saniye, videolar, kıyas, künyeler, araçlar, kulüp */}
+  <MobilAlan ad={api.pickAd(ads, 'mr', 2)} />
+
+  {/* İncelemeler ve Rehber ayrı bölümler, Son haberlerin üstünde (31 Ekim 2026, kullanıcı): puanlı inceleme azken başlığında "inceleme" geçen yazılar tamamlar */}
+  {incelemeler.length > 0 && <section class="sec"><div class="wrap">
+    <div class="sh"><h2><span class="no">{no()}</span>İncelemeler</h2><a class="btn-t btn" href="/inceleme">Tümü</a></div>
+    <div class="grid4">{incelemeler.map((r) => <CardStd item={r} />)}</div>
+  </div></section>}
+
+  {rehber.length > 0 && <section class="sec"><div class="wrap">
+    <div class="sh"><h2><span class="no">{no()}</span>Rehber</h2><a class="btn-t btn" href="/rehber">Tümü</a></div>
+    <div class="grid4">{rehber.slice(0, 4).map((n) => <CardStd item={n} />)}</div>
+  </div></section>}
+
+  <MobilAlan ad={api.pickAd(ads, 'mr', 3)} />
+
+  {/* Sıra (31 Ekim 2026, kullanıcı): manşet → videolar → [telefonda reklam] → incelemeler → rehber → [telefonda reklam] → son haberler → 60 sn → kıyas → künyeler → araçlar → kulüp */}
   <section class="sec"><div class="wrap with-rail">
     <div class="ana-sol">
       <div><div class="sh"><h2><span class="no">{no()}</span>Son haberler</h2><a class="btn-t btn" href="/haberler">Tümü</a></div>
@@ -73,17 +89,6 @@ const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşıla�
   {m.altmisSaniye && <section class="sec ana-60"><div class="wrap"><Altmis items={latest} no={no()} /></div></section>}
 
   <Ad slot="lb" ad={api.pickAd(ads, 'lb', 1)} />
-
-  {/* İncelemeler ve Rehber ayrı bölümler (31 Ekim 2026, kullanıcı): puanlı inceleme azken başlığında "inceleme" geçen yazılar tamamlar */}
-  {incelemeler.length > 0 && <section class="sec"><div class="wrap">
-    <div class="sh"><h2><span class="no">{no()}</span>İncelemeler</h2><a class="btn-t btn" href="/inceleme">Tümü</a></div>
-    <div class="grid4">{incelemeler.map((r) => <CardStd item={r} />)}</div>
-  </div></section>}
-
-  {rehber.length > 0 && <section class="sec"><div class="wrap">
-    <div class="sh"><h2><span class="no">{no()}</span>Rehber</h2><a class="btn-t btn" href="/rehber">Tümü</a></div>
-    <div class="grid4">{rehber.slice(0, 4).map((n) => <CardStd item={n} />)}</div>
-  </div></section>}
 
   {katalog.length >= 2 && <section class="sec"><div class="wrap"><KiyasBaslat katalog={katalog} no={no()} /></div></section>}
   {robotVar && <section class="sec"><div class="wrap"><KiyasRobotu products={products} no={no()} /></div></section>}

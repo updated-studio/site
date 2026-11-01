@@ -40,6 +40,11 @@ const DILLER: [string, string][] = [['en', 'English'], ['de', 'Deutsch'], ['ru',
     <a href="/haberler" aria-current={current.startsWith('/haberler') ? 'page' : undefined}><span>Tümü</span></a>
     {kategoriler.map((c) => <a href={`/${c.slug}`} aria-current={current === `/${c.slug}` || current.startsWith(`/${c.slug}/`) ? 'page' : undefined}><span>{c.name}</span></a>)}
   </div></nav>}
+  {/* Telefonda ve tablette ana bölümler kategori şeridinin altında (31 Ekim 2026, kullanıcı): masaüstü üst menüsünün aynısı, menü düğmesine girmeden */}
+  <nav class="bolum-serit" aria-label="Bölümler (telefon)"><div class="wrap">
+    {nav.map((n) => <a href={n.href} aria-current={on(n.href)}>{n.label}</a>)}
+    <a href={site.kulupUrl} aria-current={current.startsWith(site.kulupUrl) || current.startsWith('/gorev') || current.startsWith('/yarismalar') ? 'page' : undefined}>Kulüp</a>
+  </div></nav>
 </header>
 <script is:inline>(()=>{document.querySelectorAll('[data-dil-kod]').forEach(a=>{a.href='https://updated-com-tr.translate.goog'+location.pathname+'?_x_tr_sl=tr&_x_tr_tl='+a.dataset.dilKod+'&_x_tr_hl='+a.dataset.dilKod})})()</script>
 <script is:inline>(()=>{const a=document.querySelector('.kat-serit [aria-current=page]');if(!a)return;const w=a.parentElement;w.scrollLeft=a.offsetLeft-(w.clientWidth-a.offsetWidth)/2})()</script>

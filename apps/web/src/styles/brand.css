@@ -685,7 +685,7 @@ main{overflow-x:clip}
 .mv-h h2{font-size:22px}
 .mv-h .cat{padding:0;margin:0;font-size:12px}
 /* Reels (30 Ekim 2026): kapakta yazı zaten var; altyazı ve "takip et" kalktı, hesap adı bağlantı */
-.mv-hesap{text-decoration:none;color:var(--cat)}.mv-hesap:hover{text-decoration:underline;text-underline-offset:3px}
+.mv-hesap{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit}.mv-hesap:hover{text-decoration:underline;text-underline-offset:3px}
 .mv-iz{margin-bottom:14px!important}
 .mv-ok{display:flex;gap:6px}.mv-ok .ibtn{width:34px;height:34px}
 /* Reels kartları tam boy (28 Ekim 2026, kullanıcı: "reelsler tam boyut doğru görünsün"): her kapak 9:16, kırpılmaz; her görünümde

@@ -1,0 +1,30 @@
+---
+/**
+ * Telefonda bölüm arası reklam alanı (31 Ekim 2026, kullanıcı: "mobilde birinci reklam videolardan sonra, ikincisi son haberlerden önce").
+ * Kampanya varsa kutu reklam (300 × 250); yoksa kendi "Reklam ver" tanıtımımız. Yalnız 760 px ve altı.
+ * Tanıtım reklam değil: sınıf adları "ad-…" taşımaz (reklam engelleyiciler gizliyordu, bkz. YanEv).
+ */
+import Ad from './Ad.astro'
+import type { Ad as AdT } from '../lib/types'
+interface Props { ad?: AdT | null }
+const { ad } = Astro.props
+---
+<div class="mobil-alan">
+  {ad ? <Ad slot="mr" ad={ad} bare /> : (
+    <a class="mobil-tanit" href="/reklam">
+      <span class="eyebrow">Bu alan boş</span>
+      <b>Markan burada görünsün</b>
+      <span class="mobil-tanit-m">Teknoloji, kamera ve ekipman meraklılarına ulaş.</span>
+      <span class="btn btn-p">Reklam ver</span>
+    </a>
+  )}
+</div>
+<style is:global>
+  .mobil-alan{display:none}
+  @media (max-width:760px){
+    .mobil-alan{display:flex;justify-content:center;padding:8px max(16px,env(safe-area-inset-left,0px)) 8px max(16px,env(safe-area-inset-right,0px))}
+    .mobil-tanit{display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:8px;width:100%;max-width:300px;aspect-ratio:300/250;padding:20px;border:1px solid var(--line);border-radius:var(--r-kart,0);background:linear-gradient(180deg,var(--surface-2),var(--surface));box-shadow:var(--cam-golge,none);color:var(--text-2);text-decoration:none;font-size:14px}
+    .mobil-tanit b{font-family:var(--f-head);font-weight:900;font-size:28px;line-height:1.05;color:var(--text)}
+    .mobil-tanit .mobil-tanit-m{line-height:1.45}
+  }
+</style>

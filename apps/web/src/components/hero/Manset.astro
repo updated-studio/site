@@ -42,7 +42,7 @@ const videolar = ig ? reels.slice(0, 10) : shorts.slice(0, 10)
 
     {videolar.length > 0 && <aside class="mv" aria-label="Son videolar">
       <div class="mv-h">
-        <div><h2 class="pl-bas"><Fragment set:html={ig ? logoInstagram(22) : logoYoutube(20)} />{ig ? 'Reels' : 'Shorts'}</h2><a class="cat mv-hesap" href={ig ? instagram : `${youtube}/shorts`} target="_blank" rel="noopener">{ig ? 'Instagram · @updated.tr' : 'YouTube · Nerdesin Fatih'}</a></div>
+        <div><h2 class="pl-bas"><a class="mv-hesap" href={ig ? instagram : `${youtube}/shorts`} target="_blank" rel="noopener"><Fragment set:html={ig ? logoInstagram(22) : logoYoutube(20)} />{ig ? 'Reels' : 'Shorts'}</a></h2></div>
         <div class="mv-ok"><button class="ibtn" type="button" data-mv="-1" aria-label="Son videolar: geri"><Fragment set:html={ico('left', 16)} /></button><button class="ibtn" type="button" data-mv="1" aria-label="Son videolar: ileri"><Fragment set:html={ico('right', 16)} /></button></div>
       </div>
       <div class="mv-iz" data-mv-iz tabindex="0" aria-label="Son videolar şeridi">
