@@ -159,3 +159,6 @@
 }
 /* En küçük telefonlar (≤374 px): üst bar tek satıra sığsın; 480 px kurallarından sonra gelmeli */
 @media (max-width:374px){.cam .hdr .logo svg{height:17px}.cam .hdr .wrap{gap:8px}.cam .hdr-r{gap:0}.cam .hdr-r .ibtn,.cam .hdr-r .srch{width:36px;min-width:36px;height:40px}.logo-kulup{font-size:17px;padding:0 6px}.hdr .bolum-serit a{font-size:3.35vw}}
+/* Kategori şeridi yalnız Haberler bölümünde (1 Kasım 2026): şeritsiz sayfalarda üst bar kısa, yapışık öğeler ona göre */
+:root:has(.hdr.katsiz){--hdr-alt:76px}
+@media (max-width:1100px){:root:has(.hdr.katsiz){--hdr-alt:113px}}

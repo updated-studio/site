@@ -5,7 +5,11 @@ import { getCategories, type SiteCfg } from '../lib/api'
 interface Props { site: SiteCfg; current?: string }
 const { site, current = '' } = Astro.props
 const nav = site.nav.slice(0, 7) // kit 10b: en fazla 7
-const kategoriler = await getCategories() // telefon menüsünde kategoriler (üst menü sade: 25 Ekim 2026)
+const kategoriler = await getCategories()
+// Kategori şeridi yalnız Haberler bölümünde (1 Kasım 2026, kullanıcı: "kategoriler haberler sayfasına girince olsun, ana ekranda gerek yok"):
+// /haberler, kategori sayfaları ve haber yazıları (/kategori/yazı)
+const ilk = (current.split('/')[1] || '').replace(/\.html$/, '') // derlemede liste sayfalarının yolu .html ile gelir
+const katGoster = ilk === 'haberler' || kategoriler.some((c) => c.slug === ilk)
 /** Etkin bölüm: Ana Sayfa yalnız kökte; Kıyaslamalar künye sayfalarını da kapsar */
 const BOLUM: Record<string, string[]> = { '/karsilastirma': ['/karsilastirma', '/urun'] }
 // Kulüp çatısı (1 Kasım 2026): dersler, araçlar, haftalık görev, yarışmalar
@@ -15,7 +19,7 @@ const on = (h: string) => ((h === '/' ? current === '/' : (BOLUM[h] || [h]).some
 // sunucuya yük yok, arama motorlarına ayrı dil olarak bildirilmez. Gerçek çok dilli site sonraya bırakıldı.
 const DILLER: [string, string][] = [['en', 'English'], ['de', 'Deutsch'], ['ru', 'Русский'], ['es', 'Español'], ['ar', 'العربية'], ['zh-CN', '中文']]
 ---
-<header class="hdr" id="hdr">
+<header class:list={["hdr", { katsiz: !katGoster }]} id="hdr">
   <div class="wrap">
     <a class="logo" href="/" aria-label="UPDATED ana sayfa"><Logo /></a>
     {/* Beta rozeti yerine Kulüp (1 Kasım 2026, kullanıcı: "beta yazısını kaldırıp yerine kulübü koysak, dik çizgiyle vurgu"): logonun yanında,
@@ -40,7 +44,7 @@ const DILLER: [string, string][] = [['en', 'English'], ['de', 'Deutsch'], ['ru',
     {nav.map((n) => <a href={n.href} aria-current={on(n.href)}>{n.label}</a>)}
   </div></nav>
   {/* Kategori şeridi (30 Ekim 2026, kullanıcı: "üst barın altında kategoriler her zaman, mobilde de bilgisayarda da"): üst menüyle birlikte yapışık */}
-  {kategoriler.length > 0 && <nav class="kat-serit" aria-label="Kategoriler"><div class="wrap">
+  {katGoster && kategoriler.length > 0 && <nav class="kat-serit" aria-label="Kategoriler"><div class="wrap">
     <a href="/haberler" aria-current={current.startsWith('/haberler') ? 'page' : undefined}><span>Tümü</span></a>
     {kategoriler.map((c) => <a href={`/${c.slug}`} aria-current={current === `/${c.slug}` || current.startsWith(`/${c.slug}/`) ? 'page' : undefined}><span>{c.name}</span></a>)}
   </div></nav>}
