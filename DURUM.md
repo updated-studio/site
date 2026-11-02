@@ -53,6 +53,7 @@
 
 ## Günlük (en yeni üstte)
 
+- **2 Kasım 2026 19:35 · Görsel üstü yazı alanları mavi cam (kullanıcı: "mavi rengimizle gradyan, hafif cam efektimizle").** Manşet (`.mn-g`) ve inceleme kartları (`.icl-k`): siyah geçiş yerine alttan lacivertten marka mavisine inen geçiş + yazının arkasında maskeyle başlayan hafif bulanıklık (brand.css, inceleme.css). Ölçek denetimi temiz.
 - **2 Kasım 2026 15:30 · Kulüp menüde, köşe düğmeleri yatay (kullanıcı).** Logonun yanındaki Kulüp kalktı; ana menünün sağında dik çizgiyle ayrılmış turuncu Kulüp (masaüstü `.nav`, telefon bölüm şeridi; şerit 320-414 px'te tek satır, `min(17px,2.85vw)`). Köşe düğmeleri yatay sıra; sayfa sonu (alt bilgi, Tüm haberler) ekrandayken gizlenir; yan reklam alanı eski boyuna döndü.
 
 - **2 Kasım 2026 17:35 · Site kesintisi (Natro).** updated.com.tr birkaç dakika her yerden açılmadı: Natro web sunucusu (94.73.151.12) 80 ve 443'te bütün bağlantıları ilk anda kesiyordu (6 ülkeden check-host denemesi), FTP açıktı; panel ve Stüdyo (kendi sunucumuz) etkilenmedi, son yükleme 05:34'te sorunsuzdu. Kendiliğinden düzeldi. Yedek plan (siteyi kendi sunucumuzdan sunmak, DNS 136.144.200.84) önerildi, gerek kalmadı.
