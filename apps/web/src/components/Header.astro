@@ -39,11 +39,11 @@ const DILLER: [string, string][] = [['en', 'English'], ['de', 'Deutsch'], ['ru',
 <header class:list={["hdr", { katsiz: !katGoster }]} id="hdr">
   <div class="wrap">
     <a class="logo" href="/" aria-label="UPDATED ana sayfa"><Logo /></a>
-    {/* Beta rozeti yerine Kulüp (1 Kasım 2026, kullanıcı: "beta yazısını kaldırıp yerine kulübü koysak, dik çizgiyle vurgu"): logonun yanında,
-        her ekranda; böylece bölüm şeridi telefonda tek ekrana sığar. "Beta sürüm" ibaresi alt bilgide kalır. */}
-    <a class="logo-kulup" href={site.kulupUrl} aria-current={kulupte ? 'page' : undefined}>Kulüp</a>
     <nav class="nav" aria-label="Bölümler">
       {nav.map((n) => <a href={n.href} aria-current={on(n.href)}>{n.label}</a>)}
+      {/* Kulüp ana menünün sağında, dik çizgiyle ayrı (2 Kasım 2026, kullanıcı: "logonun yanında bir şey olmasın") */}
+      <i class="nav-ayrac" aria-hidden="true"></i>
+      <a class="kulup" href={site.kulupUrl} aria-current={kulupte ? 'page' : undefined}>Kulüp</a>
     </nav>
     <div class="hdr-r">
       <button class="srch" type="button" data-open-search aria-label="Ara"><Fragment set:html={ico('search')} /><span>Ara</span></button>
@@ -59,6 +59,8 @@ const DILLER: [string, string][] = [['en', 'English'], ['de', 'Deutsch'], ['ru',
   {/* Telefonda ve tablette ana bölümler en üstte, kategoriler altında (1 Kasım 2026, kullanıcı): masaüstü üst menüsünün aynısı, menü düğmesine girmeden */}
   <nav class="bolum-serit" aria-label="Bölümler (telefon)"><div class="wrap">
     {nav.map((n) => <a href={n.href} aria-current={on(n.href)}>{n.label}</a>)}
+    <i class="nav-ayrac" aria-hidden="true"></i>
+    <a class="kulup" href={site.kulupUrl} aria-current={kulupte ? 'page' : undefined}>Kulüp</a>
   </div></nav>
   {/* Kategori şeridi (30 Ekim 2026, kullanıcı: "üst barın altında kategoriler her zaman, mobilde de bilgisayarda da"): üst menüyle birlikte yapışık */}
   <BreakingStrip items={hot} />

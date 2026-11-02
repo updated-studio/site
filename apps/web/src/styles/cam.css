@@ -153,12 +153,12 @@
   .cam .hdr .logo svg{height:20px}
   .logo-kulup{font-size:19px;padding:0 8px;margin-left:4px}.logo-kulup::before{left:-8px}
   .hdr .bolum-serit .wrap{justify-content:space-between;-webkit-mask-image:none;mask-image:none} /* sığdığı için kenar solması gerekmez */
-  .bolum-serit a{font-size:min(17px,3.55vw);padding:0 min(8px,1vw)} /* ekran genişliğiyle ölçeklenir: dört bölüm her telefonda tek satır */
+  .bolum-serit a{font-size:min(17px,2.85vw);padding:0 min(8px,.8vw)} /* ekran genişliğiyle ölçeklenir: dört bölüm + Kulüp her telefonda tek satır */
   .cam .hdr-r{gap:2px}
   .cam .hdr-r .ibtn,.cam .hdr-r .srch{width:40px;min-width:40px;height:40px}
 }
 /* En küçük telefonlar (≤374 px): üst bar tek satıra sığsın; 480 px kurallarından sonra gelmeli */
-@media (max-width:374px){.cam .hdr .logo svg{height:17px}.cam .hdr .wrap{gap:8px}.cam .hdr-r{gap:0}.cam .hdr-r .ibtn,.cam .hdr-r .srch{width:36px;min-width:36px;height:40px}.logo-kulup{font-size:17px;padding:0 6px}.hdr .bolum-serit a{font-size:3.35vw}}
+@media (max-width:374px){.cam .hdr .logo svg{height:17px}.cam .hdr .wrap{gap:8px}.cam .hdr-r{gap:0}.cam .hdr-r .ibtn,.cam .hdr-r .srch{width:36px;min-width:36px;height:40px}.logo-kulup{font-size:17px;padding:0 6px}.hdr .bolum-serit a{font-size:2.9vw}}
 /* Kategori şeridi yalnız Haberler bölümünde (1 Kasım 2026): şeritsiz sayfalarda üst bar kısa, yapışık öğeler ona göre */
 :root:has(.hdr.katsiz){--hdr-alt:calc(76px + var(--sd-h))}
 @media (max-width:1100px){:root:has(.hdr.katsiz){--hdr-alt:calc(113px + var(--sd-h))}}
@@ -171,3 +171,10 @@
    logo içerik sütununun sol kenarına, hesap düğmesi sağ kenarına hizalanır. Geniş ekrandaki yan reklamlar barın dışında kalır. */
 .cam .hdr{margin-left:max(12px,env(safe-area-inset-left,0px),calc((100% - var(--max)) / 2 - 20px));margin-right:max(12px,env(safe-area-inset-right,0px),calc((100% - var(--max)) / 2 - 20px))}
 @media (min-width:1101px){.cam .hdr .wrap{max-width:none;padding-left:20px;padding-right:20px}}
+
+/* Kulüp ana menünün sağında (2 Kasım 2026): dik çizgi + turuncu Kulüp; etkinken turuncu dolgulu */
+.nav .nav-ayrac,.bolum-serit .nav-ayrac{flex:none;align-self:center;width:2px;height:20px;margin:0 6px;border-radius:1px;background:color-mix(in srgb,var(--text) 22%,transparent)}
+.cam .nav a.kulup,.bolum-serit a.kulup{color:var(--orange-tx)}
+.cam .nav a.kulup:hover{background:color-mix(in srgb,var(--orange) 14%,transparent)}
+.cam .nav a.kulup[aria-current=page],.hdr .bolum-serit a.kulup[aria-current=page]{background:var(--orange);color:#111}
+@media (max-width:1100px){.hdr .bolum-serit .nav-ayrac{height:16px;margin:0 2px}}
