@@ -103,7 +103,7 @@
 .icl-k{position:relative;display:block;border-radius:var(--r-kart,0);overflow:hidden;background:var(--img);text-decoration:none;color:#fff;min-height:200px}
 .icl-k.buyuk{min-height:460px}
 .icl-k img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.icl-k::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgb(6 17 46 / .92) 0%,rgb(13 38 104 / .62) 32%,rgb(37 99 235 / 0) 66%)}
+.icl-k::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgb(2 6 18 / .95) 0%,rgb(5 16 44 / .78) 28%,rgb(14 40 110 / .35) 48%,rgb(37 99 235 / 0) 68%)}
 .icl-k .icl-alt{position:absolute;z-index:1;left:18px;right:18px;bottom:16px;display:flex;flex-direction:column;gap:8px}
 .icl-k.buyuk .icl-alt{left:28px;right:28px;bottom:26px}
 .icl-k b{font-size:18px;line-height:1.25}
