@@ -21,6 +21,7 @@ export const Products: CollectionConfig = {
   access: { read: () => true, create: editorsUp, update: editorsUp, delete: editorsUp },
   fields: [
     { type: 'row', fields: [{ name: 'name', type: 'text', label: 'Ürün adı', required: true }, { name: 'brand', type: 'text', label: 'Marka', required: true }] },
+    { name: 'shortName', type: 'text', label: 'Kısa ad', admin: { description: 'Kartlarda ve listelerde görünür (ör. "16-50mm f/2.8"). Boşsa tam addaki parantezli kısım atılır. Ürün sayfasında tam ad görünür.' } },
     slugField('name'),
     {
       type: 'row', fields: [

@@ -41,7 +41,7 @@ const kiyas = `/karsilastirma/kiyas?u=${[p.slug, ...p.rivals.slice(0, 1).map((r)
     <div class="ku-copy">
       <nav class="crumbs" aria-label="Konum"><a href="/">Ana sayfa</a><span aria-hidden="true">/</span><a href="/urun">Künye</a><span aria-hidden="true">/</span><span>{p.name}</span></nav>
       <span class="eyebrow ku-eb">Künye · <span lang="en" translate="no">{p.brand}</span></span>
-      <h1 class="ku-h1">{p.name}</h1>
+      <h1 class="ku-h1">{p.fullName ?? p.name}</h1>
       {p.blurb && <p class="ku-blurb">{p.blurb}</p>}
       <div class="ku-status">
         <Fragment set:html={durum(p.status)} />
@@ -52,7 +52,7 @@ const kiyas = `/karsilastirma/kiyas?u=${[p.slug, ...p.rivals.slice(0, 1).map((r)
       <div class="ku-stats">{[[feed.length, 'içerik'], [p.news.length, 'haber'], [p.reviews.length, 'inceleme']].filter(([n]) => n).map(([n, t]) => <span><b>{n}</b> {t}</span>)}{specs.length > 0 && <span><b>{bilinen.length}/{specs.length}</b> doğrulanmış özellik</span>}</div>
     </div>
     <div class="ku-stage">
-      {p.image && <><div class="ku-tabs" role="group" aria-label="Görünüm"><button type="button" aria-pressed="true" data-m="sok">Söküm</button><button type="button" aria-pressed="false" data-m="foto">Fotoğraf</button></div><div class="ku-photo" hidden><Img img={p.image} alt={p.name} /></div></>}
+      {p.image && <><div class="ku-tabs" role="group" aria-label="Görünüm"><button type="button" aria-pressed="true" data-m="sok">Söküm</button><button type="button" aria-pressed="false" data-m="foto">Fotoğraf</button></div><div class="ku-photo" hidden><Img img={p.image} alt={p.fullName ?? p.name} /></div></>}
       <Sokum p={p} />
       <button class="btn ku-tog" type="button" aria-pressed="true">Topla</button>
       <span class="eyebrow ku-cap">Söküm · her katman bir özellik</span>

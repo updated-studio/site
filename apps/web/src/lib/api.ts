@@ -71,9 +71,11 @@ const mCat = (c: any): Cat => (rel(c) ? { name: c.name, slug: c.slug } : { name:
 // Yazar fotoğrafı (28 Ekim 2026, kullanıcı: "editörlerin küçük resmi görünsün"): panelde Yazarlar › Fotoğraf; kare 'avatar' boyutu
 const mAuthor = (a: any): Author => (rel(a) ? { name: a.name, slug: a.slug, title: a.title, bio: a.bio, avatar: mImg(a.avatar, 'avatar') } : { name: 'UPDATED', slug: 'updated' })
 const mSpec = (s: any): Spec => ({ key: s.key, value: s.value || null, num: s.num ?? undefined, unit: s.unit, source: s.source, sourceUrl: s.sourceUrl, at: s.at, group: s.group, higherIsBetter: s.higherIsBetter, searchWeight: s.searchWeight })
+/** Kartlarda kısa ad (3 Kasım 2026): panelde "Kısa ad" yazılıysa o, yoksa tam addan parantezli kısım ("(Model B091)") atılır */
+const kisaAd = (p: any): string => String(p.shortName || '').trim() || String(p.name || '').replace(/\s*\([^)]*\)/g, '').replace(/\s{2,}/g, ' ').trim() || p.name
 export function mRef(p: any): ProductRef | null {
   p = rel(p); if (!p) return null
-  return { slug: p.slug, name: p.name, brand: p.brand, type: p.type, status: p.status, certainty: p.certainty || 4, image: mImg(p.image, 'card'), blurb: p.blurb, specs: (p.specs || []).map(mSpec), score: p.score,
+  return { slug: p.slug, name: kisaAd(p), fullName: p.name, brand: p.brand, type: p.type, status: p.status, certainty: p.certainty || 4, image: mImg(p.image, 'card'), blurb: p.blurb, specs: (p.specs || []).map(mSpec), score: p.score,
     upscore: typeof p.upscore === 'number' ? p.upscore : undefined, upscoreUrl: rel(p.upscoreReview)?.path || undefined, amazon: p.amazon || undefined }
 }
 const media = (v: any) => { const m = mImg(v, 'hero'); return m ? { url: m.url, alt: m.alt, credit: m.credit, w: m.w, h: m.h } : null }

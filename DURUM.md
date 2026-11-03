@@ -53,6 +53,7 @@
 
 ## Günlük (en yeni üstte)
 
+- **3 Kasım 2026 · Künyede kısa ad (kullanıcı onayı).** Panel: Ürünler › "Kısa ad" (`shortName`, göç `20261103_120000_kisa_ad`, elle yazıldı, .json anlık görüntüsü yok). Site `mRef`: kartlarda kısa ad (boşsa tam addaki parantezli kısım atılır), ürün sayfası başlığı ve SEO tam ad (`fullName`). Ölçek denetimi temiz.
 - **3 Kasım 2026 · Manşet 1,5 kat (kullanıcı: "manşet bir buçuk kat büyüsün").** Masaüstü manşet 16:10 (1440'ta 360 → 548 px); Reels sütunu %25 (280–440 px) ve tek video gösterir, oklarla geçilir (iki dikey video bu boyda sığmıyor). Ölçek denetimi temiz.
 - **3 Kasım 2026 · Manşet 2:1, koyuluk yazı bloğunda (kullanıcı: "yarıyı geçmesin, ismin üst sınırını geçmesin; manşet çok dar").** Koyu geçiş + cam artık `.mn-b::before` (yazı bloğunun kendisi, `isolation:isolate`): etiketin üst kenarında biter. Manşet 16:7 → 2:1 (min 380 px), Reels sütunu %33. Ölçek denetimi temiz.
 - **3 Kasım 2026 · Ölçek denetimi düzeltildi, uzun ürün adları iki satır.** Yeni künye "16-50mm f/2.8 Di III-A VC VXD" denetimde 9 "çakışma" verdi: "…" ile kesilen adın görünmeyen kısmı ölçülüyordu (cakisma.mjs artık yazıyı kırpan kutuların içindeki görünür parçasıyla ölçer). /urun listesinde ad kesilmek yerine iki satıra sarar. Not: önceki gönderim (manşet gölgesi) bu denetim 9 sorun derken gitmişti; sorun ondan değildi.

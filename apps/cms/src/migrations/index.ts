@@ -20,6 +20,7 @@ import * as migration_20261031_120636_rehber_liste from './20261031_120636_rehbe
 import * as migration_20261031_150000_rehber_etiketi from './20261031_150000_rehber_etiketi';
 import * as migration_20261031_164459_radar_oto from './20261031_164459_radar_oto';
 import * as migration_20261031_180000_uye_arac from './20261031_180000_uye_arac';
+import * as migration_20261103_120000_kisa_ad from './20261103_120000_kisa_ad';
 
 export const migrations = [
   {
@@ -131,5 +132,10 @@ export const migrations = [
     up: migration_20261031_180000_uye_arac.up,
     down: migration_20261031_180000_uye_arac.down,
     name: '20261031_180000_uye_arac',
+  },
+  {
+    up: migration_20261103_120000_kisa_ad.up,
+    down: migration_20261103_120000_kisa_ad.down,
+    name: '20261103_120000_kisa_ad',
   },
 ];
