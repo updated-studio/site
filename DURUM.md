@@ -53,6 +53,7 @@
 
 ## Günlük (en yeni üstte)
 
+- **3 Kasım 2026 · Manşet 1,5 kat (kullanıcı: "manşet bir buçuk kat büyüsün").** Masaüstü manşet 16:10 (1440'ta 360 → 548 px); Reels sütunu %25 (280–440 px) ve tek video gösterir, oklarla geçilir (iki dikey video bu boyda sığmıyor). Ölçek denetimi temiz.
 - **3 Kasım 2026 · Manşet 2:1, koyuluk yazı bloğunda (kullanıcı: "yarıyı geçmesin, ismin üst sınırını geçmesin; manşet çok dar").** Koyu geçiş + cam artık `.mn-b::before` (yazı bloğunun kendisi, `isolation:isolate`): etiketin üst kenarında biter. Manşet 16:7 → 2:1 (min 380 px), Reels sütunu %33. Ölçek denetimi temiz.
 - **3 Kasım 2026 · Ölçek denetimi düzeltildi, uzun ürün adları iki satır.** Yeni künye "16-50mm f/2.8 Di III-A VC VXD" denetimde 9 "çakışma" verdi: "…" ile kesilen adın görünmeyen kısmı ölçülüyordu (cakisma.mjs artık yazıyı kırpan kutuların içindeki görünür parçasıyla ölçer). /urun listesinde ad kesilmek yerine iki satıra sarar. Not: önceki gönderim (manşet gölgesi) bu denetim 9 sorun derken gitmişti; sorun ondan değildi.
 - **3 Kasım 2026 · Manşet koyuluğu aşağı (kullanıcı: "biraz daha alta insin, görselin önüne çıkıyor").** Geçiş %76 yerine %66'da biter, cam maskesi %48'de; başlığa hafif lacivert gölge (üst satır her fotoğrafta okunur). Ölçek denetimi temiz.
