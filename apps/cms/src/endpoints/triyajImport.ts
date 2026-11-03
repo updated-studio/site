@@ -19,7 +19,7 @@ import { sql } from '@payloadcms/db-postgres'
  *   (422 kategori); görsel bir kez yüklenir (aynı adres tekrar gelirse yeniden yüklenmez) ve 16:9'a kırpılır (önemli yer ortada).
  *   Yayın kurallarına uydurulur (lib/triyajKural.ts): başlık düzeltilir, kontrol listesinin ölçülebilir maddeleri işaretlenir;
  *   yanıtta eksikler (editörün tamamlayacakları) ve duzeltmeler döner.
- * POST /api/triyaj/kapak   → { studioId, image } — sonradan gelen görseli (Flux) kapağı olmayan taslağa ekler.
+ * POST /api/triyaj/kapak   → { studioId, image, degistir? } — sonradan gelen görseli kapağı olmayan taslağa ekler; degistir ile yayında olmayan taslağın kapağını değiştirir.
  * POST /api/triyaj/temizle → { gun, taslaklar: [{ studioId, lastSeen }] } — panelde `gun` gündür kimsenin dokunmadığı
  *   otomatik taslakları (son sürüm Stüdyo'nun son gördüğüyle aynı, yayında/planlı değil) ve yalnız onların kullandığı kapakları siler
  *   (Fatih, 24 Ekim 2026: taslak birikmesi). Yanıt: { silinen: studioId[] }.
@@ -206,13 +206,16 @@ export const triyajKapak: Endpoint = {
     const body = await req.json?.()
     const prev = await bulStudyo(req, String(body?.studioId || ''))
     if (!prev) return Response.json({ error: 'Haber panelde yok', code: 'yok' }, { status: 404 })
-    if (prev._status === 'published' || prev.cover) return Response.json({ ok: false, error: 'Haberin zaten kapağı var ya da yayında; dokunulmadı.', ...linkler(prev) }, { status: 409 })
+    // degistir (3 Kasım 2026): Stüdyo'da görsel kıyası adaylarından başkası seçildiyse, yayında olmayan taslağın kapağı değişir; eski görsel sahipsizse silinir
+    const eskiKapak = prev.cover ? (typeof prev.cover === 'object' ? prev.cover.id : prev.cover) : null
+    if (prev._status === 'published' || (prev.cover && !body?.degistir)) return Response.json({ ok: false, error: 'Haberin zaten kapağı var ya da yayında; dokunulmadı.', ...linkler(prev) }, { status: 409 })
     if (!body?.image?.url) return Response.json({ error: 'image.url gerekli', code: 'eksik' }, { status: 400 })
     const y = await gorselYukle(req, body.image, prev.title)
     if (!y.id) return Response.json({ ok: false, error: y.hata }, { status: 502 })
     const denetim = makineDenetimi({ title: prev.title ?? '', spot: prev.spot ?? '', seoTitle: prev.seo?.title, category: prev.category, label: prev.label ?? 'yok', kapak: y.kapak ?? null, shortAnswer: prev.shortAnswer, sizinti: { knowns: prev.knowns, unknowns: prev.unknowns, certainty: prev.certainty } })
     const workflow = { ...(prev.workflow || {}), checklist: { ...(prev.workflow?.checklist || {}), kapak: denetim.checklist.kapak, alt: denetim.checklist.alt, kunye: denetim.checklist.kunye } }
     const doc = await req.payload.update({ collection: 'news', id: prev.id, data: { cover: y.id, workflow, _status: 'draft' } as any, draft: true })
+    if (eskiKapak && body?.degistir) await sahipsizseSil(req, eskiKapak).catch(() => {})
     return Response.json({ ok: true, ...linkler(doc), eksikler: denetim.eksikler })
   },
 }
