@@ -53,6 +53,7 @@
 
 ## Günlük (en yeni üstte)
 
+- **3 Kasım 2026 · Manşet koyuluğu aşağı (kullanıcı: "biraz daha alta insin, görselin önüne çıkıyor").** Geçiş %76 yerine %66'da biter, cam maskesi %48'de; başlığa hafif lacivert gölge (üst satır her fotoğrafta okunur). Ölçek denetimi temiz.
 - **2 Kasım 2026 20:30 · Reels boşluğu, daha derin cam (kullanıcı).** Masaüstünde video sütunu %30,5 (340–520 px) ve kartlar sütun boyunu doldurur; alttaki boşluk kalktı. Manşet/inceleme geçişi siyaha yakın laciverte indi, cam bulanıklığı koyulaştırıldı (brightness .78). Ölçek denetimi temiz.
 - **2 Kasım 2026 19:35 · Görsel üstü yazı alanları mavi cam (kullanıcı: "mavi rengimizle gradyan, hafif cam efektimizle").** Manşet (`.mn-g`) ve inceleme kartları (`.icl-k`): siyah geçiş yerine alttan lacivertten marka mavisine inen geçiş + yazının arkasında maskeyle başlayan hafif bulanıklık (brand.css, inceleme.css). Ölçek denetimi temiz.
 - **2 Kasım 2026 15:30 · Kulüp menüde, köşe düğmeleri yatay (kullanıcı).** Logonun yanındaki Kulüp kalktı; ana menünün sağında dik çizgiyle ayrılmış turuncu Kulüp (masaüstü `.nav`, telefon bölüm şeridi; şerit 320-414 px'te tek satır, `min(17px,2.85vw)`). Köşe düğmeleri yatay sıra; sayfa sonu (alt bilgi, Tüm haberler) ekrandayken gizlenir; yan reklam alanı eski boyuna döndü.

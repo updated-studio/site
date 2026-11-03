@@ -667,14 +667,14 @@ main{overflow-x:clip}
 .mn-s{position:absolute;inset:0}
 .mn-g{position:absolute;inset:0;display:block}
 .mn-g img{width:100%;height:100%;object-fit:cover}
-/* Yazı alanı (2 Kasım 2026, kullanıcı: "mavi rengimizle gradyan, hafif cam efektimizle"; aynı gün "beyaz yerine siyah, derinlik"): alttan siyaha yakın lacivertten marka mavisine inen
+/* Yazı alanı (2 Kasım 2026, kullanıcı: "mavi rengimizle gradyan, hafif cam efektimizle"; aynı gün "beyaz yerine siyah, derinlik"; 3 Kasım "biraz daha alta insin, görselin önüne çıkıyor"): alttan siyaha yakın lacivertten marka mavisine inen
    geçiş + yazının arkasında maskeyle yumuşakça başlayan hafif bulanıklık. Görsel karşıtlığı yazıyı her fotoğrafta okunur tutar. */
-.mn-g::before,.icl-k::before{content:"";position:absolute;inset:0;pointer-events:none;-webkit-backdrop-filter:blur(16px) saturate(1.3) brightness(.78);backdrop-filter:blur(16px) saturate(1.3) brightness(.78);-webkit-mask-image:linear-gradient(to top,#000 0%,#000 22%,transparent 55%);mask-image:linear-gradient(to top,#000 0%,#000 22%,transparent 55%)}
+.mn-g::before,.icl-k::before{content:"";position:absolute;inset:0;pointer-events:none;-webkit-backdrop-filter:blur(16px) saturate(1.3) brightness(.78);backdrop-filter:blur(16px) saturate(1.3) brightness(.78);-webkit-mask-image:linear-gradient(to top,#000 0%,#000 18%,transparent 48%);mask-image:linear-gradient(to top,#000 0%,#000 18%,transparent 48%)}
 .icl-k::before{z-index:1}
-.mn-g::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgb(2 6 18 / .96) 0%,rgb(5 16 44 / .82) 24%,rgb(14 40 110 / .45) 46%,rgb(37 99 235 / .12) 62%,rgb(37 99 235 / 0) 76%)}
+.mn-g::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgb(2 6 18 / .96) 0%,rgb(5 16 44 / .84) 22%,rgb(14 40 110 / .48) 42%,rgb(37 99 235 / .14) 56%,rgb(37 99 235 / 0) 66%)}
 .mn-b{position:absolute;left:0;right:0;bottom:0;display:grid;gap:8px;padding:0 32px 46px;max-width:860px}
 .mn-kat{font-family:var(--f-mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#111;background:var(--orange);padding:3px 8px;border-radius:var(--r-etiket,8px);text-decoration:none;justify-self:start} /* fotoğraf üstünde okunsun diye dolu etiket (30 Ekim 2026) */
-.mn-b h2{font-size:clamp(26px,2.6vw,38px);line-height:1.12;color:#fff;text-transform:none}
+.mn-b h2{font-size:clamp(26px,2.6vw,38px);line-height:1.12;color:#fff;text-transform:none;text-shadow:0 1px 2px rgb(2 6 18 / .5),0 2px 18px rgb(2 6 18 / .55)}
 .mn-b h2 a{color:inherit;text-decoration:none}
 .mn-b h2 a:hover{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
 .mn-meta{font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:rgb(255 255 255 / .72)}
