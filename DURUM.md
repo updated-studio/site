@@ -53,6 +53,7 @@
 
 ## Günlük (en yeni üstte)
 
+- **3 Kasım 2026 · Ölçek denetimi düzeltildi, uzun ürün adları iki satır.** Yeni künye "16-50mm f/2.8 Di III-A VC VXD" denetimde 9 "çakışma" verdi: "…" ile kesilen adın görünmeyen kısmı ölçülüyordu (cakisma.mjs artık yazıyı kırpan kutuların içindeki görünür parçasıyla ölçer). /urun listesinde ad kesilmek yerine iki satıra sarar. Not: önceki gönderim (manşet gölgesi) bu denetim 9 sorun derken gitmişti; sorun ondan değildi.
 - **3 Kasım 2026 · Manşet koyuluğu aşağı (kullanıcı: "biraz daha alta insin, görselin önüne çıkıyor").** Geçiş %76 yerine %66'da biter, cam maskesi %48'de; başlığa hafif lacivert gölge (üst satır her fotoğrafta okunur). Ölçek denetimi temiz.
 - **2 Kasım 2026 20:30 · Reels boşluğu, daha derin cam (kullanıcı).** Masaüstünde video sütunu %30,5 (340–520 px) ve kartlar sütun boyunu doldurur; alttaki boşluk kalktı. Manşet/inceleme geçişi siyaha yakın laciverte indi, cam bulanıklığı koyulaştırıldı (brightness .78). Ölçek denetimi temiz.
 - **2 Kasım 2026 19:35 · Görsel üstü yazı alanları mavi cam (kullanıcı: "mavi rengimizle gradyan, hafif cam efektimizle").** Manşet (`.mn-g`) ve inceleme kartları (`.icl-k`): siyah geçiş yerine alttan lacivertten marka mavisine inen geçiş + yazının arkasında maskeyle başlayan hafif bulanıklık (brand.css, inceleme.css). Ölçek denetimi temiz.

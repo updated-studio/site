@@ -30,8 +30,10 @@ for (const yol of YOLLAR) for (const w of GENISLIK) {
     }
     const ilk = kutular.filter((k) => gorunur(k.e))
     // Kaydırılan şeritlerde (overflow) ekran dışına düşen yazılar sayılmaz
-    const kesik = (k) => { for (let a = k.e.parentElement; a && a !== document.body; a = a.parentElement) { const c = getComputedStyle(a); if (/(auto|scroll|hidden|clip)/.test(c.overflowX + c.overflowY)) { const r = a.getBoundingClientRect(); if (k.q.right <= r.left + 1 || k.q.left >= r.right - 1 || k.q.bottom <= r.top + 1 || k.q.top >= r.bottom - 1) return true } } return false }
-    const yazi = ilk.filter((k) => !kesik(k))
+    // Yazı, kırpan kutuların (öğenin kendisi dahil: "…" ile kesilen başlık) içinde kalan görünür parçasıyla ölçülür (3 Kasım 2026: kesilen
+    // uzun ürün adı görünmeyen kısmıyla yan karta "çakışıyor" sayılıyordu)
+    const kirp = (k) => { let q = { left: k.q.left, right: k.q.right, top: k.q.top, bottom: k.q.bottom }; for (let a = k.e; a && a !== document.body; a = a.parentElement) { const c = getComputedStyle(a); if (/(auto|scroll|hidden|clip)/.test(c.overflowX + c.overflowY)) { const r = a.getBoundingClientRect(); q = { left: Math.max(q.left, r.left), right: Math.min(q.right, r.right), top: Math.max(q.top, r.top), bottom: Math.min(q.bottom, r.bottom) }; if (q.right - q.left <= 1 || q.bottom - q.top <= 1) return null } } return { ...k, q: { ...q, width: q.right - q.left, height: q.bottom - q.top } } }
+    const yazi = ilk.map(kirp).filter(Boolean)
     const kat = (e) => { let z = 0; for (let a = e; a; a = a.parentElement) { const c = getComputedStyle(a); if (c.position !== 'static' && c.zIndex !== 'auto') z = Math.max(z, +c.zIndex || 0) } return z }
     const sabit = (e) => { for (let a = e; a; a = a.parentElement) { const p = getComputedStyle(a).position; if (p === 'fixed' || p === 'sticky') return true } return false }
     const goruldu = new Set()
