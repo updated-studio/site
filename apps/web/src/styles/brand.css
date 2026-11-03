@@ -663,16 +663,19 @@ main{overflow-x:clip}
 .mn.mn-afissiz{grid-template-columns:minmax(0,1fr)}
 .mn-ic{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:var(--gut);align-items:stretch;min-width:0}
 .mn-ic.mn-tek{grid-template-columns:minmax(0,1fr)}
-.mn-sl{position:relative;width:100%;aspect-ratio:16/7;min-height:360px;border-radius:var(--r-kart,0);overflow:hidden;background:#111;min-width:0}
+.mn-sl{position:relative;width:100%;aspect-ratio:2/1;min-height:380px;border-radius:var(--r-kart,0);overflow:hidden;background:#111;min-width:0}
 .mn-s{position:absolute;inset:0}
 .mn-g{position:absolute;inset:0;display:block}
 .mn-g img{width:100%;height:100%;object-fit:cover}
 /* Yazı alanı (2 Kasım 2026, kullanıcı: "mavi rengimizle gradyan, hafif cam efektimizle"; aynı gün "beyaz yerine siyah, derinlik"; 3 Kasım "biraz daha alta insin, görselin önüne çıkıyor"): alttan siyaha yakın lacivertten marka mavisine inen
    geçiş + yazının arkasında maskeyle yumuşakça başlayan hafif bulanıklık. Görsel karşıtlığı yazıyı her fotoğrafta okunur tutar. */
-.mn-g::before,.icl-k::before{content:"";position:absolute;inset:0;pointer-events:none;-webkit-backdrop-filter:blur(16px) saturate(1.3) brightness(.78);backdrop-filter:blur(16px) saturate(1.3) brightness(.78);-webkit-mask-image:linear-gradient(to top,#000 0%,#000 18%,transparent 48%);mask-image:linear-gradient(to top,#000 0%,#000 18%,transparent 48%)}
+.icl-k::before{content:"";position:absolute;inset:0;pointer-events:none;-webkit-backdrop-filter:blur(16px) saturate(1.3) brightness(.78);backdrop-filter:blur(16px) saturate(1.3) brightness(.78);-webkit-mask-image:linear-gradient(to top,#000 0%,#000 18%,transparent 48%);mask-image:linear-gradient(to top,#000 0%,#000 18%,transparent 48%)}
 .icl-k::before{z-index:1}
-.mn-g::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgb(2 6 18 / .96) 0%,rgb(5 16 44 / .84) 22%,rgb(14 40 110 / .48) 42%,rgb(37 99 235 / .14) 56%,rgb(37 99 235 / 0) 66%)}
-.mn-b{position:absolute;left:0;right:0;bottom:0;display:grid;gap:8px;padding:0 32px 46px;max-width:860px}
+.mn-b{position:absolute;left:0;right:0;bottom:0;display:grid;gap:8px;padding:0 32px 46px;isolation:isolate}
+.mn-b>*{max-width:860px}
+/* Koyuluk yazı bloğunun kendisine bağlı (3 Kasım 2026, kullanıcı: "yarıyı geçmesin, ismin üst sınırını geçmesin"): etiketin üst
+   kenarında biter, başlık kaç satır olursa olsun yalnız yazının arkasını koyultur; altta lacivert, üstte marka mavisi, hafif cam. */
+.mn-b::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(to top,rgb(2 6 18 / .94) 0%,rgb(5 16 44 / .8) 38%,rgb(14 40 110 / .38) 76%,rgb(37 99 235 / 0) 100%);-webkit-backdrop-filter:blur(16px) saturate(1.3) brightness(.8);backdrop-filter:blur(16px) saturate(1.3) brightness(.8);-webkit-mask-image:linear-gradient(to top,#000 55%,transparent 100%);mask-image:linear-gradient(to top,#000 55%,transparent 100%)}
 .mn-kat{font-family:var(--f-mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#111;background:var(--orange);padding:3px 8px;border-radius:var(--r-etiket,8px);text-decoration:none;justify-self:start} /* fotoğraf üstünde okunsun diye dolu etiket (30 Ekim 2026) */
 .mn-b h2{font-size:clamp(26px,2.6vw,38px);line-height:1.12;color:#fff;text-transform:none;text-shadow:0 1px 2px rgb(2 6 18 / .5),0 2px 18px rgb(2 6 18 / .55)}
 .mn-b h2 a{color:inherit;text-decoration:none}
@@ -711,9 +714,9 @@ main{overflow-x:clip}
 .ad-hp img{width:300px;height:600px;object-fit:cover}
 @media (max-width:1279px){.mn:not(.mn-afissiz){grid-template-columns:minmax(0,1fr)}.mn-af{justify-content:center}.ad-hp .slot{height:250px}.ad-hp img{height:auto;aspect-ratio:300/250}}
 /* Masaüstünde video sütunu manşetle birlikte büyür ve kartlar sütunun boyunu doldurur (2 Kasım 2026, kullanıcı: "reelslerin alt tarafında
-   fazla boşluk var"). %30,5: manşet 16:7 iken iki 9:16 kartın tam sığdığı oran; arta kalan birkaç piksel kartın kapağında kırpılır. */
+   fazla boşluk var"). %33: manşet 2:1 iken (3 Kasım 2026, "manşet çok dar kaldı") iki 9:16 kartın tam sığdığı oran; arta kalan birkaç piksel kartın kapağında kırpılır. */
 @media (min-width:1001px){
-  .mn-ic{grid-template-columns:minmax(0,1fr) clamp(340px,30.5%,520px)}
+  .mn-ic{grid-template-columns:minmax(0,1fr) clamp(340px,33%,560px)}
   .mv-iz{align-content:stretch;grid-auto-rows:100%}
   .mv-k .c-img{flex:1;aspect-ratio:auto;min-height:0}
 }
