@@ -53,6 +53,7 @@
 
 ## Günlük (en yeni üstte)
 
+- **4 Kasım 2026 · Logo imzası düzeltme (kullanıcı).** Çizgi 1 px ve daha açık; "Nerdesin Fatih"in altındaki bağlantı çizgisi kalktı. Ölçek denetimi temiz.
 - **4 Kasım 2026 · Panel: haber içi resmî görseller.** `triyajImport` `araGorseller` alır; markdown'daki "[[gorsel-N]]" satırı indirilen görselle (upload düğümü) değişir, aynı adres daha önce yüklendiyse o kullanılır; alınamazsa satır silinir.
 - **4 Kasım 2026 · Logo imzası (kullanıcı: "logonun altına çizgi, altına anlaşılır el yazısıyla Nerdesin Fatih").** `Header.astro` `.logo-imzali` + `.logo-imza` (brand.css; telefonda cam.css 13,5 px). Yazı tipi Caveat 600, yalnız bu harflerin alt kümesi (`public/yazi-tipleri/caveat-600-imza.woff2`, OFL; yazi-tipleri.css üretici dosyası olduğu için @font-face brand.css'te). Video alanı açıklaması: önerilen yer ilk paragraftan sonra. Ölçek denetimi temiz.
 - **4 Kasım 2026 · Haberde resmî video (kullanıcı onayı; yerleşim: ilk paragraftan sonra).** Panel: Haber › "Gömülü video" (`fields/editorial.ts` videoField: url, başlık, kanal, resmî sayfa, en başta; göç `20261104_120000_haber_video`, elle yazıldı, .json yok). `triyajImport` `video` alır (yalnız YouTube/Vimeo). Site: `HaberVideo.astro` (YouTube kapak + tıklayınca yerinde oynar, `scripts/site.ts` youtube(); Vimeo tembel iframe), `ArticleBody` ilk paragraftan sonra ya da en başta. Yazı editörüne blok eklenmedi (ayrı alan). Ölçek denetimi temiz.
