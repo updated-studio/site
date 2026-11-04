@@ -53,6 +53,7 @@
 
 ## Günlük (en yeni üstte)
 
+- **4 Kasım 2026 · Panel: yazar kilidi (kullanıcı: "başkasının adına haber girilemesin, yalnız yöneticiler değiştirebilsin").** `hooks/imza.ts` `yazarKilidi` News/Reviews/Comparisons beforeChange: yönetici olmayan yazarı başkasına çeviremez; yeni kayıtta yazar boşsa kaydedenin yazar profili, "Hazırlayan" boşsa kaydeden hesap; Updated Stüdyo imzalı taslak kaydedene geçer. Sistem anahtarıyla gelen içe aktarma etkilenmez.
 - **3 Kasım 2026 · Panel: kapak değiştirme.** `/api/triyaj/kapak` `degistir` alırsa yayında olmayan taslağın kapağını değiştirir, eski görsel sahipsizse silinir (Stüdyo görsel model kıyası: editör başka adayı seçince).
 - **3 Kasım 2026 · Künyede kısa ad (kullanıcı onayı).** Panel: Ürünler › "Kısa ad" (`shortName`, göç `20261103_120000_kisa_ad`, elle yazıldı, .json anlık görüntüsü yok). Site `mRef`: kartlarda kısa ad (boşsa tam addaki parantezli kısım atılır), ürün sayfası başlığı ve SEO tam ad (`fullName`). Ölçek denetimi temiz.
 - **3 Kasım 2026 · Manşet 1,5 kat (kullanıcı: "manşet bir buçuk kat büyüsün").** Masaüstü manşet 16:10 (1440'ta 360 → 548 px); Reels sütunu %25 (280–440 px) ve tek video gösterir, oklarla geçilir (iki dikey video bu boyda sığmıyor). Ölçek denetimi temiz.

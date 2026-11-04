@@ -4,7 +4,7 @@ import { seoFields } from '../fields/seo'
 import { authorField, coverField, pathField, publishedAt, shortAnswer, workflow } from '../fields/editorial'
 import { autoSeo } from '../hooks/autoSeo'
 import { workflowGuard } from '../hooks/workflow'
-import { imzaYayinlayana } from '../hooks/imza'
+import { imzaYayinlayana, yazarKilidi } from '../hooks/imza'
 import { revalidate } from '../hooks/revalidate'
 import { trSlug } from '../lib/slug'
 
@@ -49,7 +49,7 @@ export const Comparisons: CollectionConfig = {
         return data
       },
       autoSeo(),
-      workflowGuard,
+      yazarKilidi, workflowGuard,
     ],
     afterChange: [revalidate((d) => [d.path].filter(Boolean))],
   },

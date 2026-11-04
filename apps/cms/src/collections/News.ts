@@ -6,7 +6,7 @@ import { seoFields } from '../fields/seo'
 import { authorField, corrections, coverField, pathField, productsField, publishedAt, readingTime, shortAnswer, sources, spotField, titleField, triyaj, workflow } from '../fields/editorial'
 import { autoSeo } from '../hooks/autoSeo'
 import { workflowGuard } from '../hooks/workflow'
-import { imzaYayinlayana } from '../hooks/imza'
+import { imzaYayinlayana, yazarKilidi } from '../hooks/imza'
 import { revalidate } from '../hooks/revalidate'
 
 export const News: CollectionConfig = {
@@ -70,7 +70,7 @@ export const News: CollectionConfig = {
   hooks: {
     beforeChange: [
       autoSeo(),
-      workflowGuard,
+      yazarKilidi, workflowGuard,
       imzaYayinlayana,
       async ({ data, req }) => {
         if (data.category && data.slug) {

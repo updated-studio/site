@@ -6,7 +6,7 @@ import { seoFields } from '../fields/seo'
 import { authorField, corrections, coverField, pathField, publishedAt, readingTime, shortAnswer, sources, spotField, titleField, workflow } from '../fields/editorial'
 import { autoSeo } from '../hooks/autoSeo'
 import { workflowGuard } from '../hooks/workflow'
-import { imzaYayinlayana } from '../hooks/imza'
+import { imzaYayinlayana, yazarKilidi } from '../hooks/imza'
 import { revalidate } from '../hooks/revalidate'
 
 /** WordPress'ten taşınan eski incelemelerde bu bilgiler yoksa boş kalabilir; yenilerde zorunlu. */
@@ -69,7 +69,7 @@ export const Reviews: CollectionConfig = {
     { name: 'wpId', type: 'number', admin: { position: 'sidebar', readOnly: true, condition: (d) => !!d?.wpId } },
   ],
   hooks: {
-    beforeChange: [autoSeo(), workflowGuard, imzaYayinlayana, ({ data }) => { if (data.slug) data.path = `/inceleme/${data.slug}`; return data }],
+    beforeChange: [autoSeo(), yazarKilidi, workflowGuard, imzaYayinlayana, ({ data }) => { if (data.slug) data.path = `/inceleme/${data.slug}`; return data }],
     afterChange: [revalidate((d) => [d.path, '/inceleme'].filter(Boolean))],
   },
 }
