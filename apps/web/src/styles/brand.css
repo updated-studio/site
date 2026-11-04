@@ -69,8 +69,10 @@ h3{font-weight:700}
 @font-face{font-family:"Imza";src:url(/yazi-tipleri/caveat-600-imza.woff2) format("woff2");font-weight:600;font-display:fallback}
 .logo-imzali{flex-direction:column;align-items:stretch;justify-content:center;gap:0}
 .logo-imzali,.logo-imzali:hover,.logo-imza{text-decoration:none!important}
-.logo-imzali svg{height:21px}
-.logo-imza{display:block;margin-top:3px;padding-top:1px;border-top:1px solid color-mix(in srgb,var(--logo) 28%,transparent);font-family:"Imza","Segoe Print","Bradley Hand",cursive;font-weight:600;font-size:15px;line-height:1.05;letter-spacing:.01em;color:var(--text-2);text-align:center;white-space:nowrap}
+/* Marka kiti §2 boşluk kuralı: logonun her kenarında en az x (x = U harfinin genişliği ≈ logo boyu × 0,58). 64 px çubukta blok (logo + imza)
+   üstte ve altta ≥ x pay bırakacak boyda: logo 20 px (x ≈ 12), imza 14 px, blok ≈ 40 px. */
+.hdr .logo.logo-imzali svg{height:20px}
+.logo-imza{display:block;margin-top:3px;padding-top:1px;border-top:1px solid color-mix(in srgb,var(--logo) 28%,transparent);font-family:"Imza","Segoe Print","Bradley Hand",cursive;font-weight:600;font-size:14px;line-height:1.05;letter-spacing:.01em;color:var(--text-2);text-align:center;white-space:nowrap}
 .logo svg{height:24px;width:auto;fill:currentColor;display:block}
 /* Beta ibaresi (25 Ekim 2026): logonun yanında, tıklayınca kısa açıklama */
 .beta{position:relative;flex:none;margin-left:-16px}
