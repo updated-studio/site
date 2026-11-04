@@ -193,3 +193,19 @@ export const studyoBosTaslakSil: Endpoint = {
     return Response.json({ silinen }, { headers })
   },
 }
+
+/**
+ * GET /api/studyo/yazar-esle — yazar ↔ hesap e-postası eşleşmesi (4 Kasım 2026): Stüdyo'nun Ekip katkı puanı, sitede yayınlanan haberleri
+ * yazarına göre sayar ("Haber yaz"la yazılanlar dahil). Yalnız ekip görür; yalnız yazarı bağlı hesaplar döner.
+ */
+export const studyoYazarEsle: Endpoint = {
+  path: '/studyo/yazar-esle',
+  method: 'get',
+  handler: async (req) => {
+    const headers = headersWithCors({ headers: new Headers({ 'Cache-Control': 'no-store' }), req })
+    if (!req.user || !['admin', 'yayin-yonetmeni', 'editor', 'video'].includes((req.user as any).role)) return Response.json({ error: 'Yetki yok' }, { status: 403, headers })
+    const r = await req.payload.find({ collection: 'users', depth: 0, limit: 200, pagination: false, overrideAccess: true, where: { author: { exists: true } } as any })
+    const esle = (r.docs as any[]).filter((u) => u.author && u.email).map((u) => ({ author: typeof u.author === 'object' ? u.author.id : u.author, email: String(u.email).toLowerCase() }))
+    return Response.json({ esle }, { headers })
+  },
+}

@@ -53,6 +53,8 @@
 
 ## Günlük (en yeni üstte)
 
+- **4 Kasım 2026 (Natro Claude):** Panel: `GET /api/studyo/yazar-esle` (yazar ↔ hesap e-postası; Stüdyo Ekip puanı yayınlanan haberleri yazarına göre sayar), `POST /api/triyaj/yz-medya` + `/api/triyaj/yz-temizle` (Updated AI arşivi, 120 gün), `gorselYukle` aynı adresi yeniden yüklemez.
+
 - **4 Kasım 2026 (Natro Claude):** Boş haber taslakları (kullanıcı: "yeni haber yaz deyip hiçbir şey eklenmeyen taslağa boş düşmesin"): panel ucu `POST /api/studyo/bos-taslak-sil` (endpoints/studyo.ts; yalnız başlık/spot/metin/kapak boş, hiç yayınlanmamış, iş akışı "taslak" olanı siler; id yoksa 1 saatten eskileri). Stüdyo Duzenle boş çıkılınca, Taslaklar açılınca çağırır.
 
 - **4 Kasım 2026 (Natro Claude):** Kullanıcı: "Nerdesin Fatih yazısını kaldır, gerek kalmadı" — logo imzası, Caveat yazı tipi ve önyüklemesi kaldırıldı; başlık çubuğu 74 → 64 px, --hdr-alt değerleri eski haline (121/158/76/113). Denetim Temiz.
