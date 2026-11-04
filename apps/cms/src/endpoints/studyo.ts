@@ -154,3 +154,42 @@ export const studyoZamanlaSil: Endpoint = {
     return Response.json({ ok: true }, { headers })
   },
 }
+
+/**
+ * POST /api/studyo/bos-taslak-sil — boş haber taslaklarını siler (4 Kasım 2026, kullanıcı: "yeni haber yaz deyip hiçbir şey eklenmeyen şey
+ * taslağa boş olarak düşmesin"). Stüdyo "Haber yaz" açılınca taslak hemen oluşur (kilit, sürüm, otomatik kayıt kimliğe bağlı); editör bir şey
+ * yazmadan çıkarsa Stüdyo bu ucu çağırır. { id } verilirse yalnız o taslak; verilmezse 1 saatten eski bütün boş taslaklar (sekme kapanınca kalanlar).
+ * Silinen yalnız GERÇEKTEN boş olandır: başlık, spot, metin, kapak boş, hiç yayınlanmamış, iş akışında "taslak". Editörler de çağırabilir;
+ * dolu bir habere dokunamaz (haber silme yetkisi ayrıca yalnız yöneticide).
+ */
+const metinVar = (n: any): boolean => {
+  if (!n || typeof n !== 'object') return false
+  if (typeof n.text === 'string' && n.text.trim()) return true
+  if (n.type && !['root', 'paragraph', 'text', 'linebreak', 'heading'].includes(n.type)) return true // görsel, blok, bağlantı kartı…
+  return Array.isArray(n.children) ? n.children.some(metinVar) : n.root ? metinVar(n.root) : false
+}
+const bosMu = (d: any) => !String(d?.title ?? '').trim() && !String(d?.spot ?? '').trim() && !d?.cover && !metinVar(d?.body)
+  && d?._status !== 'published' && (d?.workflow?.state ?? 'taslak') === 'taslak'
+export const studyoBosTaslakSil: Endpoint = {
+  path: '/studyo/bos-taslak-sil',
+  method: 'post',
+  handler: async (req) => {
+    const headers = headersWithCors({ headers: new Headers({ 'Cache-Control': 'no-store' }), req })
+    if (!req.user || !['admin', 'yayin-yonetmeni', 'editor', 'video'].includes((req.user as any).role)) return Response.json({ error: 'Yetki yok' }, { status: 403, headers })
+    const g = ((await req.json?.().catch(() => ({}))) ?? {}) as { id?: number | string }
+    const adaylar: any[] = g.id
+      ? [await req.payload.findByID({ collection: 'news', id: g.id, draft: true, depth: 0, overrideAccess: true }).catch(() => null)].filter(Boolean)
+      : (await req.payload.find({ collection: 'news', draft: true, depth: 0, limit: 200, overrideAccess: true, pagination: false,
+          where: { and: [{ _status: { equals: 'draft' } }, { updatedAt: { less_than: new Date(Date.now() - 3600_000).toISOString() } }] } as any })).docs
+    let silinen = 0
+    for (const d of adaylar) {
+      if (!bosMu(d)) continue
+      // Daha önce yayınlanmış bir sürümü varsa (yayından kaldırılmış haber) silinmez
+      const yayinli = await req.payload.countVersions({ collection: 'news', overrideAccess: true, where: { and: [{ parent: { equals: d.id } }, { 'version._status': { equals: 'published' } }] } as any })
+      if (yayinli.totalDocs) continue
+      await req.payload.delete({ collection: 'news', id: d.id, overrideAccess: true, req })
+      silinen++
+    }
+    return Response.json({ silinen }, { headers })
+  },
+}

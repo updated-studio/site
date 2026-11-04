@@ -53,6 +53,8 @@
 
 ## Günlük (en yeni üstte)
 
+- **4 Kasım 2026 (Natro Claude):** Boş haber taslakları (kullanıcı: "yeni haber yaz deyip hiçbir şey eklenmeyen taslağa boş düşmesin"): panel ucu `POST /api/studyo/bos-taslak-sil` (endpoints/studyo.ts; yalnız başlık/spot/metin/kapak boş, hiç yayınlanmamış, iş akışı "taslak" olanı siler; id yoksa 1 saatten eskileri). Stüdyo Duzenle boş çıkılınca, Taslaklar açılınca çağırır.
+
 - **4 Kasım 2026 (Natro Claude):** Kullanıcı: "Nerdesin Fatih yazısını kaldır, gerek kalmadı" — logo imzası, Caveat yazı tipi ve önyüklemesi kaldırıldı; başlık çubuğu 74 → 64 px, --hdr-alt değerleri eski haline (121/158/76/113). Denetim Temiz.
 
 - **4 Kasım 2026 · Başlık çubuğu 74 px (kullanıcı: "logo menü başlıklarıyla aynı oldu, eski haline döndür, çerçeveyi logoya göre genişlet").** Logo eski boyunda (24 px, telefonda 20), imza 15/13 px; `.hdr .wrap` 64 → 74 px; `--hdr-alt` her yerde +10 (131/168/86/123), ölçülen başlık alt kenarıyla aynı. Logo üst/alt pay 15 px ≥ x (14) (telefonda 18 ≥ 12). Ölçek denetimi temiz.
