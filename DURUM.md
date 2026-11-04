@@ -53,6 +53,7 @@
 
 ## Günlük (en yeni üstte)
 
+- **4 Kasım 2026 · Başlık çubuğu 74 px (kullanıcı: "logo menü başlıklarıyla aynı oldu, eski haline döndür, çerçeveyi logoya göre genişlet").** Logo eski boyunda (24 px, telefonda 20), imza 15/13 px; `.hdr .wrap` 64 → 74 px; `--hdr-alt` her yerde +10 (131/168/86/123), ölçülen başlık alt kenarıyla aynı. Logo üst/alt pay 15 px ≥ x (14) (telefonda 18 ≥ 12). Ölçek denetimi temiz.
 - **4 Kasım 2026 · Logo boşluğu marka kitine göre (kullanıcı: "logo çerçeveye göre büyük, bunun standardı yok mu").** Marka kiti §2: her kenarda en az x (U harfinin genişliği ≈ logo boyu × 0,58). Önceki 21 px kuralı `.logo svg` tarafından eziliyordu (logo 24 px kalmıştı). Şimdi `.hdr .logo.logo-imzali svg` 20 px (telefon 18), imza 14 px: çubukta üst/alt pay 12 px = x (ölçüldü). Ölçek denetimi temiz.
 - **4 Kasım 2026 · Yazı tipi kayması (kullanıcı: "her yenilemede bir an yazı tipi değişiyor").** Sebep: font-display swap + yalnız Plex Sans 400 önden yükleniyordu; başlıkların Türkçe harfleri ayrı latin-ext dosyasında sonradan geliyordu. `font-display: fallback` (yazi-tipleri.css, üretici betik, imza) ve ilk ekran yazı tiplerinin önden yüklenmesi (Plex Sans 400 latin/ext, Big Shoulders 900 latin/ext, Plex Sans Condensed 700 latin/ext, imza). Ölçek denetimi temiz.
 - **4 Kasım 2026 · Logo imzası sıkışıktı (kullanıcı).** İmzalı logoda logo 24 → 21 px (telefonda 20 → 18), imza 17 → 15 px (telefonda 12,5); çubukta üst/alt pay açıldı. Ölçek denetimi temiz.

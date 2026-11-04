@@ -9,7 +9,7 @@
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
   --f-quote:"Newsreader",Georgia,serif;
   --ease:cubic-bezier(.2,0,0,1); --t1:120ms; --t2:200ms; --t3:320ms;
-  --sd-h:0px; --hdr-alt:calc(121px + var(--sd-h)); /* yapışkan başlığın alt kenarı (kategori şeridi dahil); yapışkan öğeler bunun altına oturur */ --edge:80px; --gut:24px; --max:1200px; /* 28 Ekim 2026: 1280 → 1200, geniş ekranda iki yana 160 px reklam yeri */
+  --sd-h:0px; --hdr-alt:calc(131px + var(--sd-h)); /* yapışkan başlığın alt kenarı (kategori şeridi dahil); yapışkan öğeler bunun altına oturur */ --edge:80px; --gut:24px; --max:1200px; /* 28 Ekim 2026: 1280 → 1200, geniş ekranda iki yana 160 px reklam yeri */
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1E2023;--surface:#25282C;--surface-2:#2E3236;--text:#F2F2F2;--text-2:#B4B7BB;--text-3:#8E9297;--line:#3A3E44;--rule:#F2F2F2;--link:#F2F2F2;--cat:#B4B7BB;--input:#8E9297;--img:#2E3236;--logo:#FFFFFF;--orange-tx:#FF6B1A;color-scheme:dark}}
@@ -63,16 +63,17 @@ h3{font-weight:700}
 
 /* header (kit §10b) */
 .hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:var(--bg);border-bottom:3px solid var(--rule)}
-.hdr .wrap{height:64px;display:flex;align-items:center;gap:24px}
+/* 4 Kasım 2026: 64 → 74 px; logo imzasıyla birlikte marka kiti §2 boşluğu (her kenarda ≥ x) logo küçülmeden sağlansın (kullanıcı: "çerçeveyi logoya göre genişlet") */
+.hdr .wrap{height:74px;display:flex;align-items:center;gap:24px}
 .logo{display:flex;align-items:center;min-height:44px;color:var(--logo);flex:none;line-height:0}
 /* Logo imzası (4 Kasım 2026): logonun altında ince çizgi, altında el yazısıyla "Nerdesin Fatih" */
 @font-face{font-family:"Imza";src:url(/yazi-tipleri/caveat-600-imza.woff2) format("woff2");font-weight:600;font-display:fallback}
 .logo-imzali{flex-direction:column;align-items:stretch;justify-content:center;gap:0}
 .logo-imzali,.logo-imzali:hover,.logo-imza{text-decoration:none!important}
-/* Marka kiti §2 boşluk kuralı: logonun her kenarında en az x (x = U harfinin genişliği ≈ logo boyu × 0,58). 64 px çubukta blok (logo + imza)
-   üstte ve altta ≥ x pay bırakacak boyda: logo 20 px (x ≈ 12), imza 14 px, blok ≈ 40 px. */
-.hdr .logo.logo-imzali svg{height:20px}
-.logo-imza{display:block;margin-top:3px;padding-top:1px;border-top:1px solid color-mix(in srgb,var(--logo) 28%,transparent);font-family:"Imza","Segoe Print","Bradley Hand",cursive;font-weight:600;font-size:14px;line-height:1.05;letter-spacing:.01em;color:var(--text-2);text-align:center;white-space:nowrap}
+/* Marka kiti §2 boşluk kuralı: logonun her kenarında en az x (x = U harfinin genişliği ≈ logo boyu × 0,58). Logo menü yazılarından belirgin
+   büyük kalır (24 px); çubuk 74 px: blok (logo + imza ≈ 45 px) üstte ve altta ≈ 15 px ≥ x (14). */
+.hdr .logo.logo-imzali svg{height:24px}
+.logo-imza{display:block;margin-top:3px;padding-top:1px;border-top:1px solid color-mix(in srgb,var(--logo) 28%,transparent);font-family:"Imza","Segoe Print","Bradley Hand",cursive;font-weight:600;font-size:15px;line-height:1.05;letter-spacing:.01em;color:var(--text-2);text-align:center;white-space:nowrap}
 .logo svg{height:24px;width:auto;fill:currentColor;display:block}
 /* Beta ibaresi (25 Ekim 2026): logonun yanında, tıklayınca kısa açıklama */
 .beta{position:relative;flex:none;margin-left:-16px}
