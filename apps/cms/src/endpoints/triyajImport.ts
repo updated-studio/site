@@ -186,7 +186,7 @@ export const triyajImport: Endpoint = {
         ...(etiketler.length ? { geo: { ...(prev?.seo?.geo || {}), entities: etiketler } } : {}),
       },
       ...(!prev && seo.slug ? { slug: seo.slug } : {}),
-      body: convertMarkdownToLexical({ editorConfig, markdown: body.markdown }),
+      body: await araGorselleriKoy(req, convertMarkdownToLexical({ editorConfig, markdown: body.markdown }) as any, Array.isArray(body.araGorseller) ? body.araGorseller.slice(0, 2) : [], baslik),
       sources: Array.isArray(body.sources) ? body.sources.filter((s: any) => s?.name).slice(0, 8) : [],
       // Ölçülebilir maddeler her gönderimde yeniden ölçülür; editörün işaretlediği diğer maddeler korunur
       workflow: prev
@@ -222,6 +222,26 @@ export const triyajKapak: Endpoint = {
     if (eskiKapak && body?.degistir) await sahipsizseSil(req, eskiKapak).catch(() => {})
     return Response.json({ ok: true, ...linkler(doc), eksikler: denetim.eksikler })
   },
+}
+
+/** Haber içi resmî görseller (4 Kasım 2026): Stüdyo markdown'a "[[gorsel-N]]" satırı koyar; burada görsel indirilir (aynı adres daha önce
+ *  yüklendiyse o kullanılır, yeniden gönderimde kopya birikmez) ve satır yazının içinde görsel olur. Görsel alınamazsa satır silinir. */
+async function araGorselleriKoy(req: PayloadRequest, lex: any, liste: any[], baslik: string) {
+  const kok: any[] = lex?.root?.children ?? []
+  const metin = (n: any): string => (n?.children ?? []).map((c: any) => c.text ?? metin(c)).join('').trim()
+  for (let i = kok.length - 1; i >= 0; i--) {
+    const m = kok[i]?.type === 'paragraph' ? metin(kok[i]).match(/^\[\[gorsel-(\d)\]\]$/) : null
+    if (!m) continue
+    const g = liste[Number(m[1]) - 1]
+    let id: number | string | undefined
+    if (g?.url) {
+      const var_ = await req.payload.find({ collection: 'media', where: { sourceUrl: { equals: g.url } }, limit: 1, depth: 0, req }).catch(() => null)
+      id = var_?.docs[0]?.id ?? (await gorselYukle(req, g, baslik)).id
+    }
+    if (id) kok[i] = { type: 'upload', version: 3, format: '', id: crypto.randomUUID().replace(/-/g, '').slice(0, 24), fields: null, relationTo: 'media', value: id }
+    else kok.splice(i, 1)
+  }
+  return lex
 }
 
 /** Görsel hiçbir kayıtta (sürümler dahil) kullanılmıyorsa siler */
