@@ -53,6 +53,7 @@
 
 ## Günlük (en yeni üstte)
 
+- **4 Kasım 2026 · Logo imzası sıkışıktı (kullanıcı).** İmzalı logoda logo 24 → 21 px (telefonda 20 → 18), imza 17 → 15 px (telefonda 12,5); çubukta üst/alt pay açıldı. Ölçek denetimi temiz.
 - **4 Kasım 2026 · Logo imzası düzeltme (kullanıcı).** Çizgi 1 px ve daha açık; "Nerdesin Fatih"in altındaki bağlantı çizgisi kalktı. Ölçek denetimi temiz.
 - **4 Kasım 2026 · Panel: haber içi resmî görseller.** `triyajImport` `araGorseller` alır; markdown'daki "[[gorsel-N]]" satırı indirilen görselle (upload düğümü) değişir, aynı adres daha önce yüklendiyse o kullanılır; alınamazsa satır silinir.
 - **4 Kasım 2026 · Logo imzası (kullanıcı: "logonun altına çizgi, altına anlaşılır el yazısıyla Nerdesin Fatih").** `Header.astro` `.logo-imzali` + `.logo-imza` (brand.css; telefonda cam.css 13,5 px). Yazı tipi Caveat 600, yalnız bu harflerin alt kümesi (`public/yazi-tipleri/caveat-600-imza.woff2`, OFL; yazi-tipleri.css üretici dosyası olduğu için @font-face brand.css'te). Video alanı açıklaması: önerilen yer ilk paragraftan sonra. Ölçek denetimi temiz.

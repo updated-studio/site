@@ -151,7 +151,8 @@
 @media (max-width:480px){
   .cam .hdr .wrap{gap:10px}
   .cam .hdr .logo svg{height:20px}
-  .logo-imza{font-size:13.5px;margin-top:2px}
+  .cam .hdr .logo-imzali svg{height:18px}
+  .logo-imza{font-size:12.5px;margin-top:2px}
   .logo-kulup{font-size:19px;padding:0 8px;margin-left:4px}.logo-kulup::before{left:-8px}
   .hdr .bolum-serit .wrap{justify-content:space-between;-webkit-mask-image:none;mask-image:none} /* sığdığı için kenar solması gerekmez */
   .bolum-serit a{font-size:min(17px,2.85vw);padding:0 min(8px,.8vw)} /* ekran genişliğiyle ölçeklenir: dört bölüm + Kulüp her telefonda tek satır */
