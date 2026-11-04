@@ -61,8 +61,16 @@ const ld = { '@context': 'https://schema.org', '@graph': [...siteLd(sayfalar), .
   <link rel="icon" href="/marka/updated-up-black.svg" type="image/svg+xml" />
   <link rel="alternate" type="application/rss+xml" title="UPDATED" href="/rss.xml" />
   <!-- Yazı tipleri kendi sitemizde (Google'a bağlanılmaz): public/yazi-tipleri, üretici deploy/yazi-tipi-indir.mjs -->
+  <!-- İlk ekranda görünen yazı tipleri önceden yüklenir; Türkçe harfler (İ, ş, ğ) latin-ext dosyasında olduğu için ikisi birden.
+       font-display: fallback: önbellekteki yazı tipi ilk boyamaya yetişir, sayfa her yenilendiğinde yazı tipi değişip kaymaz (4 Kasım 2026). -->
   <link rel="preload" href="/yazi-tipleri/ibm-plex-sans-400-latin.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="/yazi-tipleri/yazi-tipleri.css?v=20261025" />
+  <link rel="preload" href="/yazi-tipleri/ibm-plex-sans-400-latin-ext.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/yazi-tipleri/big-shoulders-display-900-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/yazi-tipleri/big-shoulders-display-900-latin-ext.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/yazi-tipleri/ibm-plex-sans-condensed-700-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/yazi-tipleri/ibm-plex-sans-condensed-700-latin-ext.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/yazi-tipleri/caveat-600-imza.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/yazi-tipleri/yazi-tipleri.css?v=20261104" />
   <script is:inline>try{var t=localStorage.getItem('up-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
   <!-- Cam görünüm 25 Ekim 2026'dan beri varsayılan (styles/cam.css); eski düz görünüm ?tema=duz ile (tercih saklanır), ?tema=cam geri getirir -->
   <script is:inline>try{var q=new URLSearchParams(location.search).get('tema');if(q==='duz')localStorage.setItem('up-duz','1');if(q==='cam')localStorage.removeItem('up-duz');localStorage.removeItem('up-cam');if(localStorage.getItem('up-duz')==='1')document.documentElement.classList.remove('cam')}catch(e){}</script>

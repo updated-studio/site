@@ -53,6 +53,7 @@
 
 ## Günlük (en yeni üstte)
 
+- **4 Kasım 2026 · Yazı tipi kayması (kullanıcı: "her yenilemede bir an yazı tipi değişiyor").** Sebep: font-display swap + yalnız Plex Sans 400 önden yükleniyordu; başlıkların Türkçe harfleri ayrı latin-ext dosyasında sonradan geliyordu. `font-display: fallback` (yazi-tipleri.css, üretici betik, imza) ve ilk ekran yazı tiplerinin önden yüklenmesi (Plex Sans 400 latin/ext, Big Shoulders 900 latin/ext, Plex Sans Condensed 700 latin/ext, imza). Ölçek denetimi temiz.
 - **4 Kasım 2026 · Logo imzası sıkışıktı (kullanıcı).** İmzalı logoda logo 24 → 21 px (telefonda 20 → 18), imza 17 → 15 px (telefonda 12,5); çubukta üst/alt pay açıldı. Ölçek denetimi temiz.
 - **4 Kasım 2026 · Logo imzası düzeltme (kullanıcı).** Çizgi 1 px ve daha açık; "Nerdesin Fatih"in altındaki bağlantı çizgisi kalktı. Ölçek denetimi temiz.
 - **4 Kasım 2026 · Panel: haber içi resmî görseller.** `triyajImport` `araGorseller` alır; markdown'daki "[[gorsel-N]]" satırı indirilen görselle (upload düğümü) değişir, aynı adres daha önce yüklendiyse o kullanılır; alınamazsa satır silinir.

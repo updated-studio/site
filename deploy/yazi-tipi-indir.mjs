@@ -25,7 +25,8 @@ for (const [, altkume, blok] of bloklar) {
   const r = await fetch(kaynak)
   if (!r.ok) throw new Error(`${kaynak}: ${r.status}`)
   writeFileSync(join(cikti, ad), Buffer.from(await r.arrayBuffer()))
-  sonuc += blok.replace(/src:\s*url\([^)]+\)/, `src: url(${onek}/${ad})`) + '\n'
+  // font-display: fallback (4 Kasım 2026): swap'te her yenilemede yazı tipi bir an değişiyordu; önbellekteki yazı tipi ilk boyamaya yetişir
+  sonuc += blok.replace(/src:\s*url\([^)]+\)/, `src: url(${onek}/${ad})`).replace(/font-display:\s*\w+/, 'font-display: fallback') + '\n'
   n++
 }
 if (!n) throw new Error('hiç yazı tipi bulunamadı (adres doğru mu?)')
