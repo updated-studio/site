@@ -69,6 +69,6 @@ export const videoField: Field = {
       { name: 'kanal', type: 'text', label: 'Yayınlayan kanal', admin: { description: 'Resmî kanal adı (ör. Bethesda Softworks)' } },
       { name: 'resmiSayfa', type: 'text', label: 'Resmî sayfa adresi', admin: { description: 'Ürünün ya da oyunun resmî sayfası; videonun altında bağlantı olarak' } },
     ] },
-    { name: 'spotAltinda', type: 'checkbox', label: 'Metnin en başında göster (haber videonun kendisiyle ilgiliyse; yoksa ilk paragraftan sonra)', defaultValue: false },
+    { name: 'spotAltinda', type: 'checkbox', label: 'Metnin en başında göster', defaultValue: false, admin: { description: 'Önerilen: işaretsiz (video ilk paragraftan sonra). Yalnız haber videonun kendisiyle ilgiliyse (fragman/tanıtım yayınlandı) işaretlenir; sistem kendisi karar verir.' } },
   ],
 }

@@ -65,6 +65,10 @@ h3{font-weight:700}
 .hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:var(--bg);border-bottom:3px solid var(--rule)}
 .hdr .wrap{height:64px;display:flex;align-items:center;gap:24px}
 .logo{display:flex;align-items:center;min-height:44px;color:var(--logo);flex:none;line-height:0}
+/* Logo imzası (4 Kasım 2026): logonun altında ince çizgi, altında el yazısıyla "Nerdesin Fatih" */
+@font-face{font-family:"Imza";src:url(/yazi-tipleri/caveat-600-imza.woff2) format("woff2");font-weight:600;font-display:swap}
+.logo-imzali{flex-direction:column;align-items:stretch;justify-content:center;gap:0}
+.logo-imza{display:block;margin-top:4px;padding-top:2px;border-top:1.5px solid color-mix(in srgb,var(--logo) 35%,transparent);font-family:"Imza","Segoe Print","Bradley Hand",cursive;font-weight:600;font-size:17px;line-height:1.05;letter-spacing:.01em;color:var(--text-2);text-align:center;white-space:nowrap}
 .logo svg{height:24px;width:auto;fill:currentColor;display:block}
 /* Beta ibaresi (25 Ekim 2026): logonun yanında, tıklayınca kısa açıklama */
 .beta{position:relative;flex:none;margin-left:-16px}

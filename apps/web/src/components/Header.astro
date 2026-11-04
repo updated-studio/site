@@ -38,7 +38,8 @@ const DILLER: [string, string][] = [['en', 'English'], ['de', 'Deutsch'], ['ru',
 ---
 <header class:list={["hdr", { katsiz: !katGoster }]} id="hdr">
   <div class="wrap">
-    <a class="logo" href="/" aria-label="UPDATED ana sayfa"><Logo /></a>
+    {/* Logonun altında çizgi ve el yazısıyla "Nerdesin Fatih" (4 Kasım 2026, kullanıcı isteği; yazı tipi Caveat 600, OFL, yalnız bu harfler) */}
+    <a class="logo logo-imzali" href="/" aria-label="UPDATED ana sayfa · Nerdesin Fatih"><Logo /><span class="logo-imza" aria-hidden="true">Nerdesin Fatih</span></a>
     <nav class="nav" aria-label="Bölümler">
       {nav.map((n) => <a href={n.href} aria-current={on(n.href)}>{n.label}</a>)}
       {/* Kulüp ana menünün sağında, dik çizgiyle ayrı (2 Kasım 2026, kullanıcı: "logonun yanında bir şey olmasın") */}
