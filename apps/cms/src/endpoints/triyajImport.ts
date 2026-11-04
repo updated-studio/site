@@ -11,7 +11,7 @@ import { sql } from '@payloadcms/db-postgres'
  *
  * GET  /api/triyaj/durum   → { ok, kategoriler[{id,name,slug}], yazar } — Stüdyo "Bağlantıyı dene" ve kategori listesi.
  * POST /api/triyaj/import  → taslak haber açar ya da günceller (aynı studioId).
- *   Gövde: { studioId, title, spot, markdown, category, label?, sources[{name,url,primary}], image?{url,credit,alt,ai},
+ *   Gövde: { studioId, title, spot, markdown, category, label?, sources[{name,url,primary}], image?{url,credit,alt,ai}, video?{url,baslik,kanal,resmiSayfa,spotAltinda},
  *            seo?{title,description,slug}, tags?[], products?[slug], shortAnswer?, priority?, cluster?, editorEmail?,
  *            leak?{knowns[],unknowns[],certainty}, lastSeen? (Stüdyo'nun son gördüğü updatedAt), force? }
  *   Kurallar: haber "incelemede" taslak olarak açılır; yayındaki ya da zamanlanmış haberin üzerine yazılmaz (409 yayinda);
@@ -174,6 +174,10 @@ export const triyajImport: Endpoint = {
       ...(leak ? { knowns: leak.knowns, unknowns: leak.unknowns, ...(leak.certainty ? { certainty: leak.certainty } : {}) } : {}),
       ...(products.length ? { products } : {}),
       ...(body.shortAnswer ? { shortAnswer: body.shortAnswer } : {}),
+      // Resmî video (4 Kasım 2026): Haber Masası resmî kanaldan bulduysa; yalnız YouTube/Vimeo adresi kabul edilir. Editör sonradan silebilir.
+      ...(body.video?.url && /^https:\/\/(www\.)?(youtube\.com|youtu\.be|vimeo\.com)\//.test(String(body.video.url)) && !prev?.video?.url
+        ? { video: { url: String(body.video.url).slice(0, 300), baslik: cut(String(body.video.baslik || ''), 140), kanal: cut(String(body.video.kanal || ''), 80), resmiSayfa: /^https:\/\//.test(String(body.video.resmiSayfa || '')) ? String(body.video.resmiSayfa).slice(0, 300) : '', spotAltinda: !!body.video.spotAltinda } }
+        : {}),
       // SEO: Stüdyo'nun yazdığı değer korunur; boş olan alanı panel otomatik doldurur. Etiketler sayfa açmaz, yalnız varlık (schema "mentions").
       seo: {
         ...(prev?.seo || {}),

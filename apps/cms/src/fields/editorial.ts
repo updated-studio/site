@@ -54,3 +54,21 @@ export const triyaj: Field = {
     { name: 'importedAt', type: 'date', label: 'Aktarım', admin: { readOnly: true }, hooks: kopyadaBos },
   ],
 }
+
+/** Gömülü video (4 Kasım 2026, kullanıcı: "resmî fragman varsa doğrudan gömsün, okur sitede izlesin"): yazının içine blok yerine ayrı alan;
+ *  site videoyu ilk paragraftan sonra (fragman haberinde spotun hemen altında) yerleştirir. Haber Masası resmî kanaldan bulduğunu doldurur. */
+export const videoField: Field = {
+  name: 'video', type: 'group', label: 'Gömülü video',
+  admin: { description: 'Resmî fragman ya da tanıtım videosu. Boşsa video gösterilmez. Site kendisi yerleştirir: ilk paragraftan sonra.' },
+  fields: [
+    { type: 'row', fields: [
+      { name: 'url', type: 'text', label: 'Video adresi (YouTube ya da Vimeo)' },
+      { name: 'baslik', type: 'text', label: 'Video başlığı' },
+    ] },
+    { type: 'row', fields: [
+      { name: 'kanal', type: 'text', label: 'Yayınlayan kanal', admin: { description: 'Resmî kanal adı (ör. Bethesda Softworks)' } },
+      { name: 'resmiSayfa', type: 'text', label: 'Resmî sayfa adresi', admin: { description: 'Ürünün ya da oyunun resmî sayfası; videonun altında bağlantı olarak' } },
+    ] },
+    { name: 'spotAltinda', type: 'checkbox', label: 'Metnin en başında göster (haber videonun kendisiyle ilgiliyse; yoksa ilk paragraftan sonra)', defaultValue: false },
+  ],
+}

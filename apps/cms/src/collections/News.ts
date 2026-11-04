@@ -3,7 +3,7 @@ import { editorsUp, publishedOrStaff } from '../access/roles'
 import { LABELS } from '../lib/kit'
 import { slugField } from '../fields/slug'
 import { seoFields } from '../fields/seo'
-import { authorField, corrections, coverField, pathField, productsField, publishedAt, readingTime, shortAnswer, sources, spotField, titleField, triyaj, workflow } from '../fields/editorial'
+import { authorField, corrections, coverField, pathField, productsField, publishedAt, readingTime, shortAnswer, sources, spotField, titleField, triyaj, videoField, workflow } from '../fields/editorial'
 import { autoSeo } from '../hooks/autoSeo'
 import { workflowGuard } from '../hooks/workflow'
 import { imzaYayinlayana, yazarKilidi } from '../hooks/imza'
@@ -54,6 +54,7 @@ export const News: CollectionConfig = {
         ] },
       ],
     },
+    videoField,
     productsField,
     sources,
     corrections,

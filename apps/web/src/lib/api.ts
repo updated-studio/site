@@ -84,7 +84,7 @@ export function mNews(d: any): News {
   return {
     id: String(d.id), kind: 'news', title: d.title, spot: d.spot, path: d.path, category: mCat(d.category), label: d.label || 'yok', cover: mImg(d.cover, 'hero'), author: mAuthor(d.author),
     publishedAt: d.publishedAt || d.createdAt, updatedAt: d.updatedAt, readingTime: d.readingTime, products: (d.products || []).map(mRef).filter(Boolean) as ProductRef[],
-    shortAnswer: d.shortAnswer, html: d.body ? lexicalToHtml(d.body, media) : undefined, knowns: d.knowns || [], unknowns: d.unknowns || [], liste: (d.liste || []).map((x: any) => ({ urun: mRef(x.urun), baslik: x.baslik || '', gerekce: x.gerekce || '' })).filter((x: any) => x.urun), sources: d.sources || [], corrections: d.corrections || [], seo: seo(d),
+    shortAnswer: d.shortAnswer, html: d.body ? lexicalToHtml(d.body, media) : undefined, video: d.video?.url ? { url: d.video.url, baslik: d.video.baslik || '', kanal: d.video.kanal || '', resmiSayfa: d.video.resmiSayfa || '', spotAltinda: !!d.video.spotAltinda } : undefined, knowns: d.knowns || [], unknowns: d.unknowns || [], liste: (d.liste || []).map((x: any) => ({ urun: mRef(x.urun), baslik: x.baslik || '', gerekce: x.gerekce || '' })).filter((x: any) => x.urun), sources: d.sources || [], corrections: d.corrections || [], seo: seo(d),
   }
 }
 export function mReview(d: any): Review {

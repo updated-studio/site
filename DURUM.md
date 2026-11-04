@@ -53,6 +53,7 @@
 
 ## Günlük (en yeni üstte)
 
+- **4 Kasım 2026 · Haberde resmî video (kullanıcı onayı; yerleşim: ilk paragraftan sonra).** Panel: Haber › "Gömülü video" (`fields/editorial.ts` videoField: url, başlık, kanal, resmî sayfa, en başta; göç `20261104_120000_haber_video`, elle yazıldı, .json yok). `triyajImport` `video` alır (yalnız YouTube/Vimeo). Site: `HaberVideo.astro` (YouTube kapak + tıklayınca yerinde oynar, `scripts/site.ts` youtube(); Vimeo tembel iframe), `ArticleBody` ilk paragraftan sonra ya da en başta. Yazı editörüne blok eklenmedi (ayrı alan). Ölçek denetimi temiz.
 - **4 Kasım 2026 · Panel: yazar kilidi (kullanıcı: "başkasının adına haber girilemesin, yalnız yöneticiler değiştirebilsin").** `hooks/imza.ts` `yazarKilidi` News/Reviews/Comparisons beforeChange: yönetici olmayan yazarı başkasına çeviremez; yeni kayıtta yazar boşsa kaydedenin yazar profili, "Hazırlayan" boşsa kaydeden hesap; Updated Stüdyo imzalı taslak kaydedene geçer. Sistem anahtarıyla gelen içe aktarma etkilenmez.
 - **3 Kasım 2026 · Panel: kapak değiştirme.** `/api/triyaj/kapak` `degistir` alırsa yayında olmayan taslağın kapağını değiştirir, eski görsel sahipsizse silinir (Stüdyo görsel model kıyası: editör başka adayı seçince).
 - **3 Kasım 2026 · Künyede kısa ad (kullanıcı onayı).** Panel: Ürünler › "Kısa ad" (`shortName`, göç `20261103_120000_kisa_ad`, elle yazıldı, .json anlık görüntüsü yok). Site `mRef`: kartlarda kısa ad (boşsa tam addaki parantezli kısım atılır), ürün sayfası başlığı ve SEO tam ad (`fullName`). Ölçek denetimi temiz.

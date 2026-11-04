@@ -6,7 +6,7 @@ export type Spec = { key: string; value?: string | null; num?: number; unit?: st
 export type Label = 'yok' | 'son-dakika' | 'sizinti' | 'rehber' | 'sponsorlu'
 export type News = {
   id: string; kind: 'news'; title: string; spot: string; path: string; category: Cat; label: Label; cover?: Img; author: Author
-  publishedAt: string; updatedAt?: string; readingTime?: number; products: ProductRef[]; shortAnswer?: string; html?: string
+  publishedAt: string; updatedAt?: string; readingTime?: number; products: ProductRef[]; shortAnswer?: string; html?: string; video?: { url: string; baslik?: string; kanal?: string; resmiSayfa?: string; spotAltinda?: boolean }
   knowns?: string[]; unknowns?: string[]; liste?: { urun: ProductRef; baslik: string; gerekce: string }[]; sources?: { name: string; url?: string; primary?: boolean }[]; corrections?: { at: string; note: string }[]
   seo: { title: string; description: string; image?: Img; canonical?: string; noindex?: boolean; entities?: string[]; faq?: { q: string; a: string }[] }
 }

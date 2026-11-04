@@ -1,0 +1,26 @@
+---
+/**
+ * Haberde gömülü resmî video (4 Kasım 2026, kullanıcı: "resmî fragman varsa doğrudan gömsün, okur sitede izlesin"). Panelde Haber › Gömülü video.
+ * YouTube: kapak resmi görünür, tıklayınca yerinde oynar (youtube-nocookie; scripts/site.ts youtube()); JS yoksa YouTube'a gider.
+ * Vimeo: oynatıcı tembel yüklenir. Altında kanal ve varsa resmî sayfa bağlantısı.
+ */
+import { ico } from '../lib/ui'
+import type { News } from '../lib/types'
+interface Props { v: NonNullable<News['video']> }
+const { v } = Astro.props
+const yt = v.url.match(/(?:youtube(?:-nocookie)?\.com\/(?:embed\/|watch\?v=|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/)?.[1]
+const vimeo = !yt ? v.url.match(/vimeo\.com\/(?:video\/)?(\d+)/)?.[1] : undefined
+const ad = v.baslik || 'Video'
+---
+{(yt || vimeo) && (
+  <figure class="hv">
+    {yt ? (
+      <a class="hv-a" href={`https://www.youtube.com/watch?v=${yt}`} target="_blank" rel="noopener" data-yt={yt} aria-label={`Videoyu oynat: ${ad}`}>
+        <span class="c-img"><img src={`https://i.ytimg.com/vi/${yt}/hqdefault.jpg`} alt="" loading="lazy" width="480" height="360" /><span class="ic-oy" set:html={ico('play', 30)} /></span>
+      </a>
+    ) : (
+      <span class="c-img"><iframe src={`https://player.vimeo.com/video/${vimeo}?dnt=1`} title={ad} loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></span>
+    )}
+    <figcaption>{ad}{v.kanal && <> · {v.kanal}</>}{v.resmiSayfa && <> · <a href={v.resmiSayfa} target="_blank" rel="noopener">Resmî sayfa ↗</a></>}</figcaption>
+  </figure>
+)}

@@ -122,3 +122,11 @@
 .icl-duvar > a:hover b{text-decoration:underline;text-underline-offset:3px}
 @media (max-width:900px){.icl-one{grid-template-columns:minmax(0,1fr)}.icl-one > div{grid-template-rows:none;grid-template-columns:repeat(2,minmax(0,1fr))}.icl-k.buyuk{min-height:340px}}
 @media (max-width:560px){.icl-one > div{grid-template-columns:minmax(0,1fr)}.icl-duvar{columns:2 150px;column-gap:12px}.icl-duvar > a{margin-bottom:16px}}
+
+/* Haberde gömülü resmî video (HaberVideo.astro, 4 Kasım 2026) */
+.hv{margin:28px 0;display:grid;gap:8px}
+.hv .c-img{position:relative;display:block;aspect-ratio:16/9;border-radius:var(--r-kart,0);overflow:hidden;background:var(--img)}
+.hv .c-img img,.hv .c-img iframe{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border:0}
+.hv-a{display:block;text-decoration:none}
+.hv-a:hover .ic-oy{transform:translate(-50%,-50%) scale(1.06)}
+.hv figcaption{font-size:14px;color:var(--text-2)}
