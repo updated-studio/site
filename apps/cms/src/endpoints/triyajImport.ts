@@ -56,6 +56,9 @@ async function onAltiyaDokuz(buf: Buffer) {
 /** Görseli indirip ortam kütüphanesine yükler (WebP türevlerini Media koleksiyonu üretir). Hata yazıyı engellemez. */
 async function gorselYukle(req: PayloadRequest, image: any, baslik: string): Promise<{ id?: number | string; kapak?: KapakBilgi; hata?: string }> {
   try {
+    // Aynı adres kütüphanede varsa yeniden yüklenmez (4 Kasım 2026: yapay zekâ görselleri üretilince "Updated AI" olarak önceden girer)
+    const onceki: any = image.url ? (await req.payload.find({ collection: 'media', where: { sourceUrl: { equals: image.url } }, limit: 1, depth: 0, overrideAccess: true }).catch(() => null))?.docs[0] : null
+    if (onceki) return { id: onceki.id, kapak: { width: onceki.width, height: onceki.height, alt: onceki.alt, credit: onceki.credit, aiGenerated: onceki.aiGenerated, representative: onceki.representative } }
     const c = new AbortController(); const t = setTimeout(() => c.abort(), 25_000)
     const r = await fetch(image.url, { signal: c.signal, headers: { 'User-Agent': 'UpdatedPanel/1.0 (https://updated.com.tr)' } }).finally(() => clearTimeout(t))
     if (!r.ok) return { hata: `Görsel indirilemedi (${r.status})` }
@@ -69,7 +72,7 @@ async function gorselYukle(req: PayloadRequest, image: any, baslik: string): Pro
     const m: any = await req.payload.create({
       collection: 'media',
       data: { alt: cut(image.alt || baslik, LIMIT.alt), credit: image.credit || 'Görsel: kaynak', sourceUrl: image.url, aiGenerated: !!image.ai } as any,
-      file: { data: k.buf, mimetype: mime, name: `${trSlug(baslik) || 'haber-gorseli'}.${uzanti}`, size: k.buf.length },
+      file: { data: k.buf, mimetype: mime, name: `${image.dosyaAdi ? trSlug(String(image.dosyaAdi), 12) : trSlug(baslik) || 'haber-gorseli'}.${uzanti}`, size: k.buf.length },
     })
     // Odak noktası (28 Ekim 2026): yapay zekâ seçerken konunun yerini verdiyse küçük boyutlar ve sitenin kırpmaları o noktaya göre
     const o = image.odak
@@ -280,5 +283,64 @@ export const triyajTemizle: Endpoint = {
       silinen.push(studioId)
     }
     return Response.json({ silinen })
+  },
+}
+
+/**
+ * Updated AI görsel kütüphanesi (4 Kasım 2026, kullanıcı: "üretilen görseller isimlendirmeyle stoğa girsin, editör aramada bulsun; eskidikçe
+ * silelim, yeni modeller daha iyi"). Stüdyo denetimden geçen her yapay zekâ görselini buraya gönderir (künye kendiliğinden "Temsili görsel ·
+ * Yapay zekâ ile üretildi"); sıkıştırma diğer görsellerle aynı (Media koleksiyonu). Kapak olursa aynı kayıt kullanılır.
+ * POST /api/triyaj/yz-medya   → { url, alt, ad, model, odak? } → { id }
+ * POST /api/triyaj/yz-temizle → { gun } → gun günden eski, hiçbir yerde (kapak, ürün, sürümler, metin içi) kullanılmayan yapay zekâ görsellerini siler.
+ */
+export const triyajYzMedya: Endpoint = {
+  path: '/triyaj/yz-medya',
+  method: 'post',
+  handler: async (req) => {
+    if (!yetkili(req)) return yetkisiz()
+    const b = (await req.json?.()) as { url?: string; alt?: string; ad?: string; model?: string; odak?: unknown } | undefined
+    if (!b?.url) return Response.json({ error: 'url gerekli', code: 'eksik' }, { status: 400 })
+    const ad = `yz ${b.ad || 'gorsel'} ${b.model || ''}`.trim()
+    const y = await gorselYukle(req, { url: b.url, alt: b.alt || b.ad, ai: true, dosyaAdi: ad, odak: b.odak }, String(b.ad || 'yapay zeka gorseli'))
+    return y.id ? Response.json({ id: y.id }) : Response.json({ error: y.hata || 'Yüklenemedi', code: 'gorsel' }, { status: 422 })
+  },
+}
+
+/** Herhangi bir kayıtta kullanılan görsel numaraları: payload.media'ya bağlı bütün sütunlar (sürümler ve ilişki tabloları dahil) + zengin metinlerdeki görseller */
+async function kullanilanMedya(req: PayloadRequest): Promise<Set<number>> {
+  const db = (req.payload.db as any).drizzle
+  const satir = (r: any) => (r.rows ?? r) as any[]
+  const fk = satir(await db.execute(sql.raw(`select kcu.table_name t, kcu.column_name c from information_schema.referential_constraints rc
+    join information_schema.key_column_usage kcu on kcu.constraint_name = rc.constraint_name and kcu.constraint_schema = rc.constraint_schema
+    join information_schema.constraint_column_usage ccu on ccu.constraint_name = rc.unique_constraint_name and ccu.constraint_schema = rc.unique_constraint_schema
+    where kcu.table_schema = 'payload' and ccu.table_schema = 'payload' and ccu.table_name = 'media' and kcu.table_name not in ('media', 'payload_locked_documents_rels', 'payload_preferences_rels')`)))
+  const js = satir(await db.execute(sql.raw(`select table_name t, column_name c from information_schema.columns where table_schema = 'payload' and data_type = 'jsonb' and table_name <> 'media'`)))
+  const q = (x: string) => '"' + x.replace(/"/g, '""') + '"'
+  const parca = [
+    ...fk.map((r) => `select ${q(r.c)}::bigint id from payload.${q(r.t)} where ${q(r.c)} is not null`),
+    ...js.map((r) => `select (jsonb_path_query(${q(r.c)}, 'lax $.** ? (@.relationTo == "media").value ? (@.type() == "number")'))::text::bigint id from payload.${q(r.t)}`),
+  ]
+  if (!parca.length) return new Set()
+  const r = satir(await db.execute(sql.raw(`select distinct id from (${parca.join(' union ')}) k where id is not null`)))
+  return new Set(r.map((x) => Number(x.id)))
+}
+
+export const triyajYzTemizle: Endpoint = {
+  path: '/triyaj/yz-temizle',
+  method: 'post',
+  handler: async (req) => {
+    if (!yetkili(req)) return yetkisiz()
+    const gun = Number(((await req.json?.()) as { gun?: number } | undefined)?.gun)
+    if (!(gun >= 30)) return Response.json({ error: 'gun en az 30', code: 'eksik' }, { status: 400 })
+    const eski = await req.payload.find({ collection: 'media', depth: 0, limit: 200, overrideAccess: true, pagination: false,
+      where: { and: [{ aiGenerated: { equals: true } }, { createdAt: { less_than: new Date(Date.now() - gun * 86_400_000).toISOString() } }] } as any })
+    if (!eski.docs.length) return Response.json({ silinen: 0 })
+    const kullanilan = await kullanilanMedya(req)
+    let silinen = 0
+    for (const m of eski.docs as any[]) {
+      if (kullanilan.has(Number(m.id))) continue
+      await req.payload.delete({ collection: 'media', id: m.id, overrideAccess: true }).then(() => silinen++).catch((e) => req.payload.logger.warn(`yz görseli silinemedi ${m.id}: ${e}`))
+    }
+    return Response.json({ silinen, bakilan: eski.docs.length })
   },
 }
