@@ -14,7 +14,7 @@ export const workflowGuard: CollectionBeforeChangeHook = ({ data, req, originalD
   data.workflow ||= {}
   if (operation === 'create' && !data.workflow.state) data.workflow.state = 'taslak'
   if (!publishing) return data
-  if (!canPublish(req.user)) throw new APIError('Yayınlama yetkisi yalnız yayın yönetmenindedir. "İncelemeye gönder" kullanın.', 403)
+  if (!canPublish(req.user)) throw new APIError('Yayınlama yetkisi editör ve yöneticide.', 403)
   const t = String(data.title || '').toLocaleLowerCase('tr-TR')
   const bad = BANNED_WORDS.find((w) => t.includes(w))
   if (bad || /!/.test(t)) throw new APIError(`Başlıkta "${bad || '!'}" kullanılmaz (kit §7).`, 400)

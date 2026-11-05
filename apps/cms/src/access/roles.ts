@@ -1,6 +1,6 @@
 import type { Access, FieldAccess } from 'payload'
 
-/** Roller (kit §14): yayın yönetmeni yayınlar; editör yazar ama kendi haberini onaylamaz. */
+/** Roller (kit §14). 5 Kasım 2026'dan beri editör de doğrudan yayınlar (onay adımı kalktı). */
 export const ROLES = [
   { label: 'Yönetici', value: 'admin' },
   { label: 'Yayın yönetmeni', value: 'yayin-yonetmeni' },
@@ -14,7 +14,8 @@ const has = (user: any, ...r: string[]) => !!user && r.includes(user.role)
 
 export const isAdmin: Access = ({ req }) => has(req.user, 'admin')
 export const isStaff: Access = ({ req }) => !!req.user
-export const canPublish = (user: any) => has(user, 'admin', 'yayin-yonetmeni')
+// 5 Kasım 2026 (kullanıcı: "yayın yönetmeni yok, herkes editör, bir de yöneticiler; direkt paylaşabiliyorlar, onaya gitmiyor"): editör de yayınlar
+export const canPublish = (user: any) => has(user, 'admin', 'yayin-yonetmeni', 'editor')
 export const editorsUp: Access = ({ req }) => has(req.user, 'admin', 'yayin-yonetmeni', 'editor', 'video')
 
 /** Herkes yayımlanmışı okur; ekip taslakları da görür. */

@@ -102,7 +102,7 @@ export const studyoZamanla: Endpoint = {
   method: 'get',
   handler: async (req) => {
     const headers = headersWithCors({ headers: new Headers({ 'Cache-Control': 'no-store' }), req })
-    if (!canPublish(req.user)) return Response.json({ error: 'Zamanlama yalnız yayın yönetmeni ve yöneticide.' }, { status: 403, headers })
+    if (!canPublish(req.user)) return Response.json({ error: 'Zamanlama yalnız editör ve yöneticide.' }, { status: 403, headers })
     const h = ZAMANLAMA_HEDEF(new URL(req.url!).searchParams)
     if (!(h.koleksiyon && h.id) && !h.genel) return Response.json({ error: 'Geçersiz' }, { status: 400, headers })
     const hedef = h.genel ? [{ 'input.global': { equals: h.genel } }] : [{ 'input.doc.value': { equals: h.id } }, { 'input.doc.relationTo': { equals: h.koleksiyon } }]
@@ -119,7 +119,7 @@ export const studyoZamanlaEkle: Endpoint = {
   method: 'post',
   handler: async (req) => {
     const headers = headersWithCors({ headers: new Headers({ 'Cache-Control': 'no-store' }), req })
-    if (!canPublish(req.user)) return Response.json({ error: 'Zamanlama yalnız yayın yönetmeni ve yöneticide.' }, { status: 403, headers })
+    if (!canPublish(req.user)) return Response.json({ error: 'Zamanlama yalnız editör ve yöneticide.' }, { status: 403, headers })
     const g = ((await req.json?.()) ?? {}) as Record<string, unknown>
     const h = ZAMANLAMA_HEDEF(g)
     const zaman = new Date(String(g.zaman ?? ''))
@@ -139,7 +139,7 @@ export const studyoZamanlaSil: Endpoint = {
   method: 'delete',
   handler: async (req) => {
     const headers = headersWithCors({ headers: new Headers({ 'Cache-Control': 'no-store' }), req })
-    if (!canPublish(req.user)) return Response.json({ error: 'Zamanlama yalnız yayın yönetmeni ve yöneticide.' }, { status: 403, headers })
+    if (!canPublish(req.user)) return Response.json({ error: 'Zamanlama yalnız editör ve yöneticide.' }, { status: 403, headers })
     const is = new URL(req.url!).searchParams.get('is')
     if (!is) return Response.json({ error: 'Geçersiz' }, { status: 400, headers })
     const { docs } = await req.payload.delete({ collection: 'payload-jobs', overrideAccess: true, where: { and: [{ id: { equals: is } }, { taskSlug: { equals: 'schedulePublish' } }, { completedAt: { exists: false } }] } as any })
