@@ -9,11 +9,11 @@ import { havuz } from './uye'
 
 const KESINLIK: Record<string, number> = { soylenti: 1, sizinti: 2, test: 3, takvim: 3, duyuruldu: 4, satista: 4 }
 const sade = (x: string) => String(x ?? '').toLocaleLowerCase('tr-TR').normalize('NFKD').replace(/[^a-z0-9]/g, '')
-type Aday = { id: number; marka: string; ad: string; tur: string; durum: string; tarih: string | null; tarih_notu: string; ozet: string; urun_id: number | null }
+type Aday = { id: number; marka: string; ad: string; tur: string; durum: string; tarih: string | null; tarih_notu: string; ozet: string; urun_id: number | null; islem_notu?: string }
 
 export async function radarIsle(p: Payload) {
   const db = havuz(p)
-  const r = await db.query(`select id, marka, ad, tur, durum, tarih::text, tarih_notu, ozet, urun_id from public.radar_adaylari where islem = 'bekliyor' order by id limit 20`).catch(() => null)
+  const r = await db.query(`select id, marka, ad, tur, durum, tarih::text, tarih_notu, ozet, urun_id, islem_notu from public.radar_adaylari where islem = 'bekliyor' order by id limit 20`).catch(() => null)
   if (!r?.rows.length) return
   for (const a of r.rows as Aday[]) {
     const not = (islem: string, notu: string, urunId?: number) =>
@@ -33,9 +33,13 @@ export async function radarIsle(p: Payload) {
         await p.update({ collection: 'products', id: urun.id, data: { ...ortak, onRadar: !satista } as any, overrideAccess: true, context: { radar: true } })
         await not('uygulandi', satista ? 'Satışa çıktı, radardan düştü' : 'Künye güncellendi', urun.id)
       } else {
-        if (satista) { await not('atlandi', 'Satışta, künyesi yok'); continue }
-        const yeni = await p.create({ collection: 'products', data: { name: a.ad, brand: a.marka, type: a.tur, blurb: a.ozet || undefined, ...ortak, onRadar: true, radarOto: true } as any, overrideAccess: true, context: { radar: true } })
-        await not('uygulandi', 'Künye açıldı', yeni.id as number)
+        // Katalog (5 Kasım 2026, kullanıcı: "künyeye markaların son ürünlerini ekle"): Stüdyo radar-otomatik {katalog} markaların son 12 ayda
+        // çıkardığı ürünleri islem_notu 'katalog' ile yazar; satıştaki bu ürünlerin künyesi açılır (radarda görünmez), künye otomasyonu doldurur.
+        // Haberden gelen satıştaki üründe künye yine açılmaz (eski ürünler künyeye dolmasın).
+        const katalog = a.islem_notu === 'katalog'
+        if (satista && !katalog) { await not('atlandi', 'Satışta, künyesi yok'); continue }
+        const yeni = await p.create({ collection: 'products', data: { name: a.ad, brand: a.marka, type: a.tur, blurb: a.ozet || undefined, ...ortak, onRadar: !satista, radarOto: true } as any, overrideAccess: true, context: { radar: true } })
+        await not('uygulandi', katalog ? 'Künye açıldı (katalog)' : 'Künye açıldı', yeni.id as number)
       }
     } catch (e) { await not('hata', String((e as Error).message ?? e)).catch(() => {}) }
   }

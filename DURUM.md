@@ -53,6 +53,7 @@
 
 ## Günlük (en yeni üstte)
 
+- **5 Kasım 2026 · Katalog: markaların son ürünleri künyeye (kullanıcı: "künyeye güncel markaların son ürünlerini ekle").** Stüdyo `radar-otomatik {katalog}` künyedeki markaların son 12 aydaki ürünlerini Claude web aramasıyla bulup `radar_adaylari`'na `islem_notu = 'katalog'` ile yazar; panel `lib/radar.ts` bu satırlar satıştaysa da künye açar (radarda görünmez; haberden gelen satıştaki ürün yine açılmaz). Künye otomasyonu yeni künyeleri doldurur, editör onaylar.
 - **5 Kasım 2026 17:40** (Natro sunucusundaki Claude): Künye sayfasında Söküm çizimi ve Topla kalktı (kullanıcı: "kaldır gitsin"), sahnede arka planı silinmiş ürün fotoğrafı (55vw srcset). Amazon: ürünlerde Amazon alanları (göç `20261105_120000_amazon`, uygulandı), `/api/studyo/amazon-yaz` (x-studio-key, hareket geçmişine yazmaz), ürün sayfasında fiyat (yalnız 24 saatten yeniyse, zaman damgası + komisyon notu) ve `rel="sponsored"` bağlantı; veriyi Stüdyo `amazon-fiyat` yazar (göç 0069 ve anahtarlar bekliyor). Denetim: Temiz. Panel kesintisi (~15.50-17.20 TR): payload bağlantısı medya eklemede "idle in transaction" kaldı, havuz doldu; panel yeniden başlatıldı. Önlem (onay bekliyor): payload rolüne idle_in_transaction_session_timeout.
 
 - **4 Kasım 2026 (Natro Claude):** Panel: `GET /api/studyo/yazar-esle` (yazar ↔ hesap e-postası; Stüdyo Ekip puanı yayınlanan haberleri yazarına göre sayar), `POST /api/triyaj/yz-medya` + `/api/triyaj/yz-temizle` (Updated AI arşivi, 120 gün), `gorselYukle` aynı adresi yeniden yüklemez.
