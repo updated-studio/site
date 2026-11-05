@@ -3,10 +3,10 @@
  * KÜNYE — ürün sayfası. Bu ürüne bağlı her haber, inceleme ve kıyas burada listelenir.
  * Teknik değerler: bilinmeyen değer "Bilinmiyor" kalır, uydurulmaz. Kaynak sütunu 5 Kasım 2026'da kalktı (kullanıcı: "sitede kaynak göstermeye
  * gerek yok; ürünün hangi aşamada olduğu zaten belli"); değerler üreticinin resmî kaynağından gelir, kaynak panelde kayıtlı kalır.
+ * Söküm çizimi ve Topla düğmesi 5 Kasım 2026'da kalktı (kullanıcı: "kaldır gitsin"); sahnede üreticinin arka planı silinmiş ürün fotoğrafı.
  */
 import Base from '../../layouts/Base.astro'
 import Img from '../../components/Img.astro'
-import Sokum from '../../components/Sokum.astro'
 import Ad from '../../components/Ad.astro'
 import * as api from '../../lib/api'
 import { productMeta } from '../../lib/seo'
@@ -43,13 +43,15 @@ const kiyas = `/karsilastirma/kiyas?u=${[p.slug, ...p.rivals.slice(0, 1).map((r)
         {p.score && p.reviews[0] && <a class="ku-score" href={p.reviews[0].path}><b>{s20(p.score)}</b><span>Updated<br />puanı</span></a>}
       </div>
       <div class="ku-actions"><a class="btn pri" href={`/rss/urun/${p.slug}.xml`}>Takip et (RSS)</a><a class="btn" href={kiyas}>Kıyasla</a></div>
+      {p.amazon && <div class="ku-amz">
+        <a class="btn" href={p.amazon.url} target="_blank" rel="sponsored nofollow noopener">{p.amazon.metin ? <>Amazon'da <b>{p.amazon.metin}</b></> : "Amazon'da gör"}</a>
+        <p>{p.amazon.metin && <>Fiyat {new Date(p.amazon.guncel).toLocaleString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Istanbul' })} itibarıyla Amazon Türkiye'den alındı, değişebilir. </>}Bu bağlantıdan yapılan alışverişten Updated komisyon alabilir.</p>
+      </div>}
       <div class="ku-stats">{[[feed.length, 'içerik'], [p.news.length, 'haber'], [p.reviews.length, 'inceleme']].filter(([n]) => n).map(([n, t]) => <span><b>{n}</b> {t}</span>)}{specs.length > 0 && <span><b>{bilinen.length}/{specs.length}</b> doğrulanmış özellik</span>}</div>
     </div>
-    <div class="ku-stage">
-      {p.image && <><div class="ku-tabs" role="group" aria-label="Görünüm"><button type="button" aria-pressed="true" data-m="sok">Söküm</button><button type="button" aria-pressed="false" data-m="foto">Fotoğraf</button></div><div class="ku-photo" hidden><Img img={p.image} alt={p.fullName ?? p.name} /></div></>}
-      <Sokum p={p} />
-      <button class="btn ku-tog" type="button" aria-pressed="true">Topla</button>
-      <span class="eyebrow ku-cap">Söküm · her katman bir özellik</span>
+    <div class={`ku-stage${p.image ? '' : ' bos'}`}>
+      {p.image ? <Img class="ku-foto" img={p.image} alt={p.fullName ?? p.name} eager sizes="(max-width: 1000px) 100vw, 55vw" />
+        : <><Fragment set:html={glyph(p.type, 96)} /><span class="eyebrow">Ürün görseli hazırlanıyor</span></>}
     </div>
   </div></header>
 

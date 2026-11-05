@@ -292,19 +292,6 @@ function onlyDiff() {
   })
 }
 
-/* ---------- künye sayfası: söküm ---------- */
-function sokum() {
-  const sk = $('[data-sokum]'); if (!sk) return
-  const tog = $('.ku-tog')
-  setTimeout(() => sk.classList.add('open'), RM ? 0 : 350)
-  tog?.addEventListener('click', () => { const on = !sk.classList.contains('open'); sk.classList.toggle('open', on); tog.textContent = on ? 'Topla' : 'Sök'; tog.setAttribute('aria-pressed', String(on)) })
-  $$('.ku-tabs button').forEach((b) => b.addEventListener('click', () => {
-    const foto = b.dataset.m === 'foto'
-    $$('.ku-tabs button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)))
-    $('.ku-photo')!.hidden = !foto; sk.hidden = foto; if (tog) tog.hidden = foto
-  }))
-}
-
 /* ---------- bülten ---------- */
 function newsletter() {
   const f = $<HTMLFormElement>('#bulten'), msg = $('#nlmsg'); if (!f || !msg) return
@@ -332,5 +319,5 @@ function okunanSekme() {
 /** Sonradan eklenen parçalara (sonsuz akış) davranış bağla. */
 function hydrate(root: ParentNode) { strips(root); youtube(root); videoAds(root) }
 
-theme(); menu(); search(); searchPage(); breaking(); accordion(); newPill(); clocks(); feeds(); kunyeCard(); robot(); onlyDiff(); sokum(); newsletter(); okunanSekme(); videoBolumleri()
+theme(); menu(); search(); searchPage(); breaking(); accordion(); newPill(); clocks(); feeds(); kunyeCard(); robot(); onlyDiff(); newsletter(); okunanSekme(); videoBolumleri()
 hydrate(document)

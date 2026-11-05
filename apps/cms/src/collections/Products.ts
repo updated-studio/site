@@ -54,6 +54,27 @@ export const Products: CollectionConfig = {
         },
       ],
     },
+    // Amazon (5 Kasım 2026, kullanıcı: ürün sayfasında Amazon fiyatı ve ortaklık bağlantısı). Stüdyo'nun amazon-fiyat fonksiyonu günde iki kez
+    // Amazon Creators API'den (amazon.com.tr) fiyatı yeniler ve /api/studyo/amazon-yaz ile buraya yazar; ASIN boşsa ürünü arar ve eşleştirir.
+    {
+      type: 'collapsible', label: 'Amazon', admin: { initCollapsed: true, description: 'Fiyat ve bağlantıyı sistem günde iki kez Amazon Türkiye\'den günceller. Yanlış ürün eşleştiyse ASIN\'i düzelt ya da sil.' }, fields: [
+        {
+          type: 'row', fields: [
+            { name: 'amazonAsin', type: 'text', label: 'Amazon ürün kodu (ASIN)', admin: { description: 'Boşsa sistem Amazon Türkiye\'de arar. Ürün sayfasının adresindeki /dp/ sonrası 10 karakter.' } },
+            { name: 'amazonGizle', type: 'checkbox', label: 'Sitede gösterme', defaultValue: false },
+          ],
+        },
+        {
+          type: 'row', fields: [
+            { name: 'amazonFiyat', type: 'number', label: 'Fiyat (TL)', admin: { readOnly: true } },
+            { name: 'amazonFiyatMetni', type: 'text', label: 'Fiyat (Amazon\'un yazdığı)', admin: { readOnly: true } },
+            { name: 'amazonGuncel', type: 'date', label: 'Son güncelleme', admin: { readOnly: true, date: { pickerAppearance: 'dayAndTime' } } },
+          ],
+        },
+        { name: 'amazonUrl', type: 'text', label: 'Ortaklık bağlantısı', admin: { readOnly: true } },
+        { name: 'amazonDurum', type: 'text', label: 'Durum', admin: { readOnly: true, description: 'eşleşti · fiyat yok (stokta değil) · bulunamadı' } },
+      ],
+    },
     { name: 'image', type: 'upload', relationTo: 'media', label: 'Ürün görseli' },
     { name: 'blurb', type: 'textarea', label: 'Tek cümle tanım' },
     // Kıyaslamalar (27 Ekim 2026): iki ayrı puan. Teknik puan sitede künye değerlerinden kendiliğinden hesaplanır; UPscore editörün notu.

@@ -22,6 +22,7 @@ import * as migration_20261031_164459_radar_oto from './20261031_164459_radar_ot
 import * as migration_20261031_180000_uye_arac from './20261031_180000_uye_arac';
 import * as migration_20261103_120000_kisa_ad from './20261103_120000_kisa_ad';
 import * as migration_20261104_120000_haber_video from './20261104_120000_haber_video';
+import * as migration_20261105_120000_amazon from './20261105_120000_amazon';
 
 export const migrations = [
   {
@@ -143,5 +144,10 @@ export const migrations = [
     up: migration_20261104_120000_haber_video.up,
     down: migration_20261104_120000_haber_video.down,
     name: '20261104_120000_haber_video',
+  },
+  {
+    up: migration_20261105_120000_amazon.up,
+    down: migration_20261105_120000_amazon.down,
+    name: '20261105_120000_amazon',
   },
 ];
