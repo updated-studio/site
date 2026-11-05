@@ -189,7 +189,9 @@ export async function getProduct(slug: string): Promise<Product | null> {
     // Amazon (5 Kasım 2026): fiyat yalnız 24 saatten yeniyse gösterilir (Amazon kuralı); eskiyse yalnız bağlantı
     const amzTaze = d.amazonGuncel && Date.now() - Date.parse(d.amazonGuncel) < 24 * 3600e3
     const amazon = d.amazonUrl && !d.amazonGizle ? { url: d.amazonUrl as string, metin: amzTaze && d.amazonFiyatMetni ? String(d.amazonFiyatMetni) : undefined, guncel: d.amazonGuncel as string } : undefined
-    return { ...ref, id: d.id, amazon, score: reviews[0]?.score, comparisons: cmp, path: `/urun/${d.slug}`, releaseWhen: d.releaseWhen, parts: d.parts || [], rivals: (d.rivals || []).map(mRef).filter(Boolean), news: (d.news?.docs || []).filter((x: any) => rel(x) && x._status === 'published').map(mNews), reviews, seo: seo({ ...d, title: d.name, spot: d.blurb }) } as Product
+    // Künye albümü (6 Kasım 2026): üreticinin diğer görselleri; ana görsel ref.image
+    const album = ((d.gallery || []) as any[]).map((g) => mImg(g?.image, 'hero')).filter(Boolean) as Img[]
+    return { ...ref, id: d.id, amazon, album: album.length ? album : undefined, score: reviews[0]?.score, comparisons: cmp, path: `/urun/${d.slug}`, releaseWhen: d.releaseWhen, parts: d.parts || [], rivals: (d.rivals || []).map(mRef).filter(Boolean), news: (d.news?.docs || []).filter((x: any) => rel(x) && x._status === 'published').map(mNews), reviews, seo: seo({ ...d, title: d.name, spot: d.blurb }) } as Product
   }, () => (S.PRODUCTS[slug] ? { ...S.PRODUCTS[slug], comparisons: S.COMPARISONS.filter((c) => c.a.slug === slug || c.b.slug === slug) } : null))
 }
 export const getProducts = (limit = 12) => safe(async () => (await get('products', { sort: '-updatedAt', limit, depth: 1 })).docs.map(mRef).filter(Boolean) as ProductRef[], () => Object.values(S.PRODUCTS).slice(0, limit))

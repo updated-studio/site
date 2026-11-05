@@ -76,6 +76,13 @@ export const Products: CollectionConfig = {
       ],
     },
     { name: 'image', type: 'upload', relationTo: 'media', label: 'Ürün görseli' },
+    // Künye albümü (6 Kasım 2026, kullanıcı: "künyelerde birden çok görsel olabilir; ana görsel yine tek ürün, albümde yaşam tarzı vs."):
+    // ana görsel yukarıdaki tek ürün çekimi; albüm üreticinin diğer görselleri. Stüdyo künye onayı doldurur, elle de eklenir.
+    {
+      name: 'gallery', type: 'array', label: 'Albüm', labels: { singular: 'Görsel', plural: 'Görseller' }, maxRows: 12,
+      admin: { initCollapsed: true, description: 'Üreticinin kullanım, yaşam tarzı ve başka açı görselleri. Ana görsel (tek ürün, düz açı) yukarıdaki "Ürün görseli"dir.' },
+      fields: [{ name: 'image', type: 'upload', relationTo: 'media', label: 'Görsel' }],
+    },
     { name: 'blurb', type: 'textarea', label: 'Tek cümle tanım' },
     // Kıyaslamalar (27 Ekim 2026): iki ayrı puan. Teknik puan sitede künye değerlerinden kendiliğinden hesaplanır; UPscore editörün notu.
     {

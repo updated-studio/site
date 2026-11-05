@@ -4,6 +4,8 @@
  * Teknik değerler: bilinmeyen değer "Bilinmiyor" kalır, uydurulmaz. Kaynak sütunu 5 Kasım 2026'da kalktı (kullanıcı: "sitede kaynak göstermeye
  * gerek yok; ürünün hangi aşamada olduğu zaten belli"); değerler üreticinin resmî kaynağından gelir, kaynak panelde kayıtlı kalır.
  * Söküm çizimi ve Topla düğmesi 5 Kasım 2026'da kalktı (kullanıcı: "kaldır gitsin"); sahnede üreticinin arka planı silinmiş ürün fotoğrafı.
+ * Albüm (6 Kasım 2026, kullanıcı: "künyelerde birden çok görsel olabilir; ana görsel yine tek ürün"): sahnenin altında üreticinin diğer
+ * görselleri yatay şeritte; tıklayınca sayfada büyür (dialog), betik çalışmazsa bağlantı görseli açar.
  */
 import Base from '../../layouts/Base.astro'
 import Img from '../../components/Img.astro'
@@ -29,6 +31,8 @@ const rel = shelf.filter((q) => q.slug !== p.slug).slice(0, 4)
 const status = api.statusText(p.status)
 // Kıyas aracı (27 Ekim 2026): rakip girilmişse onunla, yoksa araç aynı türün en dolu künyesini rakip yapar
 const kiyas = `/karsilastirma/kiyas?u=${[p.slug, ...p.rivals.slice(0, 1).map((r) => r.slug)].join(',')}`
+const album = p.album || []
+const albumAd = p.fullName ?? p.name
 ---
 <Base meta={{ ...productMeta(p), noindex: (p.specs || []).filter((s) => s.value).length < 5 && !p.news.length && !p.reviews.length }}>
   <header class="ku-hero"><div class="wrap ku-top">
@@ -55,6 +59,18 @@ const kiyas = `/karsilastirma/kiyas?u=${[p.slug, ...p.rivals.slice(0, 1).map((r)
     </div>
   </div></header>
 
+  {album.length > 0 && <section class="wrap ku-album" aria-label="Albüm">
+    <div class="ku-alb-bas"><h2 class="eyebrow">Albüm</h2><span class="eyebrow">{album.length} görsel · <span lang="en" translate="no">{p.brand}</span></span></div>
+    <div class="ku-serit" tabindex="0" role="region" aria-label={`${albumAd} albümü`}>
+      {album.map((g, i) => <a class="ku-kare" href={g.url} data-album={i} data-not={g.credit || ''} style={`aspect-ratio:${g.w || 16}/${g.h || 9}`}><Img img={g} alt={g.alt || `${albumAd}, albüm görseli ${i + 1}`} sizes="(max-width: 767px) 80vw, 460px" /></a>)}
+    </div>
+    <dialog class="ku-lb" data-album-kutu aria-label="Albüm görseli">
+      <img alt="" />
+      <div class="ku-lb-alt"><span data-sayac></span><span data-not></span>
+        <span class="ku-lb-dugme"><button type="button" class="btn" data-yon="-1">Önceki</button><button type="button" class="btn" data-yon="1">Sonraki</button><button type="button" class="btn" data-kapat>Kapat</button></span></div>
+    </dialog>
+  </section>}
+
   <section class="wrap ku-grid">
     <div>
       <div class="sec-head" style="margin-bottom:12px"><div><span class="eyebrow">Ürün veritabanından · her değer kaynağıyla</span><h2 class="sec-title ku-h2">Teknik künye</h2></div></div>
@@ -80,3 +96,24 @@ const kiyas = `/karsilastirma/kiyas?u=${[p.slug, ...p.rivals.slice(0, 1).map((r)
     <div class="shelfk">{rel.map((q) => <a class="kcard" href={`/urun/${q.slug}`}><Fragment set:html={glyph(q.type, 46)} /><span class="eyebrow" lang="en" translate="no">{q.brand}</span><b>{q.name}</b><Fragment set:html={durum(q.status)} />{q.score && <span class="kc-sc">{s20(q.score)}</span>}</a>)}</div>
   </div></section>}
 </Base>
+<script>
+  // Albüm: görsele tıklayınca sayfada büyür; ok tuşları ve düğmelerle gezilir. Betik yoksa bağlantı görselin kendisini açar.
+  const kutu = document.querySelector<HTMLDialogElement>('[data-album-kutu]')
+  const kareler = [...document.querySelectorAll<HTMLAnchorElement>('[data-album]')]
+  if (kutu && kareler.length && typeof kutu.showModal === 'function') {
+    const img = kutu.querySelector('img')!, sayac = kutu.querySelector<HTMLElement>('[data-sayac]')!, not = kutu.querySelector<HTMLElement>('[data-not]')!
+    let sira = 0
+    const goster = (i: number) => {
+      sira = (i + kareler.length) % kareler.length
+      const k = kareler[sira]
+      img.src = k.href; img.alt = k.querySelector('img')?.alt || ''
+      sayac.textContent = `${sira + 1} / ${kareler.length}`; not.textContent = k.dataset.not || ''
+    }
+    kareler.forEach((k, i) => k.addEventListener('click', (e) => { if (e.metaKey || e.ctrlKey || e.shiftKey) return; e.preventDefault(); goster(i); kutu.showModal() }))
+    kutu.querySelectorAll<HTMLElement>('[data-yon]').forEach((d) => d.addEventListener('click', () => goster(sira + Number(d.dataset.yon))))
+    kutu.querySelector('[data-kapat]')!.addEventListener('click', () => kutu.close())
+    kutu.addEventListener('click', (e) => { if (e.target === kutu) kutu.close() })
+    kutu.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') goster(sira + 1); else if (e.key === 'ArrowLeft') goster(sira - 1) })
+    if (kareler.length < 2) kutu.querySelectorAll<HTMLElement>('[data-yon]').forEach((d) => { d.hidden = true })
+  }
+</script>

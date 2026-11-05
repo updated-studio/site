@@ -60,6 +60,22 @@
 /* Ürün fotoğrafı arka planı silinmiş 16:9 tuval (künye otomasyonu); kırpılmaz */
 .ku-foto{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:contain}
 .ku-stage.bos{aspect-ratio:16/9;align-content:center;gap:12px;color:var(--text-3)}
+/* Künye albümü (6 Kasım 2026): sahnenin altında üreticinin diğer görselleri; yatay şerit, her kare kendi oranında, tıklayınca büyür */
+.ku-album{padding-top:24px}
+.ku-alb-bas{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.ku-alb-bas h2{margin:0;font-weight:600;color:var(--text)}
+.ku-serit{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:thin;padding-bottom:8px}
+.ku-kare{flex:none;height:clamp(170px,22vw,280px);scroll-snap-align:start;border:1px solid var(--line);background:var(--surface);overflow:hidden}
+.ku-kare img{display:block;width:100%;height:100%;object-fit:cover}
+.ku-kare:hover img{opacity:.9}
+.cam .ku-kare{border-radius:var(--r-kart)}
+/* Zemin opak (--bg): cam görünümde --surface yarı saydam, arkadaki sayfa görseli bozuyordu */
+.ku-lb{width:min(1200px,calc(100vw - 24px));max-width:none;max-height:calc(100dvh - 24px);padding:0;border:1px solid var(--line);border-radius:var(--r-kart,0);overflow:hidden;background:var(--bg);color:var(--text)}
+.ku-lb::backdrop{background:rgba(0,0,0,.72)}
+.ku-lb img{display:block;width:100%;max-height:calc(100dvh - 110px);object-fit:contain;background:var(--img)}
+.ku-lb-alt{display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap;padding:10px 12px;font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3)}
+.ku-lb-dugme{display:flex;gap:8px;margin-left:auto}
+.ku-lb-dugme .btn{height:36px;padding:0 12px}
 .ku-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:var(--gut);align-items:start;padding-block:48px}
 .sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
 .sec-title{font-family:var(--f-head);font-weight:900;text-transform:uppercase;line-height:1.2;font-size:40px;margin:0}
