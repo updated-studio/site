@@ -3,7 +3,8 @@
  * Kıyas sayfasının altı (6 Kasım 2026; kullanıcı: "lens kategorisindeki haberler tek şerit, ardından videolar, ardından reels varsa,
  * ardından tekrar haberler, bitmeyen sayfa"; her ürün grubu kendi kategorisiyle): ürün türünün kategorisinden haber şeridi →
  * YouTube şeridi → Reels şeridi (liste boşsa hiç çıkmaz; paylaşım gelince sonraki derlemede kendiliğinden eklenir) → sonsuz haber akışı.
- * Videolar ve Reels kategoriye göre etiketli değil, kanalın en yenileri gösterilir. Kıyas aracında tür değişince aynı parça
+ * Videolar: paneldeki liste boşsa YouTube kanalının akışı (uzun videolar); kategori etiketi olmadığından başlığında ürün türünün
+ * sözcükleri geçenler öne alınır, kalanı en yeniden eskiye. Reels kategoriye göre ayrılmaz. Kıyas aracında tür değişince aynı parça
  * /parca/kiyas-alt/<tür> adresinden yeniden alınır (scripts/kiyas.ts).
  */
 import Strip from './Strip.astro'
@@ -20,13 +21,22 @@ const KATEGORI: Record<string, string> = {
   headphones: 'kulaklik', audio: 'kulaklik', laptop: 'pc-konsol', pad: 'pc-konsol', tablet: 'tablet-telefon-ve-mobil-cihazlar', watch: 'akilli-saat', accessory: 'elektronik',
 }
 const [kategoriler, videos, reels, ads, site] = await Promise.all([api.getCategories(), api.getVideos(12), api.getReels(14), api.getAds(), api.getSite()])
+/** Ürün türünün video başlıklarında aranan sözcükleri (ilgili videolar şeridin başına gelir) */
+const KELIME: Record<string, string[]> = {
+  camera: ['kamera', 'fotoğraf makinesi', 'aynasız'], lens: ['lens', 'objektif'], drone: ['dron', 'drone'], cam360: ['aksiyon', '360', 'gopro', 'insta360', 'osmo'],
+  phone: ['telefon', 'iphone', 'galaxy', 'pixel'], gimbal: ['gimbal'], light: ['ışık', 'led'], mic: ['mikrofon'], headphones: ['kulaklık', 'airpods'], audio: ['hoparlör', 'ses'],
+  laptop: ['laptop', 'macbook', 'bilgisayar'], tablet: ['tablet', 'ipad'], watch: ['saat', 'watch'],
+}
+const hepsi = videos.length ? videos : (await api.getYoutube()).filter((v) => !v.short)
+const ilgili = (v: { title: string }) => (KELIME[tur] ?? []).some((k) => v.title.toLocaleLowerCase('tr-TR').includes(k))
+const seritVideo = [...hepsi.filter(ilgili), ...hepsi.filter((v) => !ilgili(v))].slice(0, 12)
 const kat = kategoriler.find((c) => c.slug === KATEGORI[tur])
 const haberler = kat ? (await api.getCategoryNews(kat.slug, 1)).slice(0, 8) : []
 ---
 {haberler.length > 0 && kat && (
   <div class="km-serit"><Strip title={`${kat.name} haberleri`} moreHref={`/${kat.slug}`} moreLabel="Tümü">{haberler.map((n) => <CardStd item={n} />)}</Strip></div>
 )}
-<YtStrip videos={videos} channel={site.youtube} />
+<YtStrip videos={seritVideo} channel={site.youtube} />
 <ReelStrip reels={reels} profile={site.instagram} />
 {haberler.length > 0 && kat
   ? <InfiniteFeed title={`${kat.name} haberleri, devamı`} source={`kategori-${kat.slug}`} basePath={`/${kat.slug}`} items={[]} videos={videos} reels={reels} ads={ads} channel={site.youtube} profile={site.instagram} startPage={1} renderFirst={false} />
