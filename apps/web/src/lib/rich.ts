@@ -21,7 +21,7 @@ function node(n: any, media: (id: any) => any): string {
     case 'list': return `<${n.listType === 'number' ? 'ol' : 'ul'}>${kids()}</${n.listType === 'number' ? 'ol' : 'ul'}>`
     case 'listitem': return `<li>${kids()}</li>`
     case 'link': case 'autolink': { const u = n.fields?.url || n.url || '#'; const ext = /^https?:/.test(u) && !u.includes('updated.com.tr'); return `<a href="${esc(u)}"${ext ? ' rel="noopener" target="_blank"' : ''}>${kids()}</a>` }
-    case 'upload': { const m = media(n.value); if (!m?.url) return ''; return `<figure class="cover"><img src="${esc(m.url)}" alt="${esc(m.alt)}" loading="lazy" width="${m.w || 1600}" height="${m.h || 900}"><figcaption>${esc(m.credit || '')}</figcaption></figure>` }
+    case 'upload': { const m = media(n.value); if (!m?.url) return ''; return `<figure class="cover yazi-foto"${m.buyuk ? ` data-buyuk="${esc(m.buyuk)}"` : ''}><img src="${esc(m.url)}" alt="${esc(m.alt)}" loading="lazy" width="${m.w || 1600}" height="${m.h || 900}"><figcaption>${esc(m.credit || '')}</figcaption></figure>` }
     case 'horizontalrule': return '<hr>'
     default: return kids()
   }

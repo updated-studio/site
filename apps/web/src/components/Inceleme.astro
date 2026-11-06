@@ -45,7 +45,7 @@ const ETIKET = { kiyas: ['Kıyas', 'ic-et-k'], inceleme: ['İnceleme', 'ic-et-i'
         <a class="ic-video" href={`https://www.youtube.com/watch?v=${ytId}`} target="_blank" rel="noopener" data-yt={ytId} aria-label={`Videoyu oynat: ${r.video!.title}`}>
           <span class="c-img"><Img img={r.video!.thumb || r.cover} alt="" eager sizes="(max-width: 1000px) 100vw, 820px" /><span class="ic-oy" set:html={ico('play', 30)} /></span>
         </a>
-      ) : r.cover && <figure class="ic-kapak"><Img img={r.cover} eager sizes="(max-width: 1000px) 100vw, 820px" />{r.cover.credit && <figcaption>{r.cover.credit}</figcaption>}</figure>}
+      ) : r.cover && <figure class="ic-kapak" data-galeri-kapak data-buyuk={r.cover.buyuk}><Img img={r.cover} eager sizes="(max-width: 1000px) 100vw, 820px" />{r.cover.credit && <figcaption>{r.cover.credit}</figcaption>}</figure>}
       {ytId && bolumler.length > 0 && (
         <nav class="ic-bolum" aria-label="Video bölümleri">
           {bolumler.map((b) => <a href={`https://www.youtube.com/watch?v=${ytId}&t=${b.sn}s`} data-ic-sn={b.sn}><span class="mono">{b.zaman}</span>{b.ad}</a>)}

@@ -4,6 +4,7 @@ import '../styles/kunye.css'
 import '../styles/uye.css'
 import '../styles/cam.css'
 import '../styles/inceleme.css'
+import '../styles/galeri.css'
 import Header from '../components/Header.astro'
 import Footer from '../components/Footer.astro'
 import { allPages, getAds, getBreaking, getSite, pickAd } from '../lib/api'
@@ -97,6 +98,6 @@ const ld = { '@context': 'https://schema.org', '@graph': [...siteLd(sayfalar), .
       <ul class="res" id="sres"></ul>
     </div>
   </div>
-  <script>import '../scripts/site.ts'; import '../scripts/canli.ts'; import '../scripts/uye.ts'</script>
+  <script>import '../scripts/site.ts'; import '../scripts/canli.ts'; import '../scripts/uye.ts'; import '../scripts/galeri.ts'</script>
 </body>
 </html>

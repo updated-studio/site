@@ -65,7 +65,7 @@ export function mImg(m: any, size: 'card' | 'hero' | 'thumb' | 'reel' | 'og' | '
   const srcset = ['thumb', 'card', 'hero'].map((k) => s[k]?.url && `${localMedia(s[k].url)} ${s[k].width}w`).filter(Boolean).join(', ')
   // Odak noktası (panel/Stüdyo görsel düzenleyici): sitenin kendi kırpmaları (manşet 16:7, telefon 4:3) da bu noktaya göre (28 Ekim 2026)
   const fx = typeof m.focalX === 'number' ? m.focalX : undefined, fy = typeof m.focalY === 'number' ? m.focalY : undefined
-  return { url: pick, alt: m.alt || '', credit: m.credit, w: s[size]?.width || m.width, h: s[size]?.height || m.height, srcset: size === 'reel' || size === 'avatar' ? undefined : srcset || undefined, fx: fx !== 50 ? fx : undefined, fy: fy !== 50 ? fy : undefined }
+  return { url: pick, buyuk: localMedia(m.url), alt: m.alt || '', credit: m.credit, w: s[size]?.width || m.width, h: s[size]?.height || m.height, srcset: size === 'reel' || size === 'avatar' ? undefined : srcset || undefined, fx: fx !== 50 ? fx : undefined, fy: fy !== 50 ? fy : undefined }
 }
 const mCat = (c: any): Cat => (rel(c) ? { name: c.name, slug: c.slug } : { name: 'Haber', slug: 'haber' })
 // Yazar fotoğrafı (28 Ekim 2026, kullanıcı: "editörlerin küçük resmi görünsün"): panelde Yazarlar › Fotoğraf; kare 'avatar' boyutu
@@ -78,7 +78,12 @@ export function mRef(p: any): ProductRef | null {
   return { id: typeof p.id === 'number' ? p.id : undefined, slug: p.slug, name: kisaAd(p), fullName: p.name, brand: p.brand, type: p.type, status: p.status, certainty: p.certainty || 4, image: mImg(p.image, 'card'), blurb: p.blurb, specs: (p.specs || []).map(mSpec), score: typeof p.upscore === 'number' ? p.upscore : undefined, // kartlardaki puan = künyenin UPscore'u
     upscore: typeof p.upscore === 'number' ? p.upscore : undefined, upscoreUrl: rel(p.upscoreReview)?.path || undefined, amazon: p.amazon || undefined }
 }
-const media = (v: any) => { const m = mImg(v, 'hero'); return m ? { url: m.url, alt: m.alt, credit: m.credit, w: m.w, h: m.h } : null }
+// Yazı içi fotoğraf (6 Kasım 2026, galeri): kırpılmamış "genis" boy (1400 px; eski görsellerde ana dosya), galeri için ana dosya (en çok 2560 px WebP; orijinal saklanmaz)
+const media = (v: any) => {
+  const m = rel(v); if (!m?.url) return null
+  const g = m.sizes?.genis?.url ? m.sizes.genis : null
+  return { url: localMedia(g?.url || m.url)!, buyuk: localMedia(m.url)!, alt: m.alt || '', credit: m.credit, w: g?.width || m.width, h: g?.height || m.height }
+}
 const seo = (d: any) => ({ title: d.seo?.title || d.title, description: d.seo?.description || d.spot || '', image: mImg(d.seo?.image || d.cover, 'og'), canonical: d.seo?.canonical, noindex: !!d.seo?.noindex, entities: d.seo?.geo?.entities || [], faq: d.seo?.geo?.faq || [] })
 export function mNews(d: any): News {
   return {
