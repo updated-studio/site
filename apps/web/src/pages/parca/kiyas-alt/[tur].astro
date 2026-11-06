@@ -1,0 +1,8 @@
+---
+export const partial = true
+/** Kıyas aracının alt akışı, ürün türüne göre (statik): /parca/kiyas-alt/{tür}.html → components/KiyasAlt.astro */
+import KiyasAlt from '../../../components/KiyasAlt.astro'
+import { TUR } from '../../../lib/turler'
+export const getStaticPaths = () => Object.keys(TUR).map((tur) => ({ params: { tur } }))
+---
+<KiyasAlt tur={Astro.params.tur!} />

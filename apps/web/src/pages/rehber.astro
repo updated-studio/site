@@ -49,11 +49,12 @@ const raflar = Object.keys(TUR)
   .rh-raf-bag a{color:var(--link);text-decoration:none}
   .rh-raf-bag a:hover{text-decoration:underline;text-underline-offset:3px}
   .rh-lis{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--gut)}
-  .rh-k{position:relative;display:flex;flex-direction:column;gap:4px;height:100%;padding:12px 12px 14px;border:1px solid var(--line);border-radius:var(--r-kart,0);background:var(--surface);color:var(--text);text-decoration:none;transition:border-color var(--t1) var(--ease)}
+  .rh-k{position:relative;display:flex;flex-direction:column;gap:4px;height:100%;padding:8px 12px 14px;border:1px solid var(--line);border-radius:var(--r-kart,0);background:var(--surface);color:var(--text);text-decoration:none;transition:border-color var(--t1) var(--ease)}
   .rh-k:hover{border-color:var(--text)}
-  .rh-k-g{display:grid;place-items:center;aspect-ratio:16/9;margin-bottom:6px;border-radius:var(--r-etiket,0);background:var(--surface-2);color:var(--text-2);overflow:hidden}
+  /* Görselin arkasında çerçeve yok (6 Kasım 2026): ürün kartın genişliğini doldurur */
+  .rh-k-g{display:grid;place-items:center;aspect-ratio:16/9;margin:0 -4px 6px;color:var(--text-3)}
   .rh-k-g img{width:100%;height:100%;object-fit:contain}
-  .rh-k-sira{position:absolute;left:20px;top:20px;min-width:24px;height:24px;display:grid;place-items:center;border-radius:999px;background:var(--bg);border:1px solid var(--line);font-family:var(--f-mono);font-size:12px;font-weight:600}
+  .rh-k-sira{position:absolute;left:10px;top:10px;min-width:24px;height:24px;display:grid;place-items:center;border-radius:999px;background:var(--bg);border:1px solid var(--line);font-family:var(--f-mono);font-size:12px;font-weight:600}
   .rh-k .eyebrow{margin:0}
   .rh-k b{font-family:var(--f-baslik,var(--f-head));font-weight:700;font-size:19px;line-height:1.2;overflow-wrap:anywhere}
   .rh-k-p{margin-top:auto;padding-top:6px;font-family:var(--f-mono);font-weight:600;font-size:22px}

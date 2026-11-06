@@ -1,16 +1,20 @@
 ---
 /**
- * Kıyas masası (27 Ekim 2026): ürün kartları (teknik puan + UPscore + Amazon), yapışkan çubuk, "Neden daha iyi?", tüm özellikler.
+ * Kıyas masası (27 Ekim 2026; 6 Kasım 2026'da yeni düzen, taslak claude.ai/artifact/KoA2HF8uQSgMoPcSx2T1A8):
+ * ürün kartları → karar + kim nerede kazanıyor → özellik haritası → en büyük farklar → tüm teknik veriler (numaralı gruplar)
+ * → alternatifler → sahipleri → sınıfının en iyileri → "karar net". Veri yetmeyen bölüm hiç görünmez.
  * İlk görünüm derlemede basılır (lib/kiyas.ts); "Ürün ekle" / çıkar tarayıcıda aynı kodla yeniden çizer (scripts/kiyas.ts).
  * adresli=true (kıyas aracı sayfası): seçim adres çubuğuna yazılır (?u=a,b,c) ve paylaşılabilir; değilse ekleme kıyas aracına götürür.
  */
 import '../styles/kiyas.css'
-import { araliklar, cubukHtml, kartlarHtml, nedenHtml, tabloHtml, type K } from '../lib/kiyas'
+import { alternatifHtml, araliklar, cubukHtml, enIyiHtml, farkHtml, grupNavHtml, haritaHtml, kararHtml, kartlarHtml, netHtml, sahipHtml, tabloHtml, type K } from '../lib/kiyas'
 import { kunyeKatalog, getSite } from '../lib/api'
+import { turAdi } from '../lib/turler'
 interface Props { ks: K[]; adresli?: boolean }
 const { ks, adresli = false } = Astro.props
 const [katalog, site] = await Promise.all([kunyeKatalog(), getSite()])
 const ar = araliklar(katalog), tag = site.amazonTag || ''
+const harita = haritaHtml(ks, ar), fark = farkHtml(ks, ar), alternatif = alternatifHtml(ks, katalog, ar), sahip = sahipHtml(ks), enIyi = enIyiHtml(ks, katalog, ar), net = netHtml(ks, ar, tag)
 ---
 <div class="km" data-kiyas={ks.map((k) => k.s).join(',')} data-adresli={adresli ? '1' : undefined} data-tag={tag} style={`--n:${ks.length}`}>
   <div class="km-kartlar" data-km="kartlar"><Fragment set:html={kartlarHtml(ks, ar, tag)} /></div>
@@ -28,14 +32,30 @@ const ar = araliklar(katalog), tag = site.amazonTag || ''
     <Fragment set:html={cubukHtml(ks, ar)} />
   </div></div>
 
-  <section aria-labelledby="km-neden-b"><div class="sh"><h2 id="km-neden-b">Neden daha iyi?</h2></div>
-    <div class="km-neden" data-km="neden"><Fragment set:html={nedenHtml(ks)} /></div></section>
+  <section class="km-karar" data-km="karar" aria-label="Karar"><Fragment set:html={kararHtml(ks, ar)} /></section>
 
   <slot />
 
-  <section aria-labelledby="km-tablo-b"><div class="sh"><h2 id="km-tablo-b">Tüm özellikler</h2></div>
-    <div class="tbl km-tablo" tabindex="0" role="region" aria-label="Tüm özellikler tablosu"><table data-km="tablo"><Fragment set:html={tabloHtml(ks)} /></table></div>
+  <section aria-labelledby="km-harita-b" hidden={!harita}><div class="sh"><div><h2 id="km-harita-b">Özellik haritası</h2><p class="km-acik">Her eksen, katalogdaki aynı tür ürünlerin en düşük ve en yüksek değerine göre ölçeklenir. Dışa yakın olan daha iyi.</p></div></div>
+    <div class="km-harita" data-km="harita"><Fragment set:html={harita} /></div></section>
+
+  <section aria-labelledby="km-fark-b" hidden={!fark}><div class="sh"><h2 id="km-fark-b">En büyük farklar</h2><a class="km-ileri" href="#km-tablo-b">Tüm teknik veriler</a></div>
+    <ol class="km-farklar" data-km="farklar"><Fragment set:html={fark} /></ol></section>
+
+  <section aria-labelledby="km-tablo-b"><div class="sh"><h2 id="km-tablo-b">Tüm teknik veriler</h2><nav class="km-gruplar" data-km="gruplar" aria-label="Özellik grupları"><Fragment set:html={grupNavHtml(ks)} /></nav></div>
+    <div class="tbl km-tablo" tabindex="0" role="region" aria-label="Tüm teknik veriler tablosu"><table data-km="tablo"><Fragment set:html={tabloHtml(ks)} /></table></div>
     <p class="km-not">● önde olan · her değerin kaynağı künye sayfasında</p></section>
+
+  <section aria-labelledby="km-alt-b" hidden={!alternatif}><div class="sh"><div><h2 id="km-alt-b">Alternatifler</h2><p class="km-acik">Aynı türden, bu kıyasta olmayan künyeler; teknik puana göre.</p></div></div>
+    <div class="km-raf" data-km="alternatif"><Fragment set:html={alternatif} /></div></section>
+
+  <section aria-labelledby="km-sahip-b" hidden={!sahip}><div class="sh"><div><h2 id="km-sahip-b">Sahipleri</h2><p class="km-acik">Bu ürünleri profiline ekleyen Uper'ler.</p></div></div>
+    <div class="km-sahip" data-km="sahip"><Fragment set:html={sahip} /></div></section>
+
+  <section aria-labelledby="km-eniyi-b" hidden={!enIyi}><div class="sh"><h2 id="km-eniyi-b">Sınıfının en iyileri</h2><a class="km-ileri" href={`/urun#${ks[0].t}`} data-km="tumu">{turAdi(ks[0].t)} künyelerinin tümü</a></div>
+    <div class="km-raf" data-km="eniyi"><Fragment set:html={enIyi} /></div></section>
+
+  <section class="km-net" data-km="net" aria-label="Kıyasın birincisi" hidden={!net}><Fragment set:html={net} /></section>
 
   <section aria-labelledby="km-puan-b"><div class="sh"><h2 id="km-puan-b">İki puan, iki ayrı iş</h2></div>
     <div class="km-ikili">

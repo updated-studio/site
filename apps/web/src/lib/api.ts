@@ -75,7 +75,7 @@ const mSpec = (s: any): Spec => ({ key: s.key, value: s.value || null, num: s.nu
 const kisaAd = (p: any): string => String(p.shortName || '').trim() || String(p.name || '').replace(/\s*\([^)]*\)/g, '').replace(/\s{2,}/g, ' ').trim() || p.name
 export function mRef(p: any): ProductRef | null {
   p = rel(p); if (!p) return null
-  return { slug: p.slug, name: kisaAd(p), fullName: p.name, brand: p.brand, type: p.type, status: p.status, certainty: p.certainty || 4, image: mImg(p.image, 'card'), blurb: p.blurb, specs: (p.specs || []).map(mSpec), score: p.score,
+  return { id: typeof p.id === 'number' ? p.id : undefined, slug: p.slug, name: kisaAd(p), fullName: p.name, brand: p.brand, type: p.type, status: p.status, certainty: p.certainty || 4, image: mImg(p.image, 'card'), blurb: p.blurb, specs: (p.specs || []).map(mSpec), score: p.score,
     upscore: typeof p.upscore === 'number' ? p.upscore : undefined, upscoreUrl: rel(p.upscoreReview)?.path || undefined, amazon: p.amazon || undefined }
 }
 const media = (v: any) => { const m = mImg(v, 'hero'); return m ? { url: m.url, alt: m.alt, credit: m.credit, w: m.w, h: m.h } : null }
@@ -379,7 +379,7 @@ export const getGorevler = () => safe(async () => ((await get('gorevler', { sort
 /** Kıyas kataloğu (27 Ekim 2026): bütün künyeler, tarayıcıya giden sade biçimde (lib/kiyas.ts). /veri/kunyeler.json ve kıyas sayfaları kullanır. */
 let katalogCache: Promise<import('./kiyas').K[]> | null = null
 export const kunyeKatalog = () => (katalogCache ??= safe(async () => (await bulk('products', mRef, {}, 1)).filter(Boolean).map((p: ProductRef) => ({
-  s: p.slug, n: p.name, b: p.brand, t: p.type, g: p.image?.url, up: p.upscore, upr: p.upscoreUrl, a: p.amazon,
+  s: p.slug, n: p.name, b: p.brand, t: p.type, g: p.image?.url, up: p.upscore, upr: p.upscoreUrl, a: p.amazon, i: p.id,
   sp: (p.specs || []).map((o) => [o.key, o.value || null, o.num ?? null, o.unit || '', o.group || ''] as [string, string | null, number | null, string, string]),
 })), () => []))
 

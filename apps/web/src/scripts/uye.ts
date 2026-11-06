@@ -369,3 +369,5 @@ async function kullananlar(kok: HTMLElement) {
 ustCubuk()
 document.querySelectorAll<HTMLElement>('#topluluk[data-hedef]').forEach(topluluk)
 document.querySelectorAll<HTMLElement>('[data-kullananlar]').forEach(kullananlar)
+// Kıyas masası ürün değişince kutuları yeniden basar (scripts/kiyas.ts)
+document.addEventListener('updated:kullananlar', (e) => (e.target as HTMLElement).querySelectorAll<HTMLElement>('[data-kullananlar]').forEach(kullananlar))

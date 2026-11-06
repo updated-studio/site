@@ -2,7 +2,8 @@
  * Kıyas masası etkileşimi (27 Ekim 2026): ürün ekle/çıkar, "Sadece farklar", paylaşılabilir adres (?u=a,b,c).
  * Künye kataloğu /veri/kunyeler.json'dan bir kez okunur; HTML'i derlemedeki aynı fonksiyonlar üretir (lib/kiyas.ts).
  */
-import { baslik, cubukHtml, kartlarHtml, nedenHtml, tabloHtml, type Araliklar, type K } from '../lib/kiyas'
+import { alternatifHtml, baslik, cubukHtml, enIyiHtml, farkHtml, grupNavHtml, haritaHtml, kararHtml, kartlarHtml, netHtml, sahipHtml, tabloHtml, type Araliklar, type K } from '../lib/kiyas'
+import { turAdi } from '../lib/turler'
 
 const EN_COK = 4
 let katalog: Promise<{ k: K[]; ar: Araliklar }> | null = null
@@ -14,6 +15,21 @@ for (const kok of Array.from(document.querySelectorAll<HTMLElement>('[data-kiyas
   let secili = (kok.dataset.kiyas || '').split(',').filter(Boolean)
   let sadeceFark = false
 
+  /** Bölümün içeriğini koyar; içerik yoksa bölüm gizlenir */
+  const koy = (ad: string, html: string) => { const e = $<HTMLElement>(ad); e.innerHTML = html; (e.matches('section') ? e : e.closest('section'))!.hidden = !html }
+  /** Sayfanın altındaki kategori akışı (haber şeridi, videolar, reels, sonsuz haber) seçilen türe göre değişir; site.ts yeni parçayı canlandırır */
+  async function altAkis(tur: string) {
+    const alt = document.querySelector<HTMLElement>('[data-kiyas-alt]')
+    if (!alt || alt.dataset.kiyasAlt === tur) return
+    alt.dataset.kiyasAlt = tur
+    try {
+      const r = await fetch(`/parca/kiyas-alt/${encodeURIComponent(tur)}`)
+      if (!r.ok || alt.dataset.kiyasAlt !== tur) return
+      alt.innerHTML = await r.text()
+      alt.dispatchEvent(new CustomEvent('updated:yeni', { bubbles: true }))
+    } catch { /* bağlantı yoksa derlemedeki akış kalır */ }
+  }
+
   async function ciz() {
     const { k, ar } = await yukle()
     const ks = secili.map((s) => k.find((x) => x.s === s)).filter((x): x is K => !!x)
@@ -21,8 +37,15 @@ for (const kok of Array.from(document.querySelectorAll<HTMLElement>('[data-kiyas
     kok.style.setProperty('--n', String(ks.length))
     $('kartlar').innerHTML = kartlarHtml(ks, ar, tag)
     kok.querySelector('.km-cubuk-ic')!.innerHTML = `<div class="sol"><button class="btn" type="button" data-km="fark" aria-pressed="${sadeceFark}">Sadece farklar</button></div>` + cubukHtml(ks, ar)
-    $('neden').innerHTML = nedenHtml(ks)
-    $('tablo').innerHTML = tabloHtml(ks)
+    $('karar').innerHTML = kararHtml(ks, ar)
+    koy('harita', haritaHtml(ks, ar)); koy('farklar', farkHtml(ks, ar))
+    $('tablo').innerHTML = tabloHtml(ks); $('gruplar').innerHTML = grupNavHtml(ks)
+    koy('alternatif', alternatifHtml(ks, k, ar)); koy('eniyi', enIyiHtml(ks, k, ar)); koy('net', netHtml(ks, ar, tag))
+    const tumu = $<HTMLAnchorElement>('tumu'); tumu.href = `/urun#${ks[0].t}`; tumu.textContent = `${turAdi(ks[0].t)} künyelerinin tümü`
+    // Sahipleri: aynı ürünler duruyorsa kutular yeniden istenmez (uye.ts doldurur)
+    const sahip = sahipHtml(ks), kimler = ks.map((x) => x.i).join(',')
+    if ($('sahip').dataset.kimler !== kimler) { $('sahip').dataset.kimler = kimler; koy('sahip', sahip); $('sahip').dispatchEvent(new CustomEvent('updated:kullananlar', { bubbles: true })) }
+    altAkis(ks[0].t)
     const h1 = document.querySelector('[data-kiyas-baslik]')
     if (h1 && adresli) { h1.textContent = baslik(ks); document.title = `${baslik(ks)} · Kıyasla · UPDATED` }
     if (adresli) history.replaceState(null, '', `?u=${secili.join(',')}`)

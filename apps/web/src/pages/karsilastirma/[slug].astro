@@ -5,7 +5,7 @@ import Img from '../../components/Img.astro'
 import Topluluk from '../../components/Topluluk.astro'
 import KunyeMini from '../../components/KunyeMini.astro'
 import Ad from '../../components/Ad.astro'
-import InfiniteFeed from '../../components/InfiniteFeed.astro'
+import KiyasAlt from '../../components/KiyasAlt.astro'
 import * as api from '../../lib/api'
 import { comparisonMeta } from '../../lib/seo'
 import { date } from '../../lib/format'
@@ -17,7 +17,7 @@ export async function getStaticPaths() {
 }
 // Adres hep alfabetik (a-vs-b); ters sıra .htaccess'te 301 (scripts/postbuild.mjs).
 const { c } = Astro.props as { c: Comparison }
-const [ads, videos, reels, site] = await Promise.all([api.getAds(), api.getVideos(), api.getReels(), api.getSite()])
+const ads = await api.getAds()
 // Kıyas masası (27 Ekim 2026): editör yazısı (kısa cevap, can alıcı farklar, kime hangisi) + ortak masa (puanlar, farklar, tablo)
 const katalog = await api.kunyeKatalog()
 const ks = [c.a, c.b].map((p) => katalog.find((k) => k.s === p.slug)).filter((k) => !!k)
@@ -49,5 +49,5 @@ const nm = (w?: string) => (w === 'a' ? c.a.name : w === 'b' ? c.b.name : '')
       <YanSutun haric={c.path} ads={ads}><div><h2 class="label" style="color:var(--text-3);margin:0 0 8px">Künyeler</h2><div class="kstack"><KunyeMini p={c.a} /><KunyeMini p={c.b} /></div></div></YanSutun>
     </div>
   </div>
-  <div class="wrap" style="padding-top:48px"><InfiniteFeed title="Okumaya devam et" source="son" items={[]} videos={videos} reels={reels} ads={ads} channel={site.youtube} profile={site.instagram} renderFirst={false} /></div>
+  <div class="wrap km-alt"><KiyasAlt tur={c.a.type} /></div>
 </Base>

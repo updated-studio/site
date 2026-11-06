@@ -173,45 +173,44 @@ function clocks() {
 }
 
 /* ---------- sonsuz akış: 20 haber → videolar → reels → tekrar ---------- */
-function feeds() {
-  $$('[data-feed]').forEach((f) => {
-    const sentinel = $('[data-sentinel]', f)!, more = $<HTMLAnchorElement>('[data-more]', f)
-    let busy = false, end = false, hata = 0
-    if (more) more.hidden = true // JS varken otomatik; yoksa bağlantı kalır
-    // Yükleyici hâlâ ekrana yakınsa bir sonrakini de iste (gözlemci, görünür kalan öğe için yeniden haber vermez; 25 Ekim 2026 takılma)
-    const yakin = () => sentinel.getBoundingClientRect().top < innerHeight + 600
-    const load = async () => {
-      if (busy || end) return; busy = true
-      const page = Number(f.dataset.next || '2')
-      try {
-        const r = await fetch(`${BASE}/parca/akis/${encodeURIComponent(f.dataset.feed!)}/${page}`)
-        const html = (await r.text()).trim()
-        if (!r.ok || !html || !html.includes('inf-chunk')) { end = true; sentinel.innerHTML = '<p class="meta" style="text-align:center">Akışın sonuna geldiniz.</p>'; return }
-        const box = document.createElement('div'); box.innerHTML = html
-        const chunk = box.firstElementChild as HTMLElement
-        // Sayfada zaten kart olarak duran haber akışta ikinci kez çıkmasın (ana sayfada Gündemden ile 2. sayfa kesişiyordu)
-        const var_ = new Set($$<HTMLAnchorElement>('article :is(h2,h3) a[href]').filter((a) => !a.closest('.gy-ek[hidden]')).map((a) => a.getAttribute('href')))
-        var_.add(location.pathname.replace(/\/$/, '')) // okunan yazının kendisi de akışta çıkmasın
-        $$<HTMLAnchorElement>('article.c-std h3 a[href]', chunk).forEach((a) => { if (var_.has(a.getAttribute('href'))) a.closest('article')?.remove() })
-        const say = $('.inf-h .label', chunk); if (say) say.textContent = say.textContent!.replace(/\d+ haber/, $$('article.c-std', chunk).length + ' haber')
-        f.insertBefore(chunk, sentinel)
-        f.dataset.next = String(page + 1)
-        hydrate(chunk)
-        hata = 0
-      } catch {
-        // Bağlantı koptuysa iki kez daha dener, sonra "Daha fazla haber" bağlantısı görünür
-        if (++hata >= 3) { end = true; $('.skel', sentinel)?.remove(); if (more) more.hidden = false }
-      } finally {
-        busy = false
-        if (!end) requestAnimationFrame(() => { if (yakin()) setTimeout(load, hata ? 1500 : 0) })
-      }
+function feed(f: HTMLElement) {
+  const sentinel = $('[data-sentinel]', f)!, more = $<HTMLAnchorElement>('[data-more]', f)
+  let busy = false, end = false, hata = 0
+  if (more) more.hidden = true // JS varken otomatik; yoksa bağlantı kalır
+  // Yükleyici hâlâ ekrana yakınsa bir sonrakini de iste (gözlemci, görünür kalan öğe için yeniden haber vermez; 25 Ekim 2026 takılma)
+  const yakin = () => sentinel.getBoundingClientRect().top < innerHeight + 600
+  const load = async () => {
+    if (busy || end || !f.isConnected) return; busy = true
+    const page = Number(f.dataset.next || '2')
+    try {
+      const r = await fetch(`${BASE}/parca/akis/${encodeURIComponent(f.dataset.feed!)}/${page}`)
+      const html = (await r.text()).trim()
+      if (!r.ok || !html || !html.includes('inf-chunk')) { end = true; sentinel.innerHTML = '<p class="meta" style="text-align:center">Akışın sonuna geldiniz.</p>'; return }
+      const box = document.createElement('div'); box.innerHTML = html
+      const chunk = box.firstElementChild as HTMLElement
+      // Sayfada zaten kart olarak duran haber akışta ikinci kez çıkmasın (ana sayfada Gündemden ile 2. sayfa kesişiyordu)
+      const var_ = new Set($$<HTMLAnchorElement>('article :is(h2,h3) a[href]').filter((a) => !a.closest('.gy-ek[hidden]')).map((a) => a.getAttribute('href')))
+      var_.add(location.pathname.replace(/\/$/, '')) // okunan yazının kendisi de akışta çıkmasın
+      $$<HTMLAnchorElement>('article.c-std h3 a[href]', chunk).forEach((a) => { if (var_.has(a.getAttribute('href'))) a.closest('article')?.remove() })
+      const say = $('.inf-h .label', chunk); if (say) say.textContent = say.textContent!.replace(/\d+ haber/, $$('article.c-std', chunk).length + ' haber')
+      f.insertBefore(chunk, sentinel)
+      f.dataset.next = String(page + 1)
+      hydrate(chunk)
+      hata = 0
+    } catch {
+      // Bağlantı koptuysa iki kez daha dener, sonra "Daha fazla haber" bağlantısı görünür
+      if (++hata >= 3) { end = true; $('.skel', sentinel)?.remove(); if (more) more.hidden = false }
+    } finally {
+      busy = false
+      if (!end) requestAnimationFrame(() => { if (yakin()) setTimeout(load, hata ? 1500 : 0) })
     }
-    new IntersectionObserver((es) => { if (es[0].isIntersecting) load() }, { rootMargin: '600px 0px' }).observe(sentinel)
-    // Yedek: hızlı kaydırmada gözlemci kaçırırsa kaydırma sırasında da bakılır (en fazla 4 kez/sn)
-    let son = 0
-    addEventListener('scroll', () => { const t = Date.now(); if (t - son < 250 || busy || end) return; son = t; const r = sentinel.getBoundingClientRect(); if (r.top < innerHeight + 600 && r.bottom > -600) load() }, { passive: true })
-  })
+  }
+  new IntersectionObserver((es) => { if (es[0].isIntersecting) load() }, { rootMargin: '600px 0px' }).observe(sentinel)
+  // Yedek: hızlı kaydırmada gözlemci kaçırırsa kaydırma sırasında da bakılır (en fazla 4 kez/sn)
+  let son = 0
+  addEventListener('scroll', () => { const t = Date.now(); if (t - son < 250 || busy || end || !f.isConnected) return; son = t; const r = sentinel.getBoundingClientRect(); if (r.top < innerHeight + 600 && r.bottom > -600) load() }, { passive: true })
 }
+const feeds = () => $$<HTMLElement>('[data-feed]').forEach(feed)
 
 /* ---------- video reklam: görünürken sessiz başlar, 5 sn sonra geçilebilir ---------- */
 function videoAds(root: ParentNode = document) {
@@ -321,3 +320,5 @@ function hydrate(root: ParentNode) { strips(root); youtube(root); videoAds(root)
 
 theme(); menu(); search(); searchPage(); breaking(); accordion(); newPill(); clocks(); feeds(); kunyeCard(); robot(); onlyDiff(); newsletter(); okunanSekme(); videoBolumleri()
 hydrate(document)
+// Sayfaya sonradan konan parça (kıyas aracında türe göre değişen alt akış): şeritleri, videoları ve sonsuz akışı bağlar
+document.addEventListener('updated:yeni', (e) => { const kok = e.target as HTMLElement; hydrate(kok); $$<HTMLElement>('[data-feed]', kok).forEach(feed) })

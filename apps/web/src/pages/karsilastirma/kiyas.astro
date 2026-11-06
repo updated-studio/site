@@ -5,6 +5,7 @@
  */
 import Base from '../../layouts/Base.astro'
 import KiyasMasasi from '../../components/KiyasMasasi.astro'
+import KiyasAlt from '../../components/KiyasAlt.astro'
 import { kunyeKatalog } from '../../lib/api'
 import { baslik, type K } from '../../lib/kiyas'
 const katalog = await kunyeKatalog()
@@ -21,4 +22,5 @@ const ilk = turler.filter((l) => l.length >= 2).sort((a, b) => dolu(b[0]) + dolu
     </div>
     {ilk.length === 2 ? <KiyasMasasi ks={ilk} adresli /> : <p class="pc-unk">Kıyaslanacak künye henüz yok.</p>}
   </div>
+  {ilk.length === 2 && <div class="wrap km-alt" data-kiyas-alt={ilk[0].t}><KiyasAlt tur={ilk[0].t} /></div>}
 </Base>
