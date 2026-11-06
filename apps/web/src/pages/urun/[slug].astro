@@ -91,7 +91,7 @@ const albumAd = p.fullName ?? p.name
     </div>
     <aside class="rail" aria-label="Yan sütun">
       <div class="ku-box"><h2>Kıyasla</h2>{p.rivals.length ? <Fragment set:html={p.rivals.map((r) => chip(r)).join('')} /> : <p class="pc-unk">Henüz kıyas yok.</p>}<a class="btn" href={kiyas} style="margin-top:10px">Başka ürünle kıyasla</a></div>
-      {p.id && <div class="ku-box ku-kullanan" data-kullananlar={p.id}><h2>Kullananlar</h2><p class="pc-unk" data-ic>Yükleniyor…</p></div>}
+      {p.id && <div class="ku-box ku-kullanan" data-kullananlar={p.id}><h2>Kullananlar</h2><div class="pc-unk" data-ic>Yükleniyor…</div></div>}
       {!['satista', 'eol'].includes(p.status) && <div class="ku-box"><h2>Çıkış radarı</h2><div class="pc-st"><Fragment set:html={durum(p.status)} />{p.releaseWhen && <span>{p.releaseWhen}</span>}</div></div>}
       <Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare />
     </aside>

@@ -177,7 +177,7 @@ export const sayfaTemizle = (anahtar: string) => { for (const k of SAYFA_ON.keys
 // products (6 Kasım 2026): yorum künyeye de yazılır; kıyas aracı kıyaslanan ürünlerin yorumlarını gösterir
 export const HEDEF_TUR = { news: 'news', reviews: 'reviews', comparisons: 'comparisons', products: 'products' } as const
 export const HEDEF_DESEN = /^(news|reviews|comparisons|products):(\d{1,9})$/
-const urunAdi = (d: { name?: string; brand?: string }) => { const n = d.name || '', b = d.brand || ''; return b && !n.toLocaleLowerCase('tr-TR').startsWith(b.toLocaleLowerCase('tr-TR')) ? `${b} ${n}` : n }
+export const urunAdi = (d: { name?: string; brand?: string }) => { const n = d.name || '', b = d.brand || ''; return b && !n.toLocaleLowerCase('tr-TR').startsWith(b.toLocaleLowerCase('tr-TR')) ? `${b} ${n}` : n }
 export type Hedef = { tur: keyof typeof HEDEF_TUR; id: number; anahtar: string; yol: string; baslik: string }
 const HEDEF_ON = new Map<string, { h: Hedef | null; t: number }>()
 export async function hedefBul(p: Payload, anahtar: string): Promise<Hedef | null> {

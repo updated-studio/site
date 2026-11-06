@@ -4,7 +4,7 @@ import sharp from 'sharp'
 import { OY_HAKKI, asama } from '../lib/gorev'
 import {
   PUAN, SEVIYELER, anahtarCoz, bildirimEkle, ekibeHaberVer, ekipMi, girisYonetim, havuz, hedefBul, HEDEF_DESEN, hizSiniri, ipOzet, onayNedeni,
-  puanEkle, SAYFA_ON, sayfaTemizle, seviye, yanitBildir, type Kimlik,
+  puanEkle, SAYFA_ON, sayfaTemizle, seviye, urunAdi, yanitBildir, type Kimlik,
 } from '../lib/uye'
 
 /**
@@ -77,6 +77,22 @@ async function urunAdlari(p: Payload) {
   URUN_AD = { t: Date.now(), m }
   return m
 }
+/** Ekipman ↔ künye (6 Kasım 2026, kullanıcı: "insanlar bu künyeleri ekleyebilsin ekipmanlarına ve profillerinde görünsün"): künyenin türü, adı, adresi, kart görseli */
+const URUN_TURU: Record<string, string> = { camera: 'Kamera', cam360: 'Kamera', lens: 'Lens', drone: 'Dron', gimbal: 'Gimbal', light: 'Işık', mic: 'Ses', audio: 'Ses', headphones: 'Ses', phone: 'Telefon', laptop: 'Bilgisayar' }
+const DEPO = '/storage/v1/object/public/media/'
+/** Panel deposundaki görsel adresi sitedeki kopyasına çevrilir (sitenin lib/api.ts localMedia ile aynı yol) */
+const medyaYolu = (u?: string | null) => { if (!u) return null; const i = u.indexOf(DEPO); return i >= 0 ? '/medya/' + u.slice(i + DEPO.length) : u }
+type UrunKart = { id: number; ad: string; yol: string; gorsel: string | null; tur: string }
+async function urunKartlari(p: Payload, idler: number[]): Promise<Map<number, UrunKart>> {
+  const m = new Map<number, UrunKart>()
+  const tek = [...new Set(idler.filter((x) => Number.isInteger(x) && x > 0))]
+  if (!tek.length) return m
+  const r = await havuz(p).query(`select pr.id, pr.name, pr.brand, pr.slug, pr.type::text as type, coalesce(md.sizes_card_url, md.url) as g
+    from payload.products pr left join payload.media md on md.id = pr.image_id where pr.id = any($1::int[])`, [tek])
+  for (const d of r.rows as any[]) m.set(d.id, { id: d.id, ad: urunAdi(d), yol: `/urun/${d.slug}`, gorsel: medyaYolu(d.g), tur: URUN_TURU[d.type] || 'Diğer' })
+  return m
+}
+const urunIdsi = (e: { urun?: number | { id: number } | null }) => (typeof e.urun === 'object' ? e.urun?.id ?? null : e.urun ?? null) as number | null
 const AYRILMIS = new Set(['admin', 'yonetici', 'updated', 'editor', 'editör', 'ekip', 'moderator', 'mod', 'destek', 'uper', 'upers', 'root', 'sistem', 'kulup', 'hesap', 'yardim'])
 const temizMetin = (s: unknown, n: number) => String(s ?? '').replace(/\r\n?/g, '\n').replace(/[\u0000-\u0008\u000B-\u001F\u007F​-‏‪-‮⁦-⁩]/g, '').replace(/\n{3,}/g, '\n\n').trim().slice(0, n)
 /** Ekip üyesinin güncel rolü Stüdyo'dan (onay işareti: yönetici altın, diğer ekip mavi); 10 dk bellekte */
@@ -151,7 +167,7 @@ const benimProfil = async (p: Payload, u: Uye, k?: Kimlik | null) => {
   const s = await istatistik(p, u.id), rol = await ekipRol(p, u)
   return {
     kayitli: true, id: u.id, kullaniciAdi: u.kullaniciAdi, ad: u.ad, bio: u.bio || '', renk: u.renk || 'turuncu', email: u.email, giris: u.giris,
-    ekipman: (u.ekipman || []).map((e) => ({ tur: e.tur, ad: e.ad, urun: typeof e.urun === 'object' ? e.urun?.id : e.urun })),
+    ekipman: await (async () => { const k = await urunKartlari(p, (u.ekipman || []).map(urunIdsi) as number[]); return (u.ekipman || []).map((e) => { const id = urunIdsi(e); return { tur: e.tur, ad: e.ad, urun: id, yol: id ? k.get(id)?.yol ?? null : null } }) })(),
     fotoTur: u.fotoTur || 'harf', foto: u.foto || null, emoji: u.emoji || null, googleFoto: googleFoto(k), gravatar: gravatar(u.email), studyoFoto: await studyoFoto(p, u.email), emojiler: PROFIL_EMOJI,
     bildirimEposta: u.bildirimEposta !== false, durum: u.durum, ekip: rol, unvan: u.unvan || null, seviye: seviye(Number(u.puan) || 0), istatistik: s, rozetler: rozetler(u, s), uyelik: u.createdAt,
   }
@@ -288,7 +304,7 @@ export const uyeEndpoints: Endpoint[] = [
     const basliklar = await Promise.all(son.docs.map((y: any) => hedefBul(p, `${y.hedef?.relationTo}:${hedefDegeri(y)}`)))
     return yanit(req, {
       ...herkeseAcik(u, await ekipRol(p, u)), bio: u.bio || '', uyelik: u.createdAt, istatistik: s, rozetler: rozetler(u, s),
-      ekipman: (u.ekipman || []).map((e) => ({ tur: e.tur, ad: e.ad, urun: typeof e.urun === 'object' && e.urun ? { ad: (e.urun as any).name, yol: e.urun.slug ? `/urun/${e.urun.slug}` : null } : null })),
+      ekipman: await (async () => { const k = await urunKartlari(p, (u.ekipman || []).map(urunIdsi) as number[]); return (u.ekipman || []).map((e) => { const x = k.get(urunIdsi(e) as number); return { tur: e.tur, ad: e.ad, urun: x ? { ad: x.ad, yol: x.yol, gorsel: x.gorsel } : null } }) })(),
       yorumlar: son.docs.map((y: any, i) => ({ id: y.id, metin: y.metin.slice(0, 280), at: y.createdAt, yol: y.yol, baslik: basliklar[i]?.baslik || '' })),
     })
   }),
@@ -346,17 +362,39 @@ export const uyeEndpoints: Endpoint[] = [
   }),
 
   // Künyede "bu ürünü kullananlar": profiline ürünü ekleyen Uper'ler (en fazla 24), 5 dk bellekte
-  uc('/uye/kullananlar', 'get', 'yok', async ({ req, p }) => {
+  uc('/uye/kullananlar', 'get', 'yok', async ({ req, p, uye }) => {
     const id = Number(new URL(req.url || '', 'http://x').searchParams.get('urun'))
     if (!Number.isInteger(id) || id < 1) return hata(req, 'Ürün belirtilmedi.')
+    // benim: okurun kendi ekipmanında bu ürün var mı (künyedeki "Ben de kullanıyorum" düğmesi)
+    const benim = !!uye && (uye.ekipman || []).some((e) => urunIdsi(e) === id)
     const o = KULLANAN_ON.get(id)
-    if (o && Date.now() - o.t < 5 * 60_000) return yanit(req, o.g)
+    if (o && Date.now() - o.t < 5 * 60_000) return yanit(req, { ...(o.g as object), benim })
     const r = await p.find({ collection: 'uyeler', where: { and: [{ 'ekipman.urun': { equals: id } }, { durum: { not_equals: 'engelli' } }] }, limit: 24, depth: 0, sort: '-puan', overrideAccess: true })
     const uyeler = await Promise.all((r.docs as unknown as Uye[]).filter((u) => u.kullaniciAdi).map(async (u) => herkeseAcik(u, await ekipRol(p, u))))
     const g = { sayi: r.totalDocs, uyeler }
     if (KULLANAN_ON.size > 2000) KULLANAN_ON.clear()
     KULLANAN_ON.set(id, { t: Date.now(), g })
-    return yanit(req, g)
+    return yanit(req, { ...g, benim })
+  }),
+
+  // Künyeden tek dokunuşla ekipmana ekle ya da çıkar (künyedeki ve kıyas aracındaki "Kullananlar" kutusu)
+  uc('/uye/ekipman', 'post', 'uye', async ({ req, p, uye }) => {
+    const b = await govde(req), id = Number(b.urun), cikar = b.cikar === true
+    if (!Number.isInteger(id) || id < 1) return hata(req, 'Ürün belirtilmedi.')
+    const liste = (uye!.ekipman || []).map((e) => ({ tur: e.tur || 'Diğer', ad: e.ad, urun: urunIdsi(e) }))
+    const vardi = liste.some((e) => e.urun === id)
+    let yeni = liste
+    if (cikar) yeni = liste.filter((e) => e.urun !== id)
+    else if (!vardi) {
+      if (liste.length >= 12) return hata(req, 'Profilinde en fazla 12 ekipman olabilir. Hesabım › Profil bölümünden birini çıkar.')
+      const k = (await urunKartlari(p, [id])).get(id)
+      if (!k) return hata(req, 'Ürün bulunamadı.', 404)
+      yeni = [...liste, { tur: k.tur, ad: k.ad.slice(0, 60), urun: id }]
+    }
+    if (yeni !== liste) await p.update({ collection: 'uyeler', id: uye!.id, data: { ekipman: yeni } as never, overrideAccess: true, context: { uyeIslemi: true } })
+    KULLANAN_ON.delete(id)
+    if (!cikar && uye!.bio) await puanEkle(p, uye!.id, 'profil', 'profil')
+    return yanit(req, { ekli: !cikar, sayi: yeni.length })
   }),
 
   // Kartlardaki yorum sayıları: ?h=news:1,reviews:2 (en fazla 80), yalnız yayındaki yorumlar; 60 sn bellekte

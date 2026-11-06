@@ -244,7 +244,7 @@ async function hesabim(u: any, sekme: Sekme) {
     <div class="hs-ic" data-ic><p class="meta">Yükleniyor…</p></div>`
   const ic = kok.querySelector<HTMLElement>('[data-ic]')!
   if (sekme === 'profil') {
-    const ek = (e: any = {}) => `<div class="hs-ek"><select class="sel" name="tur" aria-label="Tür">${EKIPMAN.map((t) => `<option${t === e.tur ? ' selected' : ''}>${t}</option>`).join('')}</select><input name="model" maxlength="60" placeholder="Model (ör. Sony A7 IV)" value="${esc(e.ad || '')}" aria-label="Model" list="urun-liste" autocomplete="off"><button type="button" class="ibtn" data-ek-sil aria-label="Kaldır">×</button></div>`
+    const ek = (e: any = {}) => `<div class="hs-ek"${e.urun ? ` data-urun="${e.urun}" data-ad="${esc(e.ad)}"` : ''}><select class="sel" name="tur" aria-label="Tür">${EKIPMAN.map((t) => `<option${t === e.tur ? ' selected' : ''}>${t}</option>`).join('')}</select><input name="model" maxlength="60" placeholder="Model (ör. Sony A7 IV)" value="${esc(e.ad || '')}" aria-label="Model" list="urun-liste" autocomplete="off"><button type="button" class="ibtn" data-ek-sil aria-label="Kaldır">×</button>${e.yol ? `<a class="meta hs-ek-k" href="${esc(e.yol)}">Künyesi</a>` : ''}</div>`
     ic.innerHTML = `
       <div class="hs-iki">
         <div>
@@ -268,7 +268,7 @@ async function hesabim(u: any, sekme: Sekme) {
           <div class="hs-emoji" data-emoji-l${u.fotoTur === 'emoji' ? '' : ' hidden'}>${u.emojiler.map((e: string) => `<label><input type="radio" name="emoji" value="${e}"${(u.emoji || u.emojiler[0]) === e ? ' checked' : ''}><span>${e}</span></label>`).join('')}</div>
           <p class="meta">Zorunlu değil. Gravatar, e-postana bağlı fotoğraf servisidir (WordPress de kullanır); hesabın yoksa baş harflerin görünür.</p></fieldset>
           <fieldset><legend>Profil rengi</legend><div class="hs-renk">${['turuncu', 'mavi', 'siyah', 'gri'].map((r) => `<label><input type="radio" name="renk" value="${r}"${u.renk === r ? ' checked' : ''}><span class="av av-${r}" style="width:36px;height:36px">${esc(u.ad[0] || '?')}</span><span class="sr">${r}</span></label>`).join('')}</div></fieldset>
-          <fieldset><legend>Ekipmanım</legend><p class="meta">Kullandığın kamera, lens, gimbal… Profilinde görünür.</p><div data-ekler>${(u.ekipman.length ? u.ekipman : [{}]).map(ek).join('')}</div><button type="button" class="btn" data-ek-ekle>+ Ekipman ekle</button><datalist id="urun-liste"></datalist><p class="meta">Listeden seçtiğin model künyedeki ürünle eşleşir; ürün sayfasında "Kullananlar"da görünürsün.</p></fieldset>
+          <fieldset><legend>Ekipmanım</legend><p class="meta">Kullandığın kamera, lens, gimbal… Profilinde görünür.</p><div data-ekler>${(u.ekipman.length ? u.ekipman : [{}]).map(ek).join('')}</div><button type="button" class="btn" data-ek-ekle>+ Ekipman ekle</button><datalist id="urun-liste"></datalist><p class="meta">Listeden seçtiğin model künyedeki ürünle eşleşir; ürün sayfasında "Kullananlar"da görünürsün. Künye sayfalarındaki "Ben de kullanıyorum" düğmesi de ürünü buraya ekler.</p></fieldset>
           <button class="btn btn-p" type="submit">Kaydet</button>
         </form>
       </div>`
@@ -283,7 +283,8 @@ async function hesabim(u: any, sekme: Sekme) {
     ic.querySelector<HTMLFormElement>('[data-profil]')!.addEventListener('submit', async (e) => {
       e.preventDefault()
       const f = e.target as HTMLFormElement, fd = new FormData(f)
-      const ekipman = [...f.querySelectorAll('.hs-ek')].map((r) => ({ tur: (r.querySelector('select') as HTMLSelectElement).value, ad: (r.querySelector('input') as HTMLInputElement).value.trim() })).filter((x) => x.ad)
+      // Künyeden eklenen ürünün bağı, adı değişmedikçe korunur
+      const ekipman = [...f.querySelectorAll<HTMLElement>('.hs-ek')].map((r) => { const ad = (r.querySelector('input') as HTMLInputElement).value.trim(); return { tur: (r.querySelector('select') as HTMLSelectElement).value, ad, urun: r.dataset.urun && r.dataset.ad === ad ? Number(r.dataset.urun) : undefined } }).filter((x) => x.ad)
       const y = await api('/uye/ben', 'PATCH', { ad: fd.get('ad'), kullaniciAdi: String(fd.get('kullaniciAdi') || '').toLowerCase(), bio: fd.get('bio'), renk: fd.get('renk'), ekipman, fotoTur: fd.get('fotoTur') || 'harf', emoji: fd.get('emoji') })
       if (y.s !== 200) return bildir(y.j?.hata || 'Kaydedilemedi.', 'hata')
       await ben(true); bilgi = 'Profilin kaydedildi.'; cizim()

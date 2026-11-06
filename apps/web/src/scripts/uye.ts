@@ -154,6 +154,15 @@ async function ustCubuk() {
 
 /* ---------------- yazının topluluk bölümü ---------------- */
 const TEPKI: [string, string][] = [['begendim', 'Beğendim'], ['ilginc', 'İlginç'], ['sasirtici', 'Şaşırttı'], ['katilmiyorum', 'Katılmıyorum']]
+/** Tepki simgeleri (6 Kasım 2026, kullanıcı: "tepki düğmelerine simge"): sitenin çizgi seti gibi 2 px, düz uç, dolgusuz (lib/ui.ts) */
+const TS: Record<string, string> = {
+  begendim: '<path d="M7 21H3V10h4zM7 10l4-8a2.5 2.5 0 0 1 2.5 2.5V9H20l-2 12H7"/>',
+  ilginc: '<path d="M9 18h6M10 21h4M8.5 15.5a6.5 6.5 0 1 1 7 0V16h-7z"/>',
+  sasirtici: '<path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM9 9v2M15 9v2M12 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>',
+  katilmiyorum: '<path d="M7 3H3v11h4zM7 14l4 8a2.5 2.5 0 0 0 2.5-2.5V15H20L18 3H7"/>',
+  kaydet: '<path d="M6 3h12v18l-6-5-6 5z"/>', paylas: '<path d="M12 15V3M7 8l5-5 5 5M5 13v8h14v-8"/>',
+}
+const ts = (k: string) => `<svg class="ico" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">${TS[k]}</svg>`
 const SIKAYET = ['Hakaret / nefret', 'Spam / reklam', 'Yanlış bilgi', 'Kişisel bilgi', 'Diğer']
 
 function topluluk(kok: HTMLElement) {
@@ -211,9 +220,9 @@ function topluluk(kok: HTMLElement) {
       : `<div class="tp-ben">${avatar(profil, 40)}${formHtml('ana')}</div>`
     const cubuk = cubuksuz ? '' : `
       <div class="tp-bar" role="group" aria-label="${urun ? 'Bu künye' : 'Bu yazıya tepkin'}">
-        ${urun ? '' : TEPKI.map(([k, ad]) => `<button type="button" class="tp-t${benim.tepki === k ? ' on' : ''}" data-tepki="${k}" aria-pressed="${benim.tepki === k}">${ad}<span class="num">${t[k] || ''}</span></button>`).join('') + '<span class="tp-ara"></span>'}
-        <button type="button" class="tp-t${benim.kayitli ? ' on' : ''}" data-kaydet aria-pressed="${!!benim.kayitli}">${benim.kayitli ? 'Kaydedildi' : 'Kaydet'}</button>
-        <button type="button" class="tp-t" data-paylas>Paylaş</button>
+        ${urun ? '' : TEPKI.map(([k, ad]) => `<button type="button" class="tp-t${benim.tepki === k ? ' on' : ''}" data-tepki="${k}" aria-pressed="${benim.tepki === k}">${ts(k)}${ad}<span class="num">${t[k] || ''}</span></button>`).join('') + '<span class="tp-ara"></span>'}
+        <button type="button" class="tp-t tp-k${benim.kayitli ? ' on' : ''}" data-kaydet aria-pressed="${!!benim.kayitli}" title="${benim.kayitli ? 'Kaydedildi' : 'Kaydet'}">${ts('kaydet')}<span class="sr">${benim.kayitli ? 'Kaydedildi' : 'Kaydet'}</span></button>
+        <button type="button" class="tp-t tp-k" data-paylas title="Paylaş">${ts('paylas')}<span class="sr">Paylaş</span></button>
       </div>`
     ic.innerHTML = `${cubuk}
       ${cta}
@@ -332,6 +341,7 @@ function topluluk(kok: HTMLElement) {
   }
 }
 
+const KULLAN_IKON = '<svg class="ico" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>'
 const YORUM_IKON = '<svg class="ico" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>' // kit §8: lib/ui.ts "yorum" ile aynı
 
 /* ---------------- kartlardaki yorum sayısı ---------------- */
@@ -357,14 +367,36 @@ if (document.querySelector('[data-yorum-kart]')) kartSayilari()
 new MutationObserver(() => { clearTimeout(sayiZaman); sayiZaman = window.setTimeout(kartSayilari, 300) }).observe(document.body, { childList: true, subtree: true })
 
 /* ---------------- künyede kullananlar ---------------- */
-// Profiline bu ürünü ekleyen Uper'ler; yoksa kendini eklemeye davet (zorunlu değil)
+// Profiline bu ürünü ekleyen Uper'ler ve tek dokunuşla "Ben de kullanıyorum" (6 Kasım 2026): ürün ekipmanına eklenir, profilinde künye görseliyle görünür
 async function kullananlar(kok: HTMLElement) {
-  const ic = kok.querySelector<HTMLElement>('[data-ic]')!
-  const { s, j } = await api(`/uye/kullananlar?urun=${encodeURIComponent(kok.dataset.kullananlar!)}`)
+  const urun = Number(kok.dataset.kullananlar)
+  let ic = kok.querySelector<HTMLElement>('[data-ic]')
+  if (!ic || ic.tagName !== 'DIV') { const d = document.createElement('div'); d.dataset.ic = ''; if (ic) ic.replaceWith(d); else kok.querySelector('h2, h3')!.after(d); ic = d }
+  const { s, j } = await api(`/uye/kullananlar?urun=${urun}`)
   if (s !== 200 || !j) { ic.textContent = 'Şu an yüklenemedi.'; return }
-  const davet = `<a href="/hesap#ayarlar">${oturum ? 'Sen de kullanıyorsan profiline ekle' : 'Kullanıyorsan Uper ol, profiline ekle'}</a>`
-  if (!j.sayi) { ic.innerHTML = `Henüz kimse eklemedi. ${davet}.`; return }
-  ic.outerHTML = `<p class="meta" style="margin:0 0 8px">${j.sayi} Uper kullanıyor</p><ul class="ku-uperler">${j.uyeler.map((u: any) => `<li><a href="/uper?ad=${esc(u.kullaniciAdi)}" title="${esc(u.ad)} · ${esc(u.seviye?.ad || '')}">${avatar(u, 36)}<span>${esc(u.ad)}</span></a></li>`).join('')}</ul><p class="meta" style="margin:8px 0 0">${davet}</p>`
+  const dugme = j.benim
+    ? `<div class="ku-ben on"><span class="ku-ben-d">${KULLAN_IKON}Ekipmanında</span><button type="button" class="btn btn-t" data-kullan="cikar">Çıkar</button></div>`
+    : `<button type="button" class="btn ku-ben" data-kullan="ekle">${KULLAN_IKON}Ben de kullanıyorum</button>`
+  const not = j.benim ? '<a href="/hesap#profil">Ekipmanını düzenle</a>' : 'Profilinde görünür, burada kullananlar arasına girersin.'
+  ic.className = 'ku-kul'
+  ic.innerHTML = `${j.sayi ? `<p class="meta">${j.sayi} Uper kullanıyor</p><ul class="ku-uperler">${j.uyeler.map((u: any) => `<li><a href="/uper?ad=${esc(u.kullaniciAdi)}" title="${esc(u.ad)} · ${esc(u.seviye?.ad || '')}">${avatar(u, 36)}<span>${esc(u.ad)}</span></a></li>`).join('')}</ul>` : '<p class="pc-unk">Henüz kimse eklemedi.</p>'}
+    ${dugme}<p class="ku-kul-not">${not}</p>`
+  if (kok.dataset.bagli) return
+  kok.dataset.bagli = '1'
+  kok.addEventListener('click', async (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-kullan]')
+    if (!b) return
+    if (!oturum) { donusYaz(); location.href = '/hesap#giris'; return }
+    if (!(await ben())?.kayitli) { donusYaz(); location.href = '/hesap'; return }
+    b.disabled = true
+    const y = await api('/uye/ekipman', 'POST', { urun, cikar: b.dataset.kullan === 'cikar' })
+    b.disabled = false
+    if (y.s !== 200) return bildir(y.j?.hata || 'Olmadı.', 'hata')
+    ben(true)
+    bildir(y.j.ekli ? 'Ekipmanına eklendi. Profilinde görünüyor.' : 'Ekipmanından çıkarıldı.')
+    // Aynı ürünün sayfadaki bütün kutuları (künye yan sütunu, kıyas "Sahipleri") birlikte yenilenir
+    document.querySelectorAll<HTMLElement>(`[data-kullananlar="${urun}"]`).forEach(kullananlar)
+  })
 }
 
 /* ---------------- başlat ---------------- */
