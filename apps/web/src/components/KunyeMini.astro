@@ -1,6 +1,6 @@
 ---
 import type { ProductRef } from '../lib/types'
-import { durum, glyph, s20 } from '../lib/ui'
+import { durum, glyph, s10 } from '../lib/ui'
 interface Props { p: ProductRef }
 const { p } = Astro.props
 ---
@@ -8,6 +8,6 @@ const { p } = Astro.props
   <Fragment set:html={glyph(p.type, 40)} />
   <span class="eyebrow">Künye · <span lang="en" translate="no">{p.brand}</span></span><b>{p.name}</b>
   <Fragment set:html={durum(p.status)} />
-  {p.score && <span class="kc-sc">{s20(p.score)}</span>}
+  {p.score && <span class="kc-sc">{s10(p.score)}</span>}
   <span class="kc-go">Künyeyi aç →</span>
 </a>

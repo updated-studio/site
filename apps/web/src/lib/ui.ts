@@ -54,7 +54,9 @@ export const durum = (s: string) => kes(DURUM_SEVIYE[s] ?? 3, STATUS_TEXT[s] || 
 /** Künye etiketi: metinde ve kartlarda ürüne bağlantı; masaüstünde üzerine gelince kart açılır. */
 export const chip = (p: Pick<ProductRef, 'slug' | 'name' | 'type'>, label?: string) => `<a class="pk" href="/urun/${esc(p.slug)}" data-p="${esc(p.slug)}">${glyph(p.type, 16)}<span>${esc(label || p.name)}</span></a>`
 export const label = (l?: string) => { const x = l && LABEL_TEXT[l]; return x ? `<span class="lbl ${x[1]}">${x[0]}</span>` : '' }
-export const s20 = (n?: number) => (n == null ? '' : `${Math.round(n)}/20`)
+/** UPscore (6 Kasım 2026, kullanıcı: "tüm puan sistemimizi UPscore yapacağız, 10'lu"): 10 üzerinden, tek ondalık, Türkçe virgül (8,7) */
+export const ups = (n?: number) => (n == null ? '' : (Math.round(n * 10) / 10).toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }))
+export const s10 = (n?: number) => (n == null ? '' : `${ups(n)}/10`)
 /**
  * Metindeki ürün adlarını künye etiketine çevirir (her ürün için ilk geçiş).
  * Başlık ve bağlantı içindekiler atlanır.

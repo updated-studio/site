@@ -3,7 +3,7 @@
 import Img from '../Img.astro'
 import type { Comparison, News, Review } from '../../lib/types'
 import { short } from '../../lib/format'
-import { label, s20 } from '../../lib/ui'
+import { label, s10 } from '../../lib/ui'
 interface Props { items: (News | Review | Comparison)[] }
 const items = Astro.props.items.slice(0, 5)
 const catOf = (n: any) => (n.kind === 'news' ? n.category.name : n.kind === 'review' ? 'İnceleme' : 'Karşılaştırma')
@@ -19,7 +19,7 @@ const lblOf = (n: any) => (n.kind === 'review' ? '<span class="lbl l-inc">İncel
         <span class="cat">{catOf(n)}</span>
         <h2><a href={n.path}>{n.title}</a></h2>
         <p>{n.spot}</p>
-        <span class="meta">{n.author.name} · {short(n.publishedAt)}{n.kind === 'review' ? ` · ${s20(n.score)}` : ''}</span>
+        <span class="meta">{n.author.name} · {short(n.publishedAt)}{n.kind === 'review' ? ` · ${s10(n.score)}` : ''}</span>
       </div>
     </div>
   ))}

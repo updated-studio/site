@@ -17,10 +17,10 @@ const AU: Record<string, Author> = Object.fromEntries(['Yağmur', 'Deniz', 'Nehi
 const S = (key: string, value: string | null, source = 'uretici', group?: string, num?: number): Spec => ({ key, value, source: value ? source : undefined, group, num, higherIsBetter: !/Ağırlık/.test(key), searchWeight: /video|Su geçirmezlik/.test(key) ? 5 : 3 })
 type P = Omit<ProductRef, 'slug'> & { parts?: [string, string][]; rivals?: string[]; releaseWhen?: string; onRadar?: boolean }
 const PR: Record<string, P> = {
-  'dji-neo': { name: 'DJI Neo', brand: 'DJI', type: 'drone', status: 'satista', certainty: 4, score: 18, image: img('drone', 'DJI Neo'), blurb: 'Avuç içinden kalkan, korumalı pervaneli küçük vlog drone’u.',
+  'dji-neo': { name: 'DJI Neo', brand: 'DJI', type: 'drone', status: 'satista', certainty: 4, score: 9, image: img('drone', 'DJI Neo'), blurb: 'Avuç içinden kalkan, korumalı pervaneli küçük vlog drone’u.',
     specs: [S('Ağırlık', '135 g', 'uretici', 'Gövde', 135), S('Video', '4K / 30 fps', 'uretici', 'Video'), S('Sensör', '1/2″ · 12 MP', 'uretici', 'Görüntü'), S('Uçuş süresi', '~18 dk', 'uretici', 'Güç', 18), S('Dahili hafıza', '22 GB', 'uretici', 'Güç', 22)],
     parts: [['Pervane koruması', 'Kapalı pervaneler'], ['Üst kabuk', '135 g toplam'], ['Kamera', '1/2″ · 12 MP · 4K/30'], ['Pil', '~18 dk uçuş'], ['Ana kart', '22 GB dahili hafıza']], rivals: ['dji-avata360'] },
-  'dji-avata360': { name: 'DJI Avata360', brand: 'DJI', type: 'drone', status: 'satista', certainty: 4, score: 18, image: img('fpv', 'DJI Avata360'), blurb: '360° çekim yapan FPV drone.', specs: [], rivals: ['dji-neo'] },
+  'dji-avata360': { name: 'DJI Avata360', brand: 'DJI', type: 'drone', status: 'satista', certainty: 4, score: 9, image: img('fpv', 'DJI Avata360'), blurb: '360° çekim yapan FPV drone.', specs: [], rivals: ['dji-neo'] },
   'dji-osmo-360': { name: 'DJI Osmo 360', brand: 'DJI', type: 'cam360', status: 'satista', certainty: 4, image: img('cam360', 'DJI Osmo 360'), blurb: 'DJI’ın 360° aksiyon kamerası.',
     specs: [S('Maks. 360° video', '8K / 50 fps', 'uretici', 'Video', 50), S('Sensör', '2× 1 inç', 'uretici', 'Görüntü'), S('Ağırlık', '183 g', 'uretici', 'Gövde', 183), S('Su geçirmezlik (kasasız)', '10 m', 'uretici', 'Gövde', 10), S('Pil', '1950 mAh', 'uretici', 'Güç', 1950), S('Dahili hafıza', '105 GB', 'uretici', 'Güç'), S('Değiştirilebilir lens', 'Yok', 'uretici', 'Gövde')],
     parts: [['Lensler', 'Çift lens · 8K/50'], ['Gövde', '183 g · 10 m'], ['Ekran', 'Dokunmatik'], ['Pil', '1950 mAh'], ['Ana kart', '105 GB dahili']], rivals: ['insta360-x5'] },
@@ -72,7 +72,7 @@ const R = (id: string, slug: string, title: string, score: number, au: string, h
   score, pros: [], cons: [], cover: img(im, title), author: AU[au], publishedAt: at(h), readingTime: 6, products: [], seo: { title, description: PR[slug]?.blurb || title }, ...extra,
 })
 export const REVIEWS: Review[] = [
-  R('r3', 'dji-neo', 'DJI Neo incelemesi: bütçe dostu, dayanıklı drone', 18, 'Nehir Yalçın', 1000, 'drone', {
+  R('r3', 'dji-neo', 'DJI Neo incelemesi: bütçe dostu, dayanıklı drone', 9, 'Nehir Yalçın', 1000, 'drone', {
     spot: 'Elden kalkıp seni takip eden, korumalı pervaneli küçük bir uçan kamera; ilk drone için en kolay başlangıçlardan biri.',
     shortAnswer: "İlk drone'unu arayan, vlog'una havadan açı eklemek isteyen için. Uzun uçuş ve rüzgârlı koşullarda profesyonel çekim yapacaksanız bir üst sınıfa bakın.",
     html: '<p>135 gramlık gövdesiyle DJI Neo avuç içinden kalkıp yine avuca inebiliyor. Pervanelerin kapalı olması yeni başlayanlara güven veriyor.</p><p>4K/30 video ve 1/2 inç 12 MP sensör sosyal medya çekimleri için yeterli. Yaklaşık 18 dakikalık uçuş süresi ise uzun çekim günlerinde yedek pil gerektiriyor.</p><blockquote class="quote">"Avuçtan kalkıp avuca inmesi, ilk uçuş korkusunu siliyor."</blockquote>',
@@ -80,11 +80,11 @@ export const REVIEWS: Review[] = [
     who: { for: ["İlk drone'unu arayan", "Vlog'una havadan açı isteyen"], notFor: ['Uzun uçuş isteyen', 'Rüzgârda profesyonel çekim yapan'] },
     methodHtml: '<p>[Test yöntemi: hangi koşulda, kaç uçuş, hangi ayarlarla. Editör ekler.]</p>', video: { title: 'DJI Neo: bütçe dostu, dayanıklı drone', youtubeId: '', kind: 'İnceleme', thumb: img('drone') },
   }),
-  R('r1', 'insta360-luna-ultra', 'Insta360 Luna Ultra: 360 kamerada yeni çıta', 19, 'UPDATED', 980, 'luna'),
-  R('r2', 'dji-avata360', 'DJI Avata360: 360° FPV deneyimi', 18, 'Nehir Yalçın', 3200, 'fpv'),
-  R('r4', 'honor-magic-8-pro', 'Honor Magic 8 Pro: fiyat/performans amiral gemisi', 18, 'Nehir Yalçın', 1200, 'honor'),
-  R('r5', 'dji-osmo-360-ii', 'DJI Osmo 360 II incelemesi', 18, 'Nehir Yalçın', 700, 'cam360'),
-  R('r6', 'insta360-x4-air', 'Insta360 X4 Air incelemesi', 17, 'UPDATED', 5400, 'luna'),
+  R('r1', 'insta360-luna-ultra', 'Insta360 Luna Ultra: 360 kamerada yeni çıta', 9.5, 'UPDATED', 980, 'luna'),
+  R('r2', 'dji-avata360', 'DJI Avata360: 360° FPV deneyimi', 9, 'Nehir Yalçın', 3200, 'fpv'),
+  R('r4', 'honor-magic-8-pro', 'Honor Magic 8 Pro: fiyat/performans amiral gemisi', 9, 'Nehir Yalçın', 1200, 'honor'),
+  R('r5', 'dji-osmo-360-ii', 'DJI Osmo 360 II incelemesi', 9, 'Nehir Yalçın', 700, 'cam360'),
+  R('r6', 'insta360-x4-air', 'Insta360 X4 Air incelemesi', 8.5, 'UPDATED', 5400, 'luna'),
 ]
 
 export const COMPARISONS: Comparison[] = [{

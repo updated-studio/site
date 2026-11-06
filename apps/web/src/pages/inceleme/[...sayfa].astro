@@ -11,7 +11,7 @@ import CardStd from '../../components/CardStd.astro'
 import * as api from '../../lib/api'
 import { listMeta } from '../../lib/seo'
 import { turAdi } from '../../lib/turler'
-import { baslik } from '../../lib/ui'
+import { baslik, ups } from '../../lib/ui'
 export async function getStaticPaths() {
   const n = Math.max(1, Math.ceil((await api.allReviews()).length / 24))
   return Array.from({ length: n }, (_, i) => ({ params: { sayfa: i ? `sayfa/${i + 1}` : undefined }, props: { p: i + 1 } }))
@@ -21,31 +21,31 @@ const [items, next, ads, kiyaslar] = await Promise.all([api.getReviews(p, 24), a
 const one = p === 1 ? [...items].sort((a, b) => b.score - a.score || +new Date(b.publishedAt) - +new Date(a.publishedAt)).slice(0, 3) : []
 const duvar = items.filter((r) => !one.includes(r))
 const turler = [...new Set(items.map((r) => r.product?.type).filter(Boolean))] as string[]
-const p20 = (s: number) => Math.round(s)
+const p10 = (s: number) => ups(s)
 // Yazılı inceleme yokken sayfa boş kalmasın: kanaldaki uzun videolar (çoğu inceleme ve kıyas) gösterilir (31 Ekim 2026)
 const [youtube, site, yazilar] = items.length ? [[], null, []] : await Promise.all([api.getYoutube(), api.getSite(), api.getIncelemeHaberleri(24)])
 const videolar = youtube.filter((v) => !v.short)
 ---
-<Base meta={listMeta('İncelemeler', 'Kullanarak test ettiğimiz cihazlar: /20 puan, artılar, eksiler ve kime uygun olduğu.', p > 1 ? `/inceleme/sayfa/${p}` : '/inceleme', items.map((r) => ({ path: r.path, title: r.title })))}>
+<Base meta={listMeta('İncelemeler', 'Kullanarak test ettiğimiz cihazlar: 10 üzerinden UPscore, artılar, eksiler ve kime uygun olduğu.', p > 1 ? `/inceleme/sayfa/${p}` : '/inceleme', items.map((r) => ({ path: r.path, title: r.title })))}>
   <div class="wrap">
     <div class="icl-bas">
-      <div><span class="ic-tur">UPDATED · elle test, puan /20</span><h1 class="h1">İncelemeler</h1><p class="lead" style="margin:0">Her ürünü günlerce kullanıp videoyla, puanla ve künyeyle anlatıyoruz.</p></div>
+      <div><span class="ic-tur">UPDATED · elle test, UPscore /10</span><h1 class="h1">İncelemeler</h1><p class="lead" style="margin:0">Her ürünü günlerce kullanıp videoyla, puanla ve künyeyle anlatıyoruz.</p></div>
       {turler.length > 1 && <nav class="icl-tur" aria-label="Türe göre" data-icl-tur>
         <a href="#" data-tur="" aria-current="page">Hepsi</a>
         {turler.map((t) => <a href={`#${t}`} data-tur={t}>{turAdi(t)}</a>)}
       </nav>}
     </div>
-    {items.length === 0 ? <div style="padding-bottom:48px"><p class="lead rh-bos" style="margin:0;padding:24px 0 0">Puanlı incelemeler hazırlanıyor: cihazları kullanarak test ediyoruz, puan /20. Aşağıda şimdiye kadarki inceleme yazılarımız ve videolarımız var; ürünleri <a href="/karsilastirma">Kıyaslamalar</a>'da yan yana da koyabilir, <a href="/urun">Künyeler</a>'de teknik verilere bakabilirsin.</p>{yazilar.length > 0 && <section class="sec" style="padding-bottom:0" aria-label="İnceleme yazıları" id="yazilar"><div class="sh"><h2>İnceleme yazıları</h2></div><div class="grid4">{yazilar.map((n) => <CardStd item={n} />)}</div></section>}{videolar.length > 0 && site && <div style="margin-top:40px" id="videolar"><VideoDuvar videos={videolar} channel={site.youtube} baslik="Video incelemeler" /></div>}</div> : <>
+    {items.length === 0 ? <div style="padding-bottom:48px"><p class="lead rh-bos" style="margin:0;padding:24px 0 0">Puanlı incelemeler hazırlanıyor: cihazları kullanarak test ediyoruz, UPscore 10 üzerinden. Aşağıda şimdiye kadarki inceleme yazılarımız ve videolarımız var; ürünleri <a href="/karsilastirma">Kıyaslamalar</a>'da yan yana da koyabilir, <a href="/urun">Künyeler</a>'de teknik verilere bakabilirsin.</p>{yazilar.length > 0 && <section class="sec" style="padding-bottom:0" aria-label="İnceleme yazıları" id="yazilar"><div class="sh"><h2>İnceleme yazıları</h2></div><div class="grid4">{yazilar.map((n) => <CardStd item={n} />)}</div></section>}{videolar.length > 0 && site && <div style="margin-top:40px" id="videolar"><VideoDuvar videos={videolar} channel={site.youtube} baslik="Video incelemeler" /></div>}</div> : <>
       {one.length > 0 && <section class="icl-one" aria-label="Öne çıkan">
         <a class="icl-k buyuk" href={one[0].path} data-tur={one[0].product?.type}>
           {one[0].cover && <Img img={one[0].cover} alt="" eager sizes="(max-width: 900px) 100vw, 800px" />}
-          <span class="icl-p">{p20(one[0].score)}<small>/20</small></span>
+          <span class="icl-p">{p10(one[0].score)}<small>/10</small></span>
           <span class="icl-alt"><span class="lbl l-inc">Editörün seçimi</span><b set:html={baslik(one[0].title)} /></span>
         </a>
         {one.length > 1 && <div>{one.slice(1).map((r) => (
           <a class="icl-k" href={r.path} data-tur={r.product?.type}>
             {r.cover && <Img img={r.cover} alt="" sizes="(max-width: 900px) 50vw, 400px" />}
-            <span class="icl-p">{p20(r.score)}</span>
+            <span class="icl-p">{p10(r.score)}</span>
             <span class="icl-alt"><b set:html={baslik(r.title)} /></span>
           </a>
         ))}</div>}
@@ -61,7 +61,7 @@ const videolar = youtube.filter((v) => !v.short)
       {duvar.length > 0 && <section class="sec" aria-label="Tüm incelemeler" id="yazilar">
         <div class="sh"><h2>Tüm incelemeler</h2></div>
         <div class="icl-duvar" data-icl-duvar>{duvar.map((r) => (
-          <a href={r.path} data-tur={r.product?.type}><span class="c-img">{r.cover && <Img img={r.cover} alt="" sizes="300px" />}<span class="icl-p">{p20(r.score)}</span></span><b set:html={baslik(r.title)} /><span class="ic-neden">{turAdi(r.product?.type)} · {r.product?.brand}</span></a>
+          <a href={r.path} data-tur={r.product?.type}><span class="c-img">{r.cover && <Img img={r.cover} alt="" sizes="300px" />}<span class="icl-p">{p10(r.score)}</span></span><b set:html={baslik(r.title)} /><span class="ic-neden">{turAdi(r.product?.type)} · {r.product?.brand}</span></a>
         ))}</div>
       </section>}
       <Ad slot="lb" ad={api.pickAd(ads, 'lb')} />

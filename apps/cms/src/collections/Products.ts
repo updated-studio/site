@@ -87,7 +87,7 @@ export const Products: CollectionConfig = {
     // Kıyaslamalar (27 Ekim 2026): iki ayrı puan. Teknik puan sitede künye değerlerinden kendiliğinden hesaplanır; UPscore editörün notu.
     {
       type: 'row', fields: [
-        { name: 'upscore', type: 'number', label: 'UPscore (0–10)', min: 0, max: 10, admin: { step: 0.1, description: 'Cihazı kullanan editörün notu, tek ondalık. Teknik puan ayrıca kendiliğinden hesaplanır.' } },
+        { name: 'upscore', type: 'number', label: 'UPscore (0–10)', min: 0, max: 10, admin: { step: 0.1, description: 'Sitenin tek puanı: cihazı kullanan editörün notu, tek ondalık. İnceleme yayınlanınca puanı buraya kendiliğinden gelir (en yeni inceleme). Teknik puan ayrıca kendiliğinden hesaplanır.' } },
         { name: 'upscoreReview', type: 'relationship', relationTo: 'reviews', label: 'UPscore incelemesi', admin: { description: 'Notun gerekçesi olan inceleme' } },
         { name: 'amazon', type: 'text', label: 'Amazon ürün kodu (ASIN) ya da bağlantısı', admin: { description: 'Ör. B09JZT6YK5. Boşsa "Amazon\'da gör" ürün adıyla arama açar.' } },
       ],

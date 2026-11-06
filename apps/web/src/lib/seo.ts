@@ -1,6 +1,6 @@
 /**
  * SEO + GEO: meta etiketleri ve JSON-LD. Değerler CMS'te otomatik dolduruluyor (autoSeo); burada yalnız biçimlenir.
- * Haber → NewsArticle (+ about Product), İnceleme → Review (/20), Kıyas → Article + ItemList, Künye → Product.
+ * Haber → NewsArticle (+ about Product), İnceleme → Review (UPscore /10), Kıyas → Article + ItemList, Künye → Product.
  */
 import type { Comparison, News, Product, Review } from './types'
 import { env } from './env'
@@ -32,7 +32,7 @@ export function reviewMeta(r: Review): Meta {
   return {
     title: r.seo.title, description: r.seo.description, path: r.path, image: abs(r.seo.image?.url || r.cover?.url), type: 'article', noindex: r.seo.noindex, published: r.publishedAt, modified: r.updatedAt,
     jsonld: [
-      { '@type': 'Review', name: r.title, reviewBody: r.shortAnswer || r.spot, datePublished: r.publishedAt, author: person(r.author), publisher: { '@id': `${SITE}/#org` }, itemReviewed: productLd(r.product), reviewRating: { '@type': 'Rating', ratingValue: r.score, bestRating: 20, worstRating: 0 },
+      { '@type': 'Review', name: r.title, reviewBody: r.shortAnswer || r.spot, datePublished: r.publishedAt, author: person(r.author), publisher: { '@id': `${SITE}/#org` }, itemReviewed: productLd(r.product), reviewRating: { '@type': 'Rating', ratingValue: r.score, bestRating: 10, worstRating: 0 },
         ...(r.pros.length ? { positiveNotes: { '@type': 'ItemList', itemListElement: r.pros.map((name, i) => ({ '@type': 'ListItem', position: i + 1, name })) } } : {}),
         ...(r.cons.length ? { negativeNotes: { '@type': 'ItemList', itemListElement: r.cons.map((name, i) => ({ '@type': 'ListItem', position: i + 1, name })) } } : {}) },
       crumbs([['Ana sayfa', '/'], ['İncelemeler', '/inceleme'], [r.title, r.path]]), ...faq(r.seo.faq),
@@ -56,7 +56,7 @@ export function productMeta(p: Product): Meta {
     title: p.seo.title, description: p.seo.description, path: p.path, image: abs(p.image?.url),
     jsonld: [
       { ...productLd(p), description: p.blurb, ...(known.length ? { additionalProperty: known.map((s) => ({ '@type': 'PropertyValue', name: s.key, value: s.value })) } : {}),
-        ...(best ? { review: { '@type': 'Review', author: person(best.author), reviewRating: { '@type': 'Rating', ratingValue: best.score, bestRating: 20 }, url: SITE + best.path } } : {}),
+        ...(best ? { review: { '@type': 'Review', author: person(best.author), reviewRating: { '@type': 'Rating', ratingValue: best.score, bestRating: 10 }, url: SITE + best.path } } : {}),
         subjectOf: p.news.slice(0, 10).map((n) => ({ '@type': 'NewsArticle', headline: n.title, url: SITE + n.path })) },
       crumbs([['Ana sayfa', '/'], ['Künye', '/urun'], [p.name, p.path]]),
     ],

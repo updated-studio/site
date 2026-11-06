@@ -9,7 +9,7 @@ import Ad from './Ad.astro'
 import Img from './Img.astro'
 import CardList from './CardList.astro'
 import * as api from '../lib/api'
-import { s20 } from '../lib/ui'
+import { s10 } from '../lib/ui'
 interface Props { haric?: string; ads: import('../lib/types').Ad[]; sonDakika?: boolean }
 const { haric, ads, sonDakika = true } = Astro.props
 const [latest, reviews, okunan] = await Promise.all([api.getLatest(1, 8), api.getReviews(1, 12), api.getMostRead(5, '7g')])
@@ -29,7 +29,7 @@ const enCok = okunan.filter((n) => n.path !== haric).slice(0, 5)
       <span class="c-img"><Img img={oneri.cover} alt="" sizes="320px" /><span class="lbl l-inc">İnceleme</span></span>
       <span class="ys-ic">
         <b>{oneri.title}</b>
-        <span class="meta">{oneri.product?.name}{oneri.score ? <> · <strong class="ys-puan">{s20(oneri.score)}</strong></> : null}</span>
+        <span class="meta">{oneri.product?.name}{oneri.score ? <> · <strong class="ys-puan">{s10(oneri.score)}</strong></> : null}</span>
       </span>
     </a>
   )}

@@ -1,7 +1,7 @@
 ---
 /**
  * İnceleme şablonu (30 Ekim 2026, kullanıcı onayı; tasarım: Claude tuvali "UPDATED İnceleme Şablonu").
- * Baş (etiket, başlık, spot, künye satırı) → video + bölümler | puan kartı (UPscore /20, alt puanlar, kime göre, Kıyasla/Künye)
+ * Baş (etiket, başlık, spot, künye satırı) → video + bölümler | puan kartı (UPscore /10, alt puanlar, kime göre, Kıyasla/Künye)
  * → "Bununla birlikte izle" (otomatik: api.incelemeOnerileri) → kısa cevap "Almalı mısın?" → artılar/eksiler → test şeridi
  * → metin (araya reklam) → yöntem → düzeltmeler → yazar kartı → topluluk | sağ sütun: künye, kıyaslar, reklam, puan tablosu.
  * Video yoksa kapak görseli. Telefonda puan kartı videonun altına iner.
@@ -13,7 +13,7 @@ import Ad from './Ad.astro'
 import Topluluk from './Topluluk.astro'
 import * as api from '../lib/api'
 import { date } from '../lib/format'
-import { baslik, ico, km, linkProducts, yazarFoto } from '../lib/ui'
+import { baslik, ico, km, linkProducts, ups, yazarFoto } from '../lib/ui'
 import { insertAfterParagraph } from '../lib/rich'
 import { turAdi } from '../lib/turler'
 import type { Ad as AdT, Comparison, Review } from '../lib/types'
@@ -23,7 +23,7 @@ const MARK = '<!--AD-IN-->'
 let body = linkProducts(r.html || '', [r.product])
 if ((body.match(/<\/p>/g) || []).length >= 3) body = insertAfterParagraph(body, 2, MARK)
 const [before, after] = body.split(MARK)
-const puan = Math.round(r.score)
+const puan = ups(r.score)
 const alt = r.altPuanlar ?? []
 const bolumler = r.bolumler ?? []
 const ytId = r.video?.youtubeId
@@ -55,9 +55,9 @@ const ETIKET = { kiyas: ['Kıyas', 'ic-et-k'], inceleme: ['İnceleme', 'ic-et-i'
 
     <aside class="ic-puan" aria-label="Puan kartı">
       <span class="ic-kucuk">UPscore</span>
-      <div class="ic-skor"><b>{puan}</b><span>/20</span></div>
+      <div class="ic-skor"><b>{puan}</b><span>/10</span></div>
       {alt.length > 0 && <div class="ic-alt">
-        {alt.map((a) => <div class="ic-cubuk"><span>{a.baslik}</span><span class="mono">{Math.round(a.puan)}</span><i style={`--p:${Math.max(0, Math.min(100, (a.puan / 20) * 100))}%`} class={a.puan < 12 ? 'dusuk' : undefined}></i></div>)}
+        {alt.map((a) => <div class="ic-cubuk"><span>{a.baslik}</span><span class="mono">{ups(a.puan)}</span><i style={`--p:${Math.max(0, Math.min(100, (a.puan / 10) * 100))}%`} class={a.puan < 6 ? 'dusuk' : undefined}></i></div>)}
       </div>}
       {r.who && (r.who.for.length > 0 || r.who.notFor.length > 0) && <div class="ic-kime">
         {r.who.for.length > 0 && <div><b>Kimin için:</b> <span>{r.who.for.join(' · ')}</span></div>}

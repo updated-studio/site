@@ -6,7 +6,7 @@
  */
 import Img from './Img.astro'
 import type { News } from '../lib/types'
-import { durum, glyph, s20 } from '../lib/ui'
+import { durum, glyph, s10 } from '../lib/ui'
 import { SITE } from '../lib/seo'
 interface Props { n: News }
 const { n } = Astro.props
@@ -26,7 +26,7 @@ const jsonld = { '@context': 'https://schema.org', '@type': 'ItemList', name: n.
             {(i === 0 || x.baslik) && <span class="rl-et">{i === 0 ? 'Editörün seçimi' : x.baslik}{i === 0 && x.baslik ? ` · ${x.baslik}` : ''}</span>}
             <span class="eyebrow rl-mk" lang="en" translate="no">{x.urun.brand}</span><b translate="no">{x.urun.name}</b>
             {x.gerekce && <p>{x.gerekce}</p>}
-            <div class="rl-alt"><Fragment set:html={durum(x.urun.status)} />{x.urun.score ? <span class="rl-p">{s20(x.urun.score)}</span> : null}<a href={`/urun/${x.urun.slug}`}>Künye</a><a href={`/karsilastirma/kiyas?u=${x.urun.slug}`}>Kıyasla</a></div>
+            <div class="rl-alt"><Fragment set:html={durum(x.urun.status)} />{x.urun.score ? <span class="rl-p">{s10(x.urun.score)}</span> : null}<a href={`/urun/${x.urun.slug}`}>Künye</a><a href={`/karsilastirma/kiyas?u=${x.urun.slug}`}>Kıyasla</a></div>
           </div>
         </li>
       ))}

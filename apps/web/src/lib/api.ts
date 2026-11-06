@@ -75,7 +75,7 @@ const mSpec = (s: any): Spec => ({ key: s.key, value: s.value || null, num: s.nu
 const kisaAd = (p: any): string => String(p.shortName || '').trim() || String(p.name || '').replace(/\s*\([^)]*\)/g, '').replace(/\s{2,}/g, ' ').trim() || p.name
 export function mRef(p: any): ProductRef | null {
   p = rel(p); if (!p) return null
-  return { id: typeof p.id === 'number' ? p.id : undefined, slug: p.slug, name: kisaAd(p), fullName: p.name, brand: p.brand, type: p.type, status: p.status, certainty: p.certainty || 4, image: mImg(p.image, 'card'), blurb: p.blurb, specs: (p.specs || []).map(mSpec), score: p.score,
+  return { id: typeof p.id === 'number' ? p.id : undefined, slug: p.slug, name: kisaAd(p), fullName: p.name, brand: p.brand, type: p.type, status: p.status, certainty: p.certainty || 4, image: mImg(p.image, 'card'), blurb: p.blurb, specs: (p.specs || []).map(mSpec), score: typeof p.upscore === 'number' ? p.upscore : undefined, // kartlardaki puan = künyenin UPscore'u
     upscore: typeof p.upscore === 'number' ? p.upscore : undefined, upscoreUrl: rel(p.upscoreReview)?.path || undefined, amazon: p.amazon || undefined }
 }
 const media = (v: any) => { const m = mImg(v, 'hero'); return m ? { url: m.url, alt: m.alt, credit: m.credit, w: m.w, h: m.h } : null }
@@ -191,7 +191,7 @@ export async function getProduct(slug: string): Promise<Product | null> {
     const amazon = d.amazonUrl && !d.amazonGizle ? { url: d.amazonUrl as string, metin: amzTaze && d.amazonFiyatMetni ? String(d.amazonFiyatMetni) : undefined, guncel: d.amazonGuncel as string } : undefined
     // Künye albümü (6 Kasım 2026): üreticinin diğer görselleri; ana görsel ref.image
     const album = ((d.gallery || []) as any[]).map((g) => mImg(g?.image, 'hero')).filter(Boolean) as Img[]
-    return { ...ref, id: d.id, amazon, album: album.length ? album : undefined, score: reviews[0]?.score, comparisons: cmp, path: `/urun/${d.slug}`, releaseWhen: d.releaseWhen, parts: d.parts || [], rivals: (d.rivals || []).map(mRef).filter(Boolean), news: (d.news?.docs || []).filter((x: any) => rel(x) && x._status === 'published').map(mNews), reviews, seo: seo({ ...d, title: d.name, spot: d.blurb }) } as Product
+    return { ...ref, id: d.id, amazon, album: album.length ? album : undefined, score: ref.upscore ?? reviews[0]?.score, comparisons: cmp, path: `/urun/${d.slug}`, releaseWhen: d.releaseWhen, parts: d.parts || [], rivals: (d.rivals || []).map(mRef).filter(Boolean), news: (d.news?.docs || []).filter((x: any) => rel(x) && x._status === 'published').map(mNews), reviews, seo: seo({ ...d, title: d.name, spot: d.blurb }) } as Product
   }, () => (S.PRODUCTS[slug] ? { ...S.PRODUCTS[slug], comparisons: S.COMPARISONS.filter((c) => c.a.slug === slug || c.b.slug === slug) } : null))
 }
 export const getProducts = (limit = 12) => safe(async () => (await get('products', { sort: '-updatedAt', limit, depth: 1 })).docs.map(mRef).filter(Boolean) as ProductRef[], () => Object.values(S.PRODUCTS).slice(0, limit))

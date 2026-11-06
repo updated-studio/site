@@ -15,7 +15,7 @@ import Topluluk from '../../components/Topluluk.astro'
 import * as api from '../../lib/api'
 import { productMeta } from '../../lib/seo'
 import { date } from '../../lib/format'
-import { chip, durum, glyph, kes, LVN, s20 } from '../../lib/ui'
+import { chip, durum, glyph, kes, LVN, s10 } from '../../lib/ui'
 export async function getStaticPaths() {
   return (await api.allProductSlugs()).map((slug) => ({ params: { slug } }))
 }
@@ -23,7 +23,7 @@ const p = (await api.getProduct(Astro.params.slug!))!
 const [ads, shelf] = await Promise.all([api.getAds(), api.getProducts(8)])
 const specs = p.specs || []
 const feed = [
-  ...p.reviews.map((r) => ({ tag: 'İNCELEME', cls: 'İNCELEME', title: r.title, d: date(r.publishedAt), href: r.path, s: s20(r.score), at: r.publishedAt })),
+  ...p.reviews.map((r) => ({ tag: 'İNCELEME', cls: 'İNCELEME', title: r.title, d: date(r.publishedAt), href: r.path, s: s10(r.score), at: r.publishedAt })),
   ...(p.comparisons || []).map((c) => ({ tag: 'KIYAS', cls: 'KIYAS', title: c.title, d: date(c.publishedAt), href: c.path, s: '', at: c.publishedAt })),
   ...p.news.map((n) => ({ tag: n.label === 'sizinti' ? 'SIZINTI' : 'HABER', cls: 'TANITIM', title: n.title, d: date(n.publishedAt), href: n.path, s: '', at: n.publishedAt })),
 ].sort((a, b) => +new Date(b.at) - +new Date(a.at))
@@ -46,7 +46,7 @@ const albumAd = p.fullName ?? p.name
       <div class="ku-status">
         <Fragment set:html={durum(p.status)} />
         {!['satista', 'eol'].includes(p.status) && <span class="ku-conf">Kesinlik <Fragment set:html={kes(p.certainty)} /></span>}
-        {p.score && p.reviews[0] && <a class="ku-score" href={p.reviews[0].path}><b>{s20(p.score)}</b><span>Updated<br />puanı</span></a>}
+        {p.score != null && (p.upscoreUrl || p.reviews[0]) && <a class="ku-score" href={p.upscoreUrl || p.reviews[0].path}><b>{s10(p.score)}</b><span>UPscore</span></a>}
       </div>
       <div class="ku-actions"><a class="btn pri" href={`/rss/urun/${p.slug}.xml`}>Takip et (RSS)</a><a class="btn" href={kiyas}>Kıyasla</a></div>
       {p.amazon && <div class="ku-amz">
@@ -98,7 +98,7 @@ const albumAd = p.fullName ?? p.name
   </section>
 
   {rel.length > 0 && <section class="sec ku-rel"><div class="wrap"><div class="sec-head"><div><span class="eyebrow">Künye rafı</span><h2 class="sec-title">Benzer ürünler</h2></div></div>
-    <div class="shelfk">{rel.map((q) => <a class="kcard" href={`/urun/${q.slug}`}><Fragment set:html={glyph(q.type, 46)} /><span class="eyebrow" lang="en" translate="no">{q.brand}</span><b>{q.name}</b><Fragment set:html={durum(q.status)} />{q.score && <span class="kc-sc">{s20(q.score)}</span>}</a>)}</div>
+    <div class="shelfk">{rel.map((q) => <a class="kcard" href={`/urun/${q.slug}`}><Fragment set:html={glyph(q.type, 46)} /><span class="eyebrow" lang="en" translate="no">{q.brand}</span><b>{q.name}</b><Fragment set:html={durum(q.status)} />{q.score && <span class="kc-sc">{s10(q.score)}</span>}</a>)}</div>
   </div></section>}
 </Base>
 <script>

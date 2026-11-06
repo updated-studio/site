@@ -7,7 +7,7 @@ import Base from '../../layouts/Base.astro'
 import Img from '../../components/Img.astro'
 import * as api from '../../lib/api'
 import { listMeta } from '../../lib/seo'
-import { durum, glyph, s20 } from '../../lib/ui'
+import { durum, glyph, s10 } from '../../lib/ui'
 import { TUR, turAdi } from '../../lib/turler'
 const items = await api.getProducts(200)
 const gruplar = Object.keys(TUR).map((t) => ({ t, l: items.filter((q) => q.type === t).sort((a, b) => a.brand.localeCompare(b.brand, 'tr') || a.name.localeCompare(b.name, 'tr')) })).filter((g) => g.l.length)
@@ -26,7 +26,7 @@ const gruplar = Object.keys(TUR).map((t) => ({ t, l: items.filter((q) => q.type 
           <a class="ku-k" href={`/urun/${q.slug}`}>
             <span class="ku-k-g">{q.image ? <Img img={q.image} alt="" sizes="(max-width:520px) 96px, 128px" /> : <Fragment set:html={glyph(q.type, 34)} />}</span>
             <span class="ku-k-m"><span class="eyebrow" lang="en" translate="no">{q.brand}</span><b translate="no">{q.name}</b><Fragment set:html={durum(q.status)} /></span>
-            {q.score && <span class="ku-k-p">{s20(q.score)}</span>}
+            {q.score && <span class="ku-k-p">{s10(q.score)}</span>}
           </a>
         ))}</div>
       </section>

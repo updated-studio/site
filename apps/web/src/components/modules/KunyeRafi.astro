@@ -2,7 +2,7 @@
 import Strip from '../Strip.astro'
 import Img from '../Img.astro'
 import type { ProductRef } from '../../lib/types'
-import { durum, glyph, s20 } from '../../lib/ui'
+import { durum, glyph, s10 } from '../../lib/ui'
 import { turAdi } from '../../lib/turler'
 interface Props { products: ProductRef[] }
 const { products } = Astro.props
@@ -15,7 +15,7 @@ const { products } = Astro.props
         {q.image ? <span class="c-img" style="margin:-16px -16px 8px"><Img img={q.image} alt="" sizes="260px" /></span> : <span class="kc-sim"><Fragment set:html={glyph(q.type, 64)} /><span class="eyebrow">{turAdi(q.type)}</span></span>}
         <span class="eyebrow" lang="en" translate="no">{q.brand}</span><b>{q.name}</b>
         <Fragment set:html={durum(q.status)} />
-        {q.score && <span class="kc-sc">{s20(q.score)}</span>}
+        {q.score && <span class="kc-sc">{s10(q.score)}</span>}
       </a>
     ))}
   </Strip>

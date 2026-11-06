@@ -8,9 +8,12 @@ import { autoSeo } from '../hooks/autoSeo'
 import { workflowGuard } from '../hooks/workflow'
 import { imzaYayinlayana, yazarKilidi } from '../hooks/imza'
 import { revalidate } from '../hooks/revalidate'
+import { upscoreKunyeye } from '../hooks/upscore'
 
 /** WordPress'ten taşınan eski incelemelerde bu bilgiler yoksa boş kalabilir; yenilerde zorunlu. */
 const legacyOk = (v: unknown, { data }: any) => v != null && v !== '' ? true : data?.wpId ? true : 'Zorunlu alan.'
+/** UPscore (6 Kasım 2026, kullanıcı: "tüm puan sistemimizi UPscore yapacağız, 10'lu sistem"): 0-10, en çok bir ondalık */
+const tekOndalik = (v: unknown) => v == null || v === '' ? true : Number(v) >= 0 && Number(v) <= 10 && Math.abs(Number(v) * 10 - Math.round(Number(v) * 10)) < 1e-6 || '0 ile 10 arası, en çok bir ondalık (ör. 8,7).'
 const short = (v: unknown) => !v || String(v).trim().split(/\s+/).length <= LIMIT.proWords || `En fazla ${LIMIT.proWords} kelime.`
 
 export const Reviews: CollectionConfig = {
@@ -27,9 +30,9 @@ export const Reviews: CollectionConfig = {
     shortAnswer,
     { name: 'body', type: 'richText', label: 'Metin', required: true },
     {
-      type: 'group', name: 'scoreBox', label: 'Puan kutusu (kit: /20, tam sayı)',
+      type: 'group', name: 'scoreBox', label: 'Puan kutusu (UPscore /10, tek ondalık)',
       fields: [
-        { name: 'score', type: 'number', label: 'Puan /20', min: 0, max: 20, required: true, admin: { step: 1 } },
+        { name: 'score', type: 'number', label: 'UPscore /10', min: 0, max: 10, required: true, validate: tekOndalik, admin: { step: 0.1, description: 'Tek ondalık (8,7). Yayınlanınca künyenin UPscore\'u olur.' } },
         { name: 'pros', type: 'text', hasMany: true, label: 'Artılar (≤3, ≤6 kelime)', maxRows: LIMIT.pros, validate: (v: unknown) => !Array.isArray(v) || v.every((x) => short(x) === true) || 'Her madde en fazla 6 kelime.' },
         { name: 'cons', type: 'text', hasMany: true, label: 'Eksiler (≤3, ≤6 kelime)', maxRows: LIMIT.pros, validate: (v: unknown) => !Array.isArray(v) || v.every((x) => short(x) === true) || 'Her madde en fazla 6 kelime.' },
         { name: 'usageDays', type: 'number', label: 'Kullanım süresi (gün)', min: 1, validate: legacyOk },
@@ -37,11 +40,11 @@ export const Reviews: CollectionConfig = {
         { name: 'who', type: 'group', label: 'Kime göre', fields: [{ name: 'for', type: 'text', hasMany: true, label: 'Uygun' }, { name: 'notFor', type: 'text', hasMany: true, label: 'Uygun değil' }] },
         // Alt puanlar (30 Ekim 2026, kullanıcı onayı, inceleme şablonu): puan kartında çubuk olarak; toplam puan yine elle girilir
         {
-          name: 'altPuanlar', type: 'array', label: 'Alt puanlar (/20, en fazla 6)', maxRows: 6, labels: { singular: 'Alt puan', plural: 'Alt puanlar' },
+          name: 'altPuanlar', type: 'array', label: 'Alt puanlar (/10, en fazla 6)', maxRows: 6, labels: { singular: 'Alt puan', plural: 'Alt puanlar' },
           admin: { description: 'Puan kartında çubuk olarak görünür. Ör. Görüntü 17, Pil 12.' },
           fields: [{ type: 'row', fields: [
             { name: 'baslik', type: 'select', label: 'Başlık', required: true, options: ['Görüntü', 'Video', 'Ses', 'Pil', 'Ekran', 'Performans', 'Kullanım', 'Taşınabilirlik', 'Yapı kalitesi', 'Yazılım', 'Fiyat / performans'].map((v) => ({ label: v, value: v })) },
-            { name: 'puan', type: 'number', label: 'Puan /20', required: true, min: 0, max: 20, admin: { step: 1 } },
+            { name: 'puan', type: 'number', label: 'Puan /10', required: true, min: 0, max: 10, validate: tekOndalik, admin: { step: 0.1 } },
           ] }],
         },
       ],
@@ -70,6 +73,6 @@ export const Reviews: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [autoSeo(), yazarKilidi, workflowGuard, imzaYayinlayana, ({ data }) => { if (data.slug) data.path = `/inceleme/${data.slug}`; return data }],
-    afterChange: [revalidate((d) => [d.path, '/inceleme'].filter(Boolean))],
+    afterChange: [revalidate((d) => [d.path, '/inceleme'].filter(Boolean)), upscoreKunyeye],
   },
 }

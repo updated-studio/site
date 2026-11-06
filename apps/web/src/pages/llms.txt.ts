@@ -20,7 +20,7 @@ ${cats.map((c) => `- [${c.name}](${SITE}/${c.slug})`).join('\n')}
 ${news.map((n) => `- [${n.title}](${SITE}${n.path}): ${n.spot}`).join('\n')}
 
 ## İncelemeler
-${reviews.map((r) => `- [${r.title}](${SITE}${r.path}): ${Math.round(r.score)}/20`).join('\n')}
+${reviews.map((r) => `- [${r.title}](${SITE}${r.path}): UPscore ${s10(r.score)}`).join('\n')}
 
 ${ilke.length ? `## Yayın ilkeleri\n${ilke.map(([s, ad]) => `- [${ad}](${SITE}/${s})`).join('\n')}\n` : ''}`
   return new Response(md, { headers: { 'Content-Type': 'text/markdown; charset=utf-8', 'Cache-Control': 'public, s-maxage=3600' } })
