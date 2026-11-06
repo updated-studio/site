@@ -145,6 +145,9 @@ Header always set X-Content-Type-Options "nosniff"
 Header always set Referrer-Policy "strict-origin-when-cross-origin"
 Header always set X-Frame-Options "SAMEORIGIN"
 Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+# HSTS (6 Kasım 2026, kullanıcı: "aç"): tarayıcı siteyi yalnız https ile açar. İlk hafta 1 gün; sorun çıkmazsa 1 yıla (31536000) çıkar.
+# Alt alan adları (panel, studio) dahil değil: onlar Natro VPS'te, ayrı sertifikayla.
+Header always set Strict-Transport-Security "max-age=86400"
 # Taslak önizleme Stüdyo'nun canlı önizleme panelinde açılır (yalnız Stüdyo'nun içinde)
 <FilesMatch "^onizleme\\.html$">
 Header always unset X-Frame-Options
