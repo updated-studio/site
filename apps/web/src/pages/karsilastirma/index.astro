@@ -18,7 +18,10 @@ const gruplar = kiyasGruplari(katalog)
     <KiyasForm katalog={katalog} />
 
     {gruplar.length > 0 && <section style="margin-top:48px"><div class="sh"><h2>Hazır başlangıçlar</h2><span class="meta">Her türün en dolu iki künyesi</span></div>
-      <div class="kb-hazir">{gruplar.map((g) => <a class="kk" href={`/karsilastirma/kiyas?u=${g.l[0].s},${g.l[1].s}`}><Fragment set:html={glyph(g.t, 40)} /><span class="eyebrow">{g.ad}</span><b><span translate="no">{g.l[0].n}</span> mi, <span translate="no">{g.l[1].n}</span> mi?</b></a>)}</div></section>}
+      <div class="kb-hazir">{gruplar.map((g) => <a class="kk" href={`/karsilastirma/kiyas?u=${g.l[0].s},${g.l[1].s}`}>
+        {/* İkon yerine kıyaslanan iki ürünün görseli (6 Kasım 2026, kullanıcı isteği); görseli olmayan üründe tür simgesi kalır */}
+        <span class="kb-g">{g.l.slice(0, 2).map((k) => <span>{k.g ? <img src={k.g} alt="" loading="lazy" decoding="async" width="400" height="225" /> : <Fragment set:html={glyph(g.t, 40)} />}</span>)}</span>
+        <span class="eyebrow">{g.ad}</span><b><span translate="no">{g.l[0].n}</span> mi, <span translate="no">{g.l[1].n}</span> mi?</b></a>)}</div></section>}
 
     {items.length > 0 && <section style="margin-top:48px"><div class="sh"><h2>Editör kıyasları</h2></div><div class="grid3">{items.map((c, i) => <CardStd item={c} eager={i < 3} />)}</div></section>}
   </div>
@@ -26,4 +29,7 @@ const gruplar = kiyasGruplari(katalog)
 <style>
   .kb-hazir{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:12px}
   .kb-hazir a{text-decoration:none;color:var(--text);gap:8px}.kb-hazir a:hover{border-color:var(--text)}.kb-hazir svg{color:var(--text-3)}
+  .kb-g{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:4px}
+  .kb-g > span{display:grid;place-items:center;aspect-ratio:16/9;border-radius:var(--r-etiket,0);background:var(--surface-2);overflow:hidden}
+  .kb-g img{width:100%;height:100%;object-fit:contain}
 </style>

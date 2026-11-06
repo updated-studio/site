@@ -1,9 +1,19 @@
 ---
-/** Rehber (26 Ekim 2026, menünün dördüncü bölümü): eskimeyen içerik. Şimdilik "Rehber" etiketli yazılar; konu rafları ve güncellenme tarihi sonraki adımda. */
+/** Rehber (26 Ekim 2026, menünün dördüncü bölümü): eskimeyen içerik. "Rehber" etiketli yazılar ve altında ürün rafları.
+ *  Ürün rafları (6 Kasım 2026, kullanıcı: "rehber kısmında daha çok ürün göstermemiz lazım"): her ürün türünde künyedeki teknik puanı en
+ *  yüksek dört ürün (kıyas motoruyla aynı puan, lib/kiyas.ts); ilk üçü tek dokunuşla kıyaslanır. Puanı hesaplanamayan ürün rafa girmez. */
 import Base from '../layouts/Base.astro'
 import CardStd from '../components/CardStd.astro'
 import * as api from '../lib/api'
+import { araliklar, teknik } from '../lib/kiyas'
+import { TUR, turAdi } from '../lib/turler'
+import { glyph } from '../lib/ui'
 const yazilar = await api.getRehber()
+const katalog = await api.kunyeKatalog()
+const ar = araliklar(katalog)
+const raflar = Object.keys(TUR)
+  .map((t) => ({ t, l: katalog.filter((k) => k.t === t).map((k) => ({ k, p: teknik(k, ar).toplam })).filter((x): x is { k: typeof x.k; p: number } => x.p != null).sort((a, b) => b.p - a.p).slice(0, 4) }))
+  .filter((r) => r.l.length >= 2)
 ---
 <Base meta={{ title: 'Rehber | UPDATED', description: 'Satın alma rehberleri, nasıl yapılır yazıları ve temel bilgiler: tarihe göre değil konuya göre.', path: '/rehber', noindex: yazilar.length === 0 }}>
   <div class="wrap">
@@ -11,5 +21,43 @@ const yazilar = await api.getRehber()
     {yazilar.length
       ? <div class="grid4">{yazilar.map((n) => <CardStd item={n} />)}</div>
       : <div class="rh-bos"><p class="lead" style="margin:0">İlk rehberler hazırlanıyor. O zamana kadar çekimini planlamak için <a href="/araclar">Araçlar</a>'a, ürün seçerken <a href="/inceleme">İncelemeler</a>'e ve <a href="/karsilastirma">Kıyaslamalar</a>'a bakabilirsin.</p></div>}
+    {raflar.length > 0 && <section class="rh-raflar" aria-labelledby="rh-en">
+      <div class="sh"><h2 id="rh-en">Sınıfının en iyileri</h2><span class="meta">Künyedeki teknik puana göre · her türden ilk dört</span></div>
+      {raflar.map((r) => (
+        <div class="rh-raf">
+          <div class="rh-raf-bas"><h3>{turAdi(r.t)}</h3><span class="rh-raf-bag"><a href={`/karsilastirma/kiyas?u=${r.l.slice(0, 3).map((x) => x.k.s).join(',')}`}>İlk {Math.min(3, r.l.length) === 3 ? 'üçü' : 'ikiyi'} kıyasla</a><a href={`/urun#${r.t}`}>Tümü</a></span></div>
+          <ol class="rh-lis">{r.l.map((x, i) => (
+            <li><a class="rh-k" href={`/urun/${x.k.s}`}>
+              <span class="rh-k-g">{x.k.g ? <img src={x.k.g} alt="" loading="lazy" decoding="async" width="400" height="225" /> : <Fragment set:html={glyph(x.k.t, 46)} />}</span>
+              <span class="rh-k-sira">{i + 1}</span>
+              <span class="eyebrow" lang="en" translate="no">{x.k.b}</span>
+              <b translate="no">{x.k.n}</b>
+              <span class="rh-k-p">{Math.round(x.p)}<small>/100</small></span>
+            </a></li>
+          ))}</ol>
+        </div>
+      ))}
+    </section>}
   </div>
 </Base>
+<style>
+  .rh-raflar{padding:56px 0 24px}
+  .rh-raf{padding-bottom:36px}
+  .rh-raf-bas{display:flex;justify-content:space-between;align-items:baseline;gap:8px 16px;flex-wrap:wrap;padding-bottom:10px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+  .rh-raf-bas h3{font-family:var(--f-baslik,var(--f-head));font-weight:700;font-size:26px;line-height:1.15;margin:0}
+  .rh-raf-bag{display:flex;gap:16px;font-size:14px;font-weight:600}
+  .rh-raf-bag a{color:var(--link);text-decoration:none}
+  .rh-raf-bag a:hover{text-decoration:underline;text-underline-offset:3px}
+  .rh-lis{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--gut)}
+  .rh-k{position:relative;display:flex;flex-direction:column;gap:4px;height:100%;padding:12px 12px 14px;border:1px solid var(--line);border-radius:var(--r-kart,0);background:var(--surface);color:var(--text);text-decoration:none;transition:border-color var(--t1) var(--ease)}
+  .rh-k:hover{border-color:var(--text)}
+  .rh-k-g{display:grid;place-items:center;aspect-ratio:16/9;margin-bottom:6px;border-radius:var(--r-etiket,0);background:var(--surface-2);color:var(--text-2);overflow:hidden}
+  .rh-k-g img{width:100%;height:100%;object-fit:contain}
+  .rh-k-sira{position:absolute;left:20px;top:20px;min-width:24px;height:24px;display:grid;place-items:center;border-radius:999px;background:var(--bg);border:1px solid var(--line);font-family:var(--f-mono);font-size:12px;font-weight:600}
+  .rh-k .eyebrow{margin:0}
+  .rh-k b{font-family:var(--f-baslik,var(--f-head));font-weight:700;font-size:19px;line-height:1.2;overflow-wrap:anywhere}
+  .rh-k-p{margin-top:auto;padding-top:6px;font-family:var(--f-mono);font-weight:600;font-size:22px}
+  .rh-k-p small{font-size:12px;font-weight:400;color:var(--text-3)}
+  @media (max-width:1000px){.rh-lis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:520px){.rh-lis{gap:10px}.rh-k b{font-size:17px}.rh-raf-bas h3{font-size:22px}.rh-raflar{padding-top:40px}}
+</style>
