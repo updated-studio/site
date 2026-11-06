@@ -90,7 +90,8 @@ export const Yorumlar: CollectionConfig = {
         { name: 'neden', type: 'text', label: 'Neden onayda', admin: { readOnly: true } },
       ],
     },
-    { name: 'hedef', type: 'relationship', relationTo: ['news', 'reviews', 'comparisons'], label: 'Yazı', required: true, index: true },
+    // Ürün (künye) de hedef olabilir (6 Kasım 2026): yorum ürüne bağlanır, künye sayfasında ve kıyas aracında görünür
+    { name: 'hedef', type: 'relationship', relationTo: ['news', 'reviews', 'comparisons', 'products'], label: 'Yazı ya da ürün', required: true, index: true },
     { name: 'uye', type: 'relationship', relationTo: 'uyeler', label: 'Uper', index: true },
     { name: 'ust', type: 'relationship', relationTo: 'yorumlar', label: 'Bağlı olduğu yorum (konu başı)', index: true },
     { name: 'yanitlanan', type: 'relationship', relationTo: 'yorumlar', label: 'Yanıt verdiği yorum' },

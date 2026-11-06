@@ -2,12 +2,12 @@
 /**
  * Kıyas masası (27 Ekim 2026; 6 Kasım 2026'da yeni düzen, taslak claude.ai/artifact/KoA2HF8uQSgMoPcSx2T1A8):
  * ürün kartları → karar + kim nerede kazanıyor → özellik haritası → en büyük farklar → tüm teknik veriler (numaralı gruplar)
- * → alternatifler → sahipleri → sınıfının en iyileri → "karar net". Veri yetmeyen bölüm hiç görünmez.
+ * → alternatifler → sahipleri → yorumlar (yalnız kıyas aracında; ürüne bağlı, editör kıyasının kendi yorumları yazının altında) → sınıfının en iyileri → "karar net". Veri yetmeyen bölüm hiç görünmez.
  * İlk görünüm derlemede basılır (lib/kiyas.ts); "Ürün ekle" / çıkar tarayıcıda aynı kodla yeniden çizer (scripts/kiyas.ts).
  * adresli=true (kıyas aracı sayfası): seçim adres çubuğuna yazılır (?u=a,b,c) ve paylaşılabilir; değilse ekleme kıyas aracına götürür.
  */
 import '../styles/kiyas.css'
-import { alternatifHtml, araliklar, cubukHtml, enIyiHtml, farkHtml, grupNavHtml, haritaHtml, kararHtml, kartlarHtml, netHtml, sahipHtml, tabloHtml, type K } from '../lib/kiyas'
+import { alternatifHtml, araliklar, cubukHtml, enIyiHtml, farkHtml, grupNavHtml, haritaHtml, kararHtml, kartlarHtml, netHtml, sahipHtml, tabloHtml, yorumHtml, yorumSecHtml, type K } from '../lib/kiyas'
 import { kunyeKatalog, getSite } from '../lib/api'
 import { turAdi } from '../lib/turler'
 interface Props { ks: K[]; adresli?: boolean }
@@ -15,6 +15,7 @@ const { ks, adresli = false } = Astro.props
 const [katalog, site] = await Promise.all([kunyeKatalog(), getSite()])
 const ar = araliklar(katalog), tag = site.amazonTag || ''
 const harita = haritaHtml(ks, ar), fark = farkHtml(ks, ar), alternatif = alternatifHtml(ks, katalog, ar), sahip = sahipHtml(ks), enIyi = enIyiHtml(ks, katalog, ar), net = netHtml(ks, ar, tag)
+const yorumIlk = ks.find((k) => k.i)
 ---
 <div class="km" data-kiyas={ks.map((k) => k.s).join(',')} data-adresli={adresli ? '1' : undefined} data-tag={tag} style={`--n:${ks.length}`}>
   <div class="km-kartlar" data-km="kartlar"><Fragment set:html={kartlarHtml(ks, ar, tag)} /></div>
@@ -51,6 +52,9 @@ const harita = haritaHtml(ks, ar), fark = farkHtml(ks, ar), alternatif = alterna
 
   <section aria-labelledby="km-sahip-b" hidden={!sahip}><div class="sh"><div><h2 id="km-sahip-b">Sahipleri</h2><p class="km-acik">Bu ürünleri profiline ekleyen Uper'ler.</p></div></div>
     <div class="km-sahip" data-km="sahip"><Fragment set:html={sahip} /></div></section>
+
+  {adresli && <section class="km-yorum" aria-labelledby="km-yorum-b" hidden={!yorumIlk}><div class="sh"><div><h2 id="km-yorum-b">Yorumlar</h2><p class="km-acik">Yorumlar ürüne bağlıdır. Hangi ürün hakkında yazacaksan onu seç.</p></div><div class="km-yorum-sec" role="group" aria-label="Yorumları gösterilen ürün" data-km="yorum-sec"><Fragment set:html={yorumSecHtml(ks, yorumIlk?.i)} /></div></div>
+    <div data-km="yorum" data-urun={yorumIlk?.i}><Fragment set:html={yorumHtml(yorumIlk)} /></div></section>}
 
   <section aria-labelledby="km-eniyi-b" hidden={!enIyi}><div class="sh"><h2 id="km-eniyi-b">Sınıfının en iyileri</h2><a class="km-ileri" href={`/urun#${ks[0].t}`} data-km="tumu">{turAdi(ks[0].t)} künyelerinin tümü</a></div>
     <div class="km-raf" data-km="eniyi"><Fragment set:html={enIyi} /></div></section>

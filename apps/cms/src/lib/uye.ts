@@ -111,7 +111,7 @@ export async function bildirimEkle(p: Payload, uyeId: number, tur: string, metin
 const SON_EPOSTA = new Map<number, number>()
 const kacis = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!)
 /** Yanıt e-postası: kişi başına 15 dakikada en fazla bir tane (ayarından kapatabilir). */
-export async function yanitEpostasi(p: Payload, uye: { id: number; email: string; bildirimEposta?: boolean | null; durum?: string | null }, kim: string, baslik: string, adres: string) {
+export async function yanitEpostasi(p: Payload, uye: { id: number; email: string; bildirimEposta?: boolean | null; durum?: string | null }, kim: string, baslik: string, adres: string, yer = 'yazısındaki') {
   if (!uye.bildirimEposta || uye.durum === 'engelli' || !process.env.UYE_SMTP_HOST) return
   const t = SON_EPOSTA.get(uye.id) ?? 0
   if (Date.now() - t < 15 * 60_000) return
@@ -123,8 +123,8 @@ export async function yanitEpostasi(p: Payload, uye: { id: number; email: string
     const link = site + adres
     await tr.sendMail({
       from: `UPDATED <${process.env.UYE_SMTP_USER}>`, to: uye.email, subject: `${kim} yorumuna yanıt verdi`,
-      text: `${kim}, "${baslik}" yazısındaki yorumuna yanıt verdi.\n\nYanıtı gör: ${link}\n\nBu e-postaları hesabından kapatabilirsin: ${site}/hesap#ayarlar`,
-      html: `<div style="font-family:Arial,sans-serif;font-size:16px;line-height:1.5;color:#121212;max-width:520px"><p style="font-weight:900;letter-spacing:.04em">UPDATED</p><p><b>${kacis(kim)}</b>, “${kacis(baslik)}” yazısındaki yorumuna yanıt verdi.</p><p><a href="${kacis(link)}" style="display:inline-block;background:#FF6B1A;color:#121212;text-decoration:none;font-weight:700;padding:12px 18px">Yanıtı gör</a></p><p style="font-size:12px;color:#5C5C5C">Bu e-postaları <a href="${site}/hesap#ayarlar">hesabından</a> kapatabilirsin.</p></div>`,
+      text: `${kim}, "${baslik}" ${yer} yorumuna yanıt verdi.\n\nYanıtı gör: ${link}\n\nBu e-postaları hesabından kapatabilirsin: ${site}/hesap#ayarlar`,
+      html: `<div style="font-family:Arial,sans-serif;font-size:16px;line-height:1.5;color:#121212;max-width:520px"><p style="font-weight:900;letter-spacing:.04em">UPDATED</p><p><b>${kacis(kim)}</b>, “${kacis(baslik)}” ${yer} yorumuna yanıt verdi.</p><p><a href="${kacis(link)}" style="display:inline-block;background:#FF6B1A;color:#121212;text-decoration:none;font-weight:700;padding:12px 18px">Yanıtı gör</a></p><p style="font-size:12px;color:#5C5C5C">Bu e-postaları <a href="${site}/hesap#ayarlar">hesabından</a> kapatabilirsin.</p></div>`,
     })
   } catch (e) { p.logger.warn(`yanıt e-postası gitmedi: ${e}`) }
 }
@@ -174,16 +174,19 @@ export async function ekipMi(p: Payload, email: string) {
 export const SAYFA_ON = new Map<string, { t: number; govde: unknown }>()
 export const sayfaTemizle = (anahtar: string) => { for (const k of SAYFA_ON.keys()) if (k.startsWith(anahtar + '|')) SAYFA_ON.delete(k) }
 
-export const HEDEF_TUR = { news: 'news', reviews: 'reviews', comparisons: 'comparisons' } as const
+// products (6 Kasım 2026): yorum künyeye de yazılır; kıyas aracı kıyaslanan ürünlerin yorumlarını gösterir
+export const HEDEF_TUR = { news: 'news', reviews: 'reviews', comparisons: 'comparisons', products: 'products' } as const
+export const HEDEF_DESEN = /^(news|reviews|comparisons|products):(\d{1,9})$/
+const urunAdi = (d: { name?: string; brand?: string }) => { const n = d.name || '', b = d.brand || ''; return b && !n.toLocaleLowerCase('tr-TR').startsWith(b.toLocaleLowerCase('tr-TR')) ? `${b} ${n}` : n }
 export type Hedef = { tur: keyof typeof HEDEF_TUR; id: number; anahtar: string; yol: string; baslik: string }
 const HEDEF_ON = new Map<string, { h: Hedef | null; t: number }>()
 export async function hedefBul(p: Payload, anahtar: string): Promise<Hedef | null> {
-  const m = /^(news|reviews|comparisons):(\d{1,9})$/.exec(anahtar || '')
+  const m = HEDEF_DESEN.exec(anahtar || '')
   if (!m) return null
   const o = HEDEF_ON.get(anahtar)
   if (o && Date.now() - o.t < 10 * 60_000) return o.h
-  const d = await p.findByID({ collection: m[1] as Hedef['tur'], id: Number(m[2]), depth: 0, overrideAccess: false, draft: false, disableErrors: true, select: { title: true, path: true } as never }).catch(() => null) as { title?: string; path?: string; _status?: string } | null
-  const h: Hedef | null = d && d.path ? { tur: m[1] as Hedef['tur'], id: Number(m[2]), anahtar, yol: d.path, baslik: d.title || '' } : null
+  const d = await p.findByID({ collection: m[1] as Hedef['tur'], id: Number(m[2]), depth: 0, overrideAccess: false, draft: false, disableErrors: true, select: (m[1] === 'products' ? { name: true, brand: true, path: true } : { title: true, path: true }) as never }).catch(() => null) as { title?: string; name?: string; brand?: string; path?: string; _status?: string } | null
+  const h: Hedef | null = d && d.path ? { tur: m[1] as Hedef['tur'], id: Number(m[2]), anahtar, yol: d.path, baslik: d.title || urunAdi(d) } : null
   if (HEDEF_ON.size > 5000) HEDEF_ON.clear()
   HEDEF_ON.set(anahtar, { h, t: Date.now() })
   return h
@@ -229,7 +232,7 @@ export async function yanitBildir(p: Payload, yorum: any, yazanId: number) {
   const hedefId = typeof yorum.hedef?.value === 'object' ? yorum.hedef.value.id : yorum.hedef?.value
   const h = await hedefBul(p, `${yorum.hedef?.relationTo}:${hedefId}`)
   await bildirimEkle(p, sahipId, 'yanit', `${yazan.ad} yorumuna yanıt verdi${h ? `: ${h.baslik}` : ''}`, `${yorum.yol}#yorum-${yorum.id}`)
-  await yanitEpostasi(p, sahip, yazan.ad, h?.baslik || 'UPDATED', `${yorum.yol}#yorum-${yorum.id}`)
+  await yanitEpostasi(p, sahip, yazan.ad, h?.baslik || 'UPDATED', `${yorum.yol}#yorum-${yorum.id}`, h?.tur === 'products' ? 'künyesindeki' : 'yazısındaki')
 }
 
 /** Ekip Uper'i engellerse giriş servisinde de girişi kapanır; kaldırırsa açılır. */

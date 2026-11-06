@@ -158,6 +158,8 @@ const SIKAYET = ['Hakaret / nefret', 'Spam / reklam', 'Yanlış bilgi', 'Kişise
 
 function topluluk(kok: HTMLElement) {
   const hedef = kok.dataset.hedef!, ic = kok.querySelector<HTMLElement>('[data-tp-ic]')!
+  // Künye (ürün) yorumları: tepki düğmeleri ve okuma puanı yazıya özgüdür, üründe çıkmaz; kıyas aracında (data-bar="yok") çubuk hiç yok
+  const urun = hedef.startsWith('products:'), cubuksuz = kok.dataset.bar === 'yok'
   let veri: any = null, sira = 'yeni', profil: any = null
   const say = document.querySelector<HTMLAnchorElement>('[data-yorum-say]')
 
@@ -194,7 +196,7 @@ function topluluk(kok: HTMLElement) {
   const formHtml = (yer: string, deger = '', dugme = 'Gönder') => `
     <form class="yr-f" data-form="${yer}" novalidate>
       <label class="sr" for="yf-${yer}">Yorumun</label>
-      <textarea id="yf-${yer}" name="metin" rows="${yer === 'ana' ? 3 : 2}" maxlength="2000" placeholder="${yer === 'ana' ? 'Ne düşünüyorsun? Saygılı ve konuyla ilgili yaz.' : 'Yanıtın…'}" required>${esc(deger)}</textarea>
+      <textarea id="yf-${yer}" name="metin" rows="${yer === 'ana' ? 3 : 2}" maxlength="2000" placeholder="${yer !== 'ana' ? 'Yanıtın…' : urun ? 'Kullandın mı, almayı mı düşünüyorsun? Deneyimini ya da sorunu yaz.' : 'Ne düşünüyorsun? Saygılı ve konuyla ilgili yaz.'}" required>${esc(deger)}</textarea>
       <div class="yr-fa"><span class="meta" data-kalan>${2000 - deger.length}</span>${yer !== 'ana' ? '<button type="button" class="btn" data-vazgec>Vazgeç</button>' : ''}<button class="btn btn-p" type="submit">${dugme}</button></div>
     </form>`
 
@@ -207,13 +209,13 @@ function topluluk(kok: HTMLElement) {
       : !kayitli ? `<div class="tp-cta"><p>Yorum yapmadan önce profilini tamamla (kullanıcı adı seçmek bir dakika sürer).</p><a class="btn btn-p" href="/hesap" data-donus>Profilini tamamla</a></div>`
       : profil.durum === 'susturuldu' ? '<p class="tp-cta">Hesabın şimdilik yorum yapamıyor (topluluk kuralları).</p>'
       : `<div class="tp-ben">${avatar(profil, 40)}${formHtml('ana')}</div>`
-    ic.innerHTML = `
-      <div class="tp-bar" role="group" aria-label="Bu yazıya tepkin">
-        ${TEPKI.map(([k, ad]) => `<button type="button" class="tp-t${benim.tepki === k ? ' on' : ''}" data-tepki="${k}" aria-pressed="${benim.tepki === k}">${ad}<span class="num">${t[k] || ''}</span></button>`).join('')}
-        <span class="tp-ara"></span>
+    const cubuk = cubuksuz ? '' : `
+      <div class="tp-bar" role="group" aria-label="${urun ? 'Bu künye' : 'Bu yazıya tepkin'}">
+        ${urun ? '' : TEPKI.map(([k, ad]) => `<button type="button" class="tp-t${benim.tepki === k ? ' on' : ''}" data-tepki="${k}" aria-pressed="${benim.tepki === k}">${ad}<span class="num">${t[k] || ''}</span></button>`).join('') + '<span class="tp-ara"></span>'}
         <button type="button" class="tp-t${benim.kayitli ? ' on' : ''}" data-kaydet aria-pressed="${!!benim.kayitli}">${benim.kayitli ? 'Kaydedildi' : 'Kaydet'}</button>
         <button type="button" class="tp-t" data-paylas>Paylaş</button>
-      </div>
+      </div>`
+    ic.innerHTML = `${cubuk}
       ${cta}
       <div class="tp-ust"><span class="label">${veri.yorumSayisi ? `${veri.yorumSayisi} yorum` : 'Henüz yorum yok. İlk yorumu sen yaz.'}</span>
         ${veri.yorumSayisi > 1 ? `<label class="sr" for="tp-sira">Sırala</label><select class="sel" id="tp-sira" data-sira><option value="yeni"${sira === 'yeni' ? ' selected' : ''}>En yeni</option><option value="begeni"${sira === 'begeni' ? ' selected' : ''}>En çok beğenilen</option></select>` : ''}</div>
@@ -313,7 +315,7 @@ function topluluk(kok: HTMLElement) {
   }
 
   // Okuma puanı: yazının sonuna inildiyse ve en az 20 sn geçtiyse, yazı başına bir kez
-  if (oturum) {
+  if (oturum && !urun) {
     const basla = Date.now(), DEPO = 'up-okunan'
     const okunan: string[] = (() => { try { return JSON.parse(depo.al(DEPO) || '[]') } catch { return [] } })()
     if (!okunan.includes(hedef)) {
@@ -367,7 +369,9 @@ async function kullananlar(kok: HTMLElement) {
 
 /* ---------------- başlat ---------------- */
 ustCubuk()
-document.querySelectorAll<HTMLElement>('#topluluk[data-hedef]').forEach(topluluk)
+document.querySelectorAll<HTMLElement>('.tp[data-hedef]').forEach(topluluk)
+// Kıyas aracı seçilen ürünün yorum bölümünü sonradan basar (scripts/kiyas.ts)
+document.addEventListener('updated:topluluk', (e) => (e.target as HTMLElement).querySelectorAll<HTMLElement>('.tp[data-hedef]').forEach(topluluk))
 document.querySelectorAll<HTMLElement>('[data-kullananlar]').forEach(kullananlar)
 // Kıyas masası ürün değişince kutuları yeniden basar (scripts/kiyas.ts)
 document.addEventListener('updated:kullananlar', (e) => (e.target as HTMLElement).querySelectorAll<HTMLElement>('[data-kullananlar]').forEach(kullananlar))

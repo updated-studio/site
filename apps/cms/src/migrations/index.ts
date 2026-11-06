@@ -24,6 +24,7 @@ import * as migration_20261103_120000_kisa_ad from './20261103_120000_kisa_ad';
 import * as migration_20261104_120000_haber_video from './20261104_120000_haber_video';
 import * as migration_20261105_120000_amazon from './20261105_120000_amazon';
 import * as migration_20261106_120000_urun_album from './20261106_120000_urun_album';
+import * as migration_20261106_130000_yorum_urun from './20261106_130000_yorum_urun';
 
 export const migrations = [
   {
@@ -155,5 +156,10 @@ export const migrations = [
     up: migration_20261106_120000_urun_album.up,
     down: migration_20261106_120000_urun_album.down,
     name: '20261106_120000_urun_album',
+  },
+  {
+    up: migration_20261106_130000_yorum_urun.up,
+    down: migration_20261106_130000_yorum_urun.down,
+    name: '20261106_130000_yorum_urun',
   },
 ];

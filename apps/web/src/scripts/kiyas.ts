@@ -2,7 +2,7 @@
  * Kıyas masası etkileşimi (27 Ekim 2026): ürün ekle/çıkar, "Sadece farklar", paylaşılabilir adres (?u=a,b,c).
  * Künye kataloğu /veri/kunyeler.json'dan bir kez okunur; HTML'i derlemedeki aynı fonksiyonlar üretir (lib/kiyas.ts).
  */
-import { alternatifHtml, baslik, cubukHtml, enIyiHtml, farkHtml, grupNavHtml, haritaHtml, kararHtml, kartlarHtml, netHtml, sahipHtml, tabloHtml, type Araliklar, type K } from '../lib/kiyas'
+import { alternatifHtml, baslik, cubukHtml, enIyiHtml, farkHtml, grupNavHtml, haritaHtml, kararHtml, kartlarHtml, netHtml, sahipHtml, tabloHtml, yorumHtml, yorumSecHtml, type Araliklar, type K } from '../lib/kiyas'
 import { turAdi } from '../lib/turler'
 
 const EN_COK = 4
@@ -30,6 +30,22 @@ for (const kok of Array.from(document.querySelectorAll<HTMLElement>('[data-kiyas
     } catch { /* bağlantı yoksa derlemedeki akış kalır */ }
   }
 
+  /** Yorumlar ürüne bağlı: seçili ürünün bölümü basılır, uye.ts doldurur. Aynı ürün duruyorsa yeniden basılmaz (yazılan taslak silinmesin) */
+  let yorumUrun = Number(kok.querySelector<HTMLElement>('[data-km="yorum"]')?.dataset.urun) || 0
+  function yorumCiz(ks: K[]) {
+    const kutu = kok.querySelector<HTMLElement>('[data-km="yorum"]')
+    if (!kutu) return
+    const olan = ks.filter((x) => x.i)
+    const sec = olan.find((x) => x.i === yorumUrun) ?? olan[0]
+    yorumUrun = sec?.i ?? 0
+    kutu.closest('section')!.hidden = !sec
+    $('yorum-sec').innerHTML = yorumSecHtml(ks, yorumUrun)
+    if (kutu.dataset.urun === String(yorumUrun)) return
+    kutu.dataset.urun = String(yorumUrun)
+    kutu.innerHTML = yorumHtml(sec)
+    kutu.dispatchEvent(new CustomEvent('updated:topluluk', { bubbles: true }))
+  }
+
   async function ciz() {
     const { k, ar } = await yukle()
     const ks = secili.map((s) => k.find((x) => x.s === s)).filter((x): x is K => !!x)
@@ -45,6 +61,7 @@ for (const kok of Array.from(document.querySelectorAll<HTMLElement>('[data-kiyas
     // Sahipleri: aynı ürünler duruyorsa kutular yeniden istenmez (uye.ts doldurur)
     const sahip = sahipHtml(ks), kimler = ks.map((x) => x.i).join(',')
     if ($('sahip').dataset.kimler !== kimler) { $('sahip').dataset.kimler = kimler; koy('sahip', sahip); $('sahip').dispatchEvent(new CustomEvent('updated:kullananlar', { bubbles: true })) }
+    yorumCiz(ks)
     altAkis(ks[0].t)
     const h1 = document.querySelector('[data-kiyas-baslik]')
     if (h1 && adresli) { h1.textContent = baslik(ks); document.title = `${baslik(ks)} · Kıyasla · UPDATED` }
@@ -70,6 +87,12 @@ for (const kok of Array.from(document.querySelectorAll<HTMLElement>('[data-kiyas
       $<HTMLDialogElement>('secici').close()
       if (!adresli) { location.href = `/karsilastirma/kiyas?u=${secili.join(',')}`; return }
       await ciz(); return
+    }
+    const yorumSec = t.closest<HTMLElement>('[data-yorum-urun]')
+    if (yorumSec) {
+      yorumUrun = Number(yorumSec.dataset.yorumUrun)
+      const { k } = await yukle()
+      yorumCiz(secili.map((s) => k.find((x) => x.s === s)).filter((x): x is K => !!x)); return
     }
     if (t.closest('[data-ekle-ac]') && secili.length < EN_COK) {
       const d = $<HTMLDialogElement>('secici'), a = $<HTMLInputElement>('ara')

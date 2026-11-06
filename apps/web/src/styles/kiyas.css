@@ -143,6 +143,14 @@
 .km-gruplar{display:flex;flex-wrap:wrap;gap:6px}
 .km-gruplar a{padding:5px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--text);font-size:13px;font-weight:500;text-decoration:none;white-space:nowrap}
 .km-gruplar a:hover{border-color:var(--text)}
+/* yorumlar: ürüne bağlı; ürün seçimi grup gezinmesiyle aynı dilde, seçili olan dolu */
+.km-yorum-sec{display:flex;flex-wrap:wrap;gap:6px}
+.km-yorum-sec:empty{display:none}
+.km-yorum-sec button{min-height:36px;padding:5px 14px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--text);font:500 13px var(--f-body);white-space:nowrap;cursor:pointer;transition:background-color var(--t1) var(--ease),border-color var(--t1) var(--ease)}
+.km-yorum-sec button:hover{border-color:var(--text)}
+.km-yorum-sec button[aria-pressed="true"]{background:var(--text);color:var(--bg);border-color:var(--text)}
+.km-yorum-kim{margin:0 0 16px;color:var(--text-2);font-size:15px}
+.km-yorum .tp{margin-top:0;padding-top:0;border-top:0}
 
 /* Mini künye kartı: görsel çerçevesiz, ürün kartın genişliğini doldurur */
 .km-raf{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}

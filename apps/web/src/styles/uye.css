@@ -33,6 +33,7 @@
 /* topluluk bölümü (yazının altı) */
 .tp{margin-top:56px;padding-top:24px;border-top:3px solid var(--rule)}
 .tp-sh{margin-bottom:16px}
+.tp-urun{margin-top:48px;padding-top:0;border-top:0}
 .tp-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding-bottom:20px;border-bottom:1px solid var(--line)}
 .tp-t{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 12px;border:1px solid var(--line);background:var(--surface);color:var(--text);font-family:var(--f-body);font-size:14px;font-weight:600;cursor:pointer;transition:background-color var(--t1) var(--ease),border-color var(--t1) var(--ease)}
 .tp-t:hover{border-color:var(--text)}

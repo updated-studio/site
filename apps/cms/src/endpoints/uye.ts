@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto'
 import sharp from 'sharp'
 import { OY_HAKKI, asama } from '../lib/gorev'
 import {
-  PUAN, SEVIYELER, anahtarCoz, bildirimEkle, ekibeHaberVer, ekipMi, girisYonetim, havuz, hedefBul, hizSiniri, ipOzet, onayNedeni,
+  PUAN, SEVIYELER, anahtarCoz, bildirimEkle, ekibeHaberVer, ekipMi, girisYonetim, havuz, hedefBul, HEDEF_DESEN, hizSiniri, ipOzet, onayNedeni,
   puanEkle, SAYFA_ON, sayfaTemizle, seviye, yanitBildir, type Kimlik,
 } from '../lib/uye'
 
@@ -361,14 +361,14 @@ export const uyeEndpoints: Endpoint[] = [
 
   // Kartlardaki yorum sayıları: ?h=news:1,reviews:2 (en fazla 80), yalnız yayındaki yorumlar; 60 sn bellekte
   uc('/uye/sayilar', 'get', 'yok', async ({ req, p }) => {
-    const istenen = [...new Set((new URL(req.url || '', 'http://x').searchParams.get('h') || '').split(',').filter((x) => /^(news|reviews|comparisons):\d{1,9}$/.test(x)))].slice(0, 80)
+    const istenen = [...new Set((new URL(req.url || '', 'http://x').searchParams.get('h') || '').split(',').filter((x) => HEDEF_DESEN.test(x)))].slice(0, 80)
     const sonuc: Record<string, number> = {}, eksik: string[] = []
     for (const k of istenen) { const o = SAYI_ON.get(k); if (o && Date.now() - o.t < 60_000) { if (o.n) sonuc[k] = o.n } else eksik.push(k) }
     if (eksik.length) {
       const id = (t: string) => eksik.filter((k) => k.startsWith(t + ':')).map((k) => Number(k.split(':')[1]))
-      const r = await havuz(p).query(`select coalesce('news:' || r.news_id, 'reviews:' || r.reviews_id, 'comparisons:' || r.comparisons_id) as k, count(*)::int as n
+      const r = await havuz(p).query(`select coalesce('news:' || r.news_id, 'reviews:' || r.reviews_id, 'comparisons:' || r.comparisons_id, 'products:' || r.products_id) as k, count(*)::int as n
         from payload.yorumlar y join payload.yorumlar_rels r on r.parent_id = y.id and r.path = 'hedef'
-        where y.durum = 'yayinda' and (r.news_id = any($1::int[]) or r.reviews_id = any($2::int[]) or r.comparisons_id = any($3::int[])) group by 1`, [id('news'), id('reviews'), id('comparisons')])
+        where y.durum = 'yayinda' and (r.news_id = any($1::int[]) or r.reviews_id = any($2::int[]) or r.comparisons_id = any($3::int[]) or r.products_id = any($4::int[])) group by 1`, [id('news'), id('reviews'), id('comparisons'), id('products')])
       const bulunan = new Map(r.rows.map((x: any) => [x.k, x.n as number]))
       if (SAYI_ON.size > 5000) SAYI_ON.clear()
       for (const k of eksik) { const n = bulunan.get(k) || 0; SAYI_ON.set(k, { t: Date.now(), n }); if (n) sonuc[k] = n }
@@ -538,7 +538,7 @@ export const uyeEndpoints: Endpoint[] = [
   // Yazıyı sonuna kadar okudu (sitedeki betik: sayfanın sonuna inince ve en az 20 sn sonra)
   uc('/uye/okudum', 'post', 'uye', async ({ req, p, uye }) => {
     const h = await hedefBul(p, String((await govde(req)).hedef || ''))
-    if (h) await puanEkle(p, uye!.id, 'okuma', h.anahtar)
+    if (h && h.tur !== 'products') await puanEkle(p, uye!.id, 'okuma', h.anahtar) // künye yazı değildir, okuma puanı vermez
     return yanit(req, { tamam: true })
   }),
 

@@ -5,11 +5,13 @@
  * gerek yok; ürünün hangi aşamada olduğu zaten belli"); değerler üreticinin resmî kaynağından gelir, kaynak panelde kayıtlı kalır.
  * Söküm çizimi ve Topla düğmesi 5 Kasım 2026'da kalktı (kullanıcı: "kaldır gitsin"); sahnede üreticinin arka planı silinmiş ürün fotoğrafı.
  * Albüm (6 Kasım 2026, kullanıcı: "künyelerde birden çok görsel olabilir; ana görsel yine tek ürün"): sahnenin altında üreticinin diğer
+ * Yorumlar (6 Kasım 2026, kullanıcı: "künyeye bağla"): yorum ürüne bağlıdır; aynı yorumlar kıyas aracında o ürün seçilince de görünür.
  * görselleri yatay şeritte; tıklayınca sayfada büyür (dialog), betik çalışmazsa bağlantı görseli açar.
  */
 import Base from '../../layouts/Base.astro'
 import Img from '../../components/Img.astro'
 import Ad from '../../components/Ad.astro'
+import Topluluk from '../../components/Topluluk.astro'
 import * as api from '../../lib/api'
 import { productMeta } from '../../lib/seo'
 import { date } from '../../lib/format'
@@ -83,6 +85,9 @@ const albumAd = p.fullName ?? p.name
       <p class="ku-note">Değerler üretici beyanı, Updated ölçümü ve diğer kaynaklar olarak ayrı saklanır. Çakışan değerler QC onayına düşer; onaylanınca bu künyeye bağlı tüm haber, inceleme ve kıyaslar birlikte güncellenir.</p>
       <div class="sec-head" style="margin:48px 0 12px"><div><span class="eyebrow">Bu ürünle ilgili her şey</span><h2 class="sec-title ku-h2">Akış</h2></div></div>
       {feed.length ? <ol class="ku-feed">{feed.map((f) => <li><a href={f.href}><span class={`tag t-${f.cls}`}>{f.tag}</span><b>{f.title}</b><span class="d">{f.d}</span>{f.s && <span class="s">{f.s}</span>}</a></li>)}</ol> : <p class="pc-unk">Bu ürünle ilgili henüz içerik yok.</p>}
+      {p.id && <Topluluk hedef={`products:${p.id}`} class="tp-urun">
+        <div slot="bas" class="sec-head" style="margin-bottom:12px"><div><span class="eyebrow">Kullananlar ve almayı düşünenler</span><h2 class="sec-title ku-h2" id="tp-baslik">Yorumlar</h2></div></div>
+      </Topluluk>}
     </div>
     <aside class="rail" aria-label="Yan sütun">
       <div class="ku-box"><h2>Kıyasla</h2>{p.rivals.length ? <Fragment set:html={p.rivals.map((r) => chip(r)).join('')} /> : <p class="pc-unk">Henüz kıyas yok.</p>}<a class="btn" href={kiyas} style="margin-top:10px">Başka ürünle kıyasla</a></div>
