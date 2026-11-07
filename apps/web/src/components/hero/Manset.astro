@@ -12,9 +12,10 @@ import { date, time } from '../../lib/format'
 import { baslik, ico, yazarFoto, logoInstagram, logoYoutube } from '../../lib/ui'
 import { showAdSlots } from '../../lib/env'
 import { yazarFotolari } from '../../lib/api'
-interface Props { slides: (News | Review | Comparison)[]; reels: Reel[]; shorts: Video[]; ad: AdT | null; instagram: string; youtube: string }
-const { slides, reels, shorts, ad, instagram, youtube } = Astro.props
-const afis = !!ad || showAdSlots()
+interface Props { slides: (News | Review | Comparison)[]; reels: Reel[]; shorts: Video[]; ad: AdT | null; instagram: string; youtube: string; afissiz?: boolean }
+const { slides, reels, shorts, ad, instagram, youtube, afissiz = false } = Astro.props
+// Ana sayfa yeni düzeninde (7 Kasım 2026) dikey afiş yok: manşet + Reels, altında haber şeridi aynı sütun genişliğiyle
+const afis = !afissiz && (!!ad || showAdSlots())
 const kat = (m: News | Review | Comparison) => m.kind === 'news' ? { ad: m.category.name, href: `/${m.category.slug}` } : m.kind === 'review' ? { ad: 'İnceleme', href: '/inceleme' } : { ad: 'Karşılaştırma', href: '/karsilastirma' }
 const foto = await yazarFotolari()
 const ig = reels.length > 0

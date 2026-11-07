@@ -1,0 +1,55 @@
+---
+/**
+ * Ana sayfa kıyas robotu, Versus düzeni (7 Kasım 2026, kullanıcı: "kıyas robotu kısmı için versus u baz al"; taslak claude.ai/artifact/SobwbxHLgDSr4QgNN2yfCx).
+ * İki ürün, aralarında VS; puan yerine her ürünün kaç ölçüde tek başına önde olduğu, "Neden … daha iyi?" maddeleri ve en büyük dört farkın çubukları.
+ * Hesap kıyas sayfasıyla aynı motordan (lib/kiyas.ts versus). Ürün çifti: en son yayımlanan karşılaştırma, künyeleri katalogda yoksa en dolu iki künye.
+ */
+import type { Comparison } from '../../lib/types'
+import { araliklar, versus, type K } from '../../lib/kiyas'
+import { kiyasGruplari } from '../../lib/turler'
+import { glyph } from '../../lib/ui'
+interface Props { katalog: K[]; kiyaslar: Comparison[]; no: string }
+const { katalog, kiyaslar, no } = Astro.props
+const bul = (s?: string) => katalog.find((k) => k.s === s)
+const kiyas = kiyaslar.find((c) => bul(c.a?.slug) && bul(c.b?.slug) && bul(c.a.slug)!.t === bul(c.b.slug)!.t)
+const ks: K[] = kiyas ? [bul(kiyas.a.slug)!, bul(kiyas.b.slug)!] : (kiyasGruplari(katalog)[0]?.l.slice(0, 2) ?? [])
+const v = ks.length === 2 ? versus(ks, araliklar(katalog)) : null
+const tam = `/karsilastirma/kiyas?u=${ks.map((k) => k.s).join(',')}`
+const acik = kiyas?.path ?? tam
+const tik = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="currentColor" opacity=".16"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m8 12.5 2.6 2.5L16 9.5"/></svg>'
+const w = (x: number | null) => `${x == null ? 2 : Math.max(4, Math.round(x * 100))}%`
+---
+{v && v.toplam > 0 && <section class="sec" aria-labelledby="an-vs-b"><div class="wrap">
+  <div class="sh"><h2 id="an-vs-b"><span class="no">{no}</span>Kıyas robotu</h2><a class="btn-t btn" href="/karsilastirma">Bütün kıyaslamalar</a></div>
+  <div class="an-vs">
+    <div class="an-vs-ust">
+      {ks.map((k, i) => <>
+        {i === 1 && <div class="an-vs-orta"><span class="an-vs-rozet" aria-hidden="true">VS</span></div>}
+        <div class="an-vs-u">
+          <a class="an-vs-g" href={`/urun/${k.s}`} tabindex="-1" aria-hidden="true">{k.g ? <img src={k.g} alt="" loading="lazy" decoding="async" width="400" height="225" /> : <Fragment set:html={glyph(k.t, 72)} />}</a>
+          <a class="an-vs-ad" href={`/urun/${k.s}`} translate="no"><span class="mk">{k.b}</span>{` ${k.n}`}</a>
+          <a class="btn an-vs-d" href={tam}>Değiştir</a>
+        </div>
+      </>)}
+    </div>
+    <div class="an-vs-skor">
+      <span class="an-sk"><strong>{v.on[0]}</strong><span>ölçüde önde</span></span>
+      <span class="an-sk-ayr">{v.toplam} ölçüden</span>
+      <span class="an-sk"><strong>{v.on[1]}</strong><span>ölçüde önde</span></span>
+    </div>
+    <div class="an-vs-neden">
+      {ks.map((k, i) => <div>
+        <h3>Neden <span translate="no">{`${k.b} ${k.n}`}</span> daha iyi?</h3>
+        {v.neden[i].length ? <ul>{v.neden[i].map((m) => <li><Fragment set:html={tik} /><span><b>{m.key}: {m.bu}</b><span>Öteki: {m.o}</span></span></li>)}</ul> : <p class="meta">Tek başına önde olduğu ölçü yok</p>}
+      </div>)}
+    </div>
+    {v.cubuk.length > 0 && <div class="an-vs-cubuk">
+      {v.cubuk.map((c) => <div class="an-sat">
+        <div class="an-sol"><span class="an-tr"><i class:list={{ on: c.on === 0 }} style={`width:${w(c.x[0])}`}></i></span><span class="an-d"><b>{c.yazi[0]}</b><span class="meta" translate="no">{ks[0].b}</span></span></div>
+        <span class="an-ad">{c.key}</span>
+        <div class="an-sag"><span class="an-tr"><i class:list={{ on: c.on === 1 }} style={`width:${w(c.x[1])}`}></i></span><span class="an-d"><b>{c.yazi[1]}</b><span class="meta" translate="no">{ks[1].b}</span></span></div>
+      </div>)}
+    </div>}
+    <div class="an-vs-alt"><p>Kıyas robotu iki künyeyi ölçü ölçü karşılaştırır. Çubuk uzadıkça o ölçüde daha iyi.</p><a class="btn btn-p" href={acik}>Tam kıyaslamayı aç</a></div>
+  </div>
+</div></section>}

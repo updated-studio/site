@@ -1,0 +1,38 @@
+---
+/**
+ * Ana sayfa incelemeleri (7 Kasım 2026, taslak claude.ai/artifact/SobwbxHLgDSr4QgNN2yfCx): solda büyük öne çıkan inceleme (2:1 görsel, spot alıntı,
+ * okuma ve kıyas düğmeleri), sağda dört son inceleme. Puanlı inceleme azken başlığında "inceleme" geçen haberler tamamlar (index.astro).
+ */
+import Img from '../Img.astro'
+import type { News, Review } from '../../lib/types'
+import { baslik } from '../../lib/ui'
+import { date } from '../../lib/format'
+interface Props { items: (News | Review)[]; no: string }
+const { items, no } = Astro.props
+const [ilk, ...diger] = items
+const kat = (x: News | Review) => (x.kind === 'review' ? 'İnceleme' : x.category.name)
+---
+{ilk && <section class="sec" aria-labelledby="an-ic-b"><div class="wrap">
+  <div class="sh"><h2 id="an-ic-b"><span class="no">{no}</span>İncelemeler</h2><a class="btn-t btn" href="/inceleme">Tümü</a></div>
+  <div class:list={['an-inc', { 'an-inc-tek': !diger.length }]}>
+    <article class="an-inc-ilk">
+      <a class="an-inc-g" href={ilk.path} tabindex="-1" aria-hidden="true"><Img img={ilk.cover} alt="" sizes="(max-width: 1060px) 100vw, 700px" /></a>
+      <div class="an-inc-y">
+        <span class="cat">{kat(ilk)}</span>
+        <h3><a href={ilk.path} set:html={baslik(ilk.title)} /></h3>
+        {ilk.spot && <blockquote>{ilk.spot}</blockquote>}
+        <span class="meta">{ilk.author.name} · {date(ilk.publishedAt)}</span>
+        <div class="an-inc-e"><a class="btn btn-p" href={ilk.path}>İncelemeyi oku</a>{ilk.kind === 'review' && ilk.product?.slug && <a class="btn" href={`/karsilastirma/kiyas?u=${ilk.product.slug}`}>Kıyasla</a>}</div>
+      </div>
+    </article>
+    {diger.length > 0 && <div class="an-inc-yan">
+      <span class="meta an-inc-ust">Son incelemeler</span>
+      {diger.slice(0, 4).map((x) => (
+        <a class="an-ic-s" href={x.path}>
+          <span class="an-ic-s-g"><Img img={x.cover} alt="" sizes="140px" /></span>
+          <span><span class="cat">{kat(x)}</span><b set:html={baslik(x.title)} /><span class="meta">{x.author.name} · {date(x.publishedAt)}</span></span>
+        </a>
+      ))}
+    </div>}
+  </div>
+</div></section>}

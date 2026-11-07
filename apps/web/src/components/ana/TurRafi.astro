@@ -1,0 +1,29 @@
+---
+/**
+ * Kategoriler (7 Kasım 2026; ana sayfadaki künye rafının yerine, kullanıcı: "künyeler kategorinin altında olacak"). Künyesi olan ürün türleri,
+ * en kalabalıktan; her kutuda Stüdyo stilinde tür simgesi (lib/ui.ts turSimge), künye sayısı ve en çok künyesi olan markalar. Kutu /urun#tür'e gider.
+ */
+import type { K } from '../../lib/kiyas'
+import { TUR } from '../../lib/turler'
+import { turSimge } from '../../lib/ui'
+interface Props { katalog: K[]; no: string }
+const { katalog, no } = Astro.props
+const turler = Object.keys(TUR).map((t) => {
+  const l = katalog.filter((k) => k.t === t), say = new Map<string, number>()
+  l.forEach((k) => k.b && say.set(k.b, (say.get(k.b) ?? 0) + 1))
+  return { t, n: l.length, mk: [...say].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([m]) => m) }
+}).filter((x) => x.n > 0 && x.t !== 'other').sort((a, b) => b.n - a.n).slice(0, 8)
+const AD: Record<string, string> = { cam360: '360 ve aksiyon kamera' }
+---
+{turler.length >= 2 && <section class="sec" aria-labelledby="an-kt-b"><div class="wrap">
+  <div class="sh"><h2 id="an-kt-b"><span class="no">{no}</span>Kategoriler</h2><a class="btn-t btn" href="/urun">Bütün künyeler</a></div>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="ts-mavi" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9DBDFF" /><stop offset="1" stop-color="#3B6FF0" /></linearGradient></defs></svg>
+  <div class="an-kt">
+    {turler.map((x) => <a class="an-kt-k" href={`/urun#${x.t}`}>
+      <span class="an-kt-s" set:html={turSimge(x.t, 48)} />
+      <span class="an-kt-ad">{AD[x.t] ?? TUR[x.t]}</span>
+      <span class="an-kt-say">{x.n} künye</span>
+      <span class="an-kt-mk" translate="no">{x.mk.join(' · ')}</span>
+    </a>)}
+  </div>
+</div></section>}

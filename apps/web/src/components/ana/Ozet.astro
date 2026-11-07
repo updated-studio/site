@@ -1,0 +1,106 @@
+---
+/**
+ * Günün özeti, "Bugün 90 saniyede" (7 Kasım 2026, taslak claude.ai/artifact/SobwbxHLgDSr4QgNN2yfCx; eski kart şeridi modules/Altmis.astro'nun yerine).
+ * Koyu bant, iki eşit sütun: solda başlık, Dinle ve altı haberin listesi; sağda kendi ekseninde dönen dört yüzlü prizma, her yüzde bir haber.
+ * Altta sitenin cam stilinde sayaç (cam.css: bulanık yarı saydam yüzey, üstte ışık çizgisi). Sesli bülten varsa (scripts/ozet.ts, sağ alt
+ * köşe düğmesiyle aynı ses) prizma konuşulan habere döner, sayaç sesi izler; yoksa prizma 6 sn'de bir kendiliğinden döner.
+ * Fare üstündeyken ve "hareketi azalt" açıkken kendiliğinden dönmez. Listeye dokununca o habere geçer (ses çalıyorsa o habere sarar).
+ */
+import Img from '../Img.astro'
+import type { News } from '../../lib/types'
+import { ico } from '../../lib/ui'
+interface Props { items: News[] }
+const list = Astro.props.items.filter((n) => n.cover).slice(0, 6)
+const bugun = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', weekday: 'long', timeZone: 'Europe/Istanbul' }).format(new Date())
+---
+{list.length >= 2 && <section class="an-oz" aria-labelledby="an-oz-b" data-an-oz>
+  <div class="an-oz-sol">
+    <span class="meta">Günün özeti · {bugun}</span>
+    <h2 id="an-oz-b">Bugün <span>90 saniyede</span></h2>
+    <div class="an-oz-dinle" data-dinle-k hidden><button class="btn btn-p" type="button" data-dinle><span class="an-oz-i" data-dinle-i set:html={ico('play', 16)} /><span data-dinle-y>Dinle</span></button><small>{list.length} haber · sesli</small></div>
+    <ol class="an-oz-l">
+      {list.map((n, i) => <li data-i={i}><a href={n.path}><span class="an-no">{i + 1}</span><span>{n.title}</span></a><i></i></li>)}
+    </ol>
+  </div>
+  <div class="an-oz-sahne">
+    <div class="an-oz-kap">
+      <div class="an-prizma" data-prizma></div>
+      <div class="an-sayac"><span class="an-sure" data-sure hidden></span><span class="an-ray"><i data-ray></i></span><span class="an-sira" data-sira>1 / {list.length}</span></div>
+    </div>
+    <div hidden data-oz-veri>
+      {list.map((n, i) => <a class="an-yuz-ic" href={n.path} data-yol={n.path}><Img img={n.cover} alt="" sizes="(max-width: 1060px) 100vw, 560px" /><span class="an-yuz-no">{i + 1}/{list.length}</span><span class="an-yuz-y"><span class="cat">{n.category.name}</span><b>{n.title}</b></span></a>)}
+    </div>
+  </div>
+</section>}
+<script>
+  import { ozetYukle, olay, calDuraklat, caliyor, zaman, basladi, git, sn, type Ozet } from '../../scripts/ozet'
+  const kok = document.querySelector<HTMLElement>('[data-an-oz]')
+  if (kok) {
+    const AZ = matchMedia('(prefers-reduced-motion: reduce)').matches
+    const prizma = kok.querySelector<HTMLElement>('[data-prizma]')!, veri = [...kok.querySelectorAll<HTMLElement>('[data-oz-veri] > a')]
+    const li = [...kok.querySelectorAll<HTMLElement>('.an-oz-l li')], ray = kok.querySelector<HTMLElement>('[data-ray]')!, sira = kok.querySelector<HTMLElement>('[data-sira]')!
+    const N = veri.length
+    // Dört yüz; görünen yüz şimdiki haberi, bir sonraki yüz sıradakini taşır (altı haber dört yüze sırayla yazılır)
+    const yuz = [0, 1, 2, 3].map(() => { const d = document.createElement('div'); d.className = 'an-yuz'; prizma.appendChild(d); return d })
+    const yerlestir = () => { const h = prizma.offsetHeight / 2; yuz.forEach((d, k) => (d.style.transform = `rotateX(${-k * 90}deg) translateZ(${h}px)`)) }
+    const doldur = (d: HTMLElement, i: number) => { if (d.dataset.i !== String(i)) { d.innerHTML = ''; d.appendChild(veri[i].cloneNode(true)); d.querySelectorAll('img').forEach((m) => (m.loading = 'eager')); d.dataset.i = String(i) } }
+    let adim = 0, simdi = 0
+    const ciz = () => {
+      doldur(yuz[adim % 4], simdi); doldur(yuz[(adim + 1) % 4], (simdi + 1) % N)
+      yuz.forEach((d, k) => d.toggleAttribute('inert', k !== adim % 4))
+      prizma.style.transform = `translateZ(-${prizma.offsetHeight / 2}px) rotateX(${adim * 90}deg)`
+      li.forEach((x, j) => x.classList.toggle('aktif', j === simdi))
+      sira.textContent = `${simdi + 1} / ${N}`
+    }
+    const goster = (i: number) => { if (i !== simdi) { adim++; simdi = i } ciz() }
+    let oz: Ozet | null = null, ustunde = false
+    const madde = (i: number) => oz?.maddeler.find((m) => m.yol === veri[i].dataset.yol)
+    li.forEach((x, i) => x.addEventListener('click', (e) => {
+      if (!oz || !basladi()) { if (e.target instanceof Element && e.target.closest('a') && i !== simdi) { e.preventDefault(); goster(i); kendi() } return }
+      const m = madde(i); if (m) { e.preventDefault(); git(m.bas + 0.05) }
+    }))
+    // Kendiliğinden dönüş: ses çalmıyorken, fare üstünde değilken, sekme öndeyken 6 sn'de bir
+    let gecen = 0, onceki = performance.now()
+    const kendi = () => { gecen = 0 }
+    const dongu = (s: number) => {
+      const dt = s - onceki; onceki = s
+      if (!(oz && caliyor())) {
+        if (!ustunde && !document.hidden) gecen += dt
+        const o = Math.min(1, gecen / 6000)
+        ray.style.width = `${((simdi + o) / N) * 100}%`
+        if (o >= 1) { goster((simdi + 1) % N); kendi() }
+      }
+      requestAnimationFrame(dongu)
+    }
+    kok.addEventListener('mouseenter', () => { ustunde = true }); kok.addEventListener('mouseleave', () => { ustunde = false; kendi() })
+    addEventListener('resize', () => { yerlestir(); ciz() })
+    yerlestir(); ciz(); if (!AZ) requestAnimationFrame(dongu)
+    ozetYukle().then((o) => {
+      if (!o) return
+      oz = o
+      const kut = kok.querySelector<HTMLElement>('[data-dinle-k]')!, btn = kok.querySelector<HTMLButtonElement>('[data-dinle]')!, yazi = kok.querySelector('[data-dinle-y]')!, ikon = kok.querySelector('[data-dinle-i]')!, sure = kok.querySelector<HTMLElement>('[data-sure]')!
+      const IK = { play: '<svg class="ico" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/></svg>', pause: '<svg class="ico" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor" stroke="none"/></svg>' }
+      kut.hidden = false; sure.hidden = false; yazi.textContent = `Dinle · ${sn(o.sure)}`
+      const saat = (x: number) => { sure.innerHTML = `${sn(x)} <small>/ ${sn(o.sure)}</small>` }
+      saat(0)
+      btn.addEventListener('click', () => calDuraklat(o))
+      olay.addEventListener('durum', () => {
+        const c = caliyor()
+        ikon.innerHTML = c ? IK.pause : IK.play
+        yazi.textContent = c ? 'Duraklat' : basladi() ? 'Devam et' : `Dinle · ${sn(o.sure)}`
+        kok.toggleAttribute('data-caliyor', c); kendi()
+      })
+      olay.addEventListener('zaman', () => {
+        const z = zaman(); let k = -1
+        o.maddeler.forEach((m, q) => { if (z >= m.bas) k = q })
+        saat(z); ray.style.width = `${(z / o.sure) * 100}%`
+        const i = k < 0 ? -1 : veri.findIndex((v) => v.dataset.yol === o.maddeler[k].yol)
+        if (i >= 0) {
+          goster(i)
+          const son = o.maddeler[k + 1]?.bas ?? o.sure, bas0 = o.maddeler[k].bas
+          li[i]?.style.setProperty('--p', `${Math.min(100, ((z - bas0) / (son - bas0)) * 100)}%`)
+        }
+      })
+    })
+  }
+</script>

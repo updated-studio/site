@@ -1,30 +1,28 @@
 ---
 /**
- * Ana sayfa (Fatih, 26 Ekim 2026): manşet (13, A biçimi) + Reels + dikey afiş → yatay reklam → video haberler → son haberler → incelemeler →
- * kıyasla → radar / kıyas robotu / 60 saniye / konular (yanda en çok okunanlar, haftalık görev, reklam) → künyeler → araçlar → kulüp → "Tüm haberler" kapısı (sonsuz akış 31 Ekim 2026'da kalktı).
- * 28 Ekim 2026 (kullanıcı: "ana ekranın devamını ana ekrana uyacak şekilde doldur"): Kıyasla, Konular, Araçlar, Kulüp bölümleri ve haftalık görev
- * kartı eklendi; veri olmayan bölüm basılmaz, numaralar sırayla verilir.
+ * Ana sayfa (7 Kasım 2026, taslak claude.ai/artifact/SobwbxHLgDSr4QgNN2yfCx sürüm 3, kullanıcı onayı "kur"):
+ * manşet + Reels → haberlerin devamı (6 haberlik şerit, "Daha fazlası"; yanda Gündemde / Çıkış radarı) → günün özeti (dönen prizma, sesli bülten)
+ * → videolar → incelemeler (büyük öne çıkan + yan liste) → kıyas robotu (Versus düzeni) → kategoriler (künye rafının yerine).
+ * Dikey afiş (hp) ve sağ sütun reklamı yeni düzende yok; yatay reklamlar ve telefondaki reklam alanları yerinde. Veri olmayan bölüm basılmaz.
+ * Önceki düzen (26 Ekim – 7 Kasım 2026) git geçmişinde.
  */
 import Base from '../layouts/Base.astro'
 import Manset from '../components/hero/Manset.astro'
-import CardStd from '../components/CardStd.astro'
-import EnCokOkunan from '../components/EnCokOkunan.astro'
 import Ad from '../components/Ad.astro'
 import MobilAlan from '../components/MobilAlan.astro'
 import VideoDuvar from '../components/VideoDuvar.astro'
-import Radar from '../components/modules/Radar.astro'
-import KiyasRobotu from '../components/modules/KiyasRobotu.astro'
-import Altmis from '../components/modules/Altmis.astro'
-import KunyeRafi from '../components/modules/KunyeRafi.astro'
-import KiyasBaslat from '../components/modules/KiyasBaslat.astro'
+import Devam from '../components/ana/Devam.astro'
+import Ozet from '../components/ana/Ozet.astro'
+import Incelemeler from '../components/ana/Incelemeler.astro'
+import Versus from '../components/ana/Versus.astro'
+import TurRafi from '../components/ana/TurRafi.astro'
 import * as api from '../lib/api'
-import type { News } from '../lib/types'
-import '../styles/kiyas.css'
+import '../styles/ana.css'
 
-const [home, latest, reviews, incHaber, rehber, videos, reels, ads, radar, products, site, youtube, katalog, kategoriler, gorevler] = await Promise.all([
-  api.getHome(), api.getLatest(1, 40), api.getReviews(1, 4), api.getIncelemeHaberleri(8), api.getRehber(8), api.getVideos(), api.getReels(), api.getAds(), api.getRadar(), api.getProducts(12), api.getSite(), api.getYoutube(), api.kunyeKatalog(), api.getCategories(), api.getGorevler(),
+const [home, latest, reviews, incHaber, videos, reels, ads, radar, site, youtube, katalog, kiyaslar, okunan] = await Promise.all([
+  api.getHome(), api.getLatest(1, 40), api.getReviews(1, 5), api.getIncelemeHaberleri(8), api.getVideos(), api.getReels(), api.getAds(), api.getRadar(), api.getSite(), api.getYoutube(), api.kunyeKatalog(), api.getComparisons(), api.getMostRead(3, '48s'),
 ])
-// Videolar: kısa olanlar "Son videolar" sütununa (Instagram Reels yoksa), uzunlar "Video haberler" duvarına; paneldeki videolar önce
+// Videolar: kısa olanlar Reels sütununa (Instagram Reels yoksa), uzunlar "Videolar" duvarına; paneldeki videolar önce
 const shorts = youtube.filter((v) => v.short)
 const uzun = [...videos, ...youtube.filter((v) => !v.short && !videos.some((p) => p.youtubeId === v.youtubeId))]
 const m = { radar: true, kiyasRobotu: true, altmisSaniye: true, kunyeRafi: true, videolar: true, reels: true, cokOkunan: true, ...home.modules }
@@ -35,83 +33,31 @@ const kullanilan = new Set(secilen.map(anahtar))
 const slides = [...secilen, ...latest.filter((n) => !kullanilan.has(anahtar(n)))].slice(0, 13)
 slides.forEach((s) => kullanilan.add(anahtar(s)))
 const rest = latest.filter((n) => !kullanilan.has(anahtar(n)))
-const incelemeler = [...reviews, ...incHaber.filter((n) => n.label !== 'rehber')].slice(0, 4)
-// Bölüm numaraları basılan sıraya göre (veri olmayan bölüm atlanır, numara boşluk bırakmaz)
+const incelemeler = [...reviews, ...incHaber.filter((n) => n.label !== 'rehber')].slice(0, 5)
 let sayac = 0
 const no = () => String(++sayac).padStart(2, '0')
-const radarVar = m.radar && radar.length > 0
-const robotVar = m.kiyasRobotu && products.filter((p) => (p.specs || []).some((s) => s.value)).length >= 2
 const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşılaştırmalar', description: site.tagline, path: '/' }
 ---
 <Base meta={meta} yanEv>
   <h1 class="sr">UPDATED · Teknoloji haberleri, incelemeler ve karşılaştırmalar</h1>
-  <section class="sec" style="padding-top:24px">
-    <div class="wrap"><Manset slides={slides} reels={m.reels ? reels : []} shorts={shorts} ad={api.pickAd(ads, 'hp')} instagram={site.instagram} youtube={site.youtube} /></div>
-  </section>
+  <section class="sec" style="padding-top:24px"><div class="wrap">
+    <Manset slides={slides} reels={m.reels ? reels : []} shorts={shorts} ad={null} afissiz instagram={site.instagram} youtube={site.youtube} />
+    <Devam haberler={rest} gundem={m.cokOkunan ? (okunan.length ? okunan : rest.slice(6)) : []} radar={m.radar ? radar : []} />
+  </div></section>
   <Ad slot="lb" ad={api.pickAd(ads, 'lb')} />
 
-  {/* Video haberler manşetin hemen altında (31 Ekim 2026, kullanıcı: "video kısmı çok altta kalmış") */}
-  {m.videolar && uzun.length > 0 && <section class="sec"><div class="wrap"><VideoDuvar videos={uzun} channel={site.youtube} /></div></section>}
+  {m.altmisSaniye && <section class="sec"><div class="wrap"><Ozet items={latest} /></div></section>}
 
+  {m.videolar && uzun.length > 0 && <section class="sec"><div class="wrap"><VideoDuvar videos={uzun} channel={site.youtube} /></div></section>}
 
   <MobilAlan ad={api.pickAd(ads, 'mr', 2)} />
 
-  {/* İncelemeler ve Rehber ayrı bölümler, Son haberlerin üstünde (31 Ekim 2026, kullanıcı): puanlı inceleme azken başlığında "inceleme" geçen yazılar tamamlar */}
-  {incelemeler.length > 0 && <section class="sec"><div class="wrap">
-    <div class="sh"><h2><span class="no">{no()}</span>İncelemeler</h2><a class="btn-t btn" href="/inceleme">Tümü</a></div>
-    <div class="grid4">{incelemeler.map((r) => <CardStd item={r} />)}</div>
-  </div></section>}
-
-  {/* Rehber ana sayfadan şimdilik kalktı (7 Kasım 2026, kullanıcı: "anasayfadan şimdilik rehberi kaldırıyorum"); /rehber yerinde */}
-
-  <MobilAlan ad={api.pickAd(ads, 'mr', 3)} />
-
-  {/* Sıra (31 Ekim 2026, kullanıcı): manşet → videolar → [telefonda reklam] → incelemeler → rehber → [telefonda reklam] → son haberler → 60 sn → kıyas → künyeler (araçlar ve kulüp 1 Kasım 2026'da ana sayfadan kalktı, Kulüp sayfasında) */}
-  <section class="sec"><div class="wrap with-rail">
-    <div class="ana-sol">
-      <div><div class="sh"><h2><span class="no">{no()}</span>Son haberler</h2><a class="btn-t btn" href="/haberler">Tümü</a></div>
-        <div class="grid4">{rest.slice(0, 6).map((n) => <CardStd item={n} />)}</div></div>
-      {/* Gündemden: sağ sütun uzun kaldığında solda boşluk açılmasın diye ikişer haber açılır */}
-      {rest.length > 6 && <div><div class="sh"><h2><span class="no">{no()}</span>Gündemden</h2><a class="btn-t btn" href="/haberler">Tümü</a></div><div class="grid-yatay" data-dolgu>{rest.slice(6, 22).map((n, i) => i < 4 ? <CardStd item={n} /> : <div class="gy-ek" hidden><CardStd item={n} /></div>)}</div></div>}
-    </div>
-    <div class="rail">
-      {radarVar && <Radar items={radar} />}
-      {m.cokOkunan && <EnCokOkunan fallback={latest} />}
-      <Ad slot="mr" ad={api.pickAd(ads, 'mr', 1)} bare />
-    </div>
-  </div></section>
-
-  {m.altmisSaniye && <section class="sec ana-60"><div class="wrap"><Altmis items={latest} no={no()} /></div></section>}
+  {incelemeler.length > 0 && <Incelemeler items={incelemeler} no={no()} />}
 
   <Ad slot="lb" ad={api.pickAd(ads, 'lb', 1)} />
+  <MobilAlan ad={api.pickAd(ads, 'mr', 3)} />
 
-  {katalog.length >= 2 && <section class="sec"><div class="wrap"><KiyasBaslat katalog={katalog} no={no()} /></div></section>}
-  {robotVar && <section class="sec"><div class="wrap"><KiyasRobotu products={products} no={no()} /></div></section>}
+  {m.kiyasRobotu && katalog.length >= 2 && <Versus katalog={katalog} kiyaslar={kiyaslar} no={no()} />}
 
-  {m.kunyeRafi && products.length > 0 && <section class="sec"><div class="wrap"><KunyeRafi products={products} /></div></section>}
-
-  {/* Sonsuz akış kalktı (31 Ekim 2026, kullanıcı): ana sayfa karşılama sayfası, sonunda haberlerin devamına tek kapı */}
-  <section class="sec"><div class="wrap"><div class="ana-son"><div><span class="eyebrow">Devamı</span><h2>Bütün haberler bir tık ötede</h2></div><a class="btn btn-p" href="/haberler">Tüm haberler</a></div></div></section>
+  {m.kunyeRafi && katalog.length > 0 && <TurRafi katalog={katalog} no={no()} />}
 </Base>
-<script>
-  // Geniş ekranda sağ sütun (radar, en çok okunanlar, görev) soldan uzun kalırsa Gündemden'e ikişer haber eklenir; boşluk kapanır
-  const dolgu = () => {
-    const g = document.querySelector<HTMLElement>('[data-dolgu]'), sol = g?.closest('.ana-sol') as HTMLElement | null, rail = sol?.nextElementSibling as HTMLElement | null
-    if (!g || !sol || !rail || !matchMedia('(min-width:1101px)').matches) return
-    const ek = [...g.querySelectorAll<HTMLElement>('.gy-ek[hidden]')]
-    while (ek.length >= 2 && rail.offsetHeight - sol.offsetHeight > 150) { ek.shift()!.hidden = false; ek.shift()!.hidden = false }
-  }
-  addEventListener('load', dolgu); setTimeout(dolgu, 1500)
-</script>
-<style is:global>
-  .ana-son{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:28px 0 0;border-top:1px solid var(--line)}
-  .ana-son h2{margin:4px 0 0;font-size:28px}
-  .ana-60 .sh{margin-top:0!important}
-  .grid-yatay > .gy-ek{display:contents}
-  .grid-yatay > .gy-ek[hidden]{display:none}
-  /* Sol sütundaki modüller arası boşluk tek yerden (Altmis kendi üst boşluğunu da taşıyordu) */
-  .ana-sol{display:flex;flex-direction:column;gap:48px;min-width:0}
-  .ana-sol > div{min-width:0}
-  .ana-sol .sh{margin-top:0!important}
-  .ana-sol .grid3{margin-bottom:0!important}
-</style>

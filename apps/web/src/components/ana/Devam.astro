@@ -1,0 +1,46 @@
+---
+/**
+ * Manşetin devamı (7 Kasım 2026, taslak claude.ai/artifact/SobwbxHLgDSr4QgNN2yfCx, kullanıcı: "manşetin devamında ki haberler de direkt orada bir şerit
+ * görünsün, daha fazlası olarak buton görünsün"): solda tek parça 6 haberlik şerit, sağda Reels sütunuyla aynı genişlikte sekmeli kutu
+ * (Gündemde: son 48 saatin en çok okunanları, yoksa son haberler · Çıkış radarı). Kutunun boyunu şerit belirler.
+ */
+import Img from '../Img.astro'
+import type { News, ProductRef } from '../../lib/types'
+import { baslik, durum, tamAd } from '../../lib/ui'
+import { date } from '../../lib/format'
+interface Props { haberler: News[]; gundem: News[]; radar: (ProductRef & { releaseDate?: string })[] }
+const { haberler, gundem, radar } = Astro.props
+const AY = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara']
+const ne = (r: Props['radar'][number]) => { const d = r.releaseDate ? new Date(r.releaseDate) : null; return d && !isNaN(+d) ? [AY[d.getUTCMonth()], String(d.getUTCFullYear())] : ['?', ''] }
+const g = gundem.slice(0, 3), rd = radar.slice(0, 3)
+---
+<div class="an-devam">
+  <div class="an-serit">
+    <div class="an-serit-l">
+      {haberler.slice(0, 6).map((n) => (
+        <a class="an-sh" href={n.path}>
+          <span class="an-sh-g"><Img img={n.cover} alt="" sizes="120px" /></span>
+          <span class="an-sh-y"><span class="cat">{n.category.name}</span><b set:html={baslik(n.title)} /></span>
+        </a>
+      ))}
+    </div>
+    <div class="an-serit-alt"><span class="meta">Son haberler</span><a class="btn btn-p" href="/haberler">Daha fazlası</a></div>
+  </div>
+  {(g.length > 0 || rd.length > 0) && <aside class="an-yan" aria-label="Gündem ve çıkış radarı" data-an-sekme>
+    <div class="an-sekme" role="tablist">
+      {g.length > 0 && <button type="button" role="tab" aria-selected="true" data-s="g">Gündemde</button>}
+      {rd.length > 0 && <button type="button" role="tab" aria-selected={g.length ? 'false' : 'true'} data-s="r">Çıkış radarı</button>}
+    </div>
+    {g.length > 0 && <ol data-p="g">{g.map((n, i) => <li><a href={n.path}><span class="an-no">{String(i + 1).padStart(2, '0')}</span><span><b set:html={baslik(n.title)} /><span class="meta">{n.category.name} · {date(n.publishedAt)}</span></span></a></li>)}</ol>}
+    {rd.length > 0 && <ol data-p="r" class="an-radar" hidden={g.length > 0}>{rd.map((r) => { const [a, y] = ne(r); return <li><a href={`/urun/${r.slug}`}><span class="an-rt"><b>{a}</b><span>{y}</span></span><span><b translate="no">{tamAd(r.brand, r.name)}</b><Fragment set:html={durum(r.status)} /></span></a></li> })}</ol>}
+  </aside>}
+</div>
+<script>
+  document.querySelectorAll<HTMLElement>('[data-an-sekme]').forEach((k) => {
+    const b = [...k.querySelectorAll<HTMLButtonElement>('[role=tab]')]
+    b.forEach((x) => x.addEventListener('click', () => {
+      b.forEach((y) => y.setAttribute('aria-selected', String(y === x)))
+      k.querySelectorAll<HTMLElement>('ol').forEach((o) => { o.hidden = o.dataset.p !== x.dataset.s })
+    }))
+  })
+</script>

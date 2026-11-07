@@ -275,3 +275,16 @@ export function netHtml(ks: K[], ar: Araliklar, tag = '') {
 export const yorumSecHtml = (ks: K[], secili?: number) => { const ad = kisa(ks); return ks.filter((k) => k.i).length < 2 ? '' : ks.map((k, i) => (k.i ? `<button type="button" data-yorum-urun="${k.i}" aria-pressed="${k.i === secili}" translate="no">${esc(ad[i])}</button>` : '')).join('') }
 export const yorumHtml = (k?: K) => (k?.i ? `<p class="km-yorum-kim"><b translate="no">${esc(tamAd(k))}</b> için yazılanlar. Yorumun ürünün <a href="/urun/${esc(k.s)}">künye sayfasında</a> da görünür.</p><section class="tp" data-hedef="products:${k.i}" data-bar="yok" aria-label="${esc(tamAd(k))} yorumları"><div class="tp-ic" data-tp-ic><p class="meta">Yorumlar yükleniyor…</p></div></section>` : '')
 export const sahipHtml = (ks: K[]) => ks.filter((k) => k.i).map((k) => `<div class="km-kutu ku-kullanan" data-kullananlar="${k.i}"><h3 translate="no">${esc(tamAd(k))}</h3><div class="pc-unk" data-ic>Yükleniyor…</div></div>`).join('')
+
+/** Ana sayfa kıyas robotu, Versus düzeni (7 Kasım 2026, kullanıcı: "kıyas robotu kısmı için versus u baz al"). Puan yok (kamera ve lenste puan
+ *  verilmiyor): her ürünün tek başına önde olduğu ölçü sayısı, "neden daha iyi" maddeleri (önem sırasıyla, değerleriyle) ve en büyük dört fark. */
+export type Versus = { toplam: number; on: number[]; neden: { key: string; bu: string; o: string }[][]; cubuk: { key: string; x: (number | null)[]; yazi: string[]; on: number | null }[] }
+export function versus(ks: K[], ar: Araliklar): Versus {
+  const o = olculer(ks, ar), l = o.map((x) => lider(x.x))
+  const yazi = (k: K, x: (typeof o)[number]) => olcuYazi(k, x.key, x.birim) || 'Bilinmiyor'
+  const neden = ks.map((k, i) => o.filter((_, j) => l[j] === i).slice(0, 6).map((x) => ({ key: x.key, bu: yazi(k, x), o: ks.filter((_, n) => n !== i).map((d) => yazi(d, x)).join(', ') })))
+  const cubuk = o.map((x, j) => { const b = x.x.filter((v): v is number => v != null); return { x, j, fark: (Math.max(...b) - Math.min(...b)) * x.w } })
+    .filter((y) => y.fark > 0).sort((a, b) => b.fark - a.fark).slice(0, 4)
+    .map(({ x, j }) => ({ key: x.key, x: x.x, yazi: ks.map((k) => yazi(k, x)), on: l[j] }))
+  return { toplam: o.length, on: ks.map((_, i) => l.filter((x) => x === i).length), neden, cubuk }
+}
