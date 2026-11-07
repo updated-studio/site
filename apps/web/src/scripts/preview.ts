@@ -11,7 +11,7 @@ const cms = root.dataset.cms || ''
 const CHK = JSON.parse(root.dataset.checklist || '[]') as [string, string][]
 const LIM = JSON.parse(root.dataset.limits || '{}')
 const STATES = JSON.parse(root.dataset.states || '[]') as { label: string; value: string }[]
-const LBL: Record<string, [string, string]> = { 'son-dakika': ['Son dakika', 'l-son'], sizinti: ['Sızıntı', 'l-siz'], rehber: ['Rehber', 'l-reh'], sponsorlu: ['Sponsorlu', 'l-spo'] }
+const LBL: Record<string, [string, string]> = { 'son-dakika': ['Son dakika', 'l-son'], sizinti: ['Söylenti', 'l-siz'], rehber: ['Rehber', 'l-reh'], sponsorlu: ['Sponsorlu', 'l-spo'] }
 const media = (m: any) => (m && typeof m === 'object' ? { url: m.sizes?.hero?.url || m.url, alt: m.alt, credit: m.credit } : null)
 const gomulu = window.top !== window
 const fail = (msg: string) => { $('[data-pv-title]').textContent = msg; $('[data-pv-state]').textContent = 'Önizleme açılamadı' }

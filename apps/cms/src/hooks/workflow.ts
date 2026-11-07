@@ -18,7 +18,7 @@ export const workflowGuard: CollectionBeforeChangeHook = ({ data, req, originalD
   const t = String(data.title || '').toLocaleLowerCase('tr-TR')
   const bad = BANNED_WORDS.find((w) => t.includes(w))
   if (bad || /!/.test(t)) throw new APIError(`Başlıkta "${bad || '!'}" kullanılmaz (kit §7).`, 400)
-  if (data.label === 'sizinti' && !/(sızıntı|sızdı|iddia)/.test(t)) throw new APIError('Sızıntı haberinin başlığında "sızıntı/sızdı/iddia" geçmeli.', 400)
+  if (data.label === 'sizinti' && !/(söylenti|sızıntı|sızdı|iddia)/.test(t)) throw new APIError('Söylenti haberinin başlığında "söylenti/sızıntı/iddia" geçmeli.', 400)
   const done = data.workflow.checklist || {}
   const missing = CHECKLIST.filter(([k]) => !done[k]).map(([, l]) => l)
   if (missing.length && data.label !== 'son-dakika') throw new APIError(`Kontrol listesi eksik: ${missing[0]}${missing.length > 1 ? ` (+${missing.length - 1})` : ''}`, 400)

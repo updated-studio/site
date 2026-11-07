@@ -35,7 +35,7 @@ export const News: CollectionConfig = {
     shortAnswer,
     { name: 'body', type: 'richText', label: 'Metin', required: true },
     {
-      type: 'collapsible', label: 'Sızıntı: bilinenler / bilinmeyenler', admin: { condition: (d) => d?.label === 'sizinti', initCollapsed: false },
+      type: 'collapsible', label: 'Söylenti: bilinenler / bilinmeyenler', admin: { condition: (d) => d?.label === 'sizinti', initCollapsed: false },
       fields: [
         { name: 'knowns', type: 'text', hasMany: true, label: 'Bilinenler' },
         { name: 'unknowns', type: 'text', hasMany: true, label: 'Bilinmeyenler' },

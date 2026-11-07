@@ -8,7 +8,7 @@ export const GET: APIRoute = async () => {
   const ilke = ([['yayin-ilkeleri', 'Yayın ilkeleri'], ['test-yontemimiz', 'Test yöntemimiz'], ['duzeltme-politikasi', 'Düzeltme politikası']] as const).filter(([s]) => sayfalar.includes(s))
   const md = `# UPDATED
 
-> Türkçe teknoloji haberleri, incelemeler ve karşılaştırmalar. Önce bilgi, sonra yorum. Her haberde birincil kaynak; incelemelerde /20 puan, kullanım süresi ve cihazın kaynağı yazılır. Sızıntılar "Sızıntı" etiketiyle ayrılır.
+> Türkçe teknoloji haberleri, incelemeler ve karşılaştırmalar. Önce bilgi, sonra yorum. Her haberde birincil kaynak; incelemelerde /20 puan, kullanım süresi ve cihazın kaynağı yazılır. Söylentiler "Söylenti" etiketiyle ayrılır.
 
 ## Bölümler
 ${cats.map((c) => `- [${c.name}](${SITE}/${c.slug})`).join('\n')}

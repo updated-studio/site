@@ -22,7 +22,7 @@ async function tazele() {
     for (const n of items.slice(0, 7).reverse()) {
       if (var_.has(n.h) || BASE + n.h === location.pathname) continue // okunan yazı kendi yan sütununda çıkmaz
       const li = document.createElement('li'); li.className = n.l === 'son-dakika' ? 'hot new' : 'new'
-      li.innerHTML = `<span class="t">${saat(n.at)}</span><a href="${BASE}${esc(n.h)}">${esc(n.t)}</a><span class="c">${esc(n.c)}${n.l === 'sizinti' ? ' · sızıntı' : ''}</span>`
+      li.innerHTML = `<span class="t">${saat(n.at)}</span><a href="${BASE}${esc(n.h)}">${esc(n.t)}</a><span class="c">${esc(n.c)}${n.l === 'sizinti' ? ' · söylenti' : ''}</span>`
       ol.prepend(li)
     }
     while (ol.children.length > 7) ol.lastElementChild!.remove()
@@ -46,7 +46,7 @@ async function yeniHaber() {
   const media = (m: any) => (m && typeof m === 'object' ? { url: m.sizes?.hero?.url || m.url, alt: m.alt, credit: m.credit } : null)
   const c = media(d.cover)
   document.title = `${d.title} · UPDATED`
-  box.innerHTML = `<article class="art"><div class="art-head"><div class="chips"><span class="cat">${esc(d.category?.name)}</span>${d.label === 'son-dakika' ? '<span class="lbl l-son">Son dakika</span>' : d.label === 'sizinti' ? '<span class="lbl l-siz">Sızıntı</span>' : ''}</div><h1>${esc(d.title)}</h1><p class="lead" style="margin:0">${esc(d.spot)}</p><div class="kunye-row"><span>${esc(d.author?.name)}</span><span>·</span><span>${saat(d.publishedAt)}</span></div></div>${c ? `<figure class="cover"><img src="${esc(c.url)}" alt="${esc(c.alt)}"><figcaption>${esc(c.credit)}</figcaption></figure>` : ''}<div class="prose" style="margin-top:24px">${d.shortAnswer ? `<div class="short"><span class="label">Kısa cevap</span><p>${esc(d.shortAnswer)}</p></div>` : ''}${lexicalToHtml(d.body, media)}${(d.sources || []).length ? `<div class="src"><span class="label" style="color:var(--text-3)">Kaynak</span><p style="margin:6px 0 0">${d.sources.map((s: any) => (s.url ? `<a href="${esc(s.url)}" rel="noopener" target="_blank">${esc(s.name)}</a>` : esc(s.name))).join(' · ')}</p></div>` : ''}</div></article>`
+  box.innerHTML = `<article class="art"><div class="art-head"><div class="chips"><span class="cat">${esc(d.category?.name)}</span>${d.label === 'son-dakika' ? '<span class="lbl l-son">Son dakika</span>' : d.label === 'sizinti' ? '<span class="lbl l-siz">Söylenti</span>' : ''}</div><h1>${esc(d.title)}</h1><p class="lead" style="margin:0">${esc(d.spot)}</p><div class="kunye-row"><span>${esc(d.author?.name)}</span><span>·</span><span>${saat(d.publishedAt)}</span></div></div>${c ? `<figure class="cover"><img src="${esc(c.url)}" alt="${esc(c.alt)}"><figcaption>${esc(c.credit)}</figcaption></figure>` : ''}<div class="prose" style="margin-top:24px">${d.shortAnswer ? `<div class="short"><span class="label">Kısa cevap</span><p>${esc(d.shortAnswer)}</p></div>` : ''}${lexicalToHtml(d.body, media)}${(d.sources || []).length ? `<div class="src"><span class="label" style="color:var(--text-3)">Kaynak</span><p style="margin:6px 0 0">${d.sources.map((s: any) => (s.url ? `<a href="${esc(s.url)}" rel="noopener" target="_blank">${esc(s.name)}</a>` : esc(s.name))).join(' · ')}</p></div>` : ''}</div></article>`
   box.hidden = false
   document.querySelector<HTMLElement>('[data-404]')?.setAttribute('hidden', '')
 }

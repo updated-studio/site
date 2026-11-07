@@ -7,9 +7,9 @@ import { cut } from './slug'
  */
 
 const kucuk = (s: string) => s.toLocaleLowerCase('tr-TR')
-const SIZINTI = /(sızıntı|sızdı|iddia)/
+const SIZINTI = /(söylenti|sızıntı|sızdı|iddia)/
 
-/** Başlık: ünlem ve yasak kelime çıkar, sızıntıda "Sızıntı:" öneki, en fazla 70 karakter (kelime ortasından kesmeden) */
+/** Başlık: ünlem ve yasak kelime çıkar, söylentide "Söylenti:" öneki (7 Kasım 2026'ya kadar "Sızıntı:"), en fazla 70 karakter (kelime ortasından kesmeden) */
 export function baslikUydur(baslik: string, etiket: string): { baslik: string; duzeltmeler: string[] } {
   const duzeltmeler: string[] = []
   let t = String(baslik || '').trim()
@@ -21,7 +21,7 @@ export function baslikUydur(baslik: string, etiket: string): { baslik: string; d
     duzeltmeler.push(`Başlıktan yasak kelime çıkarıldı (${kelimeler.filter((x) => !kalan.includes(x)).join(', ')}); cümleyi kontrol et.`)
     t = kalan.join(' ').trim()
   }
-  if (etiket === 'sizinti' && !SIZINTI.test(kucuk(t))) { t = `Sızıntı: ${t}`; duzeltmeler.push('Sızıntı haberi: başlığa "Sızıntı:" eklendi (yayın kuralı).') }
+  if (etiket === 'sizinti' && !SIZINTI.test(kucuk(t))) { t = `Söylenti: ${t}`; duzeltmeler.push('Sızıntı haberi: başlığa "Sızıntı:" eklendi (yayın kuralı).') }
   if (t.length > LIMIT.title) { t = cut(t, LIMIT.title); duzeltmeler.push(`Başlık ${LIMIT.title} karaktere kısaltıldı; okunuşunu kontrol et.`) }
   return { baslik: t, duzeltmeler }
 }

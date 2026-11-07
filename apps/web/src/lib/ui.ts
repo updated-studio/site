@@ -45,11 +45,12 @@ const G: Record<string, string> = {
   headphones: '<path d="M28 50 V38 a22 22 0 0 1 44 0 V50"/><rect x="22" y="46" width="12" height="18" rx="4"/><rect x="66" y="46" width="12" height="18" rx="4"/>',
 }
 export const glyph = (t: string, s = 22) => `<svg class="pk-svg" width="${s}" height="${Math.round(s * 0.78)}" viewBox="0 0 100 78" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="5">${G[t] || G.phone}</svg>`
-export const LVN = ['', 'Söylenti', 'Sızıntı', 'Test / takvim', 'Resmî']
+// "Sızıntı" adı okuyucuya "Söylenti" (7 Kasım 2026, kullanıcı: "sızıntının adı değişiyor, söylenti olacak"); iç değer sizinti kaldı
+export const LVN = ['', 'Söylenti', 'Söylenti', 'Test / takvim', 'Resmî']
 /** Kesinlik etiketi (30 Ekim 2026, kullanıcı seçimi "C"): pil çubuğu yerine tek kelime + renk. Kesik çizgi söylenti, turuncu sızıntı, çizgili test/takvim, dolu mavi resmî. */
 export const kes = (lv: number, metin = LVN[lv] || '') => `<span class="kes k${Math.max(1, Math.min(4, lv || 4))}">${esc(metin)}</span>`
 const DURUM_SEVIYE: Record<string, number> = { soylenti: 1, sizinti: 2, test: 3, takvim: 3, duyuruldu: 4, satista: 3, eol: 1 }
-/** Ürün durumu etiketi: kartlarda ve künyede "Satışta", "Sızıntı" gibi */
+/** Ürün durumu etiketi: kartlarda ve künyede "Satışta", "Söylenti" gibi */
 export const durum = (s: string) => kes(DURUM_SEVIYE[s] ?? 3, STATUS_TEXT[s] || s)
 /** Künye etiketi: metinde ve kartlarda ürüne bağlantı; masaüstünde üzerine gelince kart açılır. */
 export const chip = (p: Pick<ProductRef, 'slug' | 'name' | 'type'>, label?: string) => `<a class="pk" href="/urun/${esc(p.slug)}" data-p="${esc(p.slug)}">${glyph(p.type, 16)}<span>${esc(label || p.name)}</span></a>`

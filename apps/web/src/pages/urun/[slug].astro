@@ -25,7 +25,7 @@ const specs = p.specs || []
 const feed = [
   ...p.reviews.map((r) => ({ tag: 'İNCELEME', cls: 'İNCELEME', title: r.title, d: date(r.publishedAt), href: r.path, s: s10(r.score), at: r.publishedAt })),
   ...(p.comparisons || []).map((c) => ({ tag: 'KIYAS', cls: 'KIYAS', title: c.title, d: date(c.publishedAt), href: c.path, s: '', at: c.publishedAt })),
-  ...p.news.map((n) => ({ tag: n.label === 'sizinti' ? 'SIZINTI' : 'HABER', cls: 'TANITIM', title: n.title, d: date(n.publishedAt), href: n.path, s: '', at: n.publishedAt })),
+  ...p.news.map((n) => ({ tag: n.label === 'sizinti' ? 'SÖYLENTİ' : 'HABER', cls: 'TANITIM', title: n.title, d: date(n.publishedAt), href: n.path, s: '', at: n.publishedAt })),
 ].sort((a, b) => +new Date(b.at) - +new Date(a.at))
 // Bilinmeyen özellikler tabloyu "Bilinmiyor" satırlarıyla doldurmasın (31 Ekim 2026): bilinenler tabloda, kalanlar altta tek satır
 const bilinen = specs.filter((s) => s.value), eksik = specs.filter((s) => !s.value)

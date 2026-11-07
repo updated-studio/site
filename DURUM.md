@@ -229,6 +229,7 @@ Görsel: (1) Payload panel görünümü · (2) Stüdyo İçerik tasarım aracı:
 Otomasyon: (1) ✅ Stüdyo ↔ Payload tam bağlantı, tek kullanıcı girişi (24 Ekim) · (2) ✅ taslak Payload'a tam hazır gelir (SEO, GEO, adres, metadata, zorunlu düzenlemeler) (24 Ekim; taslak birikmesi: günde 30 + 2 gün süre dolumu) · (3) tasarım aracına düşen haberin türü Story/Post'u belirler · (4) siteye eklenen haber Stüdyo tasarım aracına düşer (hangi editör girdiyse onda).
 Panel/altyapı: (1) hızlı yorum + üyelik, puan kazanma · (2) panelde sitenin ayrıntılı ayarları · (3) kullanıcı sistemi (bot koruması, güvenlik) · (4) profillere ekipman ilerlemesi (kamera → lens → gimbal) · (5) "offocus"tan özellik listesi çekme.
 ### 7 Kasım 2026
+- "Sızıntı" okuyucuya "Söylenti" (kullanıcı: "sızıntının adı değişiyor, söylenti olacak"): etiket, ürün durumu, kesinlik ölçeği, canlı akış, önizleme, künye akışı, llms.txt; panelde başlık öneki "Söylenti:", başlık kuralı söylenti/sızıntı/iddia kabul eder. İç değer `sizinti` kaldı (eski haberler etkilenmez).
 - Hızlı düzeltmeler (Enes'in geri bildirim listesi): lens ve kamerada puan yok (`PUANSIZ_TUR`, site `lib/ui.ts` + panel `lib/kit.ts`; UPscore bu türlerde zorunlu değil, künyeye yazılmaz, sitede gösterilmez, yapılandırılmış veride puan yok). Künye başlığında marka (`tamAd`), kartlarda marka adla aynı boyda. "N özellik daha doğrulanmayı bekliyor" okuyucuya gösterilmiyor. Rehber ana sayfadan kalktı.
 - Kopya inceleme taslağı 7 siliniyor (kullanıcı: "Sil"): göç `20261107_080000_kopya_inceleme_sil`, yalnız taslaksa ve başlık aynıysa; 8 kalıyor.
 
