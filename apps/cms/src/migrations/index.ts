@@ -27,6 +27,7 @@ import * as migration_20261106_120000_urun_album from './20261106_120000_urun_al
 import * as migration_20261106_130000_yorum_urun from './20261106_130000_yorum_urun';
 import * as migration_20261106_220000_yazar_onur_kuter from './20261106_220000_yazar_onur_kuter';
 import * as migration_20261106_230000_medya_genis from './20261106_230000_medya_genis';
+import * as migration_20261107_080000_kopya_inceleme_sil from './20261107_080000_kopya_inceleme_sil';
 
 export const migrations = [
   {
@@ -173,5 +174,10 @@ export const migrations = [
     up: migration_20261106_230000_medya_genis.up,
     down: migration_20261106_230000_medya_genis.down,
     name: '20261106_230000_medya_genis',
+  },
+  {
+    up: migration_20261107_080000_kopya_inceleme_sil.up,
+    down: migration_20261107_080000_kopya_inceleme_sil.down,
+    name: '20261107_080000_kopya_inceleme_sil',
   },
 ];
