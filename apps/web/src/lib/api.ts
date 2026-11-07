@@ -6,6 +6,7 @@
 import type { Ad, Author, Cat, Comparison, Home, Img, News, Product, ProductRef, Reel, Review, Spec, Video } from './types'
 import { lexicalToHtml } from './rich'
 import { STATUS_TEXT } from './format'
+import { puanli } from './ui'
 import * as S from './sample'
 import { env } from './env'
 
@@ -75,8 +76,8 @@ const mSpec = (s: any): Spec => ({ key: s.key, value: s.value || null, num: s.nu
 const kisaAd = (p: any): string => String(p.shortName || '').trim() || String(p.name || '').replace(/\s*\([^)]*\)/g, '').replace(/\s{2,}/g, ' ').trim() || p.name
 export function mRef(p: any): ProductRef | null {
   p = rel(p); if (!p) return null
-  return { id: typeof p.id === 'number' ? p.id : undefined, slug: p.slug, name: kisaAd(p), fullName: p.name, brand: p.brand, type: p.type, status: p.status, certainty: p.certainty || 4, image: mImg(p.image, 'card'), blurb: p.blurb, specs: (p.specs || []).map(mSpec), score: typeof p.upscore === 'number' ? p.upscore : undefined, // kartlardaki puan = künyenin UPscore'u
-    upscore: typeof p.upscore === 'number' ? p.upscore : undefined, upscoreUrl: rel(p.upscoreReview)?.path || undefined, amazon: p.amazon || undefined }
+  return { id: typeof p.id === 'number' ? p.id : undefined, slug: p.slug, name: kisaAd(p), fullName: p.name, brand: p.brand, type: p.type, status: p.status, certainty: p.certainty || 4, image: mImg(p.image, 'card'), blurb: p.blurb, specs: (p.specs || []).map(mSpec), score: typeof p.upscore === 'number' && puanli(p.type) ? p.upscore : undefined, // kartlardaki puan = künyenin UPscore'u
+    upscore: typeof p.upscore === 'number' && puanli(p.type) ? p.upscore : undefined, upscoreUrl: rel(p.upscoreReview)?.path || undefined, amazon: p.amazon || undefined }
 }
 // Yazı içi fotoğraf (6 Kasım 2026, galeri): kırpılmamış "genis" boy (1400 px; eski görsellerde ana dosya), galeri için ana dosya (en çok 2560 px WebP; orijinal saklanmaz)
 const media = (v: any) => {
@@ -97,7 +98,7 @@ export function mReview(d: any): Review {
   const { category, label, kind, ...rest } = n
   const v = rel(d.video)
   return {
-    ...rest, kind: 'review', product: mRef(d.product)!, score: d.scoreBox?.score ?? 0, pros: d.scoreBox?.pros || [], cons: d.scoreBox?.cons || [], usageDays: d.scoreBox?.usageDays, deviceSource: d.scoreBox?.deviceSource,
+    ...rest, kind: 'review', product: mRef(d.product)!, score: puanli(rel(d.product)?.type) ? d.scoreBox?.score ?? 0 : undefined, pros: d.scoreBox?.pros || [], cons: d.scoreBox?.cons || [], usageDays: d.scoreBox?.usageDays, deviceSource: d.scoreBox?.deviceSource,
     who: { for: d.scoreBox?.who?.for || [], notFor: d.scoreBox?.who?.notFor || [] }, methodHtml: d.method ? lexicalToHtml(d.method, media) : undefined, video: v ? mVideo(v) : undefined,
     altPuanlar: (d.scoreBox?.altPuanlar || []).filter((x: any) => x?.baslik && x.puan != null).map((x: any) => ({ baslik: x.baslik, puan: Number(x.puan) })),
     bolumler: (d.videoBolumleri || []).filter((x: any) => x?.zaman && x?.ad).map((x: any) => ({ zaman: x.zaman, ad: x.ad, sn: String(x.zaman).split(':').reduce((t: number, p: string) => t * 60 + Number(p), 0) })),

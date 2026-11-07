@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { editorsUp, publishedOrStaff } from '../access/roles'
-import { LIMIT } from '../lib/kit'
+import { LIMIT, PUANSIZ_TUR } from '../lib/kit'
 import { slugField } from '../fields/slug'
 import { seoFields } from '../fields/seo'
 import { authorField, corrections, coverField, pathField, publishedAt, readingTime, shortAnswer, sources, spotField, titleField, workflow } from '../fields/editorial'
@@ -14,6 +14,15 @@ import { upscoreKunyeye } from '../hooks/upscore'
 const legacyOk = (v: unknown, { data }: any) => v != null && v !== '' ? true : data?.wpId ? true : 'Zorunlu alan.'
 /** UPscore (6 Kasım 2026, kullanıcı: "tüm puan sistemimizi UPscore yapacağız, 10'lu sistem"): 0-10, en çok bir ondalık */
 const tekOndalik = (v: unknown) => v == null || v === '' ? true : Number(v) >= 0 && Number(v) <= 10 && Math.abs(Number(v) * 10 - Math.round(Number(v) * 10)) < 1e-6 || '0 ile 10 arası, en çok bir ondalık (ör. 8,7).'
+// Lens ve kamerada puan yok (7 Kasım 2026, kullanıcı: "şimdilik lens ve kamerada olmayacak"); diğer türlerde UPscore zorunlu.
+const upscoreGecerli = async (v: unknown, { data, req }: any) => {
+  const t = tekOndalik(v)
+  if (t !== true || (v != null && v !== '')) return t
+  const urun = data?.product && typeof data.product === 'object' ? data.product.id : data?.product
+  if (!urun || data?._status !== 'published') return true
+  const p: any = await req.payload.findByID({ collection: 'products', id: urun, depth: 0, req }).catch(() => null)
+  return !p || PUANSIZ_TUR.includes(p.type) || 'UPscore gerekli (lens ve kamera dışındaki ürünlerde).'
+}
 const short = (v: unknown) => !v || String(v).trim().split(/\s+/).length <= LIMIT.proWords || `En fazla ${LIMIT.proWords} kelime.`
 
 export const Reviews: CollectionConfig = {
@@ -32,7 +41,7 @@ export const Reviews: CollectionConfig = {
     {
       type: 'group', name: 'scoreBox', label: 'Puan kutusu (UPscore /10, tek ondalık)',
       fields: [
-        { name: 'score', type: 'number', label: 'UPscore /10', min: 0, max: 10, required: true, validate: tekOndalik, admin: { step: 0.1, description: 'Tek ondalık (8,7). Yayınlanınca künyenin UPscore\'u olur.' } },
+        { name: 'score', type: 'number', label: 'UPscore /10', min: 0, max: 10, validate: upscoreGecerli, admin: { step: 0.1, description: 'Tek ondalık (8,7). Yayınlanınca künyenin UPscore\'u olur. Lens ve kamerada puan verilmez, boş bırakılır.' } },
         { name: 'pros', type: 'text', hasMany: true, label: 'Artılar (≤3, ≤6 kelime)', maxRows: LIMIT.pros, validate: (v: unknown) => !Array.isArray(v) || v.every((x) => short(x) === true) || 'Her madde en fazla 6 kelime.' },
         { name: 'cons', type: 'text', hasMany: true, label: 'Eksiler (≤3, ≤6 kelime)', maxRows: LIMIT.pros, validate: (v: unknown) => !Array.isArray(v) || v.every((x) => short(x) === true) || 'Her madde en fazla 6 kelime.' },
         { name: 'usageDays', type: 'number', label: 'Kullanım süresi (gün)', min: 1, validate: legacyOk },

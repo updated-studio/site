@@ -54,6 +54,11 @@ export const durum = (s: string) => kes(DURUM_SEVIYE[s] ?? 3, STATUS_TEXT[s] || 
 /** Künye etiketi: metinde ve kartlarda ürüne bağlantı; masaüstünde üzerine gelince kart açılır. */
 export const chip = (p: Pick<ProductRef, 'slug' | 'name' | 'type'>, label?: string) => `<a class="pk" href="/urun/${esc(p.slug)}" data-p="${esc(p.slug)}">${glyph(p.type, 16)}<span>${esc(label || p.name)}</span></a>`
 export const label = (l?: string) => { const x = l && LABEL_TEXT[l]; return x ? `<span class="lbl ${x[1]}">${x[0]}</span>` : '' }
+/** Puan verilmeyen ürün türleri (7 Kasım 2026, kullanıcı: "puan kalkıyor lens ve kameralar için", "şimdilik lens ve kamerada olmayacak") */
+/** Ürünün marka ile tam adı (7 Kasım 2026, kullanıcı: "künyede marka ismi yazmıyor"); ad zaten markayla başlıyorsa tekrarlanmaz */
+export const tamAd = (marka = '', ad = '') => (marka && !ad.toLocaleLowerCase('tr').startsWith(marka.toLocaleLowerCase('tr')) ? `${marka} ${ad}` : ad)
+export const PUANSIZ_TUR = ['camera', 'lens']
+export const puanli = (tur?: string) => !PUANSIZ_TUR.includes(tur || '')
 /** UPscore (6 Kasım 2026, kullanıcı: "tüm puan sistemimizi UPscore yapacağız, 10'lu"): 10 üzerinden, tek ondalık, Türkçe virgül (8,7) */
 export const ups = (n?: number) => (n == null ? '' : (Math.round(n * 10) / 10).toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }))
 export const s10 = (n?: number) => (n == null ? '' : `${ups(n)}/10`)

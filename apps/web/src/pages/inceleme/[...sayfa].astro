@@ -18,7 +18,7 @@ export async function getStaticPaths() {
 }
 const { p } = Astro.props
 const [items, next, ads, kiyaslar] = await Promise.all([api.getReviews(p, 24), api.getReviews(p + 1, 1), api.getAds(), api.getComparisons()])
-const one = p === 1 ? [...items].sort((a, b) => b.score - a.score || +new Date(b.publishedAt) - +new Date(a.publishedAt)).slice(0, 3) : []
+const one = p === 1 ? [...items].sort((a, b) => (b.score ?? -1) - (a.score ?? -1) || +new Date(b.publishedAt) - +new Date(a.publishedAt)).slice(0, 3) : []
 const duvar = items.filter((r) => !one.includes(r))
 const turler = [...new Set(items.map((r) => r.product?.type).filter(Boolean))] as string[]
 const p10 = (s: number) => ups(s)
@@ -39,13 +39,13 @@ const videolar = youtube.filter((v) => !v.short)
       {one.length > 0 && <section class="icl-one" aria-label="Öne çıkan">
         <a class="icl-k buyuk" href={one[0].path} data-tur={one[0].product?.type}>
           {one[0].cover && <Img img={one[0].cover} alt="" eager sizes="(max-width: 900px) 100vw, 800px" />}
-          <span class="icl-p">{p10(one[0].score)}<small>/10</small></span>
+          {one[0].score != null && <span class="icl-p">{p10(one[0].score)}<small>/10</small></span>}
           <span class="icl-alt"><span class="lbl l-inc">Editörün seçimi</span><b set:html={baslik(one[0].title)} /></span>
         </a>
         {one.length > 1 && <div>{one.slice(1).map((r) => (
           <a class="icl-k" href={r.path} data-tur={r.product?.type}>
             {r.cover && <Img img={r.cover} alt="" sizes="(max-width: 900px) 50vw, 400px" />}
-            <span class="icl-p">{p10(r.score)}</span>
+            {r.score != null && <span class="icl-p">{p10(r.score)}</span>}
             <span class="icl-alt"><b set:html={baslik(r.title)} /></span>
           </a>
         ))}</div>}
@@ -61,7 +61,7 @@ const videolar = youtube.filter((v) => !v.short)
       {duvar.length > 0 && <section class="sec" aria-label="Tüm incelemeler" id="yazilar">
         <div class="sh"><h2>Tüm incelemeler</h2></div>
         <div class="icl-duvar" data-icl-duvar>{duvar.map((r) => (
-          <a href={r.path} data-tur={r.product?.type}><span class="c-img">{r.cover && <Img img={r.cover} alt="" sizes="300px" />}<span class="icl-p">{p10(r.score)}</span></span><b set:html={baslik(r.title)} /><span class="ic-neden">{turAdi(r.product?.type)} · {r.product?.brand}</span></a>
+          <a href={r.path} data-tur={r.product?.type}><span class="c-img">{r.cover && <Img img={r.cover} alt="" sizes="300px" />}{r.score != null && <span class="icl-p">{p10(r.score)}</span>}</span><b set:html={baslik(r.title)} /><span class="ic-neden">{turAdi(r.product?.type)} · {r.product?.brand}</span></a>
         ))}</div>
       </section>}
       <Ad slot="lb" ad={api.pickAd(ads, 'lb')} />

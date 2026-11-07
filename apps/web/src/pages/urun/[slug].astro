@@ -15,7 +15,7 @@ import Topluluk from '../../components/Topluluk.astro'
 import * as api from '../../lib/api'
 import { productMeta } from '../../lib/seo'
 import { date } from '../../lib/format'
-import { chip, durum, glyph, kes, LVN, s10 } from '../../lib/ui'
+import { chip, durum, glyph, kes, LVN, s10, tamAd } from '../../lib/ui'
 export async function getStaticPaths() {
   return (await api.allProductSlugs()).map((slug) => ({ params: { slug } }))
 }
@@ -41,7 +41,7 @@ const albumAd = p.fullName ?? p.name
     <div class="ku-copy">
       <nav class="crumbs" aria-label="Konum"><a href="/">Ana sayfa</a><span aria-hidden="true">/</span><a href="/urun">Künye</a><span aria-hidden="true">/</span><span>{p.name}</span></nav>
       <span class="eyebrow ku-eb">Künye · <span lang="en" translate="no">{p.brand}</span></span>
-      <h1 class="ku-h1">{p.fullName ?? p.name}</h1>
+      <h1 class="ku-h1" translate="no">{tamAd(p.brand, p.fullName ?? p.name)}</h1>
       {p.blurb && <p class="ku-blurb">{p.blurb}</p>}
       <div class="ku-status">
         <Fragment set:html={durum(p.status)} />
@@ -81,7 +81,7 @@ const albumAd = p.fullName ?? p.name
           {bilinen.map((s) => <tr><th scope="row">{s.key}</th><td>{s.value}</td></tr>)}
         </tbody></table></div>
       ) : <p class="pc-unk">Teknik veriler henüz doğrulanmadı. Değerler kaynağıyla girildikçe burada görünür.</p>}
-      {eksik.length > 0 && <details class="ku-eksik"><summary>{bilinen.length ? `${eksik.length} özellik daha doğrulanmayı bekliyor` : `Beklenen ${eksik.length} özellik`}</summary><p>{eksik.map((s) => s.key).join(' · ')}</p></details>}
+      {/* Doğrulanmamış özellik sayısı okuyucuya gösterilmez (7 Kasım 2026, kullanıcı: "okuyana göstermesine gerek yok") */}
       <p class="ku-note">Değerler üretici beyanı, Updated ölçümü ve diğer kaynaklar olarak ayrı saklanır. Çakışan değerler QC onayına düşer; onaylanınca bu künyeye bağlı tüm haber, inceleme ve kıyaslar birlikte güncellenir.</p>
       <div class="sec-head" style="margin:48px 0 12px"><div><span class="eyebrow">Bu ürünle ilgili her şey</span><h2 class="sec-title ku-h2">Akış</h2></div></div>
       {feed.length ? <ol class="ku-feed">{feed.map((f) => <li><a href={f.href}><span class={`tag t-${f.cls}`}>{f.tag}</span><b>{f.title}</b><span class="d">{f.d}</span>{f.s && <span class="s">{f.s}</span>}</a></li>)}</ol> : <p class="pc-unk">Bu ürünle ilgili henüz içerik yok.</p>}
@@ -98,7 +98,7 @@ const albumAd = p.fullName ?? p.name
   </section>
 
   {rel.length > 0 && <section class="sec ku-rel"><div class="wrap"><div class="sec-head"><div><span class="eyebrow">Künye rafı</span><h2 class="sec-title">Benzer ürünler</h2></div></div>
-    <div class="shelfk">{rel.map((q) => <a class="kcard" href={`/urun/${q.slug}`}><Fragment set:html={glyph(q.type, 46)} /><span class="eyebrow" lang="en" translate="no">{q.brand}</span><b>{q.name}</b><Fragment set:html={durum(q.status)} />{q.score && <span class="kc-sc">{s10(q.score)}</span>}</a>)}</div>
+    <div class="shelfk">{rel.map((q) => <a class="kcard" href={`/urun/${q.slug}`}><Fragment set:html={glyph(q.type, 46)} /><b translate="no"><span class="mk">{q.brand}</span> {q.name}</b><Fragment set:html={durum(q.status)} />{q.score && <span class="kc-sc">{s10(q.score)}</span>}</a>)}</div>
   </div></section>}
 </Base>
 <script>

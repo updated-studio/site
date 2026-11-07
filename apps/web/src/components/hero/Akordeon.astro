@@ -19,7 +19,7 @@ const lblOf = (n: any) => (n.kind === 'review' ? '<span class="lbl l-inc">İncel
         <span class="cat">{catOf(n)}</span>
         <h2><a href={n.path}>{n.title}</a></h2>
         <p>{n.spot}</p>
-        <span class="meta">{n.author.name} · {short(n.publishedAt)}{n.kind === 'review' ? ` · ${s10(n.score)}` : ''}</span>
+        <span class="meta">{n.author.name} · {short(n.publishedAt)}{n.kind === 'review' && n.score != null ? ` · ${s10(n.score)}` : ''}</span>
       </div>
     </div>
   ))}

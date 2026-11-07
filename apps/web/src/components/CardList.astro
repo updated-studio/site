@@ -7,6 +7,6 @@ const { items, start = 1, score = false } = Astro.props
 ---
 <ol class="c-list">
   {items.map((n, i) => (
-    <li><a href={n.path}><span class="n">{score && n.kind === 'review' ? s10(n.score).replace('/10', '') : String(i + start).padStart(2, '0')}</span><b>{n.title}</b><span class="meta">{n.kind === 'news' ? n.category.name : 'İnceleme'} · {short(n.publishedAt)}</span></a></li>
+    <li><a href={n.path}><span class="n">{score && n.kind === 'review' && n.score != null ? s10(n.score).replace('/10', '') : String(i + start).padStart(2, '0')}</span><b>{n.title}</b><span class="meta">{n.kind === 'news' ? n.category.name : 'İnceleme'} · {short(n.publishedAt)}</span></a></li>
   ))}
 </ol>

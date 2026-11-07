@@ -62,10 +62,7 @@ const meta = { title: 'UPDATED · Teknoloji haberleri, incelemeler ve karşıla�
     <div class="grid4">{incelemeler.map((r) => <CardStd item={r} />)}</div>
   </div></section>}
 
-  {rehber.length > 0 && <section class="sec"><div class="wrap">
-    <div class="sh"><h2><span class="no">{no()}</span>Rehber</h2><a class="btn-t btn" href="/rehber">Tümü</a></div>
-    <div class="grid4">{rehber.slice(0, 4).map((n) => <CardStd item={n} />)}</div>
-  </div></section>}
+  {/* Rehber ana sayfadan şimdilik kalktı (7 Kasım 2026, kullanıcı: "anasayfadan şimdilik rehberi kaldırıyorum"); /rehber yerinde */}
 
   <MobilAlan ad={api.pickAd(ads, 'mr', 3)} />
 

@@ -24,7 +24,7 @@ const jsonld = { '@context': 'https://schema.org', '@type': 'ItemList', name: n.
           <span class="rl-g">{x.urun.image ? <Img img={x.urun.image} alt="" sizes="96px" /> : <Fragment set:html={glyph(x.urun.type, 40)} />}</span>
           <div class="rl-m">
             {(i === 0 || x.baslik) && <span class="rl-et">{i === 0 ? 'Editörün seçimi' : x.baslik}{i === 0 && x.baslik ? ` · ${x.baslik}` : ''}</span>}
-            <span class="eyebrow rl-mk" lang="en" translate="no">{x.urun.brand}</span><b translate="no">{x.urun.name}</b>
+            <b translate="no"><span class="mk">{x.urun.brand}</span> {x.urun.name}</b>
             {x.gerekce && <p>{x.gerekce}</p>}
             <div class="rl-alt"><Fragment set:html={durum(x.urun.status)} />{x.urun.score ? <span class="rl-p">{s10(x.urun.score)}</span> : null}<a href={`/urun/${x.urun.slug}`}>Künye</a><a href={`/karsilastirma/kiyas?u=${x.urun.slug}`}>Kıyasla</a></div>
           </div>

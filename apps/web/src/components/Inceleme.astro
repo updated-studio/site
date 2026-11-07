@@ -54,9 +54,9 @@ const ETIKET = { kiyas: ['Kıyas', 'ic-et-k'], inceleme: ['İnceleme', 'ic-et-i'
     </div>
 
     <aside class="ic-puan" aria-label="Puan kartı">
-      <span class="ic-kucuk">UPscore</span>
-      <div class="ic-skor"><b>{puan}</b><span>/10</span></div>
-      {alt.length > 0 && <div class="ic-alt">
+      {r.score != null && <><span class="ic-kucuk">UPscore</span>
+      <div class="ic-skor"><b>{puan}</b><span>/10</span></div></>}
+      {r.score != null && alt.length > 0 && <div class="ic-alt">
         {alt.map((a) => <div class="ic-cubuk"><span>{a.baslik}</span><span class="mono">{ups(a.puan)}</span><i style={`--p:${Math.max(0, Math.min(100, (a.puan / 10) * 100))}%`} class={a.puan < 6 ? 'dusuk' : undefined}></i></div>)}
       </div>}
       {r.who && (r.who.for.length > 0 || r.who.notFor.length > 0) && <div class="ic-kime">
@@ -111,7 +111,7 @@ const ETIKET = { kiyas: ['Kıyas', 'ic-et-k'], inceleme: ['İnceleme', 'ic-et-i'
         <a href={kiyasla}><span>Başka bir ürünle kıyasla</span><Fragment set:html={ico('right', 16)} /></a>
       </div>
       <Ad slot="mr" ad={api.pickAd(ads, 'mr')} bare />
-      {top.length > 0 && <div><h2 class="label ys-baslik">Puan tablosu</h2><CardList items={top} score /></div>}
+      {top.some((x) => x.score != null) && <div><h2 class="label ys-baslik">Puan tablosu</h2><CardList items={top.filter((x) => x.score != null)} score /></div>}
       {!ytId && youtube && <a class="btn" href={youtube} target="_blank" rel="noopener">YouTube kanalımız</a>}
     </div>
   </div>

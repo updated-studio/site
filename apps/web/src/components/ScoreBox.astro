@@ -6,7 +6,7 @@ interface Props { r: Review }
 const { r } = Astro.props
 ---
 <div class="score">
-  <div class="top"><h3>{r.product.name}</h3><span class="s">{s10(r.score)}</span></div>
+  <div class="top"><h3>{r.product.name}</h3>{r.score != null && <span class="s">{s10(r.score)}</span>}</div>
   <div class="pm">
     <div><b>Artılar</b><ul>{r.pros.slice(0, 3).map((x) => <li>+ {x}</li>)}</ul></div>
     <div><b>Eksiler</b><ul>{r.cons.slice(0, 3).map((x) => <li>− {x}</li>)}</ul></div>

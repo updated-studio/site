@@ -25,7 +25,7 @@ const gruplar = Object.keys(TUR).map((t) => ({ t, l: items.filter((q) => q.type 
         <div class="ku-lis">{g.l.map((q) => (
           <a class="ku-k" href={`/urun/${q.slug}`}>
             <span class="ku-k-g">{q.image ? <Img img={q.image} alt="" sizes="(max-width:520px) 96px, 128px" /> : <Fragment set:html={glyph(q.type, 34)} />}</span>
-            <span class="ku-k-m"><span class="eyebrow" lang="en" translate="no">{q.brand}</span><b translate="no">{q.name}</b><Fragment set:html={durum(q.status)} /></span>
+            <span class="ku-k-m"><b translate="no"><span class="mk">{q.brand}</span> {q.name}</b><Fragment set:html={durum(q.status)} /></span>
             {q.score && <span class="ku-k-p">{s10(q.score)}</span>}
           </a>
         ))}</div>

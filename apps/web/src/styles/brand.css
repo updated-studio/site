@@ -771,3 +771,6 @@ main{overflow-x:clip}
 .ara-form .btn{flex:0 0 auto}
 .pl-bas{display:flex;align-items:center;gap:10px}.pl-bas .pl-logo{flex:none;display:block}
 .sdk-bas{font-family:var(--f-head);font-weight:900;font-size:22px;text-transform:uppercase;line-height:1;color:var(--text)}
+
+/* Ürün adında marka (7 Kasım 2026, kullanıcı: "marka çok küçük yazıyor"): adla aynı boy, biraz ince */
+b .mk { font-weight: 500; }

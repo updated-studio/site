@@ -1,4 +1,5 @@
 import type { CollectionAfterChangeHook } from 'payload'
+import { PUANSIZ_TUR } from '../lib/kit'
 
 /**
  * UPscore tek puan (6 Kasım 2026, kullanıcı: "tüm puan sistemimizi UPscore yapacağız, 10'lu sistem üzerinden").
@@ -12,6 +13,7 @@ export const upscoreKunyeye: CollectionAfterChangeHook = async ({ doc, req, cont
   if (puan == null || !urun) return doc
   try {
     const p: any = await req.payload.findByID({ collection: 'products', id: urun, depth: 0, req })
+    if (PUANSIZ_TUR.includes(p?.type)) return doc // lens ve kamerada puan yok (7 Kasım 2026)
     const onceki = p?.upscoreReview && typeof p.upscoreReview === 'object' ? p.upscoreReview.id : p?.upscoreReview
     if (onceki && String(onceki) !== String(doc.id)) {
       const o: any = await req.payload.findByID({ collection: 'reviews', id: onceki, depth: 0, req }).catch(() => null)
